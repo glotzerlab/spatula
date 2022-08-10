@@ -171,14 +171,31 @@ class WeigerD:
         if sym == "i":
             return self._inverse()
         inverse = "i" in sym
-        num_slice = slice(2) if inverse else slice(1)
+        order = int(sym[slice(2) if inverse else slice(1)])
         if sym[0] == "C":
-            return self._cyclic(int(sym[num_slice]), inverse)
+            return self._cyclic(order, inverse)
         if sym[0] == "D":
-            return self._diherdral(int(sym[num_slice]), inverse)
+            return self._diherdral(order, inverse)
         else:
             raise KeyError(
                 f"Point group {sym} is not supported or does not exist.")
+
+    def group_cardinality(self, sym):
+        if sym == "T":
+            return 12
+        if sym == "i":
+            return 2
+        inverse = "i" in sym
+        order = int(sym[slice(2) if inverse else slice(1)])
+        inv_factor = 2 if inverse else 1
+        if sym[0] == "C":
+            return order * inv_factor
+        if sym[0] == "D":
+            return 2 * order * inv_factor
+        else:
+            raise ValueError(
+                f"Point group {sym} is not supported or does not exist.")
+
 
 
 def _weijer_qlm_sum(Dij_dot_qlms, max_l):
