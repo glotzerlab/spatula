@@ -82,14 +82,14 @@ class PGOP:
 
     def _weijer_indices(self):
         for sym in self._symmetries:
-            sym = sym.lower()
-            inverse = "i" in sym
-            if sym[0] == "c":
-                yield self._weijer.cyclic(int(sym[-1]), inverse)
-            if sym[0] == "d":
-                yield self._weijer.diherdral(int(sym[-1]), inverse)
-            if sym[0] == "t":
+            if sym == "T":
                 yield self._weijer.tetrahedral()
+            inverse = "i" in sym
+            num_slice = slice(2) if inverse else slice(1)
+            if sym[0] == "C":
+                yield self._weijer.cyclic(int(sym[num_slice]), inverse)
+            if sym[0] == "D":
+                yield self._weijer.diherdral(int(sym[num_slice]), inverse)
 
     def _get_bond_order(self, theta, phi):
         if self._dist == "uniform":
@@ -198,14 +198,14 @@ class OptimizedPGOP:
 
     def _weijer_indices(self):
         for sym in self._symmetries:
-            sym = sym.lower()
-            inverse = "i" in sym
-            if sym[0] == "c":
-                yield self._weijer.cyclic(int(sym[-1]), inverse)
-            if sym[0] == "d":
-                yield self._weijer.diherdral(int(sym[-1]), inverse)
-            if sym[0] == "t":
+            if sym == "T":
                 yield self._weijer.tetrahedral()
+            inverse = "i" in sym
+            num_slice = slice(2) if inverse else slice(1)
+            if sym[0] == "C":
+                yield self._weijer.cyclic(int(sym[num_slice]), inverse)
+            if sym[0] == "D":
+                yield self._weijer.diherdral(int(sym[num_slice]), inverse)
 
     def _get_bond_order(self, theta, phi):
         if self._dist == "uniform":
