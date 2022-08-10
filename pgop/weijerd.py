@@ -201,6 +201,24 @@ def symmetrize_qlm(qlms, Dij, weijer):
     return sym_qlm
 
 
+def _particle_symmetrize_qlm(qlms, Dij, weijer):
+    cols = len(Dij)
+    rows = sum(2 * l + 1 for l in range(weijer._max_l + 1))
+    sym_qlm = np.empty((cols, rows), dtype=complex)
+    qshape = qlms.shape
+    dshape = Dij.shape
+    dij_dot_qlms = qlms.reshape((1, -1))[..., weijer.qlm_indices()] * Dij
+    start = 0
+    summed_ind = 0
+    for l in range(weijer._max_l + 1):
+        skip = 2 * l + 1
+        for ind_m in range(skip):
+            sym_qlm[:, summed_ind] = dij_dot_qlms[:, start : start + skip].sum(axis=-1)
+            summed_ind += 1
+            start += skip
+    return sym_qlm
+
+
 def symmetrize_qlm_compiled(qlms, Dij, max_l):
     cols = len(Dij)
     rows = sum(2 * l + 1 for l in range(weijer._max_l + 1))
