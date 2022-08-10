@@ -80,17 +80,6 @@ class PGOP:
     def pgop(self):
         return self._pgop
 
-    def _weijer_indices(self):
-        for sym in self._symmetries:
-            if sym == "T":
-                yield self._weijer.tetrahedral()
-            inverse = "i" in sym
-            num_slice = slice(2) if inverse else slice(1)
-            if sym[0] == "C":
-                yield self._weijer.cyclic(int(sym[num_slice]), inverse)
-            if sym[0] == "D":
-                yield self._weijer.diherdral(int(sym[num_slice]), inverse)
-
     def _get_bond_order(self, theta, phi):
         if self._dist == "uniform":
             return bond_order.BondOrderUniform(theta, phi, **self._bo_kwargs)
@@ -101,8 +90,8 @@ class PGOP:
 
     def _precompute_weijer_d(self):
         matrices = []
-        for matrix in self._weijer_indices():
-            matrices.append(matrix)
+        for point_group in self._symmetries:
+            matrices.append(self._weijer[point_group])
         return np.stack(matrices, axis=0)
 
 
@@ -196,17 +185,6 @@ class OptimizedPGOP:
     def pgop(self):
         return self._pgop
 
-    def _weijer_indices(self):
-        for sym in self._symmetries:
-            if sym == "T":
-                yield self._weijer.tetrahedral()
-            inverse = "i" in sym
-            num_slice = slice(2) if inverse else slice(1)
-            if sym[0] == "C":
-                yield self._weijer.cyclic(int(sym[num_slice]), inverse)
-            if sym[0] == "D":
-                yield self._weijer.diherdral(int(sym[num_slice]), inverse)
-
     def _get_bond_order(self, theta, phi):
         if self._dist == "uniform":
             return bond_order.BondOrderUniform(theta, phi, **self._bo_kwargs)
@@ -217,8 +195,8 @@ class OptimizedPGOP:
 
     def _precompute_weijer_d(self):
         matrices = []
-        for matrix in self._weijer_indices():
-            matrices.append(matrix)
+        for point_group in self._symmetries:
+            matrices.append(self._weijer[point_group])
         return np.stack(matrices, axis=0)
 
     def _compute_pgop(self, dist, rotation, qlm_eval):

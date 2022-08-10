@@ -165,6 +165,21 @@ class WeigerD:
             ind += len(ms)
         return np.array(indices)
 
+    def __getitem__(self, sym):
+        if sym == "T":
+            return self.tetrahedral()
+        if sym == "i":
+            return self.inverse()
+        inverse = "i" in sym
+        num_slice = slice(2) if inverse else slice(1)
+        if sym[0] == "C":
+            return self.cyclic(int(sym[num_slice]), inverse)
+        if sym[0] == "D":
+            return self.diherdral(int(sym[num_slice]), inverse)
+        else:
+            raise KeyError(
+                f"Point group {sym} is not supported or does not exist.")
+
 
 def _weijer_qlm_sum(Dij_dot_qlms, max_l):
     size = sum(2 * l + 1 for l in range(max_l + 1))
