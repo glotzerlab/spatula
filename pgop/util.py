@@ -62,7 +62,6 @@ _ref_I = np.diag(np.full(3, 0.4 * _fake_mass))
 
 
 def get_inertial_tensor(dist):
-    dist = 4 * dist / np.linalg.norm(dist, axis=1)[:, None]
     dot = np.einsum("ij,ij,kl->ikl", dist, dist, np.eye(3))
     outer = np.einsum("ij,ik->ijk", dist, dist)
     return np.sum(dot - outer, axis=0)
