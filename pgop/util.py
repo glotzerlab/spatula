@@ -72,7 +72,11 @@ def order_rotation_matrix(ein_values, ein_vectors):
     return ein_vectors[np.argsort(ein_values)]
 
 
+def normalize_vectors(a):
+    return a / np.linalg.norm(a, axis=1)[:, None]
+
+
 def diagonalize_neighborhood(dist):
-    I = get_inertial_tensor(dist)
+    I = get_inertial_tensor(normalize_vectors(dist))
     diag_I, rot_matrix = np.linalg.eig(I)
     return np.einsum("ij,ki->kj", order_rotation_matrix(diag_I, rot_matrix), dist)
