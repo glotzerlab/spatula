@@ -108,7 +108,7 @@ class WeigerD:
             raise ValueError("max_l cannot be greater than 6.")
         self._max_l = max_l
         
-    def cyclic(self, order, inverse):
+    def _cyclic(self, order, inverse):
         dij = np.array(
             [util.delta(mprime, m) * util.delta(m % order, 0)
              for l, mprime, m in self._iter_sph_indices()
@@ -117,7 +117,7 @@ class WeigerD:
             return self.inverse() * dij
         return dij
     
-    def diherdral(self, order, inverse):
+    def _diherdral(self, order, inverse):
         d_mprime_m_l = []
         for l, mprime, m in self._iter_sph_indices():
             if m % order:
@@ -132,13 +132,13 @@ class WeigerD:
             return self.inverse() * dij
         return dij
     
-    def tetrahedral(self):
+    def _tetrahedral(self):
         elems = 0
         for l in range(self._max_l + 1):
             elems += (2 * l + 1) ** 2
         return _tetrahedral[:elems] / 12
 
-    def inverse(self):
+    def _inverse(self):
         return np.array(
             [util.delta(mprime, m) * util.delta(l % 2, 0)
              for l, mprime, m in self._iter_sph_indices()
@@ -167,15 +167,15 @@ class WeigerD:
 
     def __getitem__(self, sym):
         if sym == "T":
-            return self.tetrahedral()
+            return self._tetrahedral()
         if sym == "i":
-            return self.inverse()
+            return self._inverse()
         inverse = "i" in sym
         num_slice = slice(2) if inverse else slice(1)
         if sym[0] == "C":
-            return self.cyclic(int(sym[num_slice]), inverse)
+            return self._cyclic(int(sym[num_slice]), inverse)
         if sym[0] == "D":
-            return self.diherdral(int(sym[num_slice]), inverse)
+            return self._diherdral(int(sym[num_slice]), inverse)
         else:
             raise KeyError(
                 f"Point group {sym} is not supported or does not exist.")
