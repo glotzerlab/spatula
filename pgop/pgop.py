@@ -126,6 +126,8 @@ class OptimizedPGOP:
         self._pgop = None
         self._weijer = weijerd.WeigerD(max_l)
         self._Dij = self._precompute_weijer_d()
+        self._score_weights = np.array(
+            [self._weijer.group_cardinality(pg) for pg in self._symmetries])
 
     def compute(self, system, neighbors, m=6):
         qlm_eval = _QlmEval(self, m)
@@ -210,4 +212,12 @@ class OptimizedPGOP:
         return self._covar(qlms[1:], sym_qlms[..., 1:])
 
     def _score(self, pgop):
-        return -np.linalg.norm(pgop)
+        return -_weighted_minkowski(
+            pgop, p=3, weights=self._score_weights)
+
+
+def _weighted_minkowski(a, p=2, weights=None):
+    if weights is None:
+        weights = np.ones(len(a))
+    pow = np.power(a, p)
+    return np.dot(pow, weights) / np.sum(weights)
