@@ -5,6 +5,7 @@ import itertools
 import freud
 import numpy as np
 import rowan
+from tqdm import tqdm
 
 from . import bond_order, integrate, optimize, sph_harm, util, weijerd
 
@@ -12,8 +13,7 @@ from . import bond_order, integrate, optimize, sph_harm, util, weijerd
 class _QlmEval:
     def __init__(self, pgop_compute, m):
         self.m = m
-        (quad_theta, quad_phi), wij = integrate.gauss_legendre_quad_points(
-            m, True)
+        (quad_theta, quad_phi), wij = integrate.gauss_legendre_quad_points(m, True)
         self.theta = quad_theta
         self.phi = quad_phi
         # Need to adjust for use in util._central_angle_fast
@@ -22,8 +22,7 @@ class _QlmEval:
         self.cos_theta = np.cos(quad_theta)
 
         normalization = 1 / (4 * m)
-        self.weighted_ylms = (
-            normalization * wij[None, :] * pgop_compute._ylms(m))
+        self.weighted_ylms = normalization * wij[None, :] * pgop_compute._ylms(m)
 
     def eval(self, bod):
         evaluated_bod = bod._fast_call(self.sin_theta, self.cos_theta, self.phi)
@@ -49,9 +48,14 @@ class PGOP:
         dist = self._compute_distances(neigh_query, neighbors)
         neigh_i = 0
         pgop = np.empty((neighbors.num_points, len(self._symmetries)))
-        for particle_i, num_neighbors in enumerate(neighbors.neighbor_counts):
-            pgop[particle_i] = self._compute_particle(
-                dist[neigh_i : neigh_i + num_neighbors], qlm_eval)
+        iterator = tqdm(
+            enumerate(neighbors.neighbor_counts), total=neighbors.num_points
+        )
+        for particle_i, num_neighbors in iterator:
+            ppgop = self._compute_particle(
+                dist[neigh_i : neigh_i + num_neighbors], qlm_eval
+            )
+            pgop[particle_i] = ppgop
             neigh_i += num_neighbors
         self._pgop = pgop
 
@@ -59,8 +63,12 @@ class PGOP:
         pi_2 = np.pi / 2
         pi_4 = np.pi / 4
         rotations = np.array(
-            [angles for angles in itertools.product(
-                (-pi_2, pi_2), (-pi_4, pi_4), (-pi_2, pi_2))]
+            [
+                angles
+                for angles in itertools.product(
+                    (-pi_2, pi_2), (-pi_4, pi_4), (-pi_2, pi_2)
+                )
+            ]
         )
         bounds = np.array([[-np.pi, np.pi], [0, np.pi], [-np.pi, np.pi]])
         brute_opt = optimize.BruteForce(rotations, bounds)
