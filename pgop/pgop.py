@@ -40,9 +40,10 @@ class PGOP:
         self._weijer = weijerd.WeigerD(max_l)
         self._Dij = self._precompute_weijer_d()
         self._score_cls = _WeightedMinkowski(
-            p=3, weights=np.array(
+            p=3,
+            weights=np.array(
                 [self._weijer.group_cardinality(pg) for pg in self._symmetries]
-            )
+            ),
         )
 
     def compute(self, system, neighbors, m=6):
@@ -78,10 +79,10 @@ class PGOP:
         for rotation in brute_opt:
             pgop = self._compute_pgop(dist, rotation, qlm_eval)
             brute_opt.report_objective(self._score(pgop))
-        init_simplex = optimize.NelderMead.create_initial_simplex(
-            brute_opt.optimum[0], delta=np.array([pi_4, np.pi / 8, pi_4]))
+        init_simplex = self._get_initial_simplex(brute_opt.optimum[0])
         simplex_opt = optimize.NelderMead(
-            init_simplex, bounds, max_iter=50, dist_tol=1e-2, std_tol=1e-3)
+            init_simplex, bounds, max_iter=150, dist_tol=1e-2, std_tol=1e-3
+        )
         for rotation in simplex_opt:
             pgop = self._compute_pgop(dist, rotation, qlm_eval)
             simplex_opt.report_objective(self._score(pgop))
@@ -90,6 +91,16 @@ class PGOP:
     def _compute_distances(self, neigh_query, neighbors):
         pos, box = neigh_query.points, neigh_query.box
         return box.wrap(pos[neighbors[:, 0]] - pos[neighbors[:, 1]])
+
+    def _get_initial_simplex(self, origin):
+        """Get a tetrahedron with given origin and 1/6 the volume of SO(3).
+
+        Here SO(3) denotes the space of Euler angles.
+        """
+        volume_fraction = 1 / 5
+        s = np.pi * (2 ** (1.0 / 6.0)) * ((3 * volume_fraction) ** (1.0 / 3.0))
+        b = 1 / np.sqrt(2)
+        return origin + s * np.array([[1, 0, -b], [-1, 0, -b], [0, 1, b], [0, -1, b]])
 
     def _get_neighbors(self, system, neighbors):
         query = freud.locality.AABBQuery.from_system(system)
