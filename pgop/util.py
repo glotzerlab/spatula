@@ -4,6 +4,8 @@ import scipy as sp
 import scipy.special
 import scipy.stats
 
+from . import _pgop
+
 
 def partial_surface_area(R, delta_theta):
     return 2 * np.pi * R * R * (1 - np.cos(delta_theta))
@@ -17,23 +19,11 @@ def central_angle(theta_a, phi_a, theta_b, phi_b):
     """
     ta = theta_a - (np.pi / 2)
     tb = theta_b - (np.pi / 2)
-    return _central_angle_fast(
-        np.sin(ta, dtype=np.float32),
-        np.sin(tb, dtype=np.float32),
-        np.cos(ta, dtype=np.float32),
-        np.cos(tb, dtype=np.float32),
-        phi_a,
-        phi_b)
+    return _pgop.central_angle(ta, phi_a, tb, phi_b)
 
 
 def _central_angle_fast(sin_ta, sin_tb, cos_ta, cos_tb, phi_a, phi_b):
-    return np.arccos(
-        np.multiply(sin_ta, sin_tb, dtype=np.float32)
-        + np.multiply(
-            np.multiply(cos_ta, cos_tb, dtype=np.float32),
-            np.cos(np.abs(np.subtract(phi_a,  phi_b, dtype=np.float32)))
-        )
-    )
+    return _pgop.fast_central_angle(sin_ta, cos_ta, phi_a, sin_tb, cos_tb, phi_b)
 
 
 def sph_to_cart(theta, phi):

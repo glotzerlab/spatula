@@ -202,8 +202,7 @@ class OptimizedPGOP:
         return np.stack(matrices, axis=0)
 
     def _compute_pgop(self, dist, rotation, qlm_eval):
-        rotation = rowan.from_euler(*rotation)
-        rotated_dist = rowan.rotate(rotation, dist)
+        rotated_dist = util.rotate(dist, *rotation)
         theta, phi = util.project_to_unit_sphere(rotated_dist)
         bod = self._get_bond_order(theta, phi)
         qlms = qlm_eval.eval(bod)
