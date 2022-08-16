@@ -44,3 +44,7 @@ def project_to_unit_sphere(x):
 
 def delta(x, y):
     return 1 if x == y else 0
+
+
+def rotate(vectors, alpha, beta, gamma):
+    return _pgop.rotate_euler(vectors, alpha, beta, gamma)
