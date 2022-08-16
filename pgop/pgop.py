@@ -206,8 +206,7 @@ class OptimizedPGOP:
         theta, phi = util.project_to_unit_sphere(rotated_dist)
         bod = self._get_bond_order(theta, phi)
         qlms = qlm_eval.eval(bod)
-        sym_qlms = weijerd._particle_symmetrize_qlm(
-            qlms, self._Dij, self._weijer)
+        sym_qlms = weijerd.particle_symmetrize_qlm(qlms, self._Dij, self._weijer)
         return self._covar(qlms[1:], sym_qlms[..., 1:])
 
     def _score(self, pgop):
