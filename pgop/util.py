@@ -1,4 +1,5 @@
 import numpy as np
+import rowan
 import scipy as sp
 import scipy.special
 import scipy.stats
@@ -47,35 +48,9 @@ def sph_to_cart(theta, phi):
 def project_to_unit_sphere(x):
     return (
         np.arccos(x[:, 2] / np.sqrt((x * x).sum(axis=1))),
-        np.arctan2(x[:, 1], x[:, 0])
+        np.arctan2(x[:, 1], x[:, 0]),
     )
 
 
 def delta(x, y):
     return 1 if x == y else 0
-
-
-# We use 10 as an arbitary number to move deviations from the itertial frame
-# away from zero matrix elements.
-_fake_mass = 10
-_ref_I = np.diag(np.full(3, 0.4 * _fake_mass))
-
-
-def get_inertial_tensor(dist):
-    dot = np.einsum("ij,ij,kl->ikl", dist, dist, np.eye(3))
-    outer = np.einsum("ij,ik->ijk", dist, dist)
-    return np.sum(dot - outer, axis=0)
-
-
-def order_rotation_matrix(ein_values, ein_vectors):
-    return ein_vectors[np.argsort(ein_values)]
-
-
-def normalize_vectors(a):
-    return a / np.linalg.norm(a, axis=1)[:, None]
-
-
-def diagonalize_neighborhood(dist):
-    I = get_inertial_tensor(normalize_vectors(dist))
-    diag_I, rot_matrix = np.linalg.eig(I)
-    return np.einsum("ij,ki->kj", order_rotation_matrix(diag_I, rot_matrix), dist)
