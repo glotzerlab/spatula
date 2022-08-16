@@ -1,3 +1,4 @@
+import functools
 import itertools
 
 import numpy as np
@@ -569,7 +570,8 @@ class WeigerD:
             ms = range(-l, l + 1)
             for mprime, m in itertools.product(ms, repeat=2):
                 yield l, mprime, m
-                
+
+    @functools.lru_cache(maxsize=6)
     def qlm_indices(self, l=None):
         ind = 0
         indices = []
