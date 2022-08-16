@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(pgop)
+project(_pgop)
 
 set(DEFAULT_BUILD_TYPE Release)
 
