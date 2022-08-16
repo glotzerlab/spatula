@@ -107,16 +107,16 @@ class WeigerD:
         if max_l > 6:
             raise ValueError("max_l cannot be greater than 6.")
         self._max_l = max_l
-        
+
     def _cyclic(self, order, inverse):
         dij = np.array(
             [util.delta(mprime, m) * util.delta(m % order, 0)
              for l, mprime, m in self._iter_sph_indices()
             ]) / order
         if inverse:
-            return self.inverse() * dij
+            return self._inverse() * dij
         return dij
-    
+
     def _diherdral(self, order, inverse):
         d_mprime_m_l = []
         for l, mprime, m in self._iter_sph_indices():
@@ -129,9 +129,9 @@ class WeigerD:
             )
         dij = np.array(d_mprime_m_l) / (2 * order)
         if inverse:
-            return self.inverse() * dij
+            return self._inverse() * dij
         return dij
-    
+
     def _tetrahedral(self):
         elems = 0
         for l in range(self._max_l + 1):
@@ -151,10 +151,6 @@ class WeigerD:
                 yield l, mprime, m
                 
     def qlm_indices(self, l=None):
-        if l is None:
-            l = range(self._max_l + 1)
-        else:
-            l = range(l, l + 1)
         ind = 0
         indices = []
         for l in range(self._max_l + 1):
@@ -171,7 +167,7 @@ class WeigerD:
         if sym == "i":
             return self._inverse()
         inverse = "i" in sym
-        order = int(sym[slice(2) if inverse else slice(1)])
+        order = int(sym[slice(2, None) if inverse else slice(1, None)])
         if sym[0] == "C":
             return self._cyclic(order, inverse)
         if sym[0] == "D":
