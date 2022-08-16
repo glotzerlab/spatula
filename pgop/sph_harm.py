@@ -21,7 +21,7 @@ class SphHarm:
         m = []
         prev_m_length = 0
         for i in range(max_l + 1):
-            m.extend((j for j in range(-i, i + 1)))
-            l.extend((i for _ in range(0, len(m) - prev_m_length)))
+            m.extend(j for j in range(-i, i + 1))
+            l.extend(i for _ in range(0, len(m) - prev_m_length))
             prev_m_length = len(m)
         return np.array(l, dtype=int), np.array(m, dtype=int)
