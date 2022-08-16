@@ -91,20 +91,19 @@ class _OrderedSimplex:
 def _default_bounds(bounds, dim):
     if bounds is not None:
         return bounds
-    return np.tile([-np.inf, np.inf], (self._dim, 1))
+    return np.tile([-np.inf, np.inf], (dim, 1))
 
 
 class BruteForce(Optimizer):
     def __init__(self, points, bounds=None, max_iter=None):
         points = np.asarray(points)
         if points.ndim != 2:
-            raise ValueError(
-                "points must have shape (npoints, ndim)")
+            raise ValueError("points must have shape (npoints, ndim)")
         self._points = points
         self._dim = points.shape[1]
         self._best_objective = np.inf
         self._best_point = None
-        
+
         super().__init__(_default_bounds(bounds, self._dim), max_iter)
 
     def _next_point(self):
@@ -152,8 +151,7 @@ class NelderMead(Optimizer):
     ):
         initial_simplex = np.asarray(initial_simplex)
         if initial_simplex.ndim != 2:
-            raise ValueError(
-                "initial_simplex must have shape (ndim + 1, ndim)")
+            raise ValueError("initial_simplex must have shape (ndim + 1, ndim)")
         self._new_simplex = initial_simplex
         self._dim = self._new_simplex.shape[1]
         self._current_simplex = _OrderedSimplex(self._dim)
@@ -168,7 +166,6 @@ class NelderMead(Optimizer):
         # Tolerances
         self._dist_tol = dist_tol
         self._std_tol = std_tol
-
 
         # Internal state variables
         self._state = self.Stages.NEW_SIMPLEX
@@ -197,9 +194,7 @@ class NelderMead(Optimizer):
     def _next_point(self):
         if self._state == self.Stages.NEW_SIMPLEX:
             if self._new_simplex_index != 0:
-                self._current_simplex.add(
-                    self._trial_point, self._trial_objective
-                )
+                self._current_simplex.add(self._trial_point, self._trial_objective)
             if self._new_simplex_index == self._dim + 1:
                 return self._reflect()
             else:
@@ -210,9 +205,7 @@ class NelderMead(Optimizer):
             if self._trial_objective < self._current_simplex.obj[0]:
                 return self._expand()
             if self._trial_objective < self._current_simplex.obj[-2]:
-                self._current_simplex.add(
-                    self._trial_point, self._trial_objective
-                )
+                self._current_simplex.add(self._trial_point, self._trial_objective)
                 return self._reflect()
             if self._trial_objective < self._current_simplex.obj[-1]:
                 return self._outside_contract()
@@ -220,25 +213,19 @@ class NelderMead(Optimizer):
         if self._state == self.Stages.EXPAND:
             reflect_pnt, reflect_obj = self._reflect_data
             if self._trial_objective < reflect_obj:
-                self._current_simplex.add(
-                    self._trial_point, self._trial_objective
-                )
+                self._current_simplex.add(self._trial_point, self._trial_objective)
             else:
                 self._current_simplex.add(reflect_pnt, reflect_obj)
             return self._reflect()
         if self._state == self.Stages.OUTSIDE_CONTRACT:
             reflect_pnt, reflect_obj = self._reflect_data
             if self._trial_objective < reflect_obj:
-                self._current_simplex.add(
-                    self._trial_point, self._trial_objective
-                )
+                self._current_simplex.add(self._trial_point, self._trial_objective)
                 return self._reflect()
             return self._shrink()
         if self._state == self.Stages.INSIDE_CONTRACT:
             if self._trial_objective < self._current_simplex.obj[-1]:
-                self._current_simplex.add(
-                    self._trial_point, self._trial_objective
-                )
+                self._current_simplex.add(self._trial_point, self._trial_objective)
                 return self._reflect()
             return self._shrink()
 
@@ -286,9 +273,7 @@ class NelderMead(Optimizer):
         return np.mean(self._current_simplex[:-1], axis=0)
 
     def _points_too_close(self):
-        dist = (
-            self._current_simplex[None, ...] - self._current_simplex[:, None, :]
-        )
+        dist = self._current_simplex[None, ...] - self._current_simplex[:, None, :]
         dist = np.linalg.norm(dist.reshape((-1, self._dim)), axis=1)
         return dist.max() < self._dist_tol
 
