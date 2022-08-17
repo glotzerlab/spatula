@@ -41,21 +41,19 @@ class FisherDistribution {
 
 template<typename distribution_type> class BondOrder {
     public:
-    BondOrder(distribution_type dist, py::array_t<double> theta, py::array_t<double> phi);
+    // Assumes points are on the unit sphere (i.e. normalized)
+    BondOrder(distribution_type dist, const py::array_t<double> positions);
 
-    py::array_t<double> operator()(py::array_t<double> theta, py::array_t<double> phi);
+    double single_call(const double* point);
 
-    std::vector<double> fast_call(const std::vector<double>& sin_theta,
-                                  const std::vector<double>& cos_theta,
-                                  const std::vector<double>& phi);
+    // Assumes points are on the unit sphere
+    py::array_t<double> py_call(const py::array_t<double> points);
 
-    double single_call(double sin_theta, double cos_theta, double phi);
+    std::vector<double> operator()(const std::vector<double>& points);
 
     private:
     distribution_type m_dist;
-    std::vector<double> m_phi;
-    std::vector<double> m_sin_theta;
-    std::vector<double> m_cos_theta;
+    std::vector<double> m_positions;
 };
 
 template<typename distribution_type> void export_bond_order_class(py::module& m, std::string name);

@@ -15,9 +15,8 @@ class _QlmEval:
         (quad_theta, quad_phi), wij = integrate.gauss_legendre_quad_points(
             m, True
         )
-        self._cpp = _pgop.QlmEval(
-            m, quad_theta, quad_phi, wij, pgop_compute._ylms(m)
-        )
+        positions = util.sph_to_cart(quad_theta, quad_phi)
+        self._cpp = _pgop.QlmEval(m, positions, wij, pgop_compute._ylms(m))
         if dist == "uniform":
             self.eval = self.uniform_eval
         elif dist == "fisher":
@@ -51,6 +50,7 @@ class PGOP:
         qlm_eval = _QlmEval(self, m, self._dist)
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
         dist = self._compute_distances(neigh_query, neighbors)
+        util.normalize(dist, out=dist)
         neigh_i = 0
         pgop = np.empty((neighbors.num_points, len(self._symmetries)))
         iterator = tqdm(
@@ -126,11 +126,11 @@ class PGOP:
     def pgop(self):
         return self._pgop
 
-    def _get_bond_order(self, theta, phi):
+    def _get_bond_order(self, positions):
         if self._dist == "uniform":
-            return bond_order.BondOrderUniform(theta, phi, **self._bo_kwargs)
+            return bond_order.BondOrderUniform(positions, **self._bo_kwargs)
         if self._dist == "fisher":
-            return bond_order.BondOrderFisher(theta, phi, **self._bo_kwargs)
+            return bond_order.BondOrderFisher(positions, **self._bo_kwargs)
         else:
             raise ValueError("Distribution must be uniform or fisher.")
 
@@ -142,8 +142,7 @@ class PGOP:
 
     def _compute_pgop(self, dist, rotation, qlm_eval):
         rotated_dist = util.rotate(dist, *rotation)
-        theta, phi = util.project_to_unit_sphere(rotated_dist)
-        bod = self._get_bond_order(theta, phi)
+        bod = self._get_bond_order(rotated_dist)
         qlms = qlm_eval.eval(bod)
         sym_qlms = weijerd.particle_symmetrize_qlm(
             qlms, self._Dij, self._weijer

@@ -6,19 +6,19 @@ from . import _pgop, util
 
 
 class BondOrder:
-    def __call__(self, theta, phi):
-        return self._cpp(theta, phi)
+    def __call__(self, positions):
+        return self._cpp(positions)
 
 
 class BondOrderFisher(BondOrder):
-    def __init__(self, theta, phi, kappa):
+    def __init__(self, positions, kappa):
         self._cpp = _pgop.FisherBondOrder(
-            _pgop.FisherDistribution(kappa), theta, phi
+            _pgop.FisherDistribution(kappa), positions
         )
 
 
 class BondOrderUniform(BondOrder):
-    def __init__(self, theta, phi, max_theta):
+    def __init__(self, positions, max_theta):
         self._cpp = _pgop.UniformBondOrder(
-            _pgop.UniformDistribution(max_theta), theta, phi
+            _pgop.UniformDistribution(max_theta), positions
         )

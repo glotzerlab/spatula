@@ -26,67 +26,44 @@ double UniformDistribution::operator()(double theta)
 }
 
 template<typename distribution_type>
-BondOrder<distribution_type>::BondOrder(distribution_type dist,
-                                        py::array_t<double> theta,
-                                        py::array_t<double> phi)
-    : m_dist(dist), m_phi(), m_sin_theta(), m_cos_theta()
+BondOrder<distribution_type>::BondOrder(distribution_type dist, py::array_t<double> positions)
+    : m_dist(dist), m_positions()
 {
-    const auto u_theta = theta.unchecked<1>();
-    m_sin_theta.reserve(u_theta.size());
-    m_cos_theta.reserve(u_theta.size());
-    m_phi.reserve(u_theta.size());
-    const auto u_phi = phi.unchecked<1>();
-    for (size_t i {0}; i < u_theta.size(); ++i) {
-        auto th = u_theta[i] - M_PI_2;
-        m_sin_theta.emplace_back(std::sin(th));
-        m_cos_theta.emplace_back(std::cos(th));
-        m_phi.emplace_back(u_phi[i]);
-    }
+    const auto u_positions = positions.unchecked<2>();
+    m_positions.assign(u_positions.data(0, 0), u_positions.data(0, 0) + u_positions.size());
 }
 
 template<typename distribution_type>
-py::array_t<double> BondOrder<distribution_type>::operator()(py::array_t<double> theta,
-                                                             py::array_t<double> phi)
+py::array_t<double> BondOrder<distribution_type>::py_call(const py::array_t<double> points)
 {
-    const auto* u_theta = static_cast<const double*>(theta.data());
-    const auto* u_phi = static_cast<const double*>(phi.data());
-
-    auto bo = py::array_t<double>(theta.size());
-    auto* u_bo = static_cast<double*>(bo.mutable_data());
-    for (size_t i {0}; i < theta.size(); ++i) {
-        const double shifted_theta = u_theta[i] - M_PI_2;
-        const double sin_theta = std::sin(shifted_theta);
-        const double cos_theta = std::cos(shifted_theta);
-        u_bo[i] = single_call(sin_theta, cos_theta, u_phi[i]);
+    auto u_points = points.unchecked<2>();
+    auto bo = py::array_t<double>(u_points.shape(0));
+    auto u_bo = static_cast<double*>(bo.mutable_data(0));
+    for (size_t i {0}; i < u_points.shape(0); ++i) {
+        u_bo[i] = this->single_call(points.data(i, 0));
     }
     return bo;
 }
 
 template<typename distribution_type>
-double BondOrder<distribution_type>::single_call(double sin_theta, double cos_theta, double phi)
+double BondOrder<distribution_type>::single_call(const double* point)
 {
     double value {0};
-    for (size_t i {0}; i < m_sin_theta.size(); ++i) {
-        const auto angle = fast_central_angle(m_sin_theta[i],
-                                              m_cos_theta[i],
-                                              m_phi[i],
-                                              sin_theta,
-                                              cos_theta,
-                                              phi);
+    for (size_t i {0}; i < m_positions.size(); i += 3) {
+        const auto angle = fast_angle_eucledian(&m_positions[i], point);
         value += m_dist(angle);
     }
-    return value / static_cast<double>(m_sin_theta.size());
+    return value / static_cast<double>(m_positions.size() / 3);
 }
 
 template<typename distribution_type>
-std::vector<double> BondOrder<distribution_type>::fast_call(const std::vector<double>& sin_theta,
-                                                            const std::vector<double>& cos_theta,
-                                                            const std::vector<double>& phi)
+std::vector<double> BondOrder<distribution_type>::operator()(const std::vector<double>& points)
 {
     auto bo = std::vector<double>();
-    bo.reserve(sin_theta.size());
-    for (size_t i {0}; i < sin_theta.size(); ++i) {
-        bo[i] = this->single_call(sin_theta[i], cos_theta[i], phi[i]);
+    const size_t n_points = points.size() / 3;
+    bo.reserve(n_points);
+    for (size_t i {0}; i < points.size(); i += 3) {
+        bo.push_back(this->single_call(&points[i]));
     }
     return bo;
 }
@@ -96,8 +73,8 @@ template<typename distribution_type> void export_bond_order_class(py::module& m,
     py::class_<BondOrder<distribution_type>, std::shared_ptr<BondOrder<distribution_type>>>(
         m,
         name.c_str())
-        .def(py::init<distribution_type, py::array_t<double>, py::array_t<double>>())
-        .def("__call__", (&BondOrder<distribution_type>::operator()));
+        .def(py::init<distribution_type, py::array_t<double>>())
+        .def("__call__", &BondOrder<distribution_type>::py_call);
 }
 
 // explicitly create templates
