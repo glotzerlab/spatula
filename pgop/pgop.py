@@ -111,12 +111,7 @@ class PGOP:
         return query, query.query(query.points, neighbors).toNeighborList()
 
     def _covar(self, qlms, sym_qlms):
-        # Uses the covariance trick of spherical harmonic expansions and
-        # symmetrized expansions.
-        covar_plain = np.real(np.einsum("j,j", qlms, np.conj(qlms)))
-        covar_sym = np.real(np.einsum("jk,jk->j", sym_qlms, np.conj(sym_qlms)))
-        covar_mixed = np.real(np.einsum("jk,k->j", sym_qlms, np.conj(qlms)))
-        return covar_mixed / np.sqrt(covar_sym * covar_plain)
+        return _pgop.covariance_score(qlms, sym_qlms)
 
     def _ylms(self, m):
         return self._sph_harm(*integrate.gauss_legendre_quad_points(m))
