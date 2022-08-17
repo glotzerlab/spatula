@@ -23,6 +23,21 @@ double fast_central_angle(double sin_ref_theta,
                      + cos_ref_theta * cos_theta * std::cos(std::abs(ref_phi - phi)));
 }
 
+// Assumes points are on the unit sphere
+double fast_angle_eucledian(const double* ref_x, const double* x)
+{
+    return std::acos(ref_x[0] * x[0] + ref_x[1] * x[1] + ref_x[2] * x[2]);
+}
+
+// Assumes points are on the unit sphere
+void project_to_sphere(const double* x, double* theta, double* phi)
+{
+    *theta = std::acos(x[2]);
+    // atan2 takes account of what quaterant (x, y) is in necessary for this
+    // projection.
+    *phi = std::atan2(x[1], x[0]);
+}
+
 std::vector<double> compute_rotation_matrix(double alpha, double beta, double gamma)
 {
     auto R = std::vector<double>();
