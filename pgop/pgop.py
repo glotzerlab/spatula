@@ -7,26 +7,27 @@ import numpy as np
 import rowan
 from tqdm import tqdm
 
-from . import bond_order, integrate, optimize, sph_harm, util, weijerd
+from . import _pgop, bond_order, integrate, optimize, sph_harm, util, weijerd
 
 
 class _QlmEval:
-    def __init__(self, pgop_compute, m):
-        self.m = m
-        (quad_theta, quad_phi), wij = integrate.gauss_legendre_quad_points(m, True)
-        self.theta = quad_theta
-        self.phi = quad_phi
-        # Need to adjust for use in util._central_angle_fast
-        quad_theta = quad_theta - np.pi / 2
-        self.sin_theta = np.sin(quad_theta)
-        self.cos_theta = np.cos(quad_theta)
+    def __init__(self, pgop_compute, m, dist):
+        (quad_theta, quad_phi), wij = integrate.gauss_legendre_quad_points(
+            m, True
+        )
+        self._cpp = _pgop.QlmEval(
+            m, quad_theta, quad_phi, wij, pgop_compute._ylms(m)
+        )
+        if dist == "uniform":
+            self.eval = self.uniform_eval
+        elif dist == "fisher":
+            self.eval = self.fisher_eval
 
-        normalization = 1 / (4 * m)
-        self.weighted_ylms = normalization * wij[None, :] * pgop_compute._ylms(m)
+    def uniform_eval(self, bod):
+        return self._cpp.uniform_eval(bod._cpp)
 
-    def eval(self, bod):
-        evaluated_bod = bod._fast_call(self.sin_theta, self.cos_theta, self.phi)
-        return np.einsum("jk,k", self.weighted_ylms, evaluated_bod)
+    def fisher_eval(self, bod):
+        return self._cpp.fisher_eval(bod._cpp)
 
 
 class PGOP:
@@ -47,7 +48,7 @@ class PGOP:
         )
 
     def compute(self, system, neighbors, m=6):
-        qlm_eval = _QlmEval(self, m)
+        qlm_eval = _QlmEval(self, m, self._dist)
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
         dist = self._compute_distances(neigh_query, neighbors)
         neigh_i = 0
@@ -100,7 +101,9 @@ class PGOP:
         volume_fraction = 1 / 5
         s = np.pi * (2 ** (1.0 / 6.0)) * ((3 * volume_fraction) ** (1.0 / 3.0))
         b = 1 / np.sqrt(2)
-        return origin + s * np.array([[1, 0, -b], [-1, 0, -b], [0, 1, b], [0, -1, b]])
+        return origin + s * np.array(
+            [[1, 0, -b], [-1, 0, -b], [0, 1, b], [0, -1, b]]
+        )
 
     def _get_neighbors(self, system, neighbors):
         query = freud.locality.AABBQuery.from_system(system)
@@ -142,7 +145,9 @@ class PGOP:
         theta, phi = util.project_to_unit_sphere(rotated_dist)
         bod = self._get_bond_order(theta, phi)
         qlms = qlm_eval.eval(bod)
-        sym_qlms = weijerd.particle_symmetrize_qlm(qlms, self._Dij, self._weijer)
+        sym_qlms = weijerd.particle_symmetrize_qlm(
+            qlms, self._Dij, self._weijer
+        )
         return self._covar(qlms[1:], sym_qlms[..., 1:])
 
     def _score(self, pgop):

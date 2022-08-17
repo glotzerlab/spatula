@@ -2,13 +2,15 @@
 
 #include "BondOrder.h"
 #include "Optimize.h"
+#include "QlmEval.h"
 #include "Util.h"
 #include "Weijer.h"
 
-PYBIND11_MODULE(pgop, m)
+PYBIND11_MODULE(_pgop, m)
 {
     export_bond_order(m);
     export_optimize(m);
+    export_qlm_eval(m);
     export_util(m);
     export_weijer(m);
 }

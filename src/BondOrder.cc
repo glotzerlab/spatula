@@ -1,5 +1,6 @@
 #include <cmath>
 #include <math.h>
+#include <memory>
 
 #include "BondOrder.h"
 #include "Util.h"
@@ -78,29 +79,30 @@ double BondOrder<distribution_type>::single_call(double sin_theta, double cos_th
 }
 
 template<typename distribution_type>
-py::array_t<double> BondOrder<distribution_type>::fast_call(py::array_t<double> sin_theta,
-                                                            py::array_t<double> cos_theta,
-                                                            py::array_t<double> phi)
+std::vector<double> BondOrder<distribution_type>::fast_call(const std::vector<double>& sin_theta,
+                                                            const std::vector<double>& cos_theta,
+                                                            const std::vector<double>& phi)
 {
-    const auto* u_sin_theta = static_cast<const double*>(sin_theta.data());
-    const auto* u_cos_theta = static_cast<const double*>(cos_theta.data());
-    const auto* u_phi = static_cast<const double*>(phi.data());
-
-    auto bo = py::array_t<double>(sin_theta.size());
-    auto* u_bo = static_cast<double*>(bo.mutable_data());
+    auto bo = std::vector<double>();
+    bo.reserve(sin_theta.size());
     for (size_t i {0}; i < sin_theta.size(); ++i) {
-        u_bo[i] = this->single_call(u_sin_theta[i], u_cos_theta[i], u_phi[i]);
+        bo[i] = this->single_call(sin_theta[i], cos_theta[i], phi[i]);
     }
     return bo;
 }
 
 template<typename distribution_type> void export_bond_order_class(py::module& m, std::string name)
 {
-    py::class_<BondOrder<distribution_type>>(m, name.c_str())
+    py::class_<BondOrder<distribution_type>, std::shared_ptr<BondOrder<distribution_type>>>(
+        m,
+        name.c_str())
         .def(py::init<distribution_type, py::array_t<double>, py::array_t<double>>())
-        .def("__call__", (&BondOrder<distribution_type>::operator()))
-        .def("fast_call", &BondOrder<distribution_type>::fast_call);
+        .def("__call__", (&BondOrder<distribution_type>::operator()));
 }
+
+// explicitly create templates
+template class BondOrder<UniformDistribution>;
+template class BondOrder<FisherDistribution>;
 
 void export_bond_order(py::module& m)
 {

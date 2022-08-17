@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -44,9 +45,10 @@ template<typename distribution_type> class BondOrder {
 
     py::array_t<double> operator()(py::array_t<double> theta, py::array_t<double> phi);
 
-    py::array_t<double> fast_call(py::array_t<double> sin_theta,
-                                  py::array_t<double> cos_theta,
-                                  py::array_t<double> phi);
+    std::vector<double> fast_call(const std::vector<double>& sin_theta,
+                                  const std::vector<double>& cos_theta,
+                                  const std::vector<double>& phi);
+
     double single_call(double sin_theta, double cos_theta, double phi);
 
     private:
