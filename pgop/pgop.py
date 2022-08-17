@@ -1,10 +1,7 @@
-import enum
-import functools
 import itertools
 
 import freud
 import numpy as np
-import rowan
 from tqdm import tqdm
 
 from . import _pgop, bond_order, integrate, optimize, sph_harm, util, weijerd
@@ -158,8 +155,10 @@ class _WeightedMinkowski:
 
     def __call__(self, a):
         d = np.power(a, self._p)
+        if self._p % 2 != 0:
+            np.abs(d, out=d)
         if self._weights is not None:
             d = np.dot(d, self._weights) / self._normalization
         else:
             d = d.sum()
-        return d ** (1 / self._p)
+        return d.item() ** (1 / self._p)
