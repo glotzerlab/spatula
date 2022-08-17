@@ -23,7 +23,9 @@ def central_angle(theta_a, phi_a, theta_b, phi_b):
 
 
 def _central_angle_fast(sin_ta, sin_tb, cos_ta, cos_tb, phi_a, phi_b):
-    return _pgop.fast_central_angle(sin_ta, cos_ta, phi_a, sin_tb, cos_tb, phi_b)
+    return _pgop.fast_central_angle(
+        sin_ta, cos_ta, phi_a, sin_tb, cos_tb, phi_b
+    )
 
 
 def sph_to_cart(theta, phi):
@@ -48,3 +50,11 @@ def delta(x, y):
 
 def rotate(vectors, alpha, beta, gamma):
     return _pgop.rotate_euler(vectors, alpha, beta, gamma)
+
+
+def normalize(a, out=None):
+    norms = np.linalg.norm(a, axis=1)
+    if out is None:
+        return a / norms
+    np.divide(a, norms.reshape((-1, 1)), out=out)
+    return None
