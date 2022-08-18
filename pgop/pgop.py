@@ -67,7 +67,8 @@ class PGOP:
         )
         for particle_i, num_neighbors in iterator:
             ppgop = self._compute_particle(
-                dist[neigh_i : neigh_i + num_neighbors], qlm_eval
+                dist[neigh_i : neigh_i + num_neighbors],
+                qlm_eval,
             )
             pgop[particle_i] = ppgop
             neigh_i += num_neighbors
