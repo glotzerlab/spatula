@@ -509,7 +509,8 @@ _tetrahedral = np.array(
         0,
         0,
         5 / 32,
-    ]
+    ],
+    dtype=complex,
 )
 
 
@@ -525,7 +526,8 @@ class WeigerD:
                 [
                     util.delta(mprime, m) * util.delta(m % order, 0)
                     for l, mprime, m in self._iter_sph_indices()
-                ]
+                ],
+                dtype=complex,
             )
             / order
         )
@@ -543,7 +545,7 @@ class WeigerD:
             d_mprime_m_l.append(
                 0.5 * (util.delta(mprime, m) + sign * util.delta(mprime, -m))
             )
-        dij = np.array(d_mprime_m_l) / (2 * order)
+        dij = np.array(d_mprime_m_l, dtype=complex) / (2 * order)
         if inverse:
             return self._inverse() * dij
         return dij
@@ -560,7 +562,8 @@ class WeigerD:
                 [
                     util.delta(mprime, m) * util.delta(l % 2, 0)
                     for l, mprime, m in self._iter_sph_indices()
-                ]
+                ],
+                dtype=complex,
             )
             / 2
         )
@@ -595,7 +598,9 @@ class WeigerD:
         if sym[0] == "D":
             return self._diherdral(order, inverse)
         else:
-            raise KeyError(f"Point group {sym} is not supported or does not exist.")
+            raise KeyError(
+                f"Point group {sym} is not supported or does not exist."
+            )
 
     def group_cardinality(self, sym):
         if sym == "T":
@@ -610,7 +615,9 @@ class WeigerD:
         if sym[0] == "D":
             return 2 * order * inv_factor
         else:
-            raise ValueError(f"Point group {sym} is not supported or does not exist.")
+            raise ValueError(
+                f"Point group {sym} is not supported or does not exist."
+            )
 
 
 def _weijer_qlm_sum(Dij_dot_qlms, max_l):
@@ -641,9 +648,9 @@ def symmetrize_qlm(qlms, Dij, weijer):
     for l in range(weijer._max_l + 1):
         skip = 2 * l + 1
         for ind_m in range(skip):
-            sym_qlm[..., summed_ind] = dij_dot_qlms[..., start : start + skip].sum(
-                axis=-1
-            )
+            sym_qlm[..., summed_ind] = dij_dot_qlms[
+                ..., start : start + skip
+            ].sum(axis=-1)
             summed_ind += 1
             start += skip
     return sym_qlm
