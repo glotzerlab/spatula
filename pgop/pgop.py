@@ -27,6 +27,18 @@ class _QlmEval:
 
 
 class PGOP:
+    _default_rotations = np.array(
+        [
+            angles
+            for angles in itertools.product(
+                (-util.PI_2, util.PI_2),
+                (-util.PI_4, util.PI_4),
+                (-util.PI_2, util.PI_2),
+            )
+        ]
+        + [(0, 0, 0)]
+    )
+
     def __init__(self, dist, max_l, symmetries, bo_kwargs):
         self._dist = dist
         self._bo_kwargs = bo_kwargs
@@ -62,17 +74,8 @@ class PGOP:
         self._pgop = pgop
 
     def _compute_particle(self, dist, qlm_eval):
-        pi_2 = np.pi / 2
-        pi_4 = np.pi / 4
-        rotations = [
-            angles
-            for angles in itertools.product(
-                (-pi_2, pi_2), (-pi_4, pi_4), (-pi_2, pi_2)
-            )
-        ]
-        rotations.append([0, 0, 0])
         bounds = np.array([[-np.pi, np.pi], [0, np.pi], [-np.pi, np.pi]])
-        brute_opt = optimize.BruteForce(np.array(rotations), bounds)
+        brute_opt = optimize.BruteForce(self._default_rotations, bounds)
         for rotation in brute_opt:
             pgop = self._compute_pgop(dist, rotation, qlm_eval)
             brute_opt.report_objective(self._score(pgop))

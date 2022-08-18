@@ -6,6 +6,9 @@ import scipy.stats
 
 from . import _pgop
 
+PI_2 = np.pi / 2
+PI_4 = np.pi / 4
+
 
 def partial_surface_area(R, delta_theta):
     return 2 * np.pi * R * R * (1 - np.cos(delta_theta))
@@ -17,8 +20,8 @@ def central_angle(theta_a, phi_a, theta_b, phi_b):
     Assumes the first column is the polar (latitude) and the second is the
     azmuthal angle. The polar angle is assumed to go from 0 to pi.
     """
-    ta = theta_a - (np.pi / 2)
-    tb = theta_b - (np.pi / 2)
+    ta = theta_a - PI_2
+    tb = theta_b - PI_2
     return _pgop.central_angle(ta, phi_a, tb, phi_b)
 
 
