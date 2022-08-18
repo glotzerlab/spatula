@@ -38,9 +38,9 @@ class PGOP:
         self._Dij = self._precompute_weijer_d()
         self._score_cls = _WeightedMinkowski(
             p=3,
-            weights=np.array(
-                [self._weijer.group_cardinality(pg) for pg in self._symmetries]
-            ),
+            weights=[
+                self._weijer.group_cardinality(pg) for pg in self._symmetries
+            ],
         )
 
     def compute(self, system, neighbors, m=6):
@@ -146,19 +146,9 @@ class PGOP:
 
 class _WeightedMinkowski:
     def __init__(self, p=2, weights=None):
-        self._p = p
-        if weights is not None:
-            self._weights = np.asarray(weights)
-            self._normalization = self._weights.sum()
-        else:
-            self._weights = None
+        if weights is None:
+            weights = []
+        self._cpp = getattr(_pgop, f"Weighted{p}Norm")(weights)
 
     def __call__(self, a):
-        d = np.power(a, self._p)
-        if self._p % 2 != 0:
-            np.abs(d, out=d)
-        if self._weights is not None:
-            d = np.dot(d, self._weights) / self._normalization
-        else:
-            d = d.sum()
-        return d.item() ** (1 / self._p)
+        return self._cpp(a)

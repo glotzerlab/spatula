@@ -1,5 +1,6 @@
 #include <complex>
 #include <numeric>
+#include <string>
 
 #include "Metrics.h"
 
@@ -27,7 +28,50 @@ py::array_t<double> covariance(py::array_t<std::complex<double>> qlms,
     return covar;
 }
 
+template<unsigned int p>
+WeightedPNorm<p>::WeightedPNorm(std::vector<double> weights)
+    : m_weights(std::move(weights)),
+      m_normalization(std::accumulate(m_weights.begin(), m_weights.end(), 0.0))
+{
+}
+
+template<unsigned int p> double WeightedPNorm<p>::operator()(py::array_t<double> vector)
+{
+    const auto* u_vector = static_cast<const double*>(vector.data(0));
+    double metric = 0;
+    if (m_weights.size() != 0) {
+        for (size_t i {0}; i < m_weights.size(); ++i) {
+            double v = u_vector[i];
+            if constexpr (p % 2 == 0) {
+                v = std::abs(v);
+            }
+            metric += m_weights[i] * std::pow(v, p);
+        }
+        metric /= m_normalization;
+    } else {
+        for (size_t i {0}; i < vector.size(); ++i) {
+            double v = u_vector[i];
+            if constexpr (p % 2 == 0) {
+                v = std::abs(v);
+            }
+            metric += std::pow(v, p);
+        }
+    }
+    return std::pow(metric, 1 / static_cast<double>(p));
+}
+
+template<unsigned int p> void export_pnorm(py::module& m)
+{
+    auto name = "Weighted" + std::to_string(p) + "Norm";
+    py::class_<WeightedPNorm<p>>(m, name.c_str())
+        .def(py::init<std::vector<double>>())
+        .def("__call__", &WeightedPNorm<p>::operator());
+}
+
 void export_metrics(py::module& m)
 {
     m.def("covariance_score", covariance);
+    export_pnorm<1>(m);
+    export_pnorm<2>(m);
+    export_pnorm<3>(m);
 }
