@@ -4,7 +4,9 @@ import freud
 import numpy as np
 from tqdm import tqdm
 
-from . import _pgop, bond_order, integrate, optimize, sph_harm, util, weijerd
+import pgop._pgop
+
+from . import bond_order, integrate, optimize, sph_harm, util, weijerd
 
 
 class _QlmEval:
@@ -13,7 +15,7 @@ class _QlmEval:
             m, True
         )
         positions = util.sph_to_cart(quad_theta, quad_phi)
-        self._cpp = _pgop.QlmEval(m, positions, wij, pgop_compute._ylms(m))
+        self._cpp = pgop._pgop.QlmEval(m, positions, wij, pgop_compute._ylms(m))
         if dist == "uniform":
             self.eval = self.uniform_eval
         elif dist == "fisher":
@@ -112,7 +114,7 @@ class PGOP:
         return query, query.query(query.points, neighbors).toNeighborList()
 
     def _covar(self, qlms, sym_qlms):
-        return _pgop.covariance_score(qlms, sym_qlms)
+        return pgop._pgop.covariance_score(qlms, sym_qlms)
 
     def _ylms(self, m):
         return self._sph_harm(*integrate.gauss_legendre_quad_points(m))
@@ -152,7 +154,7 @@ class _WeightedMinkowski:
     def __init__(self, p=2, weights=None):
         if weights is None:
             weights = []
-        self._cpp = getattr(_pgop, f"Weighted{p}Norm")(weights)
+        self._cpp = getattr(pgop._pgop, f"Weighted{p}Norm")(weights)
 
     def __call__(self, a):
         return self._cpp(a)

@@ -3,7 +3,9 @@ import itertools
 
 import numpy as np
 
-from . import _pgop, util
+import pgop._pgop
+
+from . import util
 
 _tetrahedral = np.array(
     [
@@ -657,4 +659,4 @@ def symmetrize_qlm(qlms, Dij, weijer):
 
 
 def particle_symmetrize_qlm(qlms, Dij, weijer):
-    return _pgop.symmetrize_qlms(qlms, Dij, weijer._max_l)
+    return pgop._pgop.symmetrize_qlms(qlms, Dij, weijer._max_l)
