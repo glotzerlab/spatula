@@ -8,6 +8,73 @@
 
 using namespace py::literals;
 
+Optimizer::Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds)
+    : m_min_bounds(min_bounds), m_max_bounds(max_bounds), m_point(), m_objective(),
+      m_need_objective(false)
+{
+}
+
+void Optimizer::record_objective(double objective)
+{
+    if (!m_need_objective) {
+        throw std::runtime_error("Must get new point before recording objective.");
+    }
+    m_need_objective = false;
+    m_objective = objective;
+}
+
+void Optimizer::clip_point(std::vector<double>& point)
+{
+    for (size_t i {0}; i < point.size(); ++i) {
+        auto& x = point[i];
+        if (x < m_min_bounds[i]) {
+            x = m_min_bounds[i];
+        }
+        if (x > m_max_bounds[i]) {
+            x = m_max_bounds[i];
+        }
+    }
+}
+
+BruteForce::BruteForce(const std::vector<std::vector<double>>& points,
+                       const std::vector<double>& min_bounds,
+                       const std::vector<double>& max_bounds)
+    : Optimizer(min_bounds, max_bounds), m_points(points), m_cnt(0), m_best_point(),
+      m_best_objective(std::numeric_limits<double>::infinity())
+{
+}
+
+std::vector<double> BruteForce::next_point()
+{
+    m_need_objective = true;
+    m_point = m_points[std::min(m_points.size(), m_cnt)];
+    ++m_cnt;
+    return m_point;
+}
+
+std::pair<std::vector<double>, double> BruteForce::get_optimum() const
+{
+    return std::make_pair(m_best_point, m_best_objective);
+}
+
+void BruteForce::record_objective(double objective)
+{
+    if (!m_need_objective) {
+        throw std::runtime_error("Must get new point before recording objective.");
+    }
+    m_need_objective = false;
+    m_objective = objective;
+    if (objective < m_best_objective) {
+        m_best_objective = objective;
+        m_best_point = m_point;
+    }
+}
+
+bool BruteForce::terminate() const
+{
+    return m_cnt >= m_points.size();
+}
+
 NelderMeadParams::NelderMeadParams(double alpha_, double gamma_, double rho_, double sigma_)
     : alpha(alpha_), gamma(gamma_), rho(rho_), sigma(sigma_)
 {
@@ -186,9 +253,8 @@ NelderMead::NelderMead(NelderMeadParams params,
                        unsigned int max_iter,
                        double dist_tol,
                        double std_tol)
-    : m_stage(NelderMead::Stage::NEW_SIMPLEX), m_need_objective(false), m_params(params),
-      m_dim(initial_simplex.size() - 1), m_current_simplex(m_dim), m_point(), m_objective(0),
-      m_min_bounds(min_bounds), m_max_bounds(max_bounds), m_max_iter(max_iter), m_iter(0),
+    : Optimizer(min_bounds, max_bounds), m_stage(NelderMead::Stage::NEW_SIMPLEX), m_params(params),
+      m_dim(initial_simplex.size() - 1), m_current_simplex(m_dim), m_max_iter(max_iter), m_iter(0),
       m_dist_tol(dist_tol), m_std_tol(std_tol), m_last_reflect(), m_new_simplex_index(0),
       m_new_simplex(initial_simplex.begin(), initial_simplex.end())
 {
@@ -331,28 +397,6 @@ std::vector<double> NelderMead::next_point()
     return m_point;
 }
 
-void NelderMead::clip_point(std::vector<double>& point)
-{
-    for (size_t i {0}; i < point.size(); ++i) {
-        auto& x = point[i];
-        if (x < m_min_bounds[i]) {
-            x = m_min_bounds[i];
-        }
-        if (x > m_max_bounds[i]) {
-            x = m_max_bounds[i];
-        }
-    }
-}
-
-void NelderMead::record_objective(double objective)
-{
-    if (!m_need_objective) {
-        throw std::runtime_error("Must get new point before recording objective.");
-    }
-    m_need_objective = false;
-    m_objective = objective;
-}
-
 bool NelderMead::terminate() const
 {
     if (m_stage == NelderMead::Stage::NEW_SIMPLEX) {
@@ -365,6 +409,10 @@ bool NelderMead::terminate() const
 std::pair<std::vector<double>, double> NelderMead::get_optimum() const
 {
     if (m_current_simplex.size() > 0) {
+        const auto& simplex_best = m_current_simplex[0];
+        if (!m_need_objective && simplex_best.second > m_objective) {
+            return std::make_pair(m_point, m_objective);
+        }
         return m_current_simplex[0];
     }
     return std::pair<std::vector<double>, double>();
@@ -372,6 +420,15 @@ std::pair<std::vector<double>, double> NelderMead::get_optimum() const
 
 void export_optimize(py::module& m)
 {
+    py::class_<BruteForce>(m, "BruteForce")
+        .def(py::init<const std::vector<std::vector<double>>&,
+                      const std::vector<double>&,
+                      const std::vector<double>&>())
+        .def("next_point", &BruteForce::next_point)
+        .def("record_objective", &BruteForce::record_objective)
+        .def_property_readonly("terminate", &BruteForce::terminate)
+        .def_property_readonly("optimum", &BruteForce::get_optimum);
+
     py::class_<NelderMeadParams>(m, "NelderMeadParams")
         .def(py::init<double, double, double, double>());
 

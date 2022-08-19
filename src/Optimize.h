@@ -7,6 +7,46 @@
 
 namespace py = pybind11;
 
+class Optimizer {
+    public:
+    Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds);
+
+    virtual std::vector<double> next_point() = 0;
+    virtual void record_objective(double);
+    virtual bool terminate() const = 0;
+    virtual std::pair<std::vector<double>, double> get_optimum() const = 0;
+
+    protected:
+    void clip_point(std::vector<double>& point);
+
+    const std::vector<double> m_min_bounds;
+    const std::vector<double> m_max_bounds;
+
+    std::vector<double> m_point;
+    double m_objective;
+
+    bool m_need_objective;
+};
+
+class BruteForce : public Optimizer {
+    public:
+    BruteForce(const std::vector<std::vector<double>>& points,
+               const std::vector<double>& min_bounds,
+               const std::vector<double>& max_bounds);
+
+    virtual void record_objective(double);
+    virtual std::vector<double> next_point();
+    virtual bool terminate() const;
+    virtual std::pair<std::vector<double>, double> get_optimum() const;
+
+    private:
+    std::vector<std::vector<double>> m_points;
+    size_t m_cnt;
+
+    std::vector<double> m_best_point;
+    double m_best_objective;
+};
+
 struct NelderMeadParams {
     double alpha;
     double gamma;
@@ -62,7 +102,7 @@ class OrderedSimplex {
     double m_min_dist;
 };
 
-class NelderMead {
+class NelderMead : public Optimizer {
     public:
     NelderMead(NelderMeadParams params,
                std::vector<std::vector<double>>& initial_simplex,
@@ -72,10 +112,9 @@ class NelderMead {
                double m_dist_tol,
                double m_std_tol);
 
-    std::vector<double> next_point();
-    void record_objective(double);
-    bool terminate() const;
-    std::pair<std::vector<double>, double> get_optimum() const;
+    virtual std::vector<double> next_point();
+    virtual bool terminate() const;
+    virtual std::pair<std::vector<double>, double> get_optimum() const;
 
     private:
     enum Stage {
@@ -96,18 +135,11 @@ class NelderMead {
 
     std::vector<double> shrink();
 
-    void clip_point(std::vector<double>& point);
-
     Stage m_stage;
-    bool m_need_objective;
     const NelderMeadParams m_params;
     const unsigned int m_dim;
     OrderedSimplex m_current_simplex;
-    std::vector<double> m_point;
-    double m_objective;
 
-    const std::vector<double> m_min_bounds;
-    const std::vector<double> m_max_bounds;
     unsigned int m_max_iter;
     unsigned int m_iter;
     double m_dist_tol;
