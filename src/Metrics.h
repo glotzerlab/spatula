@@ -8,15 +8,22 @@
 
 namespace py = pybind11;
 
-template<unsigned int p> class WeightedPNorm {
+class WeightedPNormBase {
     public:
-    WeightedPNorm(std::vector<double> weights);
+    WeightedPNormBase(std::vector<double>& weights);
 
-    double operator()(py::array_t<double> vector);
+    virtual double operator()(py::array_t<double> vector) = 0;
 
-    private:
+    protected:
     std::vector<double> m_weights;
     double m_normalization;
+};
+
+template<unsigned int p> class WeightedPNorm : public WeightedPNormBase {
+    public:
+    WeightedPNorm(std::vector<double>& weights);
+
+    double operator()(py::array_t<double> vector);
 };
 
 py::array_t<double> covariance(py::array_t<std::complex<double>> qlms,

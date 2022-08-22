@@ -28,10 +28,13 @@ py::array_t<double> covariance(py::array_t<std::complex<double>> qlms,
     return covar;
 }
 
+WeightedPNormBase::WeightedPNormBase(std::vector<double>& weights)
+    : m_weights(weights), m_normalization(std::accumulate(m_weights.begin(), m_weights.end(), 0.0))
+{
+}
+
 template<unsigned int p>
-WeightedPNorm<p>::WeightedPNorm(std::vector<double> weights)
-    : m_weights(std::move(weights)),
-      m_normalization(std::accumulate(m_weights.begin(), m_weights.end(), 0.0))
+WeightedPNorm<p>::WeightedPNorm(std::vector<double>& weights) : WeightedPNormBase(weights)
 {
 }
 
@@ -64,7 +67,7 @@ template<unsigned int p> void export_pnorm(py::module& m)
 {
     auto name = "Weighted" + std::to_string(p) + "Norm";
     py::class_<WeightedPNorm<p>>(m, name.c_str())
-        .def(py::init<std::vector<double>>())
+        .def(py::init<std::vector<double>&>())
         .def("__call__", &WeightedPNorm<p>::operator());
 }
 
