@@ -10,7 +10,7 @@ FisherDistribution::FisherDistribution(double kappa)
 {
 }
 
-double FisherDistribution::operator()(double theta)
+double FisherDistribution::operator()(double theta) const
 {
     return m_prefactor * std::exp(m_kappa * std::cos(theta));
 }
@@ -20,21 +20,29 @@ UniformDistribution::UniformDistribution(double max_theta)
 {
 }
 
-double UniformDistribution::operator()(double theta)
+double UniformDistribution::operator()(double theta) const
 {
     return theta <= m_max_theta ? m_prefactor : 0;
 }
 
 template<typename distribution_type>
-BondOrder<distribution_type>::BondOrder(distribution_type dist, py::array_t<double> positions)
-    : m_dist(dist), m_positions()
+BondOrder<distribution_type>::BondOrder(distribution_type dist, const py::array_t<double> positions)
+    : m_dist(dist), m_positions(), m_normalization(1 / static_cast<double>(positions.shape(0)))
 {
     const auto u_positions = positions.unchecked<2>();
     m_positions.assign(u_positions.data(0, 0), u_positions.data(0, 0) + u_positions.size());
 }
 
 template<typename distribution_type>
-py::array_t<double> BondOrder<distribution_type>::py_call(const py::array_t<double> points)
+BondOrder<distribution_type>::BondOrder(distribution_type dist,
+                                        const std::vector<double>& positions)
+    : m_dist(dist), m_positions(positions),
+      m_normalization(3 / static_cast<double>(positions.size()))
+{
+}
+
+template<typename distribution_type>
+py::array_t<double> BondOrder<distribution_type>::py_call(const py::array_t<double> points) const
 {
     auto u_points = points.unchecked<2>();
     auto bo = py::array_t<double>(u_points.shape(0));
@@ -46,18 +54,19 @@ py::array_t<double> BondOrder<distribution_type>::py_call(const py::array_t<doub
 }
 
 template<typename distribution_type>
-double BondOrder<distribution_type>::single_call(const double* point)
+double BondOrder<distribution_type>::single_call(const double* point) const
 {
     double value {0};
     for (size_t i {0}; i < m_positions.size(); i += 3) {
-        const auto angle = fast_angle_eucledian(&m_positions[i], point);
+        const auto angle = fast_angle_eucledian(&m_positions[0] + i, point);
         value += m_dist(angle);
     }
-    return value / static_cast<double>(m_positions.size() / 3);
+    return m_normalization * value;
 }
 
 template<typename distribution_type>
-std::vector<double> BondOrder<distribution_type>::operator()(const std::vector<double>& points)
+std::vector<double>
+BondOrder<distribution_type>::operator()(const std::vector<double>& points) const
 {
     auto bo = std::vector<double>();
     const size_t n_points = points.size() / 3;
