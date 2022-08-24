@@ -2,13 +2,7 @@
 
 #include <complex>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
-
-py::array_t<std::complex<double>> symmetrize_qlms(py::array_t<std::complex<double>>,
-                                                  py::array_t<std::complex<double>>,
-                                                  unsigned int max_l);
-
-void export_weijer(py::module& m);
+std::vector<std::vector<std::complex<double>>>
+symmetrize_qlms(std::vector<std::complex<double>> qlms,
+                std::vector<std::vector<std::complex<double>>> D_ij,
+                unsigned int max_l);

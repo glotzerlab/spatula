@@ -16,12 +16,12 @@ class QlmEval {
             const py::array_t<double> weights,
             const py::array_t<std::complex<double>> ylms);
 
-    template<typename distribution>
-    py::array_t<std::complex<double>> eval(std::shared_ptr<BondOrder<distribution>> bod);
+    template<typename distribution_type>
+    std::vector<std::complex<double>> eval(const BondOrder<distribution_type>& bod) const;
 
     private:
+    unsigned int m_n_lms;
+    unsigned int m_n_points;
     std::vector<double> m_positions;
-    std::vector<std::complex<double>> m_weighted_ylms;
+    std::vector<std::vector<std::complex<double>>> m_weighted_ylms;
 };
-
-void export_qlm_eval(py::module& m);

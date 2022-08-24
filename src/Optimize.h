@@ -105,9 +105,9 @@ class OrderedSimplex {
 class NelderMead : public Optimizer {
     public:
     NelderMead(NelderMeadParams params,
-               std::vector<std::vector<double>>& initial_simplex,
-               std::vector<double>& min_bounds,
-               std::vector<double>& max_bounds,
+               const std::vector<std::vector<double>>& initial_simplex,
+               const std::vector<double>& min_bounds,
+               const std::vector<double>& max_bounds,
                unsigned int max_iter,
                double m_dist_tol,
                double m_std_tol);

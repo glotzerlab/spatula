@@ -1,5 +1,7 @@
 #include <cmath>
 
+#include <pybind11/pybind11.h>
+
 #include "Util.h"
 
 double central_angle(double ref_theta, double ref_phi, double theta, double phi)
@@ -26,7 +28,8 @@ double fast_central_angle(double sin_ref_theta,
 // Assumes points are on the unit sphere
 double fast_angle_eucledian(const double* ref_x, const double* x)
 {
-    return std::acos(ref_x[0] * x[0] + ref_x[1] * x[1] + ref_x[2] * x[2]);
+    const auto dot = ref_x[0] * x[0] + ref_x[1] * x[1] + ref_x[2] * x[2];
+    return std::acos(dot);
 }
 
 // Assumes points are on the unit sphere
@@ -40,20 +43,25 @@ void project_to_sphere(const double* x, double* theta, double* phi)
 
 std::vector<double> compute_rotation_matrix(double alpha, double beta, double gamma)
 {
-    auto R = std::vector<double>();
     auto s1 {std::sin(alpha)}, s2 {std::sin(beta)}, s3 {std::sin(gamma)};
     auto c1 {std::cos(alpha)}, c2 {std::cos(beta)}, c3 {std::cos(gamma)};
-    R.reserve(9);
-    R.push_back(c2 * c3);
-    R.push_back(-c2 * s3);
-    R.push_back(s2);
-    R.push_back(s1 * s2 * c3 + s3 * c1);
-    R.push_back(c1 * c3 - s1 * s2 * s3);
-    R.push_back(-s1 * c2);
-    R.push_back(s1 * s3 - s2 * c1 * c3);
-    R.push_back(s2 * s3 * c1 + c3 * s1);
-    R.push_back(c1 * c2);
+    auto R = std::vector<double> {
+        c2 * c3,
+        -c2 * s3,
+        s2,
+        s1 * s2 * c3 + s3 * c1,
+        c1 * c3 - s1 * s2 * s3,
+        -s1 * c2,
+        s1 * s3 - s2 * c1 * c3,
+        s2 * s3 * c1 + c3 * s1,
+        c1 * c2,
+    };
     return R;
+}
+
+std::vector<double> compute_rotation_matrix(const std::vector<double> rotation)
+{
+    return compute_rotation_matrix(rotation[0], rotation[1], rotation[2]);
 }
 
 void single_rotate(const double* x, double* x_prime, const std::vector<double>& R)
@@ -63,23 +71,22 @@ void single_rotate(const double* x, double* x_prime, const std::vector<double>& 
     x_prime[2] = R[6] * x[0] + R[7] * x[1] + R[8] * x[2];
 };
 
-py::array_t<double>
-rotate_euler(const py::array_t<double> x, double alpha, double beta, double gamma)
+void rotate_euler(std::vector<double>& rotated_points,
+                  const double* x,
+                  double alpha,
+                  double beta,
+                  double gamma)
 {
     const auto R = compute_rotation_matrix(alpha, beta, gamma);
-    const auto u_x = static_cast<const double*>(x.data());
-    const std::vector<size_t> x_shape {static_cast<size_t>(x.shape(0)), 3};
-    auto x_prime = py::array_t<double>(x_shape);
-    auto* mut_x_prime = static_cast<double*>(x_prime.mutable_data());
-    for (size_t i {0}; i < x.shape(0); ++i) {
-        single_rotate(&u_x[i * 3], &mut_x_prime[i * 3], R);
+    const size_t N_points = rotated_points.size() / 3;
+    for (size_t i {0}; i < N_points; ++i) {
+        single_rotate(&x[i * 3], &rotated_points[i * 3], R);
     }
-    return x_prime;
 }
 
-void export_util(py::module& m)
+void rotate_euler(std::vector<double>& rotated_points,
+                  const double* x,
+                  const std::vector<double>& rotation)
 {
-    m.def("central_angle", py::vectorize(central_angle));
-    m.def("fast_central_angle", py::vectorize(fast_central_angle));
-    m.def("rotate_euler", rotate_euler);
+    return rotate_euler(rotated_points, x, rotation[0], rotation[1], rotation[2]);
 }

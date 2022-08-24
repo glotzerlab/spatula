@@ -2,10 +2,16 @@
 
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
+struct Vec3 {
+    double x;
+    double y;
+    double z;
 
-namespace py = pybind11;
+    Vec3 operator+(Vec3& b);
+    Vec3 operator*(Vec3& b);
+    Vec3 operator-(Vec3& b);
+    Vec3 operator/(Vec3& b);
+};
 
 double central_angle(double ref_theta, double ref_phi, double theta, double phi);
 
@@ -22,9 +28,16 @@ void project_to_sphere(const double* x, double* theta, double* phi);
 
 void single_rotate(const double* x, double* x_prime, const std::vector<double>& R);
 
+void rotate_euler(std::vector<double>& rotated_points,
+                  const double* x,
+                  double alpha,
+                  double beta,
+                  double gamma);
+
+void rotate_euler(std::vector<double>& rotated_points,
+                  const double* x,
+                  const std::vector<double>& rotation);
+
 std::vector<double> compute_rotation_matrix(double alpha, double beta, double gamma);
 
-py::array_t<double>
-rotate_euler(const py::array_t<double> x, double alpha, double beta, double gamma);
-
-void export_util(py::module& m);
+std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation);

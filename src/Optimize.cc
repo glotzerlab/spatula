@@ -247,9 +247,9 @@ void OrderedSimplex::update_min_distance(const std::vector<double>& new_point)
 }
 
 NelderMead::NelderMead(NelderMeadParams params,
-                       std::vector<std::vector<double>>& initial_simplex,
-                       std::vector<double>& min_bounds,
-                       std::vector<double>& max_bounds,
+                       const std::vector<std::vector<double>>& initial_simplex,
+                       const std::vector<double>& min_bounds,
+                       const std::vector<double>& max_bounds,
                        unsigned int max_iter,
                        double dist_tol,
                        double std_tol)

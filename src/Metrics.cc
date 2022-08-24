@@ -2,49 +2,66 @@
 #include <numeric>
 #include <string>
 
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
 #include "Metrics.h"
 
-py::array_t<double> covariance(py::array_t<std::complex<double>> qlms,
-                               py::array_t<std::complex<double>> sym_qlms)
+std::vector<double> covariance(const std::vector<std::complex<double>>& qlms,
+                               const std::vector<std::vector<std::complex<double>>>& sym_qlms)
 {
-    const auto u_qlms = qlms.unchecked<1>();
-    const double qlm_cov
-        = std::accumulate(u_qlms.data(0),
-                          u_qlms.data(0) + u_qlms.size(),
-                          0.0,
-                          [](const auto& x, const auto& y) { return x + std::norm(y); });
-    const auto u_sym_qlms = sym_qlms.unchecked<2>();
-    auto covar = py::array_t<double>(u_sym_qlms.shape(0));
-    auto u_covar = static_cast<double*>(covar.mutable_data(0));
-    for (size_t i {0}; i < u_sym_qlms.shape(0); ++i) {
+    // For the covariance we must skip the first element as it adds a spurious
+    // detection of symmetry/covariance.
+    // Use Kahan summation to correct for the addition of small numbers
+    double sum_correction = 0;
+    const double qlm_cov = std::accumulate(qlms.begin() + 1,
+                                           qlms.end(),
+                                           0.0,
+                                           [&sum_correction](const auto& sum, const auto& y) {
+                                               const auto addition = std::norm(y) - sum_correction;
+                                               const auto new_sum = sum + addition;
+                                               sum_correction = (new_sum - sum) - addition;
+                                               return new_sum;
+                                           });
+    auto covar = std::vector<double>();
+    const size_t N_sym = sym_qlms.size();
+    covar.reserve(N_sym);
+    for (size_t i {0}; i < N_sym; ++i) {
+        const auto& sym_i_qlms = sym_qlms[i];
         double sym_covar = 0;
         double mixed_covar = 0;
-        for (size_t j {0}; j < u_sym_qlms.shape(1); ++j) {
-            sym_covar += std::norm(u_sym_qlms(i, j));
-            mixed_covar += std::real(u_qlms(j) * std::conj(u_sym_qlms(i, j)));
+        for (size_t j {1}; j < qlms.size(); ++j) {
+            sym_covar += std::norm(sym_i_qlms[j]);
+            mixed_covar += std::real(qlms[j] * std::conj(sym_i_qlms[j]));
         }
-        u_covar[i] = mixed_covar / std::sqrt(sym_covar * qlm_cov);
+        const auto K = mixed_covar / std::sqrt(sym_covar * qlm_cov);
+        covar.emplace_back(K);
     }
     return covar;
 }
 
-WeightedPNormBase::WeightedPNormBase(std::vector<double>& weights)
+WeightedPNormBase::WeightedPNormBase() : m_weights(), m_normalization(0.0) { }
+
+WeightedPNormBase::WeightedPNormBase(const std::vector<double>& weights)
     : m_weights(weights), m_normalization(std::accumulate(m_weights.begin(), m_weights.end(), 0.0))
 {
 }
 
+template<unsigned int p> WeightedPNorm<p>::WeightedPNorm() : WeightedPNormBase() { }
+
 template<unsigned int p>
-WeightedPNorm<p>::WeightedPNorm(std::vector<double>& weights) : WeightedPNormBase(weights)
+WeightedPNorm<p>::WeightedPNorm(const std::vector<double>& weights) : WeightedPNormBase(weights)
 {
 }
 
-template<unsigned int p> double WeightedPNorm<p>::operator()(py::array_t<double> vector)
+template<unsigned int p>
+double WeightedPNorm<p>::operator()(const std::vector<double>& vector) const
 {
-    const auto* u_vector = static_cast<const double*>(vector.data(0));
     double metric = 0;
     if (m_weights.size() != 0) {
-        for (size_t i {0}; i < m_weights.size(); ++i) {
-            double v = u_vector[i];
+        for (size_t i {0}; i < vector.size(); ++i) {
+            double v = vector[i];
             if constexpr (p % 2 == 0) {
                 v = std::abs(v);
             }
@@ -53,7 +70,7 @@ template<unsigned int p> double WeightedPNorm<p>::operator()(py::array_t<double>
         metric /= m_normalization;
     } else {
         for (size_t i {0}; i < vector.size(); ++i) {
-            double v = u_vector[i];
+            double v = vector[i];
             if constexpr (p % 2 == 0) {
                 v = std::abs(v);
             }
@@ -63,18 +80,7 @@ template<unsigned int p> double WeightedPNorm<p>::operator()(py::array_t<double>
     return std::pow(metric, 1 / static_cast<double>(p));
 }
 
-template<unsigned int p> void export_pnorm(py::module& m)
-{
-    auto name = "Weighted" + std::to_string(p) + "Norm";
-    py::class_<WeightedPNorm<p>>(m, name.c_str())
-        .def(py::init<std::vector<double>&>())
-        .def("__call__", &WeightedPNorm<p>::operator());
-}
-
-void export_metrics(py::module& m)
-{
-    m.def("covariance_score", covariance);
-    export_pnorm<1>(m);
-    export_pnorm<2>(m);
-    export_pnorm<3>(m);
-}
+template class WeightedPNorm<1>;
+template class WeightedPNorm<2>;
+template class WeightedPNorm<3>;
+template class WeightedPNorm<4>;
