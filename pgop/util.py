@@ -10,27 +10,6 @@ PI_2 = np.pi / 2
 PI_4 = np.pi / 4
 
 
-def partial_surface_area(R, delta_theta):
-    return 2 * np.pi * R * R * (1 - np.cos(delta_theta))
-
-
-def central_angle(theta_a, phi_a, theta_b, phi_b):
-    """Compute the central angles between sets of points.
-
-    Assumes the first column is the polar (latitude) and the second is the
-    azmuthal angle. The polar angle is assumed to go from 0 to pi.
-    """
-    ta = theta_a - PI_2
-    tb = theta_b - PI_2
-    return _pgop.central_angle(ta, phi_a, tb, phi_b)
-
-
-def _central_angle_fast(sin_ta, sin_tb, cos_ta, cos_tb, phi_a, phi_b):
-    return _pgop.fast_central_angle(
-        sin_ta, cos_ta, phi_a, sin_tb, cos_tb, phi_b
-    )
-
-
 def sph_to_cart(theta, phi):
     x = np.empty(theta.shape + (3,))
     sin_theta = np.sin(theta)
@@ -51,13 +30,9 @@ def delta(x, y):
     return 1 if x == y else 0
 
 
-def rotate(vectors, alpha, beta, gamma):
-    return _pgop.rotate_euler(vectors, alpha, beta, gamma)
-
-
 def normalize(a, out=None):
-    norms = np.linalg.norm(a, axis=1)
+    norms = np.linalg.norm(a, axis=-1)
     if out is None:
         return a / norms
-    np.divide(a, norms.reshape((-1, 1)), out=out)
+    np.divide(a, norms[..., None], out=out)
     return None
