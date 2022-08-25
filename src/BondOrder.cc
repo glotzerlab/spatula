@@ -1,9 +1,9 @@
+#include <algorithm>
 #include <cmath>
 #include <math.h>
-#include <memory>
+#include <numeric>
 
 #include "BondOrder.h"
-#include "Util.h"
 
 FisherDistribution::FisherDistribution(double kappa)
     : m_kappa(kappa), m_prefactor(kappa / (2 * M_PI * (std::exp(kappa) - std::exp(-kappa))))
@@ -26,80 +26,44 @@ double UniformDistribution::operator()(double theta) const
 }
 
 template<typename distribution_type>
-BondOrder<distribution_type>::BondOrder(distribution_type dist, const py::array_t<double> positions)
-    : m_dist(dist), m_positions(), m_normalization(1 / static_cast<double>(positions.shape(0)))
-{
-    const auto u_positions = positions.unchecked<2>();
-    m_positions.assign(u_positions.data(0, 0), u_positions.data(0, 0) + u_positions.size());
-}
-
-template<typename distribution_type>
-BondOrder<distribution_type>::BondOrder(distribution_type dist,
-                                        const std::vector<double>& positions)
+BondOrder<distribution_type>::BondOrder(distribution_type dist, const std::vector<Vec3>& positions)
     : m_dist(dist), m_positions(positions),
-      m_normalization(3 / static_cast<double>(positions.size()))
+      m_normalization(1 / static_cast<double>(positions.size()))
 {
 }
 
 template<typename distribution_type>
-py::array_t<double> BondOrder<distribution_type>::py_call(const py::array_t<double> points) const
+double BondOrder<distribution_type>::single_call(const Vec3& point) const
 {
-    auto u_points = points.unchecked<2>();
-    auto bo = py::array_t<double>(u_points.shape(0));
-    auto u_bo = static_cast<double*>(bo.mutable_data(0));
-    for (size_t i {0}; i < u_points.shape(0); ++i) {
-        u_bo[i] = this->single_call(points.data(i, 0));
-    }
-    return bo;
+    double sum_correction = 0;
+    // Use Kahan summation to improve accuracy of the summation of small
+    // numbers.
+    return m_normalization
+           * std::accumulate(
+               m_positions.cbegin(),
+               m_positions.cend(),
+               0.0,
+               [this, &point, &sum_correction](const auto& sum, const auto& p) -> double {
+                   const auto addition
+                       = this->m_dist(fast_angle_eucledian(p, point)) - sum_correction;
+                   const auto new_sum = sum + addition;
+                   sum_correction = new_sum - sum - addition;
+                   return new_sum;
+               });
 }
 
 template<typename distribution_type>
-double BondOrder<distribution_type>::single_call(const double* point) const
-{
-    double value {0};
-    for (size_t i {0}; i < m_positions.size(); i += 3) {
-        const auto angle = fast_angle_eucledian(&m_positions[0] + i, point);
-        value += m_dist(angle);
-    }
-    return m_normalization * value;
-}
-
-template<typename distribution_type>
-std::vector<double>
-BondOrder<distribution_type>::operator()(const std::vector<double>& points) const
+std::vector<double> BondOrder<distribution_type>::operator()(const std::vector<Vec3>& points) const
 {
     auto bo = std::vector<double>();
-    const size_t n_points = points.size() / 3;
-    bo.reserve(n_points);
-    for (size_t i {0}; i < points.size(); i += 3) {
-        bo.push_back(this->single_call(&points[i]));
-    }
+    bo.reserve(points.size());
+    std::transform(points.cbegin(),
+                   points.cend(),
+                   std::back_inserter(bo),
+                   [this](const auto& point) { return this->single_call(point); });
     return bo;
-}
-
-template<typename distribution_type> void export_bond_order_class(py::module& m, std::string name)
-{
-    py::class_<BondOrder<distribution_type>, std::shared_ptr<BondOrder<distribution_type>>>(
-        m,
-        name.c_str())
-        .def(py::init<distribution_type, py::array_t<double>>())
-        .def("__call__", &BondOrder<distribution_type>::py_call);
 }
 
 // explicitly create templates
 template class BondOrder<UniformDistribution>;
 template class BondOrder<FisherDistribution>;
-
-void export_bond_order(py::module& m)
-{
-    py::class_<FisherDistribution>(m, "FisherDistribution")
-        .def(py::init<double>())
-        .def("__call__", &FisherDistribution::operator());
-
-    py::class_<UniformDistribution>(m, "UniformDistribution")
-        .def(py::init<double>())
-        .def("__call__", &UniformDistribution::operator());
-
-    export_bond_order_class<FisherDistribution>(m, "FisherBondOrder");
-    export_bond_order_class<UniformDistribution>(m, "UniformBondOrder");
-}

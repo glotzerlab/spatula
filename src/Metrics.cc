@@ -13,17 +13,10 @@ std::vector<double> covariance(const std::vector<std::complex<double>>& qlms,
 {
     // For the covariance we must skip the first element as it adds a spurious
     // detection of symmetry/covariance.
-    // Use Kahan summation to correct for the addition of small numbers
-    double sum_correction = 0;
-    const double qlm_cov = std::accumulate(qlms.begin() + 1,
-                                           qlms.end(),
-                                           0.0,
-                                           [&sum_correction](const auto& sum, const auto& y) {
-                                               const auto addition = std::norm(y) - sum_correction;
-                                               const auto new_sum = sum + addition;
-                                               sum_correction = (new_sum - sum) - addition;
-                                               return new_sum;
-                                           });
+    const double qlm_cov
+        = std::accumulate(qlms.begin() + 1, qlms.end(), 0.0, [](const auto& sum, const auto& y) {
+              return std::norm(y) + sum;
+          });
     auto covar = std::vector<double>();
     const size_t N_sym = sym_qlms.size();
     covar.reserve(N_sym);

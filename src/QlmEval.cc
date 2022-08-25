@@ -23,7 +23,10 @@ QlmEval::QlmEval(unsigned int m,
         m_weighted_ylms.emplace_back(ylm);
     }
     const auto u_positions = positions.unchecked<2>();
-    m_positions.assign(u_positions.data(0, 0), u_positions.data(0, 0) + u_positions.size());
+    m_positions.reserve(positions.shape(0));
+    for (size_t i {0}; i < positions.shape(0); ++i) {
+        m_positions.emplace_back(u_positions.data(i, 0));
+    }
 }
 
 template<typename distribution_type>

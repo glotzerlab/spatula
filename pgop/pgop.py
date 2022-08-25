@@ -1,5 +1,3 @@
-import itertools
-
 import freud
 import numpy as np
 from tqdm import tqdm
@@ -14,18 +12,21 @@ class PGOP:
         self._symmetries = symmetries
         self._weijer = weijerd.WeigerD(max_l)
         dist_param = bo_kwargs.popitem()[1]
+        p_norm_weights = [
+            self._weijer.group_cardinality(s) for s in self._symmetries
+        ]
         D_ij = self._precompute_weijer_d()
         if dist == "uniform":
-            self._cpp = pgop._pgop.PGOPUniform(max_l, D_ij, 3, dist_param)
+            cls_ = pgop._pgop.PGOPUniform
         if dist == "fisher":
-            self._cpp = pgop._pgop.PGOPFisher(max_l, D_ij, 3, dist_param)
+            cls_ = pgop._pgop.PGOPFisher
+        self._cpp = cls_(max_l, D_ij, 2, p_norm_weights, dist_param)
         self._sph_harm = sph_harm.SphHarm(max_l)
         self._pgop = None
 
     def compute(self, system, neighbors, m=6):
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
         dist = self._compute_distances(neigh_query, neighbors)
-        util.normalize(dist, out=dist)
         quad_positions, quad_weights = self._get_quad(m)
         self._pgop = self._cpp.compute(
             dist,

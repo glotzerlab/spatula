@@ -6,8 +6,9 @@
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-namespace py = pybind11;
+#include "Util.h"
 
 // Null class to show the necessary interface for a distribution.
 class SphereDistribution {
@@ -46,24 +47,15 @@ class FisherDistribution {
 template<typename distribution_type> class BondOrder {
     public:
     // Assumes points are on the unit sphere (i.e. normalized)
-    BondOrder(distribution_type dist, const py::array_t<double> positions);
+    BondOrder(distribution_type dist, const std::vector<Vec3>& positions);
 
-    // Assumes points are on the unit sphere (i.e. normalized)
-    BondOrder(distribution_type dist, const std::vector<double>& positions);
-
-    double single_call(const double* point) const;
+    double single_call(const Vec3& point) const;
 
     // Assumes points are on the unit sphere
-    py::array_t<double> py_call(const py::array_t<double> points) const;
-
-    std::vector<double> operator()(const std::vector<double>& points) const;
+    std::vector<double> operator()(const std::vector<Vec3>& points) const;
 
     private:
     distribution_type m_dist;
-    std::vector<double> m_positions;
+    std::vector<Vec3> m_positions;
     double m_normalization;
 };
-
-template<typename distribution_type> void export_bond_order_class(py::module& m, std::string name);
-
-void export_bond_order(py::module& m);

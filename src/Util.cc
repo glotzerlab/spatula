@@ -4,41 +4,125 @@
 
 #include "Util.h"
 
-double central_angle(double ref_theta, double ref_phi, double theta, double phi)
+Vec3::Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
+
+Vec3::Vec3(const double* point) : x(point[0]), y(point[1]), z(point[2]) { }
+
+Vec3::Vec3() : x(0.0), y(0.0), z(0.0) { }
+
+double Vec3::dot(const Vec3& b) const
 {
-    return fast_central_angle(std::sin(ref_theta),
-                              std::cos(ref_theta),
-                              ref_phi,
-                              std::sin(theta),
-                              std::cos(theta),
-                              phi);
+    return x * b.x + y * b.y + z * b.z;
 }
 
-double fast_central_angle(double sin_ref_theta,
-                          double cos_ref_theta,
-                          double ref_phi,
-                          double sin_theta,
-                          double cos_theta,
-                          double phi)
+template<typename number_type> Vec3 operator+(const Vec3& a, const number_type& b)
 {
-    return std::acos(sin_ref_theta * sin_theta
-                     + cos_ref_theta * cos_theta * std::cos(std::abs(ref_phi - phi)));
+    return Vec3(a.x + b, a.y + b, a.z + b);
+}
+
+template<typename number_type> Vec3 operator-(const Vec3& a, const number_type& b)
+{
+    return Vec3(a.x - b, a.y - b, a.z - b);
+}
+
+template<typename number_type> Vec3 operator*(const Vec3& a, const number_type& b)
+{
+    return Vec3(a.x * b, a.y * b, a.z * b);
+}
+
+template<typename number_type> Vec3 operator/(const Vec3& a, const number_type& b)
+{
+    return Vec3(a.x / b, a.y / b, a.z / b);
+}
+
+template<> Vec3 operator+(const Vec3& a, const Vec3& b)
+{
+    return Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+template<> Vec3 operator-(const Vec3& a, const Vec3& b)
+{
+    return Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+template<> Vec3 operator*(const Vec3& a, const Vec3& b)
+{
+    return Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
+}
+
+template<> Vec3 operator/(const Vec3& a, const Vec3& b)
+{
+    return Vec3(a.x / b.x, a.y / b.y, a.z / b.z);
+}
+
+template<typename number_type> Vec3& operator+=(Vec3& a, const number_type& b)
+{
+    a.x += b;
+    a.y += b;
+    a.z += b;
+    return a;
+}
+
+template<typename number_type> Vec3& operator-=(Vec3& a, const number_type& b)
+{
+    a.x -= b;
+    a.y -= b;
+    a.z -= b;
+    return a;
+}
+
+template<typename number_type> Vec3& operator*=(Vec3& a, const number_type& b)
+{
+    a.x *= b;
+    a.y *= b;
+    a.z *= b;
+    return a;
+}
+
+template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b)
+{
+    a.x /= b;
+    a.y /= b;
+    a.z /= b;
+    return a;
+}
+
+template<> Vec3& operator+=(Vec3& a, const Vec3& b)
+{
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+    return a;
+}
+
+template<> Vec3& operator-=(Vec3& a, const Vec3& b)
+{
+    a.x -= b.x;
+    a.y -= b.y;
+    a.z -= b.z;
+    return a;
+}
+
+template<> Vec3& operator*=(Vec3& a, const Vec3& b)
+{
+    a.x *= b.x;
+    a.y *= b.y;
+    a.z *= b.z;
+    return a;
+}
+
+template<> Vec3& operator/=(Vec3& a, const Vec3& b)
+{
+    a.x /= b.x;
+    a.y /= b.y;
+    a.z /= b.z;
+    return a;
 }
 
 // Assumes points are on the unit sphere
-double fast_angle_eucledian(const double* ref_x, const double* x)
+double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
 {
-    const auto dot = ref_x[0] * x[0] + ref_x[1] * x[1] + ref_x[2] * x[2];
-    return std::acos(dot);
-}
-
-// Assumes points are on the unit sphere
-void project_to_sphere(const double* x, double* theta, double* phi)
-{
-    *theta = std::acos(x[2]);
-    // atan2 takes account of what quaterant (x, y) is in necessary for this
-    // projection.
-    *phi = std::atan2(x[1], x[0]);
+    return std::acos(ref_x.dot(x));
 }
 
 std::vector<double> compute_rotation_matrix(double alpha, double beta, double gamma)
@@ -64,29 +148,48 @@ std::vector<double> compute_rotation_matrix(const std::vector<double> rotation)
     return compute_rotation_matrix(rotation[0], rotation[1], rotation[2]);
 }
 
-void single_rotate(const double* x, double* x_prime, const std::vector<double>& R)
+void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R)
 {
-    x_prime[0] = R[0] * x[0] + R[1] * x[1] + R[2] * x[2];
-    x_prime[1] = R[3] * x[0] + R[4] * x[1] + R[5] * x[2];
-    x_prime[2] = R[6] * x[0] + R[7] * x[1] + R[8] * x[2];
+    x_prime.x = R[0] * x.x + R[1] * x.y + R[2] * x.z;
+    x_prime.y = R[3] * x.x + R[4] * x.y + R[5] * x.z;
+    x_prime.z = R[6] * x.x + R[7] * x.y + R[8] * x.z;
 };
 
-void rotate_euler(std::vector<double>& rotated_points,
-                  const double* x,
+void rotate_euler(const std::vector<Vec3>::const_iterator points_begin,
+                  const std::vector<Vec3>::const_iterator points_end,
+                  std::vector<Vec3>::iterator rotated_points_it,
                   double alpha,
                   double beta,
                   double gamma)
 {
     const auto R = compute_rotation_matrix(alpha, beta, gamma);
-    const size_t N_points = rotated_points.size() / 3;
-    for (size_t i {0}; i < N_points; ++i) {
-        single_rotate(&x[i * 3], &rotated_points[i * 3], R);
+    for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
+        single_rotate(*it, *rotated_points_it, R);
     }
 }
 
-void rotate_euler(std::vector<double>& rotated_points,
-                  const double* x,
+void rotate_euler(std::vector<Vec3>::const_iterator points_begin,
+                  std::vector<Vec3>::const_iterator points_end,
+                  std::vector<Vec3>::iterator rotated_points_it,
                   const std::vector<double>& rotation)
 {
-    return rotate_euler(rotated_points, x, rotation[0], rotation[1], rotation[2]);
+    return rotate_euler(points_begin,
+                        points_end,
+                        rotated_points_it,
+                        rotation[0],
+                        rotation[1],
+                        rotation[2]);
+}
+
+std::vector<Vec3> normalize_distances(const py::array_t<double> distances)
+{
+    const auto u_distances = distances.unchecked<2>();
+    auto normalized_distances = std::vector<Vec3>();
+    normalized_distances.reserve(u_distances.shape(0));
+    for (size_t i {0}; i < u_distances.shape(0); ++i) {
+        const auto point = Vec3(u_distances.data(i, 0));
+        const double norm = 1 / std::sqrt(point.dot(point));
+        normalized_distances.emplace_back(point * norm);
+    }
+    return normalized_distances;
 }

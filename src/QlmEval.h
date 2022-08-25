@@ -6,6 +6,7 @@
 #include <pybind11/pybind11.h>
 
 #include "BondOrder.h"
+#include "Util.h"
 
 namespace py = pybind11;
 
@@ -22,6 +23,6 @@ class QlmEval {
     private:
     unsigned int m_n_lms;
     unsigned int m_n_points;
-    std::vector<double> m_positions;
+    std::vector<Vec3> m_positions;
     std::vector<std::vector<std::complex<double>>> m_weighted_ylms;
 };
