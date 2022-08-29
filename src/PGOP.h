@@ -8,6 +8,8 @@
 #include "QlmEval.h"
 #include "Util.h"
 
+namespace py = pybind11;
+
 template<typename distribution_type> class PGOP {
     public:
     PGOP(unsigned int max_l,

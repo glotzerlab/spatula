@@ -1,13 +1,14 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 project(_pgop)
 
 set(DEFAULT_BUILD_TYPE Release)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+# Add pthread library for thread_pool header
+find_package(Threads REQUIRED)
 
 find_package(pybind11 CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/dependencies)
 
 add_subdirectory(src)

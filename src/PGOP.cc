@@ -5,6 +5,7 @@
 #include "BondOrder.h"
 #include "Optimize.h"
 #include "PGOP.h"
+#include "Threads.h"
 #include "Weijer.h"
 
 template<typename distribution_type>
@@ -39,16 +40,30 @@ py::array_t<double> PGOP<distribution_type>::compute(const py::array_t<double> d
     const auto op_shape = std::vector<size_t>({N_particles, m_n_symmetries});
     auto op = py::array_t<double>(op_shape);
     auto u_op = op.mutable_unchecked<2>();
-    size_t distance_offset = 0;
-    for (size_t i {0}; i < N_particles; ++i) {
-        const auto n_neighbors = neigh_count_ptr[i];
-        const auto dist_it = normed_distances.cbegin() + distance_offset;
-        const auto particle_op = compute_particle(dist_it, dist_it + n_neighbors, qlm_eval);
-        distance_offset += n_neighbors;
-        for (size_t j {0}; j < particle_op.size(); ++j) {
-            u_op(i, j) = particle_op[j];
-        }
-    }
+    auto distance_offsets = std::vector<size_t>();
+    distance_offsets.reserve(N_particles + 1);
+    distance_offsets.emplace_back(0);
+    std::partial_sum(neigh_count_ptr,
+                     neigh_count_ptr + N_particles,
+                     std::back_inserter(distance_offsets));
+    auto& pool = ThreadPool::get().get_pool();
+    const auto dist_begin = normed_distances.cbegin();
+    pool.push_loop(0,
+                   N_particles,
+                   [&u_op, &normed_distances, &distance_offsets, &qlm_eval, &dist_begin, this](
+                       const size_t start,
+                       const size_t stop) {
+                       for (size_t i = start; i < stop; ++i) {
+                           const auto particle_op
+                               = this->compute_particle(dist_begin + distance_offsets[i],
+                                                        dist_begin + distance_offsets[i + 1],
+                                                        qlm_eval);
+                           for (size_t j {0}; j < particle_op.size(); ++j) {
+                               u_op(i, j) = particle_op[j];
+                           }
+                       }
+                   });
+    pool.wait_for_tasks();
     return op;
 }
 
