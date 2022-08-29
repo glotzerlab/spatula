@@ -1,8 +1,9 @@
 #pragma once
 
 #include <complex>
+#include <vector>
 
-std::vector<std::vector<std::complex<double>>>
-symmetrize_qlms(std::vector<std::complex<double>> qlms,
-                std::vector<std::vector<std::complex<double>>> D_ij,
-                unsigned int max_l);
+void symmetrize_qlms(const std::vector<std::complex<double>>& qlms,
+                     const std::vector<std::vector<std::complex<double>>>& D_ij,
+                     std::vector<std::vector<std::complex<double>>>& sym_qlm_buf,
+                     unsigned int max_l);

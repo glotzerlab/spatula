@@ -62,10 +62,18 @@ PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterato
     const std::vector<double> opt_max_bounds {M_PI, M_PI_2, M_PI};
     auto brute_opt = BruteForce(getDefaultRotations(), opt_min_bounds, opt_max_bounds);
     auto rotated_dist = std::vector<Vec3>(std::distance(position_begin, position_end));
+    auto sym_qlm_buf = std::vector<std::vector<std::complex<double>>>(m_n_symmetries);
+    for (auto& sym_qlm : sym_qlm_buf) {
+        sym_qlm.reserve(qlm_eval.getNlm());
+    }
     while (!brute_opt.terminate()) {
         const auto rotation = brute_opt.next_point();
-        const auto particle_op
-            = compute_pgop(rotation, position_begin, position_end, rotated_dist, qlm_eval);
+        const auto particle_op = compute_pgop(rotation,
+                                              position_begin,
+                                              position_end,
+                                              rotated_dist,
+                                              sym_qlm_buf,
+                                              qlm_eval);
         brute_opt.record_objective(score(particle_op));
     }
     const auto initial_simplex = getInitialSimplex(brute_opt.get_optimum().first);
@@ -78,14 +86,19 @@ PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterato
                                   1e-4);
     while (!simplex_opt.terminate()) {
         const auto rotation = simplex_opt.next_point();
-        const auto particle_op
-            = compute_pgop(rotation, position_begin, position_end, rotated_dist, qlm_eval);
+        const auto particle_op = compute_pgop(rotation,
+                                              position_begin,
+                                              position_end,
+                                              rotated_dist,
+                                              sym_qlm_buf,
+                                              qlm_eval);
         simplex_opt.record_objective(score(particle_op));
     }
     return compute_pgop(simplex_opt.get_optimum().first,
                         position_begin,
                         position_end,
                         rotated_dist,
+                        sym_qlm_buf,
                         qlm_eval);
 }
 
@@ -95,13 +108,14 @@ PGOP<distribution_type>::compute_pgop(const std::vector<double>& rotation,
                                       const std::vector<Vec3>::const_iterator& position_begin,
                                       const std::vector<Vec3>::const_iterator& position_end,
                                       std::vector<Vec3>& rotated_positions,
+                                      std::vector<std::vector<std::complex<double>>>& sym_qlm_buf,
                                       const QlmEval& qlm_eval) const
 {
     rotate_euler(position_begin, position_end, rotated_positions.begin(), rotation);
     const auto bond_order = BondOrder<distribution_type>(getDistribution(), rotated_positions);
     const auto qlms = qlm_eval.eval<distribution_type>(bond_order);
-    const auto sym_qlms = symmetrize_qlms(qlms, m_Dij, m_max_l);
-    return covariance(qlms, sym_qlms);
+    symmetrize_qlms(qlms, m_Dij, sym_qlm_buf, m_max_l);
+    return covariance(qlms, sym_qlm_buf);
 }
 
 template<typename distribution_type>

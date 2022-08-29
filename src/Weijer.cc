@@ -2,19 +2,17 @@
 
 #include "Weijer.h"
 
-std::vector<std::vector<std::complex<double>>>
-symmetrize_qlms(std::vector<std::complex<double>> qlms,
-                std::vector<std::vector<std::complex<double>>> D_ij,
-                unsigned int max_l)
+void symmetrize_qlms(const std::vector<std::complex<double>>& qlms,
+                     const std::vector<std::vector<std::complex<double>>>& D_ij,
+                     std::vector<std::vector<std::complex<double>>>& sym_qlm_buf,
+                     unsigned int max_l)
 {
     size_t num_syms = D_ij.size();
-    auto sym_qlms = std::vector<std::vector<std::complex<double>>>();
-    sym_qlms.reserve(num_syms);
 
     for (size_t sym_i {0}; sym_i < num_syms; ++sym_i) {
-        auto sym_i_qlms = std::vector<std::complex<double>>();
-        sym_i_qlms.reserve(qlms.size());
-        const auto d_ij = D_ij[sym_i];
+        auto& sym_i_qlms = sym_qlm_buf[sym_i];
+        sym_i_qlms.clear();
+        const auto& d_ij = D_ij[sym_i];
         size_t qlm_i {0};
         size_t dij_index {0};
         for (size_t l {0}; l < max_l + 1; ++l) {
@@ -29,7 +27,5 @@ symmetrize_qlms(std::vector<std::complex<double>> qlms,
             }
             qlm_i += max_m;
         }
-        sym_qlms.emplace_back(sym_i_qlms);
     }
-    return sym_qlms;
 }

@@ -20,6 +20,8 @@ class QlmEval {
     template<typename distribution_type>
     std::vector<std::complex<double>> eval(const BondOrder<distribution_type>& bod) const;
 
+    unsigned int getNlm() const;
+
     private:
     unsigned int m_n_lms;
     unsigned int m_n_points;

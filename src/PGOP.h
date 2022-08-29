@@ -37,6 +37,7 @@ template<typename distribution_type> class PGOP {
                                      const std::vector<Vec3>::const_iterator& position_begin,
                                      const std::vector<Vec3>::const_iterator& position_end,
                                      std::vector<Vec3>& rotated_positions,
+                                     std::vector<std::vector<std::complex<double>>>& sym_qlm_buf,
                                      const QlmEval& qlm_eval) const;
 
     double score(const std::vector<double>& pgop) const;

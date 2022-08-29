@@ -48,6 +48,11 @@ std::vector<std::complex<double>> QlmEval::eval(const BondOrder<distribution_typ
     return qlms;
 }
 
+unsigned int QlmEval::getNlm() const
+{
+    return m_n_lms;
+};
+
 template std::vector<std::complex<double>>
 QlmEval::eval<UniformDistribution>(const BondOrder<UniformDistribution>&) const;
 
