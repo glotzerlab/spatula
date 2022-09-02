@@ -1,3 +1,9 @@
 .ipynb_checkpoints
 __pycache__
 build
+.venv
+.cache
+compile_commands.json
+*.egg-info
+_pgop.cpython*
+dist
