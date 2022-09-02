@@ -1,6 +1,5 @@
 import freud
 import numpy as np
-from tqdm import tqdm
 
 import pgop._pgop
 
