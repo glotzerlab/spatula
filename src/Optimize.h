@@ -7,6 +7,11 @@
 
 namespace py = pybind11;
 
+/**
+ * @brief Base class for pgop optimizers. We use a state model where an optimizer is always either
+ * expecting an objective for a queried point or to be queried for a point. To do the other
+ * operation is an error and leads to an exception.
+ */
 class Optimizer {
     public:
     Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds);
