@@ -7,6 +7,7 @@ pybind11_add_module(_pgop export-module.cc
     QlmEval.h QlmEval.cc
     Threads.h
     Weijer.h Weijer.cc
+    Vec3.h Vec3.cc
 )
 
 set_target_properties(_pgop PROPERTIES
