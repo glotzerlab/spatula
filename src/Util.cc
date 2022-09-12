@@ -78,3 +78,19 @@ std::vector<Vec3> normalize_distances(const py::array_t<double> distances)
     }
     return normalized_distances;
 }
+
+std::vector<double> linspace(double start, double end, unsigned int n, bool include_end)
+{
+    double delta;
+    if (include_end) {
+        delta = (end - start) / static_cast<double>(n);
+    } else {
+        delta = (end - start) / static_cast<double>(n + 1);
+    }
+    auto v = std::vector<double>();
+    v.reserve(n);
+    for (unsigned int i {0}; i < n; ++i) {
+        v.push_back(start + (static_cast<double>(i) * delta));
+    }
+    return v;
+}

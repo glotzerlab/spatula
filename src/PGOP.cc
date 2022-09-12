@@ -97,25 +97,7 @@ PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterato
                                               qlm_eval);
         brute_opt.record_objective(score(particle_op));
     }
-    const auto initial_simplex = getInitialSimplex(brute_opt.get_optimum().first);
-    auto simplex_opt = NelderMead(NelderMeadParams(1.0, 2.0, 0.5, 0.5),
-                                  initial_simplex,
-                                  opt_min_bounds,
-                                  opt_max_bounds,
-                                  150,
-                                  1e-3,
-                                  1e-4);
-    while (!simplex_opt.terminate()) {
-        const auto rotation = simplex_opt.next_point();
-        const auto particle_op = compute_pgop(rotation,
-                                              position_begin,
-                                              position_end,
-                                              rotated_dist,
-                                              sym_qlm_buf,
-                                              qlm_eval);
-        simplex_opt.record_objective(score(particle_op));
-    }
-    return compute_pgop(simplex_opt.get_optimum().first,
+    return compute_pgop(brute_opt.get_optimum().first,
                         position_begin,
                         position_end,
                         rotated_dist,

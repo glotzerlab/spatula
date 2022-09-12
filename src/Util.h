@@ -77,3 +77,13 @@ std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation)
  * direction but with unit magnitude.
  */
 std::vector<Vec3> normalize_distances(const py::array_t<double> distances);
+
+/**
+ * @brief Return a vector of linearly spaced points between start and end.
+ *
+ * @param start The starting value.
+ * @param end The final or n-th + 1 value according to the value of include_end
+ * @param n The number of points in the vector.
+ * @param include_end Whether the last point is at or before @p end.
+ */
+std::vector<double> linspace(double start, double end, unsigned int n, bool include_end = true);
