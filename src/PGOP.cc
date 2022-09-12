@@ -46,24 +46,30 @@ py::array_t<double> PGOP<distribution_type>::compute(const py::array_t<double> d
     std::partial_sum(neigh_count_ptr,
                      neigh_count_ptr + N_particles,
                      std::back_inserter(distance_offsets));
-    auto& pool = ThreadPool::get().get_pool();
     const auto dist_begin = normed_distances.cbegin();
-    pool.push_loop(0,
-                   N_particles,
-                   [&u_op, &normed_distances, &distance_offsets, &qlm_eval, &dist_begin, this](
-                       const size_t start,
-                       const size_t stop) {
-                       for (size_t i = start; i < stop; ++i) {
-                           const auto particle_op
-                               = this->compute_particle(dist_begin + distance_offsets[i],
-                                                        dist_begin + distance_offsets[i + 1],
-                                                        qlm_eval);
-                           for (size_t j {0}; j < particle_op.size(); ++j) {
-                               u_op(i, j) = particle_op[j];
-                           }
-                       }
-                   });
-    pool.wait_for_tasks();
+    const auto loop_func
+        = [&u_op, &normed_distances, &distance_offsets, &qlm_eval, &dist_begin, this](
+              const size_t start,
+              const size_t stop) {
+              for (size_t i = start; i < stop; ++i) {
+                  const auto particle_op
+                      = this->compute_particle(dist_begin + distance_offsets[i],
+                                               dist_begin + distance_offsets[i + 1],
+                                               qlm_eval);
+                  for (size_t j {0}; j < particle_op.size(); ++j) {
+                      u_op(i, j) = particle_op[j];
+                  }
+              }
+          };
+    bool serial = false;
+    // Enable profiling through serial mode.
+    if (serial) {
+        ThreadPool::get().serial_compute<void, size_t>(0, N_particles, loop_func);
+    } else {
+        auto& pool = ThreadPool::get().get_pool();
+        pool.push_loop(0, N_particles, loop_func, 2 * pool.get_thread_count());
+        pool.wait_for_tasks();
+    }
     return op;
 }
 
