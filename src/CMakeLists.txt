@@ -5,6 +5,7 @@ pybind11_add_module(_pgop export-module.cc
     Optimize.h Optimize.cc
     PGOP.h PGOP.cc
     QlmEval.h QlmEval.cc
+    Quaternion.h Quaternion.cc
     Threads.h
     Weijer.h Weijer.cc
     Vec3.h Vec3.cc

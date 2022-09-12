@@ -16,6 +16,20 @@ double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x);
 void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R);
 
 /**
+ * @brief Rotate an interator of points via the rotation matrix R.
+ * The points rotated are given by @c (auto it = points_begin; it < points_end; ++it).
+ *
+ * @param points_begin constant iterator to the beginning of points to rotate.
+ * @param points_end constant iterator to the end of points to rotate.
+ * @param rotated_points_it iterator to the starting vector location to place rotated positions in.
+ * @param R The rotation matrix given in row column order.
+ */
+void rotate_matrix(std::vector<Vec3>::const_iterator points_begin,
+                   std::vector<Vec3>::const_iterator points_end,
+                   std::vector<Vec3>::iterator rotated_points_it,
+                   const std::vector<double>& R);
+
+/**
  * @brief Rotate a set of points using a rotation matrix. Uses the Euler angle convention XYZ
  * intrinsic convention @todo check to see if this is correct. The points rotated are given by @c
  * (auto it = points_begin; it < points_end; ++it).

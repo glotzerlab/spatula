@@ -5,6 +5,7 @@
 #include "BondOrder.h"
 #include "Optimize.h"
 #include "PGOP.h"
+#include "Quaternion.h"
 #include "Threads.h"
 #include "Weijer.h"
 
@@ -79,76 +80,105 @@ PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterato
                                           const std::vector<Vec3>::const_iterator& position_end,
                                           const QlmEval& qlm_eval) const
 {
-    const std::vector<double> opt_min_bounds {-M_PI, -M_PI_2, -M_PI};
-    const std::vector<double> opt_max_bounds {M_PI, M_PI_2, M_PI};
-    auto brute_opt = BruteForce(getDefaultRotations(), opt_min_bounds, opt_max_bounds);
     auto rotated_dist = std::vector<Vec3>(std::distance(position_begin, position_end));
-    auto sym_qlm_buf = std::vector<std::vector<std::complex<double>>>(m_n_symmetries);
-    for (auto& sym_qlm : sym_qlm_buf) {
-        sym_qlm.reserve(qlm_eval.getNlm());
+    auto sym_qlm_buf = std::vector<std::complex<double>>();
+    sym_qlm_buf.reserve(qlm_eval.getNlm());
+    auto pgop = std::vector<double>();
+    pgop.reserve(m_Dij.size());
+    for (const auto& D_ij : m_Dij) {
+        pgop.push_back(compute_symmetry(position_begin,
+                                        position_end,
+                                        rotated_dist,
+                                        D_ij,
+                                        sym_qlm_buf,
+                                        qlm_eval));
     }
+    return pgop;
+}
+
+template<typename distribution_type>
+double
+PGOP<distribution_type>::compute_symmetry(const std::vector<Vec3>::const_iterator& position_begin,
+                                          const std::vector<Vec3>::const_iterator& position_end,
+                                          std::vector<Vec3>& rotated_distances_buf,
+                                          const std::vector<std::complex<double>>& D_ij,
+                                          std::vector<std::complex<double>>& sym_qlm_buf,
+                                          const QlmEval& qlm_eval) const
+{
+    // Optimize over the 4D unit sphere which has a bijective mapping from unit quaternions to the
+    // hypersphere's surface.
+    const std::vector<double> opt_min_bounds {-M_PI, -M_PI_2, -M_PI_2};
+    const std::vector<double> opt_max_bounds {M_PI, M_PI_2, M_PI_2};
+    auto brute_opt = BruteForce(getDefaultRotations(), opt_min_bounds, opt_max_bounds);
     while (!brute_opt.terminate()) {
-        const auto rotation = brute_opt.next_point();
-        const auto particle_op = compute_pgop(rotation,
+        const auto hsphere_pos = brute_opt.next_point();
+        const auto particle_op = compute_pgop(hsphere_pos,
                                               position_begin,
                                               position_end,
-                                              rotated_dist,
+                                              rotated_distances_buf,
+                                              D_ij,
                                               sym_qlm_buf,
                                               qlm_eval);
-        brute_opt.record_objective(score(particle_op));
+        brute_opt.record_objective(-particle_op);
     }
     return compute_pgop(brute_opt.get_optimum().first,
                         position_begin,
                         position_end,
-                        rotated_dist,
+                        rotated_distances_buf,
+                        D_ij,
                         sym_qlm_buf,
                         qlm_eval);
 }
 
 template<typename distribution_type>
-std::vector<double>
-PGOP<distribution_type>::compute_pgop(const std::vector<double>& rotation,
+double
+PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_pos,
                                       const std::vector<Vec3>::const_iterator& position_begin,
                                       const std::vector<Vec3>::const_iterator& position_end,
                                       std::vector<Vec3>& rotated_positions,
-                                      std::vector<std::vector<std::complex<double>>>& sym_qlm_buf,
+                                      const std::vector<std::complex<double>>& D_ij,
+                                      std::vector<std::complex<double>>& sym_qlm_buf,
                                       const QlmEval& qlm_eval) const
 {
-    rotate_euler(position_begin, position_end, rotated_positions.begin(), rotation);
+    const auto R = quat_from_hypersphere(hsphere_pos[0], hsphere_pos[1], hsphere_pos[2])
+                       .to_rotation_matrix();
+    rotate_matrix(position_begin, position_end, rotated_positions.begin(), R);
     const auto bond_order = BondOrder<distribution_type>(getDistribution(), rotated_positions);
     const auto qlms = qlm_eval.eval<distribution_type>(bond_order);
-    symmetrize_qlms(qlms, m_Dij, sym_qlm_buf, m_max_l);
+    symmetrize_qlm(qlms, D_ij, sym_qlm_buf, m_max_l);
     return covariance(qlms, sym_qlm_buf);
 }
 
 template<typename distribution_type>
 std::vector<std::vector<double>> PGOP<distribution_type>::getDefaultRotations() const
 {
-    return std::vector<std::vector<double>> {
-        std::initializer_list<double> {0, 0, 0},
-        std::initializer_list<double> {-M_PI_2, -M_PI_4, -M_PI_2},
-        std::initializer_list<double> {-M_PI_2, -M_PI_4, M_PI_2},
-        std::initializer_list<double> {-M_PI_2, M_PI_4, -M_PI_2},
-        std::initializer_list<double> {-M_PI_2, M_PI_4, M_PI_2},
-        std::initializer_list<double> {M_PI_2, -M_PI_4, -M_PI_2},
-        std::initializer_list<double> {M_PI_2, -M_PI_4, M_PI_2},
-        std::initializer_list<double> {M_PI_2, M_PI_4, -M_PI_2},
-        std::initializer_list<double> {M_PI_2, M_PI_4, M_PI_2}};
+    auto rotations = std::vector<std::vector<double>>();
+    auto phis = linspace(-M_PI, M_PI_2, 10, false);
+    auto thetas = linspace(-M_PI_2, M_PI_2, 5, true);
+    auto psis = linspace(-M_PI_2, M_PI_2, 5, true);
+    rotations.reserve(phis.size() * thetas.size() * psis.size());
+    for (const auto& phi : phis) {
+        for (const auto& theta : thetas) {
+            for (const auto& psi : psis) {
+                rotations.push_back(std::initializer_list<double> {phi, theta, psi});
+            }
+        }
+    }
+    return rotations;
 }
 
 template<typename distribution_type>
 std::vector<std::vector<double>>
 PGOP<distribution_type>::getInitialSimplex(const std::vector<double>& center) const
 {
-    const double volume_fraction = 0.18333;
-    const double scale = M_PI * std::pow(2.0, 1.0 / 6.0) * std::pow(3 * volume_fraction, 1.0 / 3.0);
-    const double b = scale / std::sqrt(2);
+    const double delta_phi {M_PI / 8}, delta_theta {M_PI / 16}, delta_psi {M_PI / 16};
+    const double b = delta_psi / std::sqrt(2);
     const double b_plus_z {b + center[2]}, z_minus_b {center[2] - b};
     return std::vector<std::vector<double>> {
-        std::initializer_list<double> {center[0] + scale, center[1], z_minus_b},
-        std::initializer_list<double> {center[0] - scale, center[1], z_minus_b},
-        std::initializer_list<double> {center[0], center[1] + scale, b_plus_z},
-        std::initializer_list<double> {center[0], center[1] - scale, b_plus_z}};
+        std::initializer_list<double> {center[0] + delta_phi, center[1], z_minus_b},
+        std::initializer_list<double> {center[0] - delta_phi, center[1], z_minus_b},
+        std::initializer_list<double> {center[0], center[1] + delta_theta, b_plus_z},
+        std::initializer_list<double> {center[0], center[1] - delta_theta, b_plus_z}};
 }
 
 template<typename distribution_type>

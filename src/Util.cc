@@ -48,9 +48,7 @@ void rotate_euler(const std::vector<Vec3>::const_iterator points_begin,
                   double gamma)
 {
     const auto R = compute_rotation_matrix(alpha, beta, gamma);
-    for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
-        single_rotate(*it, *rotated_points_it, R);
-    }
+    return rotate_matrix(points_begin, points_end, rotated_points_it, R);
 }
 
 void rotate_euler(std::vector<Vec3>::const_iterator points_begin,
@@ -66,12 +64,22 @@ void rotate_euler(std::vector<Vec3>::const_iterator points_begin,
                         rotation[2]);
 }
 
+void rotate_matrix(std::vector<Vec3>::const_iterator points_begin,
+                   std::vector<Vec3>::const_iterator points_end,
+                   std::vector<Vec3>::iterator rotated_points_it,
+                   const std::vector<double>& R)
+{
+    for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
+        single_rotate(*it, *rotated_points_it, R);
+    }
+}
+
 std::vector<Vec3> normalize_distances(const py::array_t<double> distances)
 {
     const auto u_distances = distances.unchecked<2>();
     auto normalized_distances = std::vector<Vec3>();
     normalized_distances.reserve(u_distances.shape(0));
-    for (size_t i {0}; i < u_distances.shape(0); ++i) {
+    for (size_t i {0}; i < static_cast<size_t>(u_distances.shape(0)); ++i) {
         const auto point = Vec3(u_distances.data(i, 0));
         const double norm = 1 / std::sqrt(point.dot(point));
         normalized_distances.emplace_back(point * norm);

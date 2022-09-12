@@ -35,12 +35,20 @@ template<typename distribution_type> class PGOP {
                                          const std::vector<Vec3>::const_iterator& position_end,
                                          const QlmEval& qlm_eval) const;
 
-    std::vector<double> compute_pgop(const std::vector<double>& rotation,
-                                     const std::vector<Vec3>::const_iterator& position_begin,
-                                     const std::vector<Vec3>::const_iterator& position_end,
-                                     std::vector<Vec3>& rotated_positions,
-                                     std::vector<std::vector<std::complex<double>>>& sym_qlm_buf,
-                                     const QlmEval& qlm_eval) const;
+    double compute_symmetry(const std::vector<Vec3>::const_iterator& position_begin,
+                            const std::vector<Vec3>::const_iterator& position_end,
+                            std::vector<Vec3>& rotated_distances_buf,
+                            const std::vector<std::complex<double>>& D_ij,
+                            std::vector<std::complex<double>>& sym_qlm_buf,
+                            const QlmEval& qlm_eval) const;
+
+    double compute_pgop(const std::vector<double>& hsphere_pos,
+                        const std::vector<Vec3>::const_iterator& position_begin,
+                        const std::vector<Vec3>::const_iterator& position_end,
+                        std::vector<Vec3>& rotated_positions,
+                        const std::vector<std::complex<double>>& D_ij,
+                        std::vector<std::complex<double>>& sym_qlm_buf,
+                        const QlmEval& qlm_eval) const;
 
     double score(const std::vector<double>& pgop) const;
 
