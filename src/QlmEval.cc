@@ -8,7 +8,7 @@ QlmEval::QlmEval(unsigned int m,
                  const py::array_t<double> positions,
                  const py::array_t<double> weights,
                  const py::array_t<std::complex<double>> ylms)
-    : m_n_points(ylms.shape(1)), m_n_lms(ylms.shape(0)), m_positions(), m_weighted_ylms()
+    : m_n_lms(ylms.shape(0)), m_n_points(ylms.shape(1)), m_positions(), m_weighted_ylms()
 {
     m_weighted_ylms.reserve(m_n_lms);
     const auto unchecked_ylms = ylms.unchecked<2>();
@@ -24,7 +24,7 @@ QlmEval::QlmEval(unsigned int m,
     }
     const auto u_positions = positions.unchecked<2>();
     m_positions.reserve(positions.shape(0));
-    for (size_t i {0}; i < positions.shape(0); ++i) {
+    for (size_t i {0}; i < static_cast<size_t>(positions.shape(0)); ++i) {
         m_positions.emplace_back(u_positions.data(i, 0));
     }
 }

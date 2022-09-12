@@ -17,4 +17,5 @@ set_target_properties(_pgop PROPERTIES
     THREADS_PREFER_PTHREAD_FLAG ON
 )
 target_link_libraries(_pgop PRIVATE Threads::Threads)
+target_compile_options(_pgop PRIVATE -Werror -Wall -Wextra)
 target_compile_definitions(_pgop PRIVATE VERSION_INFO=${VERSION_INFO})
