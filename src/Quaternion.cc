@@ -35,11 +35,11 @@ Vec3 quat_to_vec3(const Quaternion& q)
 Quaternion quat_from_hypersphere(double phi, double theta, double psi)
 {
     const double sin_phi = std::sin(phi);
-    const double cos_psi = std::sin(psi);
-    return Quaternion(-std::cos(phi),
-                      -sin_phi * std::sin(psi),
-                      sin_phi * cos_psi * std::sin(theta),
-                      -sin_phi * cos_psi * std::cos(theta));
+    const double sin_psi = std::sin(psi);
+    return Quaternion(std::cos(phi),
+                      sin_phi * std::cos(psi),
+                      sin_phi * sin_psi * std::cos(theta),
+                      sin_phi * sin_psi * std::sin(theta));
 }
 
 Quaternion quat_from_vec(const Vec3& v)

@@ -5,6 +5,8 @@ import numpy as np
 
 import pgop._pgop
 
+HYPERSPHERE_BOUNDS = np.array([[0, 2 * np.pi], [0, np.pi], [0, np.pi]])
+
 
 class Optimizer(abc.ABC):
     # User Interface
