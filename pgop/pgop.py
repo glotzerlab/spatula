@@ -47,17 +47,12 @@ class PGOP:
         self._weijer = weijerd.WeigerD(max_l)
         self._optmizer = optimizer
         dist_param = bo_kwargs.popitem()[1]
-        p_norm_weights = [
-            self._weijer.group_cardinality(s) for s in self._symmetries
-        ]
         D_ij = self._precompute_weijer_d()  # noqa :D806
         if dist == "uniform":
             cls_ = pgop._pgop.PGOPUniform
         if dist == "fisher":
             cls_ = pgop._pgop.PGOPFisher
-        self._cpp = cls_(
-            max_l, D_ij, 2, p_norm_weights, optimizer._cpp, dist_param
-        )
+        self._cpp = cls_(max_l, D_ij, optimizer._cpp, dist_param)
         self._sph_harm = sph_harm.SphHarm(max_l)
         self._pgop = None
 

@@ -11,11 +11,10 @@
 template<typename distribution_type>
 PGOP<distribution_type>::PGOP(unsigned int max_l,
                               const py::array_t<std::complex<double>> D_ij,
-                              std::unique_ptr<WeightedPNormBase> p_norm,
                               std::shared_ptr<Optimizer>& optimizer,
                               typename distribution_type::param_type distribution_params)
     : m_distribution_params(distribution_params), m_max_l(max_l), m_n_symmetries(D_ij.shape(0)),
-      m_Dij(), m_p_norm(std::move(p_norm)), m_optimize(optimizer)
+      m_Dij(), m_optimize(optimizer)
 {
     m_Dij.reserve(m_n_symmetries);
     const auto u_D_ij = D_ij.unchecked<2>();
@@ -203,42 +202,16 @@ distribution_type PGOP<distribution_type>::getDistribution() const
     return distribution_type(m_distribution_params);
 }
 
-template<typename distribution_type>
-double PGOP<distribution_type>::score(const std::vector<double>& pgop) const
-{
-    return -m_p_norm->operator()(pgop);
-}
-
 template class PGOP<UniformDistribution>;
 template class PGOP<FisherDistribution>;
 
 template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name)
 {
     py::class_<PGOP<distribution_type>>(m, name.c_str())
-        .def(py::init([](unsigned int max_l,
-                         const py::array_t<std::complex<double>> D_ij,
-                         unsigned int p,
-                         std::vector<double> pnorm_weights,
-                         std::shared_ptr<Optimizer>& optimizer,
-                         typename distribution_type::param_type distribution_params) {
-            std::unique_ptr<WeightedPNormBase> p_norm(nullptr);
-            if (p == 1) {
-                p_norm.reset(new WeightedPNorm<1>(pnorm_weights));
-            } else if (p == 2) {
-                p_norm.reset(new WeightedPNorm<2>(pnorm_weights));
-            } else if (p == 3) {
-                p_norm.reset(new WeightedPNorm<3>(pnorm_weights));
-            } else if (p == 4) {
-                p_norm.reset(new WeightedPNorm<4>(pnorm_weights));
-            } else {
-                throw std::runtime_error("p cannot be greater than 4.");
-            }
-            return std::make_unique<PGOP<distribution_type>>(max_l,
-                                                             D_ij,
-                                                             std::move(p_norm),
-                                                             optimizer,
-                                                             distribution_params);
-        }))
+        .def(py::init<unsigned int,
+                      const py::array_t<std::complex<double>>,
+                      std::shared_ptr<Optimizer>&,
+                      typename distribution_type::param_type>())
         .def("compute", &PGOP<distribution_type>::compute);
 }
 

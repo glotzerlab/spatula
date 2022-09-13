@@ -20,7 +20,6 @@ template<typename distribution_type> class PGOP {
     public:
     PGOP(unsigned int max_l,
          const py::array_t<std::complex<double>> D_ij,
-         std::unique_ptr<WeightedPNormBase> p_norm,
          std::shared_ptr<Optimizer>& optimizer,
          typename distribution_type::param_type distribution_params);
 
@@ -59,13 +58,10 @@ template<typename distribution_type> class PGOP {
                         std::vector<std::complex<double>>& sym_qlm_buf,
                         const QlmEval& qlm_eval) const;
 
-    double score(const std::vector<double>& pgop) const;
-
     typename distribution_type::param_type m_distribution_params;
     unsigned int m_max_l;
     unsigned int m_n_symmetries;
     std::vector<std::vector<std::complex<double>>> m_Dij;
-    std::unique_ptr<WeightedPNormBase> m_p_norm;
     std::shared_ptr<const Optimizer> m_optimize;
     std::vector<std::vector<std::complex<double>>> m_sym_qlms;
     std::vector<std::complex<double>> m_qlms;
