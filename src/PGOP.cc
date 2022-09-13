@@ -27,12 +27,12 @@ PGOP<distribution_type>::PGOP(unsigned int max_l,
 }
 
 template<typename distribution_type>
-py::array_t<double> PGOP<distribution_type>::compute(const py::array_t<double> distances,
-                                                     const py::array_t<int> num_neighbors,
-                                                     const unsigned int m,
-                                                     const py::array_t<std::complex<double>> ylms,
-                                                     const py::array_t<double> quad_positions,
-                                                     const py::array_t<double> quad_weights) const
+py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
+                                           const py::array_t<int> num_neighbors,
+                                           const unsigned int m,
+                                           const py::array_t<std::complex<double>> ylms,
+                                           const py::array_t<double> quad_positions,
+                                           const py::array_t<double> quad_weights) const
 {
     const size_t N_particles = num_neighbors.size();
     const auto qlm_eval = QlmEval(m, quad_positions, quad_weights, ylms);
@@ -41,6 +41,10 @@ py::array_t<double> PGOP<distribution_type>::compute(const py::array_t<double> d
     const auto op_shape = std::vector<size_t>({N_particles, m_n_symmetries});
     auto op = py::array_t<double>(op_shape);
     auto u_op = op.mutable_unchecked<2>();
+    auto rotations_shape = op_shape;
+    rotations_shape.push_back(4);
+    auto rotations = py::array_t<double>(rotations_shape);
+    auto u_rotations = rotations.mutable_unchecked<3>();
     auto distance_offsets = std::vector<size_t>();
     distance_offsets.reserve(N_particles + 1);
     distance_offsets.emplace_back(0);
@@ -48,20 +52,25 @@ py::array_t<double> PGOP<distribution_type>::compute(const py::array_t<double> d
                      neigh_count_ptr + N_particles,
                      std::back_inserter(distance_offsets));
     const auto dist_begin = normed_distances.cbegin();
-    const auto loop_func
-        = [&u_op, &normed_distances, &distance_offsets, &qlm_eval, &dist_begin, this](
-              const size_t start,
-              const size_t stop) {
-              for (size_t i = start; i < stop; ++i) {
-                  const auto particle_op
-                      = this->compute_particle(dist_begin + distance_offsets[i],
-                                               dist_begin + distance_offsets[i + 1],
-                                               qlm_eval);
-                  for (size_t j {0}; j < particle_op.size(); ++j) {
-                      u_op(i, j) = particle_op[j];
-                  }
-              }
-          };
+    const auto loop_func =
+        [&u_op, &u_rotations, &distance_offsets, &qlm_eval, &dist_begin, this](const size_t start,
+                                                                               const size_t stop) {
+            for (size_t i = start; i < stop; ++i) {
+                const auto particle_op_rot
+                    = this->compute_particle(dist_begin + distance_offsets[i],
+                                             dist_begin + distance_offsets[i + 1],
+                                             qlm_eval);
+                const auto particle_op = std::get<0>(particle_op_rot);
+                const auto particle_rotations = std::get<1>(particle_op_rot);
+                for (size_t j {0}; j < particle_op.size(); ++j) {
+                    u_op(i, j) = particle_op[j];
+                    u_rotations(i, j, 0) = particle_rotations[j].w;
+                    u_rotations(i, j, 1) = particle_rotations[j].x;
+                    u_rotations(i, j, 2) = particle_rotations[j].y;
+                    u_rotations(i, j, 3) = particle_rotations[j].z;
+                }
+            }
+        };
     bool serial = false;
     // Enable profiling through serial mode.
     if (serial) {
@@ -71,11 +80,11 @@ py::array_t<double> PGOP<distribution_type>::compute(const py::array_t<double> d
         pool.push_loop(0, N_particles, loop_func, 2 * pool.get_thread_count());
         pool.wait_for_tasks();
     }
-    return op;
+    return py::make_tuple(op, rotations);
 }
 
 template<typename distribution_type>
-std::vector<double>
+std::tuple<std::vector<double>, std::vector<Quaternion>>
 PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterator& position_begin,
                                           const std::vector<Vec3>::const_iterator& position_end,
                                           const QlmEval& qlm_eval) const
@@ -84,20 +93,24 @@ PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterato
     auto sym_qlm_buf = std::vector<std::complex<double>>();
     sym_qlm_buf.reserve(qlm_eval.getNlm());
     auto pgop = std::vector<double>();
+    auto rotations = std::vector<Quaternion>();
     pgop.reserve(m_Dij.size());
+    rotations.reserve(m_Dij.size());
     for (const auto& D_ij : m_Dij) {
-        pgop.push_back(compute_symmetry(position_begin,
-                                        position_end,
-                                        rotated_dist,
-                                        D_ij,
-                                        sym_qlm_buf,
-                                        qlm_eval));
+        const auto result = compute_symmetry(position_begin,
+                                             position_end,
+                                             rotated_dist,
+                                             D_ij,
+                                             sym_qlm_buf,
+                                             qlm_eval);
+        pgop.push_back(std::get<0>(result));
+        rotations.push_back(std::get<1>(result));
     }
-    return pgop;
+    return std::make_tuple(std::move(pgop), std::move(rotations));
 }
 
 template<typename distribution_type>
-double
+std::tuple<double, Quaternion>
 PGOP<distribution_type>::compute_symmetry(const std::vector<Vec3>::const_iterator& position_begin,
                                           const std::vector<Vec3>::const_iterator& position_end,
                                           std::vector<Vec3>& rotated_distances_buf,
@@ -121,13 +134,16 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<Vec3>::const_iterato
                                               qlm_eval);
         opt->record_objective(-particle_op);
     }
-    return compute_pgop(opt->get_optimum().first,
-                        position_begin,
-                        position_end,
-                        rotated_distances_buf,
-                        D_ij,
-                        sym_qlm_buf,
-                        qlm_eval);
+    const auto best_rotation = opt->get_optimum().first;
+    return std::make_tuple(
+        compute_pgop(best_rotation,
+                     position_begin,
+                     position_end,
+                     rotated_distances_buf,
+                     D_ij,
+                     sym_qlm_buf,
+                     qlm_eval),
+        quat_from_hypersphere(best_rotation[0], best_rotation[1], best_rotation[2]));
 }
 
 template<typename distribution_type>

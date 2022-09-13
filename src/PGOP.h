@@ -24,12 +24,12 @@ template<typename distribution_type> class PGOP {
          std::shared_ptr<Optimizer>& optimizer,
          typename distribution_type::param_type distribution_params);
 
-    py::array_t<double> compute(const py::array_t<double> distances,
-                                const py::array_t<int> num_neighbors,
-                                const unsigned int m,
-                                const py::array_t<std::complex<double>> ylms,
-                                const py::array_t<double> quad_positions,
-                                const py::array_t<double> quad_weights) const;
+    py::tuple compute(const py::array_t<double> distances,
+                      const py::array_t<int> num_neighbors,
+                      const unsigned int m,
+                      const py::array_t<std::complex<double>> ylms,
+                      const py::array_t<double> quad_positions,
+                      const py::array_t<double> quad_weights) const;
 
     private:
     std::vector<std::vector<double>> getDefaultRotations() const;
@@ -38,16 +38,18 @@ template<typename distribution_type> class PGOP {
 
     distribution_type getDistribution() const;
 
-    std::vector<double> compute_particle(const std::vector<Vec3>::const_iterator& position_begin,
-                                         const std::vector<Vec3>::const_iterator& position_end,
-                                         const QlmEval& qlm_eval) const;
+    std::tuple<std::vector<double>, std::vector<Quaternion>>
+    compute_particle(const std::vector<Vec3>::const_iterator& position_begin,
+                     const std::vector<Vec3>::const_iterator& position_end,
+                     const QlmEval& qlm_eval) const;
 
-    double compute_symmetry(const std::vector<Vec3>::const_iterator& position_begin,
-                            const std::vector<Vec3>::const_iterator& position_end,
-                            std::vector<Vec3>& rotated_distances_buf,
-                            const std::vector<std::complex<double>>& D_ij,
-                            std::vector<std::complex<double>>& sym_qlm_buf,
-                            const QlmEval& qlm_eval) const;
+    std::tuple<double, Quaternion>
+    compute_symmetry(const std::vector<Vec3>::const_iterator& position_begin,
+                     const std::vector<Vec3>::const_iterator& position_end,
+                     std::vector<Vec3>& rotated_distances_buf,
+                     const std::vector<std::complex<double>>& D_ij,
+                     std::vector<std::complex<double>>& sym_qlm_buf,
+                     const QlmEval& qlm_eval) const;
 
     double compute_pgop(const std::vector<double>& hsphere_pos,
                         const std::vector<Vec3>::const_iterator& position_begin,

@@ -82,7 +82,7 @@ class PGOP:
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
         dist = self._compute_distances(neigh_query, neighbors)
         quad_positions, quad_weights = self._get_cartesian_quad(m)
-        self._pgop = self._cpp.compute(
+        self._pgop, self._rotations = self._cpp.compute(
             dist,
             neighbors.neighbor_counts,
             m,
@@ -122,6 +122,15 @@ class PGOP:
         The symmetry order is consistent with the order passed to `~.compute`.
         """
         return self._pgop
+
+    @property
+    def rotations(self):
+        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimial rotations.
+
+        The optimial rotations expressed as quaternions for each particles and
+        each point group.
+        """
+        return self._rotations
 
     def _precompute_weijer_d(self):
         """Return a NumPy array of WignerD matrices for given symmetries."""
