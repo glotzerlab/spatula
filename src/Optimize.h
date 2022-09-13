@@ -21,6 +21,9 @@ class Optimizer {
     virtual bool terminate() const = 0;
     virtual std::pair<std::vector<double>, double> get_optimum() const = 0;
 
+    /// Create a clone of this optimizer
+    virtual std::unique_ptr<Optimizer> clone() const = 0;
+
     protected:
     void clip_point(std::vector<double>& point);
 
@@ -33,16 +36,45 @@ class Optimizer {
     bool m_need_objective;
 };
 
+/**
+ * @brief Trampoline class for exposing Optimizer in Python.
+ *
+ * This shouldn't actually be used to extend the class but we need this to pass Optimizers through
+ * from Python.
+ */
+class PyOptimizer : public Optimizer {
+    public:
+    using Optimizer::Optimizer;
+
+    /// Get the next point to compute the objective for.
+    std::vector<double> next_point() override;
+    /// Record the objective function's value for the last querried point.
+    void record_objective(double) override;
+    /// Returns whether or not convergence or termination conditions have been met.
+    bool terminate() const override;
+    /// Get the current best point and the value of the objective function at that point.
+    std::pair<std::vector<double>, double> get_optimum() const override;
+
+    /// Create a clone of this optimizer
+    virtual std::unique_ptr<Optimizer> clone() const override;
+};
+
+/**
+ * @brief An Optimizer that just tests prescribed points. The optimizer picks the best point out of
+ * all provided test points.
+ */
 class BruteForce : public Optimizer {
     public:
     BruteForce(const std::vector<std::vector<double>>& points,
                const std::vector<double>& min_bounds,
                const std::vector<double>& max_bounds);
 
-    virtual void record_objective(double);
-    virtual std::vector<double> next_point();
-    virtual bool terminate() const;
-    virtual std::pair<std::vector<double>, double> get_optimum() const;
+    void record_objective(double) override;
+    std::vector<double> next_point() override;
+    bool terminate() const override;
+    std::pair<std::vector<double>, double> get_optimum() const override;
+    std::unique_ptr<Optimizer> clone() const override;
+
 
     private:
     std::vector<std::vector<double>> m_points;
@@ -117,9 +149,10 @@ class NelderMead : public Optimizer {
                double m_dist_tol,
                double m_std_tol);
 
-    virtual std::vector<double> next_point();
-    virtual bool terminate() const;
-    virtual std::pair<std::vector<double>, double> get_optimum() const;
+    std::vector<double> next_point() override;
+    bool terminate() const override;
+    std::pair<std::vector<double>, double> get_optimum() const override;
+    std::unique_ptr<Optimizer> clone() const override;
 
     private:
     enum Stage {

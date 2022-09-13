@@ -1,11 +1,17 @@
 #pragma once
+#include <memory>
+#include <tuple>
+#include <vector>
+
 #include <complex>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "Metrics.h"
+#include "Optimize.h"
 #include "QlmEval.h"
+#include "Quaternion.h"
 #include "Util.h"
 
 namespace py = pybind11;
@@ -15,6 +21,7 @@ template<typename distribution_type> class PGOP {
     PGOP(unsigned int max_l,
          const py::array_t<std::complex<double>> D_ij,
          std::unique_ptr<WeightedPNormBase> p_norm,
+         std::shared_ptr<Optimizer>& optimizer,
          typename distribution_type::param_type distribution_params);
 
     py::array_t<double> compute(const py::array_t<double> distances,
@@ -57,6 +64,7 @@ template<typename distribution_type> class PGOP {
     unsigned int m_n_symmetries;
     std::vector<std::vector<std::complex<double>>> m_Dij;
     std::unique_ptr<WeightedPNormBase> m_p_norm;
+    std::shared_ptr<const Optimizer> m_optimize;
     std::vector<std::vector<std::complex<double>>> m_sym_qlms;
     std::vector<std::complex<double>> m_qlms;
 };

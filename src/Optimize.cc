@@ -6,8 +6,6 @@
 
 #include "Optimize.h"
 
-using namespace py::literals;
-
 Optimizer::Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds)
     : m_min_bounds(min_bounds), m_max_bounds(max_bounds), m_point(), m_objective(),
       m_need_objective(false)
@@ -73,6 +71,35 @@ void BruteForce::record_objective(double objective)
 bool BruteForce::terminate() const
 {
     return m_cnt >= m_points.size();
+}
+
+std::unique_ptr<Optimizer> BruteForce::clone() const
+{
+    return std::make_unique<BruteForce>(*this);
+}
+
+std::vector<double> PyOptimizer::next_point()
+{
+    PYBIND11_OVERRIDE_PURE(std::vector<double>, Optimizer, next_point);
+}
+
+void PyOptimizer::record_objective(double objective)
+{
+    PYBIND11_OVERRIDE_PURE(void, Optimizer, record_objective, objective);
+}
+bool PyOptimizer::terminate() const
+{
+    PYBIND11_OVERRIDE_PURE(bool, Optimizer, terminate);
+}
+std::pair<std::vector<double>, double> PyOptimizer::get_optimum() const
+{
+    using pair_ = std::pair<std::vector<double>, double>;
+    PYBIND11_OVERRIDE_PURE_NAME(pair_, Optimizer, "optimum", get_optimum);
+}
+
+std::unique_ptr<Optimizer> PyOptimizer::clone() const
+{
+    return std::make_unique<PyOptimizer>(*this);
 }
 
 NelderMeadParams::NelderMeadParams(double alpha_, double gamma_, double rho_, double sigma_)
@@ -406,6 +433,11 @@ bool NelderMead::terminate() const
            || m_current_simplex.get_min_dist() < m_dist_tol;
 }
 
+std::unique_ptr<Optimizer> NelderMead::clone() const
+{
+    return std::make_unique<NelderMead>(*this);
+}
+
 std::pair<std::vector<double>, double> NelderMead::get_optimum() const
 {
     if (m_current_simplex.size() > 0) {
@@ -420,14 +452,16 @@ std::pair<std::vector<double>, double> NelderMead::get_optimum() const
 
 void export_optimize(py::module& m)
 {
-    py::class_<BruteForce>(m, "BruteForce")
+    py::class_<Optimizer, PyOptimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
+        .def("next_point", &Optimizer::next_point)
+        .def("record_objective", &Optimizer::record_objective)
+        .def_property_readonly("terminate", &Optimizer::terminate)
+        .def_property_readonly("optimum", &Optimizer::get_optimum);
+
+    py::class_<BruteForce, Optimizer, std::shared_ptr<BruteForce>>(m, "BruteForce")
         .def(py::init<const std::vector<std::vector<double>>&,
                       const std::vector<double>&,
-                      const std::vector<double>&>())
-        .def("next_point", &BruteForce::next_point)
-        .def("record_objective", &BruteForce::record_objective)
-        .def_property_readonly("terminate", &BruteForce::terminate)
-        .def_property_readonly("optimum", &BruteForce::get_optimum);
+                      const std::vector<double>&>());
 
     py::class_<NelderMeadParams>(m, "NelderMeadParams")
         .def(py::init<double, double, double, double>());
@@ -450,16 +484,12 @@ void export_optimize(py::module& m)
         .def("compute_centroid", &OrderedSimplex::compute_centroid)
         .def("__getitem__", &OrderedSimplex::operator[]);
 
-    py::class_<NelderMead>(m, "NelderMead")
+    py::class_<NelderMead, Optimizer, std::shared_ptr<NelderMead>>(m, "NelderMead")
         .def(py::init<NelderMeadParams,
                       std::vector<std::vector<double>>&,
                       std::vector<double>&,
                       std::vector<double>&,
                       unsigned int,
                       double,
-                      double>())
-        .def("next_point", &NelderMead::next_point)
-        .def("record_objective", &NelderMead::record_objective)
-        .def_property_readonly("terminate", &NelderMead::terminate)
-        .def_property_readonly("optimum", &NelderMead::get_optimum);
+                      double>());
 }

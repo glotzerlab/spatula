@@ -21,7 +21,7 @@ class PGOP:
     the surface of the sphere (e.g. von-Mises-Fisher or uniform distributions).
     """
 
-    def __init__(self, dist, max_l, symmetries, bo_kwargs):
+    def __init__(self, dist, max_l, symmetries, optimizer, bo_kwargs):
         """Create a PGOP object.
 
         Parameters
@@ -34,6 +34,9 @@ class PGOP:
         symmetries : list[str]
             A list of point groups to test each particles' neighborhood. Uses
             Schoenflies notation and is case sensitive.
+        optimizer : pgop.optimize.Optimizer
+            An optimizer to optimize the rotation of the particle's local
+            neighborhoods.
         bo_kwargs : dict[str, float]
             A dictionary to pass as keyword arguments to the distribution's
             constructor. The "fisher" distribution expects ``kappa``
@@ -42,6 +45,7 @@ class PGOP:
         """
         self._symmetries = symmetries
         self._weijer = weijerd.WeigerD(max_l)
+        self._optmizer = optimizer
         dist_param = bo_kwargs.popitem()[1]
         p_norm_weights = [
             self._weijer.group_cardinality(s) for s in self._symmetries
@@ -51,7 +55,9 @@ class PGOP:
             cls_ = pgop._pgop.PGOPUniform
         if dist == "fisher":
             cls_ = pgop._pgop.PGOPFisher
-        self._cpp = cls_(max_l, D_ij, 2, p_norm_weights, dist_param)
+        self._cpp = cls_(
+            max_l, D_ij, 2, p_norm_weights, optimizer._cpp, dist_param
+        )
         self._sph_harm = sph_harm.SphHarm(max_l)
         self._pgop = None
 

@@ -5,7 +5,6 @@
 #include "BondOrder.h"
 #include "Optimize.h"
 #include "PGOP.h"
-#include "Quaternion.h"
 #include "Threads.h"
 #include "Weijer.h"
 
@@ -13,9 +12,10 @@ template<typename distribution_type>
 PGOP<distribution_type>::PGOP(unsigned int max_l,
                               const py::array_t<std::complex<double>> D_ij,
                               std::unique_ptr<WeightedPNormBase> p_norm,
+                              std::shared_ptr<Optimizer>& optimizer,
                               typename distribution_type::param_type distribution_params)
     : m_distribution_params(distribution_params), m_max_l(max_l), m_n_symmetries(D_ij.shape(0)),
-      m_Dij(), m_p_norm(std::move(p_norm))
+      m_Dij(), m_p_norm(std::move(p_norm)), m_optimize(optimizer)
 {
     m_Dij.reserve(m_n_symmetries);
     const auto u_D_ij = D_ij.unchecked<2>();
@@ -109,9 +109,9 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<Vec3>::const_iterato
     // hypersphere's surface.
     const std::vector<double> opt_min_bounds {-M_PI, -M_PI_2, -M_PI_2};
     const std::vector<double> opt_max_bounds {M_PI, M_PI_2, M_PI_2};
-    auto brute_opt = BruteForce(getDefaultRotations(), opt_min_bounds, opt_max_bounds);
-    while (!brute_opt.terminate()) {
-        const auto hsphere_pos = brute_opt.next_point();
+    auto opt = m_optimize->clone();
+    while (!opt->terminate()) {
+        const auto hsphere_pos = opt->next_point();
         const auto particle_op = compute_pgop(hsphere_pos,
                                               position_begin,
                                               position_end,
@@ -119,9 +119,9 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<Vec3>::const_iterato
                                               D_ij,
                                               sym_qlm_buf,
                                               qlm_eval);
-        brute_opt.record_objective(-particle_op);
+        opt->record_objective(-particle_op);
     }
-    return compute_pgop(brute_opt.get_optimum().first,
+    return compute_pgop(opt->get_optimum().first,
                         position_begin,
                         position_end,
                         rotated_distances_buf,
@@ -203,6 +203,7 @@ template<typename distribution_type> void export_pgop_class(py::module& m, const
                          const py::array_t<std::complex<double>> D_ij,
                          unsigned int p,
                          std::vector<double> pnorm_weights,
+                         std::shared_ptr<Optimizer>& optimizer,
                          typename distribution_type::param_type distribution_params) {
             std::unique_ptr<WeightedPNormBase> p_norm(nullptr);
             if (p == 1) {
@@ -219,6 +220,7 @@ template<typename distribution_type> void export_pgop_class(py::module& m, const
             return std::make_unique<PGOP<distribution_type>>(max_l,
                                                              D_ij,
                                                              std::move(p_norm),
+                                                             optimizer,
                                                              distribution_params);
         }))
         .def("compute", &PGOP<distribution_type>::compute);
