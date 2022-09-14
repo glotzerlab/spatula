@@ -141,16 +141,10 @@ std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
                                               qlm_buf);
         opt->record_objective(-particle_op);
     }
-    const auto best_rotation = opt->get_optimum().first;
+    const auto optimum = opt->get_optimum();
     return std::make_tuple(
-        compute_pgop(best_rotation,
-                     position_begin,
-                     position_end,
-                     rotated_distances_buf,
-                     D_ij,
-                     sym_qlm_buf,
-                     qlm_eval),
-        util::quat_from_hypersphere(best_rotation[0], best_rotation[1], best_rotation[2]));
+        -optimum.second,
+        util::quat_from_hypersphere(optimum.first[0], optimum.first[1], optimum.first[2]));
 }
 
 template<typename distribution_type>
