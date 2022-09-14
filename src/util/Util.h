@@ -5,7 +5,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
-#include "Vec3.h"
+#include "../data/Vec3.h"
 
 namespace py = pybind11;
 

@@ -8,7 +8,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "Util.h"
+#include "data/Vec3.h"
+#include "util/Util.h"
 
 namespace pgop {
 /**

@@ -5,7 +5,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
-#include "BondOrder.h"
+#include "../BondOrder.h"
 #include "Util.h"
 
 namespace py = pybind11;

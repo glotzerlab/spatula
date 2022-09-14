@@ -1,14 +1,14 @@
 pybind11_add_module(_pgop export-module.cc
     BondOrder.h BondOrder.cc
-    Metrics.h Metrics.cc
-    Util.h Util.cc
-    Optimize.h Optimize.cc
     PGOP.h PGOP.cc
-    QlmEval.h QlmEval.cc
-    Quaternion.h Quaternion.cc
-    Threads.h
-    Weijer.h Weijer.cc
-    Vec3.h Vec3.cc
+    data/Vec3.h data/Vec3.cc
+    data/Quaternion.h data/Quaternion.cc
+    optimize/Optimize.h optimize/Optimize.cc
+    util/Metrics.h util/Metrics.cc
+    util/Util.h util/Util.cc
+    util/QlmEval.h util/QlmEval.cc
+    util/Threads.h
+    util/Weijer.h util/Weijer.cc
 )
 
 set_target_properties(_pgop PROPERTIES

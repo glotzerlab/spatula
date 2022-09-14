@@ -3,10 +3,10 @@
 #include <string>
 
 #include "BondOrder.h"
-#include "Optimize.h"
 #include "PGOP.h"
-#include "Threads.h"
-#include "Weijer.h"
+#include "optimize/Optimize.h"
+#include "util/Threads.h"
+#include "util/Weijer.h"
 
 namespace pgop {
 template<typename distribution_type>

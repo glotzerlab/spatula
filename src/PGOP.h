@@ -8,11 +8,11 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "Metrics.h"
-#include "Optimize.h"
-#include "QlmEval.h"
-#include "Quaternion.h"
-#include "Util.h"
+#include "data/Quaternion.h"
+#include "optimize/Optimize.h"
+#include "util/Metrics.h"
+#include "util/QlmEval.h"
+#include "util/Util.h"
 
 namespace py = pybind11;
 
