@@ -10,19 +10,19 @@ FisherDistribution::FisherDistribution(double kappa)
 {
 }
 
-double FisherDistribution::operator()(double theta) const
+double FisherDistribution::operator()(double x) const
 {
-    return m_prefactor * std::exp(m_kappa * std::cos(theta));
+    return m_prefactor * std::exp(m_kappa * x);
 }
 
 UniformDistribution::UniformDistribution(double max_theta)
-    : m_max_theta(max_theta), m_prefactor(1 / (2 * M_PI * (1 - std::cos(max_theta))))
+    : m_threshold(std::cos(max_theta)), m_prefactor(1 / (2 * M_PI * (1 - std::cos(max_theta))))
 {
 }
 
-double UniformDistribution::operator()(double theta) const
+double UniformDistribution::operator()(double x) const
 {
-    return theta <= m_max_theta ? m_prefactor : 0;
+    return x > m_threshold ? m_prefactor : 0;
 }
 
 template<typename distribution_type>
@@ -44,8 +44,13 @@ double BondOrder<distribution_type>::single_call(const Vec3& point) const
                m_positions.cend(),
                0.0,
                [this, &point, &sum_correction](const auto& sum, const auto& p) -> double {
-                   const auto addition
-                       = this->m_dist(fast_angle_eucledian(p, point)) - sum_correction;
+                   double x;
+                   if constexpr (distribution_type::use_theta) {
+                       x = util::fast_angle_eucledian(p, point);
+                   } else {
+                       x = p.dot(point);
+                   }
+                   const auto addition = this->m_dist(x) - sum_correction;
                    const auto new_sum = sum + addition;
                    sum_correction = new_sum - sum - addition;
                    return new_sum;

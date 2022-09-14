@@ -14,12 +14,13 @@
  * @brief Null class to show the necessary interface for a spherical surface distribution. Given the
  * performance critical nature of the evaluation the bond order diagram, we should likely not move
  * this to an interface like approach as this would introduce a vtable and the need to access the
- * distribution on the heap.
+ * distribution on the heap. However, when we can use C++20 we can use a compile-time interface
+ * using concepts we can flesh this out into the required concept for BondOrder.
  *
- * Notice that the position of a point in operator() is not given just the distance from the
- * distribution mean.
- *
- * This remains as a pure reminder of the interface expected of distributions.
+ * Two options for computing the distribution exist:
+ *   1. Compute the distribution from the angle between the point and the mean.
+ *   2. The dot product of the mean with the point which when the arccos is taken produces the angle
+ *      from 1. Therefore, this can be faster if the distribtion can be expressed without the angle.
  */
 class SphereSurfaceDistribution {
     public:
@@ -31,11 +32,15 @@ class SphereSurfaceDistribution {
     SphereSurfaceDistribution(param_type param);
 
     /**
-     * @brief Compute the distribution's value at a distance of theta radians away from the mean.
-     * All distributions that are radially symmetric (on the sphere's surface) should be reducable
-     * to this approach.
+     * @brief Compute the distribution's value.
+     *
+     * @param x The meaning of x is given by the use_theta static member. If true, x is the angle
+     * between the mean and the point. If false, x is the dot product of the mean and the point.
      */
-    double operator()(double theta) const;
+    double operator()(double x) const;
+
+    /// Whether to use theta in operator().
+    static const bool use_theta = false;
 };
 
 /**
@@ -46,6 +51,10 @@ class SphereSurfaceDistribution {
  * \\
  *               &= 0 \quad \text{else}
  * \f{align*}
+ *
+ * To speed up the performance we use the fact that \f$ \cos{x} \f$ is monotonically decreasing in
+ * the domain \f$ [0, \pi] \f$ to transform the check to \f$ \mu \cdot x < cos{\theta_{max}} \f$
+ * precomputing the cosign.
  */
 class UniformDistribution {
     public:
@@ -58,11 +67,16 @@ class UniformDistribution {
      */
     UniformDistribution(double max_theta);
 
-    double operator()(double theta) const;
+    double operator()(double x) const;
+
+    static const bool use_theta = false;
 
     private:
-    /// max_theta The distance in radian from the mean that is non-zero.
-    double m_max_theta;
+    /**
+     * The value which if the dot product (x in operator()) of the point and the mean is equal to
+     * or lower than the distribution is 0.
+     */
+    double m_threshold;
     /// The normalization constant for the distribution.
     double m_prefactor;
 };
@@ -86,7 +100,9 @@ class FisherDistribution {
      */
     FisherDistribution(double kappa);
 
-    double operator()(double theta) const;
+    double operator()(double x) const;
+
+    static const bool use_theta = false;
 
     private:
     /**
