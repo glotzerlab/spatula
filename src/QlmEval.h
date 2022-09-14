@@ -10,6 +10,7 @@
 
 namespace py = pybind11;
 
+namespace pgop { namespace util {
 // TODO: pass normalization factor not m for generalizing.
 /**
  * @brief Helper class to make computation of \f$ Q_{m}^{l} \f$ more efficient. The class upon
@@ -55,7 +56,8 @@ class QlmEval {
     /// Number of points in quadrature.
     unsigned int m_n_points;
     /// The quadrature points.
-    std::vector<Vec3> m_positions;
+    std::vector<data::Vec3> m_positions;
     /// Precomputed weighted ylms of the provided quadrature and normalization.
     std::vector<std::vector<std::complex<double>>> m_weighted_ylms;
 };
+}} // namespace pgop::util

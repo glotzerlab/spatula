@@ -10,6 +10,7 @@
 
 #include "Util.h"
 
+namespace pgop {
 /**
  * @brief Null class to show the necessary interface for a spherical surface distribution. Given the
  * performance critical nature of the evaluation the bond order diagram, we should likely not move
@@ -134,10 +135,10 @@ template<typename distribution_type> class BondOrder {
      * @param The normalized (lie on the unit sphere) neighbor vectors. These serve as the mean for
      * the \f$ N \f$ distributions on the bond order diagram.
      */
-    BondOrder(distribution_type dist, const std::vector<Vec3>& positions);
+    BondOrder(distribution_type dist, const std::vector<data::Vec3>& positions);
 
     // Assumes points are on the unit sphere
-    std::vector<double> operator()(const std::vector<Vec3>& points) const;
+    std::vector<double> operator()(const std::vector<data::Vec3>& points) const;
 
     private:
     /**
@@ -145,12 +146,13 @@ template<typename distribution_type> class BondOrder {
      *
      * @param point A point on the unit sphere in Cartesian coordinates.
      */
-    double single_call(const Vec3& point) const;
+    double single_call(const data::Vec3& point) const;
 
     /// The distribution to use for all provided neighbor vectors.
     distribution_type m_dist;
     /// The normalized neighbor vectors for the bond order diagram.
-    std::vector<Vec3> m_positions;
+    std::vector<data::Vec3> m_positions;
     /// The normalization constant @c 1 / static_cast<double>(m_positions.size()).
     double m_normalization;
 };
+} // End namespace pgop

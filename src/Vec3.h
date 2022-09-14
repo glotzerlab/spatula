@@ -1,5 +1,6 @@
 #pragma once
 
+namespace pgop { namespace data {
 /**
  * @brief Vec3 represents a point in 3d space and provides arithmetic operators for easy
  * manipulation. Some other functions are provided such as Vec3::dot for other common use cases.
@@ -56,3 +57,4 @@ template<typename number_type> Vec3& operator*=(Vec3& a, const number_type& b);
 
 /// Vec3 inplace division.
 template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b);
+}} // namespace pgop::data

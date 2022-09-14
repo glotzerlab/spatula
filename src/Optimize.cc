@@ -6,6 +6,7 @@
 
 #include "Optimize.h"
 
+namespace pgop { namespace optimize {
 Optimizer::Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds)
     : m_min_bounds(min_bounds), m_max_bounds(max_bounds), m_point(), m_objective(),
       m_need_objective(false)
@@ -493,3 +494,4 @@ void export_optimize(py::module& m)
                       double,
                       double>());
 }
+}} // namespace pgop::optimize

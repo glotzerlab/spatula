@@ -5,6 +5,6 @@
 
 PYBIND11_MODULE(_pgop, m)
 {
-    export_optimize(m);
-    export_pgop(m);
+    pgop::optimize::export_optimize(m);
+    pgop::export_pgop(m);
 }

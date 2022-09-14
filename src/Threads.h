@@ -4,6 +4,7 @@
 
 #include "BS_thread_pool.hpp"
 
+namespace pgop { namespace util {
 class ThreadPool {
     public:
     static ThreadPool& get()
@@ -45,3 +46,4 @@ class ThreadPool {
     BS::synced_stream m_out;
     BS::thread_pool m_pool;
 };
+}} // namespace pgop::util

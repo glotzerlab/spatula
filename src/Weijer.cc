@@ -2,16 +2,7 @@
 
 #include "Weijer.h"
 
-void symmetrize_qlms(const std::vector<std::complex<double>>& qlms,
-                     const std::vector<std::vector<std::complex<double>>>& D_ijs,
-                     std::vector<std::vector<std::complex<double>>>& sym_qlm_buf,
-                     unsigned int max_l)
-{
-    for (size_t sym_i {0}; sym_i < D_ijs.size(); ++sym_i) {
-        symmetrize_qlm(qlms, D_ijs[sym_i], sym_qlm_buf[sym_i], max_l);
-    }
-}
-
+namespace pgop { namespace util {
 void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     const std::vector<std::complex<double>>& D_ij,
                     std::vector<std::complex<double>>& sym_qlm_buf,
@@ -33,3 +24,4 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
         qlm_i += max_m;
     }
 }
+}} // namespace pgop::util

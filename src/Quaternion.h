@@ -4,6 +4,7 @@
 
 #include "Vec3.h"
 
+namespace pgop { namespace data {
 struct Quaternion {
     double w;
     double x;
@@ -24,3 +25,4 @@ struct Quaternion {
 Quaternion quat_from_hypersphere(double phi, double theta, double psi);
 Quaternion quat_from_vec(const Vec3& v);
 Vec3 quat_to_vec3(const Quaternion& q);
+}} // namespace pgop::data

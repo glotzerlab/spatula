@@ -2,6 +2,7 @@
 
 #include "Quaternion.h"
 
+namespace pgop { namespace data {
 Quaternion::Quaternion(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) { }
 
 Quaternion Quaternion::conjugate() const
@@ -46,3 +47,4 @@ Quaternion quat_from_vec(const Vec3& v)
 {
     return Quaternion(0, v.x, v.y, v.z);
 }
+}} // namespace pgop::data

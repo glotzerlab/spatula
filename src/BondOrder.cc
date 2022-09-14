@@ -5,6 +5,7 @@
 
 #include "BondOrder.h"
 
+namespace pgop {
 FisherDistribution::FisherDistribution(double kappa)
     : m_kappa(kappa), m_prefactor(kappa / (2 * M_PI * (std::exp(kappa) - std::exp(-kappa))))
 {
@@ -26,14 +27,15 @@ double UniformDistribution::operator()(double x) const
 }
 
 template<typename distribution_type>
-BondOrder<distribution_type>::BondOrder(distribution_type dist, const std::vector<Vec3>& positions)
+BondOrder<distribution_type>::BondOrder(distribution_type dist,
+                                        const std::vector<data::Vec3>& positions)
     : m_dist(dist), m_positions(positions),
       m_normalization(1 / static_cast<double>(positions.size()))
 {
 }
 
 template<typename distribution_type>
-double BondOrder<distribution_type>::single_call(const Vec3& point) const
+double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
 {
     double sum_correction = 0;
     // Use Kahan summation to improve accuracy of the summation of small
@@ -58,7 +60,8 @@ double BondOrder<distribution_type>::single_call(const Vec3& point) const
 }
 
 template<typename distribution_type>
-std::vector<double> BondOrder<distribution_type>::operator()(const std::vector<Vec3>& points) const
+std::vector<double>
+BondOrder<distribution_type>::operator()(const std::vector<data::Vec3>& points) const
 {
     auto bo = std::vector<double>();
     bo.reserve(points.size());
@@ -72,3 +75,4 @@ std::vector<double> BondOrder<distribution_type>::operator()(const std::vector<V
 // explicitly create templates
 template class BondOrder<UniformDistribution>;
 template class BondOrder<FisherDistribution>;
+} // End namespace pgop

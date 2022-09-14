@@ -4,6 +4,7 @@
 
 #include "Util.h"
 
+namespace pgop { namespace util {
 // Assumes points are on the unit sphere
 double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
 {
@@ -102,3 +103,4 @@ std::vector<double> linspace(double start, double end, unsigned int n, bool incl
     }
     return v;
 }
+}} // namespace pgop::util

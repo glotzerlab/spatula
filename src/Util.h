@@ -9,6 +9,11 @@
 
 namespace py = pybind11;
 
+namespace pgop { namespace util {
+
+// Bring Vec3 and Quaternion into namespace.
+using namespace pgop::data;
+
 /// Compute and return the angle (in radians) between two vectors in 3D.
 double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x);
 
@@ -101,3 +106,4 @@ std::vector<Vec3> normalize_distances(const py::array_t<double> distances);
  * @param include_end Whether the last point is at or before @p end.
  */
 std::vector<double> linspace(double start, double end, unsigned int n, bool include_end = true);
+}} // namespace pgop::util

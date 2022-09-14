@@ -7,6 +7,7 @@
 
 namespace py = pybind11;
 
+namespace pgop { namespace optimize {
 /**
  * @brief Base class for pgop optimizers. We use a state model where an optimizer is always either
  * expecting an objective for a queried point or to be queried for a point. To do the other
@@ -292,3 +293,4 @@ class NelderMead : public Optimizer {
 };
 
 void export_optimize(py::module& m);
+}} // namespace pgop::optimize

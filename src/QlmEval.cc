@@ -4,6 +4,7 @@
 
 #include "QlmEval.h"
 
+namespace pgop { namespace util {
 QlmEval::QlmEval(unsigned int m,
                  const py::array_t<double> positions,
                  const py::array_t<double> weights,
@@ -58,3 +59,4 @@ QlmEval::eval<UniformDistribution>(const BondOrder<UniformDistribution>&) const;
 
 template std::vector<std::complex<double>>
 QlmEval::eval<FisherDistribution>(const BondOrder<FisherDistribution>&) const;
+}} // namespace pgop::util

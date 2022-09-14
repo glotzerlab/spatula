@@ -1,5 +1,6 @@
 #include "Vec3.h"
 
+namespace pgop { namespace data {
 Vec3::Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
 
 Vec3::Vec3(const double* point) : x(point[0]), y(point[1]), z(point[2]) { }
@@ -123,3 +124,4 @@ template Vec3& operator+=(Vec3& a, const double& b);
 template Vec3& operator-=(Vec3& a, const double& b);
 template Vec3& operator*=(Vec3& a, const double& b);
 template Vec3& operator/=(Vec3& a, const double& b);
+}} // namespace pgop::data

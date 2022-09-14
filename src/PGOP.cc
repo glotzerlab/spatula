@@ -8,10 +8,11 @@
 #include "Threads.h"
 #include "Weijer.h"
 
+namespace pgop {
 template<typename distribution_type>
 PGOP<distribution_type>::PGOP(unsigned int max_l,
                               const py::array_t<std::complex<double>> D_ij,
-                              std::shared_ptr<Optimizer>& optimizer,
+                              std::shared_ptr<optimize::Optimizer>& optimizer,
                               typename distribution_type::param_type distribution_params)
     : m_distribution_params(distribution_params), m_max_l(max_l), m_n_symmetries(D_ij.shape(0)),
       m_Dij(), m_optimize(optimizer)
@@ -34,9 +35,9 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                                            const py::array_t<double> quad_weights) const
 {
     const size_t N_particles = num_neighbors.size();
-    const auto qlm_eval = QlmEval(m, quad_positions, quad_weights, ylms);
+    const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto* neigh_count_ptr = static_cast<const int*>(num_neighbors.data(0));
-    const auto normed_distances = normalize_distances(distances);
+    const auto normed_distances = util::normalize_distances(distances);
     const auto op_shape = std::vector<size_t>({N_particles, m_n_symmetries});
     auto op = py::array_t<double>(op_shape);
     auto u_op = op.mutable_unchecked<2>();
@@ -73,9 +74,9 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
     bool serial = false;
     // Enable profiling through serial mode.
     if (serial) {
-        ThreadPool::get().serial_compute<void, size_t>(0, N_particles, loop_func);
+        util::ThreadPool::get().serial_compute<void, size_t>(0, N_particles, loop_func);
     } else {
-        auto& pool = ThreadPool::get().get_pool();
+        auto& pool = util::ThreadPool::get().get_pool();
         pool.push_loop(0, N_particles, loop_func, 2 * pool.get_thread_count());
         pool.wait_for_tasks();
     }
@@ -83,16 +84,17 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
 }
 
 template<typename distribution_type>
-std::tuple<std::vector<double>, std::vector<Quaternion>>
-PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterator& position_begin,
-                                          const std::vector<Vec3>::const_iterator& position_end,
-                                          const QlmEval& qlm_eval) const
+std::tuple<std::vector<double>, std::vector<data::Quaternion>>
+PGOP<distribution_type>::compute_particle(
+    const std::vector<data::Vec3>::const_iterator& position_begin,
+    const std::vector<data::Vec3>::const_iterator& position_end,
+    const util::QlmEval& qlm_eval) const
 {
-    auto rotated_dist = std::vector<Vec3>(std::distance(position_begin, position_end));
+    auto rotated_dist = std::vector<data::Vec3>(std::distance(position_begin, position_end));
     auto sym_qlm_buf = std::vector<std::complex<double>>();
     sym_qlm_buf.reserve(qlm_eval.getNlm());
     auto pgop = std::vector<double>();
-    auto rotations = std::vector<Quaternion>();
+    auto rotations = std::vector<data::Quaternion>();
     pgop.reserve(m_Dij.size());
     rotations.reserve(m_Dij.size());
     for (const auto& D_ij : m_Dij) {
@@ -109,13 +111,13 @@ PGOP<distribution_type>::compute_particle(const std::vector<Vec3>::const_iterato
 }
 
 template<typename distribution_type>
-std::tuple<double, Quaternion>
-PGOP<distribution_type>::compute_symmetry(const std::vector<Vec3>::const_iterator& position_begin,
-                                          const std::vector<Vec3>::const_iterator& position_end,
-                                          std::vector<Vec3>& rotated_distances_buf,
-                                          const std::vector<std::complex<double>>& D_ij,
-                                          std::vector<std::complex<double>>& sym_qlm_buf,
-                                          const QlmEval& qlm_eval) const
+std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
+    const std::vector<data::Vec3>::const_iterator& position_begin,
+    const std::vector<data::Vec3>::const_iterator& position_end,
+    std::vector<data::Vec3>& rotated_distances_buf,
+    const std::vector<std::complex<double>>& D_ij,
+    std::vector<std::complex<double>>& sym_qlm_buf,
+    const util::QlmEval& qlm_eval) const
 {
     // Optimize over the 4D unit sphere which has a bijective mapping from unit quaternions to the
     // hypersphere's surface.
@@ -142,58 +144,26 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<Vec3>::const_iterato
                      D_ij,
                      sym_qlm_buf,
                      qlm_eval),
-        quat_from_hypersphere(best_rotation[0], best_rotation[1], best_rotation[2]));
+        util::quat_from_hypersphere(best_rotation[0], best_rotation[1], best_rotation[2]));
 }
 
 template<typename distribution_type>
 double
 PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_pos,
-                                      const std::vector<Vec3>::const_iterator& position_begin,
-                                      const std::vector<Vec3>::const_iterator& position_end,
-                                      std::vector<Vec3>& rotated_positions,
+                                      const std::vector<data::Vec3>::const_iterator& position_begin,
+                                      const std::vector<data::Vec3>::const_iterator& position_end,
+                                      std::vector<data::Vec3>& rotated_positions,
                                       const std::vector<std::complex<double>>& D_ij,
                                       std::vector<std::complex<double>>& sym_qlm_buf,
-                                      const QlmEval& qlm_eval) const
+                                      const util::QlmEval& qlm_eval) const
 {
-    const auto R = quat_from_hypersphere(hsphere_pos[0], hsphere_pos[1], hsphere_pos[2])
+    const auto R = data::quat_from_hypersphere(hsphere_pos[0], hsphere_pos[1], hsphere_pos[2])
                        .to_rotation_matrix();
-    rotate_matrix(position_begin, position_end, rotated_positions.begin(), R);
+    util::rotate_matrix(position_begin, position_end, rotated_positions.begin(), R);
     const auto bond_order = BondOrder<distribution_type>(getDistribution(), rotated_positions);
     const auto qlms = qlm_eval.eval<distribution_type>(bond_order);
-    symmetrize_qlm(qlms, D_ij, sym_qlm_buf, m_max_l);
-    return covariance(qlms, sym_qlm_buf);
-}
-
-template<typename distribution_type>
-std::vector<std::vector<double>> PGOP<distribution_type>::getDefaultRotations() const
-{
-    auto rotations = std::vector<std::vector<double>>();
-    auto phis = linspace(-M_PI, M_PI_2, 10, false);
-    auto thetas = linspace(-M_PI_2, M_PI_2, 5, true);
-    auto psis = linspace(-M_PI_2, M_PI_2, 5, true);
-    rotations.reserve(phis.size() * thetas.size() * psis.size());
-    for (const auto& phi : phis) {
-        for (const auto& theta : thetas) {
-            for (const auto& psi : psis) {
-                rotations.push_back(std::initializer_list<double> {phi, theta, psi});
-            }
-        }
-    }
-    return rotations;
-}
-
-template<typename distribution_type>
-std::vector<std::vector<double>>
-PGOP<distribution_type>::getInitialSimplex(const std::vector<double>& center) const
-{
-    const double delta_phi {M_PI / 8}, delta_theta {M_PI / 16}, delta_psi {M_PI / 16};
-    const double b = delta_psi / std::sqrt(2);
-    const double b_plus_z {b + center[2]}, z_minus_b {center[2] - b};
-    return std::vector<std::vector<double>> {
-        std::initializer_list<double> {center[0] + delta_phi, center[1], z_minus_b},
-        std::initializer_list<double> {center[0] - delta_phi, center[1], z_minus_b},
-        std::initializer_list<double> {center[0], center[1] + delta_theta, b_plus_z},
-        std::initializer_list<double> {center[0], center[1] - delta_theta, b_plus_z}};
+    util::symmetrize_qlm(qlms, D_ij, sym_qlm_buf, m_max_l);
+    return util::covariance(qlms, sym_qlm_buf);
 }
 
 template<typename distribution_type>
@@ -210,7 +180,7 @@ template<typename distribution_type> void export_pgop_class(py::module& m, const
     py::class_<PGOP<distribution_type>>(m, name.c_str())
         .def(py::init<unsigned int,
                       const py::array_t<std::complex<double>>,
-                      std::shared_ptr<Optimizer>&,
+                      std::shared_ptr<optimize::Optimizer>&,
                       typename distribution_type::param_type>())
         .def("compute", &PGOP<distribution_type>::compute);
 }
@@ -220,3 +190,4 @@ void export_pgop(py::module& m)
     export_pgop_class<UniformDistribution>(m, "PGOPUniform");
     export_pgop_class<FisherDistribution>(m, "PGOPFisher");
 }
+} // End namespace pgop
