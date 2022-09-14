@@ -46,6 +46,19 @@ class QlmEval {
     template<typename distribution_type>
     std::vector<std::complex<double>> eval(const BondOrder<distribution_type>& bod) const;
 
+    /**
+     * @brief For the provided bond order diagram compute the spherical harmonic expansion
+     * coefficients in-place. The method is templated on bond order type.
+     *
+     * We could use a base type and std::unique_ptr to avoid the template if desired in the future.
+     *
+     * @param bod the bond order diagram to use for evaluating the quadrature positions.
+     * @qlm_buf the buffer to place the \f$ Q_{m}^{l} \f$ for the spherical harmonic expansion in.
+     */
+    template<typename distribution_type>
+    void eval(const BondOrder<distribution_type>& bod,
+              std::vector<std::complex<double>>& qlm_buf) const;
+
     /// Get the number of unique combintations of \f$ l \f$ and \f$ m \f$.
     unsigned int getNlm() const;
 

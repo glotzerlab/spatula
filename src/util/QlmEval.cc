@@ -31,14 +31,15 @@ QlmEval::QlmEval(unsigned int m,
 }
 
 template<typename distribution_type>
-std::vector<std::complex<double>> QlmEval::eval(const BondOrder<distribution_type>& bod) const
+void QlmEval::eval(const BondOrder<distribution_type>& bod,
+                   std::vector<std::complex<double>>& qlm_buf) const
 {
-    std::vector<std::complex<double>> qlms;
-    qlms.reserve(m_n_lms);
+    qlm_buf.reserve(m_n_lms);
+    qlm_buf.clear();
     const auto B_quad = bod(m_positions);
     std::transform(m_weighted_ylms.begin(),
                    m_weighted_ylms.end(),
-                   std::back_insert_iterator(qlms),
+                   std::back_insert_iterator(qlm_buf),
                    [&B_quad](const auto& w_ylm) {
                        std::complex<double> dot = 0;
                        for (size_t i {0}; i < w_ylm.size(); ++i) {
@@ -46,6 +47,14 @@ std::vector<std::complex<double>> QlmEval::eval(const BondOrder<distribution_typ
                        }
                        return dot;
                    });
+}
+
+template<typename distribution_type>
+std::vector<std::complex<double>> QlmEval::eval(const BondOrder<distribution_type>& bod) const
+{
+    std::vector<std::complex<double>> qlms;
+    qlms.reserve(m_n_lms);
+    eval(bod, qlms);
     return qlms;
 }
 
@@ -56,7 +65,12 @@ unsigned int QlmEval::getNlm() const
 
 template std::vector<std::complex<double>>
 QlmEval::eval<UniformDistribution>(const BondOrder<UniformDistribution>&) const;
+template void QlmEval::eval<UniformDistribution>(const BondOrder<UniformDistribution>&,
+                                                 std::vector<std::complex<double>>&) const;
 
 template std::vector<std::complex<double>>
 QlmEval::eval<FisherDistribution>(const BondOrder<FisherDistribution>&) const;
+template void QlmEval::eval<FisherDistribution>(const BondOrder<FisherDistribution>&,
+                                                std::vector<std::complex<double>>&) const;
+
 }} // namespace pgop::util
