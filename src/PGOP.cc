@@ -6,7 +6,6 @@
 #include "PGOP.h"
 #include "optimize/Optimize.h"
 #include "util/Threads.h"
-#include "util/Weijer.h"
 
 namespace pgop {
 template<typename distribution_type>

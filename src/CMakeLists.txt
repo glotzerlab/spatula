@@ -8,7 +8,6 @@ pybind11_add_module(_pgop export-module.cc
     util/Util.h util/Util.cc
     util/QlmEval.h util/QlmEval.cc
     util/Threads.h
-    util/Weijer.h util/Weijer.cc
 )
 
 set_target_properties(_pgop PROPERTIES
