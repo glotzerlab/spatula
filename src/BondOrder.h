@@ -1,15 +1,8 @@
 #pragma once
 
-#include <memory>
-#include <string>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include "data/Vec3.h"
-#include "util/Util.h"
 
 namespace pgop {
 /**
@@ -150,7 +143,7 @@ template<typename distribution_type> class BondOrder {
      *
      * @param point A point on the unit sphere in Cartesian coordinates.
      */
-    double single_call(const data::Vec3& point) const;
+    inline double single_call(const data::Vec3& point) const;
 
     /// The distribution to use for all provided neighbor vectors.
     distribution_type m_dist;

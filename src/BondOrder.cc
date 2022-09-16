@@ -2,8 +2,10 @@
 #include <cmath>
 #include <math.h>
 #include <numeric>
+#include <ranges>
 
 #include "BondOrder.h"
+#include "util/Util.h"
 
 namespace pgop {
 FisherDistribution::FisherDistribution(double kappa)
@@ -38,25 +40,26 @@ template<typename distribution_type>
 double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
 {
     double sum_correction = 0;
-    // Use Kahan summation to improve accuracy of the summation of small
-    // numbers.
+    auto single_contributions
+        = std::views::transform(m_positions, [this, &point](const auto& p) -> double {
+              if constexpr (distribution_type::use_theta) {
+                  return this->m_dist(util::fast_angle_eucledian(p, point));
+              } else {
+                  return this->m_dist(p.dot(point));
+              }
+          });
     return m_normalization
-           * std::accumulate(
-               m_positions.cbegin(),
-               m_positions.cend(),
-               0.0,
-               [this, &point, &sum_correction](const auto& sum, const auto& p) -> double {
-                   double x;
-                   if constexpr (distribution_type::use_theta) {
-                       x = util::fast_angle_eucledian(p, point);
-                   } else {
-                       x = p.dot(point);
-                   }
-                   const auto addition = this->m_dist(x) - sum_correction;
-                   const auto new_sum = sum + addition;
-                   sum_correction = new_sum - sum - addition;
-                   return new_sum;
-               });
+           * std::reduce(single_contributions.begin(),
+                         single_contributions.end(),
+                         0.0,
+                         // Use Kahan summation to improve accuracy of the summation of small
+                         // numbers.
+                         [&sum_correction](const auto& sum, const auto& y) -> double {
+                             auto addition = y - sum_correction;
+                             const auto new_sum = sum + addition;
+                             sum_correction = new_sum - sum - addition;
+                             return new_sum;
+                         });
 }
 
 template<typename distribution_type>
