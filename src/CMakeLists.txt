@@ -11,7 +11,7 @@ pybind11_add_module(_pgop export-module.cc
 )
 
 set_target_properties(_pgop PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CMAKE_CXX_STANDARD_REQUIRED True
     THREADS_PREFER_PTHREAD_FLAG ON
 )
