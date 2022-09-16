@@ -79,6 +79,7 @@ class PGOP:
         quad_positions, quad_weights = self._get_cartesian_quad(m)
         self._pgop, self._rotations = self._cpp.compute(
             dist,
+            neighbors.weights,
             neighbors.neighbor_counts,
             m,
             self._ylms(m),

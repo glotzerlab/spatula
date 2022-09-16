@@ -30,9 +30,10 @@ double UniformDistribution::operator()(double x) const
 
 template<typename distribution_type>
 BondOrder<distribution_type>::BondOrder(distribution_type dist,
-                                        const std::vector<data::Vec3>& positions)
-    : m_dist(dist), m_positions(positions),
-      m_normalization(1 / static_cast<double>(positions.size()))
+                                        const std::vector<data::Vec3>& positions,
+                                        const std::vector<double>& weights)
+    : m_dist(dist), m_positions(positions), m_weights(weights),
+      m_normalization(1 / std::reduce(m_weights.begin(), m_weights.end()))
 {
 }
 
@@ -40,6 +41,7 @@ template<typename distribution_type>
 double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
 {
     double sum_correction = 0;
+    // Get the unweighted contribution from each distribution lazily.
     auto single_contributions
         = std::views::transform(m_positions, [this, &point](const auto& p) -> double {
               if constexpr (distribution_type::use_theta) {
@@ -48,18 +50,21 @@ double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
                   return this->m_dist(p.dot(point));
               }
           });
+    // Normalize the value and weight the contributions.
     return m_normalization
-           * std::reduce(single_contributions.begin(),
+           * std::transform_reduce(single_contributions.begin(),
                          single_contributions.end(),
+                         m_weights.begin(),
                          0.0,
                          // Use Kahan summation to improve accuracy of the summation of small
-                         // numbers.
+                         // numbers.,
                          [&sum_correction](const auto& sum, const auto& y) -> double {
                              auto addition = y - sum_correction;
                              const auto new_sum = sum + addition;
                              sum_correction = new_sum - sum - addition;
                              return new_sum;
-                         });
+                         },
+                         std::multiplies<>());
 }
 
 template<typename distribution_type>

@@ -128,11 +128,12 @@ template<typename distribution_type> class BondOrder {
      * @brief Create a BondOrder<distribution_type> object from a distribution and normalized
      * position vectors.
      *
-     * @param The distribution to be centered at the given neighbor vectors.
-     * @param The normalized (lie on the unit sphere) neighbor vectors. These serve as the mean for
-     * the \f$ N \f$ distributions on the bond order diagram.
+     * @param dist The distribution to be centered at the given neighbor vectors.
+     * @param positions The normalized (lie on the unit sphere) neighbor vectors. These serve as the
+     * mean for the \f$ N \f$ distributions on the bond order diagram.
+     * @param weights The weights to use for each position. Should be the same size as positions.
      */
-    BondOrder(distribution_type dist, const std::vector<data::Vec3>& positions);
+    BondOrder(distribution_type dist, const std::vector<data::Vec3>& positions, const std::vector<double>& weights);
 
     // Assumes points are on the unit sphere
     std::vector<double> operator()(const std::vector<data::Vec3>& points) const;
@@ -149,7 +150,9 @@ template<typename distribution_type> class BondOrder {
     distribution_type m_dist;
     /// The normalized neighbor vectors for the bond order diagram.
     const std::vector<data::Vec3>& m_positions;
-    /// The normalization constant @c 1 / static_cast<double>(m_positions.size()).
+    /// The weights for the points on the bond order diagram.
+    const std::vector<double>& m_weights;
+    /// The normalization constant @c 1 / std::reduce(m_weights).
     double m_normalization;
 };
 } // End namespace pgop

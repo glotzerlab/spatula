@@ -25,6 +25,7 @@ template<typename distribution_type> class PGOP {
          typename distribution_type::param_type distribution_params);
 
     py::tuple compute(const py::array_t<double> distances,
+                      const py::array_t<double> weights,
                       const py::array_t<int> num_neighbors,
                       const unsigned int m,
                       const py::array_t<std::complex<double>> ylms,
@@ -36,11 +37,13 @@ template<typename distribution_type> class PGOP {
 
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
     compute_particle(const std::vector<data::Vec3>& positions,
+                     const std::vector<double>& weights,
                      const util::QlmEval& qlm_eval,
                      std::vector<std::complex<double>>& qlm_buf) const;
 
     std::tuple<double, data::Quaternion>
     compute_symmetry(const std::vector<data::Vec3>& positions,
+                     const std::vector<double>& weights,
                      std::vector<data::Vec3>& rotated_distances_buf,
                      const std::vector<std::complex<double>>& D_ij,
                      std::vector<std::complex<double>>& sym_qlm_buf,
@@ -49,6 +52,7 @@ template<typename distribution_type> class PGOP {
 
     double compute_pgop(const std::vector<double>& hsphere_pos,
                         const std::vector<data::Vec3>& position,
+                        const std::vector<double>& weights,
                         std::vector<data::Vec3>& rotated_positions,
                         const std::vector<std::complex<double>>& D_ij,
                         std::vector<std::complex<double>>& sym_qlm_buf,
