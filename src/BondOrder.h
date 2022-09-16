@@ -124,6 +124,9 @@ class FisherDistribution {
  * All computation and variables are in Cartesian coordinates as this simplifies the math and
  * increases performance.
  *
+ * WARNING: This class stores references to std::vectors. This means that care must be taken that
+ * the vectors outlive the object.
+ *
  * @tparam distribution_type A type that matches the interface of SphereSurfaceDistribution.
  */
 template<typename distribution_type> class BondOrder {
@@ -152,7 +155,7 @@ template<typename distribution_type> class BondOrder {
     /// The distribution to use for all provided neighbor vectors.
     distribution_type m_dist;
     /// The normalized neighbor vectors for the bond order diagram.
-    std::vector<data::Vec3> m_positions;
+    const std::vector<data::Vec3>& m_positions;
     /// The normalization constant @c 1 / static_cast<double>(m_positions.size()).
     double m_normalization;
 };
