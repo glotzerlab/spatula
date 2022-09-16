@@ -73,19 +73,6 @@ void rotate_matrix(std::vector<Vec3>::const_iterator points_begin,
     }
 }
 
-std::vector<Vec3> normalize_distances(const py::array_t<double> distances)
-{
-    const auto u_distances = distances.unchecked<2>();
-    auto normalized_distances = std::vector<Vec3>();
-    normalized_distances.reserve(u_distances.shape(0));
-    for (size_t i {0}; i < static_cast<size_t>(u_distances.shape(0)); ++i) {
-        const auto point = Vec3(u_distances.data(i, 0));
-        const double norm = 1 / std::sqrt(point.dot(point));
-        normalized_distances.emplace_back(point * norm);
-    }
-    return normalized_distances;
-}
-
 std::vector<double> linspace(double start, double end, unsigned int n, bool include_end)
 {
     double delta;

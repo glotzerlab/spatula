@@ -35,14 +35,12 @@ template<typename distribution_type> class PGOP {
     distribution_type getDistribution() const;
 
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(const std::vector<data::Vec3>::const_iterator& position_begin,
-                     const std::vector<data::Vec3>::const_iterator& position_end,
+    compute_particle(const std::vector<data::Vec3>& positions,
                      const util::QlmEval& qlm_eval,
                      std::vector<std::complex<double>>& qlm_buf) const;
 
     std::tuple<double, data::Quaternion>
-    compute_symmetry(const std::vector<data::Vec3>::const_iterator& position_begin,
-                     const std::vector<data::Vec3>::const_iterator& position_end,
+    compute_symmetry(const std::vector<data::Vec3>& positions,
                      std::vector<data::Vec3>& rotated_distances_buf,
                      const std::vector<std::complex<double>>& D_ij,
                      std::vector<std::complex<double>>& sym_qlm_buf,
@@ -50,8 +48,7 @@ template<typename distribution_type> class PGOP {
                      std::vector<std::complex<double>>& qlm_buf) const;
 
     double compute_pgop(const std::vector<double>& hsphere_pos,
-                        const std::vector<data::Vec3>::const_iterator& position_begin,
-                        const std::vector<data::Vec3>::const_iterator& position_end,
+                        const std::vector<data::Vec3>& position,
                         std::vector<data::Vec3>& rotated_positions,
                         const std::vector<std::complex<double>>& D_ij,
                         std::vector<std::complex<double>>& sym_qlm_buf,

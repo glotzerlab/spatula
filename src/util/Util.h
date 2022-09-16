@@ -1,14 +1,13 @@
 #pragma once
 
+#include <cmath>
+#include <complex>
+#include <concepts>
 #include <iterator>
+#include <ranges>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-
 #include "../data/Vec3.h"
-
-namespace py = pybind11;
 
 namespace pgop { namespace util {
 
@@ -107,7 +106,19 @@ std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation)
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
-std::vector<Vec3> normalize_distances(const py::array_t<double> distances);
+template<std::ranges::input_range range_type>
+requires std::floating_point<std::ranges::range_value_t<range_type>>
+std::vector<Vec3> normalize_distances(const range_type& distances) {
+    auto normalized_distances = std::vector<Vec3>();
+    normalized_distances.reserve(distances.size() / 3);
+    // In C++ 23 used strided view with a transform.
+    for (auto it = distances.begin(); it < distances.end(); it+=3) {
+        const auto point = Vec3(it[0], it[1], it[2]);
+        const double norm = 1 / std::sqrt(point.dot(point));
+        normalized_distances.emplace_back(point * norm);
+    }
+    return normalized_distances;
+}
 
 /**
  * @brief Return a vector of linearly spaced points between start and end.

@@ -36,7 +36,7 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
     const size_t N_particles = num_neighbors.size();
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto* neigh_count_ptr = static_cast<const int*>(num_neighbors.data(0));
-    const auto normed_distances = util::normalize_distances(distances);
+    const auto* distances_ptr = static_cast<const double*>(distances.data(0));
     const auto op_shape = std::vector<size_t>({N_particles, m_n_symmetries});
     auto op = py::array_t<double>(op_shape);
     auto u_op = op.mutable_unchecked<2>();
@@ -50,18 +50,21 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
     std::partial_sum(neigh_count_ptr,
                      neigh_count_ptr + N_particles,
                      std::back_inserter(distance_offsets));
-    const auto dist_begin = normed_distances.cbegin();
     const auto loop_func =
-        [&u_op, &u_rotations, &distance_offsets, &qlm_eval, &dist_begin, this](const size_t start,
+        [&u_op, &u_rotations, &distance_offsets, &qlm_eval, &distances_ptr, this](const size_t start,
                                                                                const size_t stop) {
             auto qlm_buf = std::vector<std::complex<double>>();
             qlm_buf.reserve(qlm_eval.getNlm());
             for (size_t i = start; i < stop; ++i) {
                 const auto particle_op_rot
-                    = this->compute_particle(dist_begin + distance_offsets[i],
-                                             dist_begin + distance_offsets[i + 1],
-                                             qlm_eval,
-                                             qlm_buf);
+                    = this->compute_particle(
+                        util::normalize_distances(
+                            std::ranges::subrange(
+                                distances_ptr + 3 * distance_offsets[i],
+                                distances_ptr + 3 * distance_offsets[i + 1])
+                        ),
+                        qlm_eval,
+                        qlm_buf);
                 const auto particle_op = std::get<0>(particle_op_rot);
                 const auto particle_rotations = std::get<1>(particle_op_rot);
                 for (size_t j {0}; j < particle_op.size(); ++j) {
@@ -88,12 +91,11 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 PGOP<distribution_type>::compute_particle(
-    const std::vector<data::Vec3>::const_iterator& position_begin,
-    const std::vector<data::Vec3>::const_iterator& position_end,
+    const std::vector<data::Vec3>& positions,
     const util::QlmEval& qlm_eval,
     std::vector<std::complex<double>>& qlm_buf) const
 {
-    auto rotated_dist = std::vector<data::Vec3>(std::distance(position_begin, position_end));
+    auto rotated_dist = std::vector<data::Vec3>(positions);
     auto sym_qlm_buf = std::vector<std::complex<double>>();
     sym_qlm_buf.reserve(qlm_eval.getNlm());
     auto pgop = std::vector<double>();
@@ -101,8 +103,7 @@ PGOP<distribution_type>::compute_particle(
     pgop.reserve(m_Dij.size());
     rotations.reserve(m_Dij.size());
     for (const auto& D_ij : m_Dij) {
-        const auto result = compute_symmetry(position_begin,
-                                             position_end,
+        const auto result = compute_symmetry(positions,
                                              rotated_dist,
                                              D_ij,
                                              sym_qlm_buf,
@@ -116,8 +117,7 @@ PGOP<distribution_type>::compute_particle(
 
 template<typename distribution_type>
 std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
-    const std::vector<data::Vec3>::const_iterator& position_begin,
-    const std::vector<data::Vec3>::const_iterator& position_end,
+    const std::vector<data::Vec3>& positions,
     std::vector<data::Vec3>& rotated_distances_buf,
     const std::vector<std::complex<double>>& D_ij,
     std::vector<std::complex<double>>& sym_qlm_buf,
@@ -132,8 +132,7 @@ std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
     while (!opt->terminate()) {
         const auto hsphere_pos = opt->next_point();
         const auto particle_op = compute_pgop(hsphere_pos,
-                                              position_begin,
-                                              position_end,
+                                              positions,
                                               rotated_distances_buf,
                                               D_ij,
                                               sym_qlm_buf,
@@ -150,8 +149,7 @@ std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
 template<typename distribution_type>
 double
 PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_pos,
-                                      const std::vector<data::Vec3>::const_iterator& position_begin,
-                                      const std::vector<data::Vec3>::const_iterator& position_end,
+                                      const std::vector<data::Vec3>& positions,
                                       std::vector<data::Vec3>& rotated_positions,
                                       const std::vector<std::complex<double>>& D_ij,
                                       std::vector<std::complex<double>>& sym_qlm_buf,
@@ -160,7 +158,7 @@ PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_pos,
 {
     const auto R = data::quat_from_hypersphere(hsphere_pos[0], hsphere_pos[1], hsphere_pos[2])
                        .to_rotation_matrix();
-    util::rotate_matrix(position_begin, position_end, rotated_positions.begin(), R);
+    util::rotate_matrix(positions.begin(), positions.end(), rotated_positions.begin(), R);
     const auto bond_order = BondOrder<distribution_type>(getDistribution(), rotated_positions);
     qlm_eval.eval<distribution_type>(bond_order, qlm_buf);
     util::symmetrize_qlm(qlm_buf, D_ij, sym_qlm_buf, m_max_l);
