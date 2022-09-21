@@ -28,7 +28,7 @@ double UniformDistribution::operator()(double x) const
     return x > m_threshold ? m_prefactor : 0;
 }
 
-template<typename distribution_type>
+template<SphereSurfaceDistribution distribution_type>
 BondOrder<distribution_type>::BondOrder(distribution_type dist,
                                         const std::vector<data::Vec3>& positions,
                                         const std::vector<double>& weights)
@@ -37,7 +37,7 @@ BondOrder<distribution_type>::BondOrder(distribution_type dist,
 {
 }
 
-template<typename distribution_type>
+template<SphereSurfaceDistribution distribution_type>
 double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
 {
     double sum_correction = 0;
@@ -52,22 +52,23 @@ double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
           });
     // Normalize the value and weight the contributions.
     return m_normalization
-           * std::transform_reduce(single_contributions.begin(),
-                         single_contributions.end(),
-                         m_weights.begin(),
-                         0.0,
-                         // Use Kahan summation to improve accuracy of the summation of small
-                         // numbers.,
-                         [&sum_correction](const auto& sum, const auto& y) -> double {
-                             auto addition = y - sum_correction;
-                             const auto new_sum = sum + addition;
-                             sum_correction = new_sum - sum - addition;
-                             return new_sum;
-                         },
-                         std::multiplies<>());
+           * std::transform_reduce(
+               single_contributions.begin(),
+               single_contributions.end(),
+               m_weights.begin(),
+               0.0,
+               // Use Kahan summation to improve accuracy of the summation of small
+               // numbers.,
+               [&sum_correction](const auto& sum, const auto& y) -> double {
+                   auto addition = y - sum_correction;
+                   const auto new_sum = sum + addition;
+                   sum_correction = new_sum - sum - addition;
+                   return new_sum;
+               },
+               std::multiplies<>());
 }
 
-template<typename distribution_type>
+template<SphereSurfaceDistribution distribution_type>
 std::vector<double>
 BondOrder<distribution_type>::operator()(const std::vector<data::Vec3>& points) const
 {

@@ -1,41 +1,35 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 
 #include "data/Vec3.h"
 
 namespace pgop {
 /**
- * @brief Null class to show the necessary interface for a spherical surface distribution. Given the
- * performance critical nature of the evaluation the bond order diagram, we should likely not move
- * this to an interface like approach as this would introduce a vtable and the need to access the
- * distribution on the heap. However, when we can use C++20 we can use a compile-time interface
- * using concepts we can flesh this out into the required concept for BondOrder.
+ * @brief Concept to show the necessary interface for a spherical surface distribution. Given the
+ * performance critical nature of the evaluation the bond order diagram, we should use concepts and
+ * not inheritance.
  *
- * Two options for computing the distribution exist:
+ * Two options for computing the distribution (operator(double x)) exist:
  *   1. Compute the distribution from the angle between the point and the mean.
  *   2. The dot product of the mean with the point which when the arccos is taken produces the angle
  *      from 1. Therefore, this can be faster if the distribtion can be expressed without the angle.
  */
-class SphereSurfaceDistribution {
-    public:
-    /**
-     * Each distribution must have a param_type typedef which has a corresponding single argument
-     * constructor.
-     */
-    using param_type = double;
-    SphereSurfaceDistribution(param_type param);
+template<typename T>
+concept SphereSurfaceDistribution = requires(T d, double x)
+{
+    /// Require a type alias for the constructor's single argument's type.
+    typename T::param_type;
+    /// Require constructor of only param_type.
+    std::constructible_from<typename T::param_type>;
 
-    /**
-     * @brief Compute the distribution's value.
-     *
-     * @param x The meaning of x is given by the use_theta static member. If true, x is the angle
-     * between the mean and the point. If false, x is the dot product of the mean and the point.
-     */
-    double operator()(double x) const;
-
-    /// Whether to use theta in operator().
-    static const bool use_theta = false;
+    /// Require a static member use_theta which determines the value passed to operator().
+    std::same_as<decltype(T::use_theta), const bool>;
+    /// Require Distribution::operator()(double x) -> double or float.
+    {
+        std::as_const(d)(x)
+        } -> std::floating_point;
 };
 
 /**
@@ -60,7 +54,7 @@ class UniformDistribution {
      *
      * @param max_theta The distance in radian from the mean that is non-zero.
      */
-    UniformDistribution(double max_theta);
+    UniformDistribution(param_type max_theta);
 
     double operator()(double x) const;
 
@@ -75,6 +69,7 @@ class UniformDistribution {
     /// The normalization constant for the distribution.
     double m_prefactor;
 };
+static_assert(SphereSurfaceDistribution<UniformDistribution>);
 
 /**
  * @brief Represents a von-Mises-Fisher distribution centered at a given position on the unit
@@ -93,7 +88,7 @@ class FisherDistribution {
      * @param kappa the concentration parameter of the distribution. Larger values result in a more
      * concentrated (tighter) distribution.
      */
-    FisherDistribution(double kappa);
+    FisherDistribution(param_type kappa);
 
     double operator()(double x) const;
 
@@ -108,6 +103,7 @@ class FisherDistribution {
     /// The normalization constant for the distribution.
     double m_prefactor;
 };
+static_assert(SphereSurfaceDistribution<FisherDistribution>);
 
 /**
  * @brief Representation of a bond order diagram where each point in the diagram is represented by a
@@ -120,9 +116,9 @@ class FisherDistribution {
  * WARNING: This class stores references to std::vectors. This means that care must be taken that
  * the vectors outlive the object.
  *
- * @tparam distribution_type A type that matches the interface of SphereSurfaceDistribution.
+ * @tparam distribution_type A type that matches the SphereSurfaceDistribution concept.
  */
-template<typename distribution_type> class BondOrder {
+template<SphereSurfaceDistribution distribution_type> class BondOrder {
     public:
     /**
      * @brief Create a BondOrder<distribution_type> object from a distribution and normalized
@@ -133,7 +129,9 @@ template<typename distribution_type> class BondOrder {
      * mean for the \f$ N \f$ distributions on the bond order diagram.
      * @param weights The weights to use for each position. Should be the same size as positions.
      */
-    BondOrder(distribution_type dist, const std::vector<data::Vec3>& positions, const std::vector<double>& weights);
+    BondOrder(distribution_type dist,
+              const std::vector<data::Vec3>& positions,
+              const std::vector<double>& weights);
 
     // Assumes points are on the unit sphere
     std::vector<double> operator()(const std::vector<data::Vec3>& points) const;
