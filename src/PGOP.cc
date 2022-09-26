@@ -25,6 +25,8 @@ PGOP<distribution_type>::PGOP(unsigned int max_l,
     }
 }
 
+// TODO There is a memory leak somewhere down this path. Not necessarily unaccessable but this will
+// continue to eat memory until the system runs out if running for a long time.
 template<typename distribution_type>
 py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                                            const py::array_t<double> weights,
@@ -52,35 +54,39 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
     std::partial_sum(neigh_count_ptr,
                      neigh_count_ptr + N_particles,
                      std::back_inserter(distance_offsets));
-    const auto loop_func =
-        [&u_op, &u_rotations, &distance_offsets, &qlm_eval, &distances_ptr, &weights_ptr, this](const size_t start,
-                                                                               const size_t stop) {
-            auto qlm_buf = std::vector<std::complex<double>>();
-            qlm_buf.reserve(qlm_eval.getNlm());
-            for (size_t i = start; i < stop; ++i) {
-                const auto particle_op_rot
-                    = this->compute_particle(
-                        util::normalize_distances(
-                            std::ranges::subrange(
-                                distances_ptr + 3 * distance_offsets[i],
-                                distances_ptr + 3 * distance_offsets[i + 1])
-                        ),
-                        std::vector<double>(
-                            weights_ptr + distance_offsets[i],
-                            weights_ptr + distance_offsets[i + 1]),
-                        qlm_eval,
-                        qlm_buf);
-                const auto particle_op = std::get<0>(particle_op_rot);
-                const auto particle_rotations = std::get<1>(particle_op_rot);
-                for (size_t j {0}; j < particle_op.size(); ++j) {
-                    u_op(i, j) = particle_op[j];
-                    u_rotations(i, j, 0) = particle_rotations[j].w;
-                    u_rotations(i, j, 1) = particle_rotations[j].x;
-                    u_rotations(i, j, 2) = particle_rotations[j].y;
-                    u_rotations(i, j, 3) = particle_rotations[j].z;
-                }
+    const auto loop_func = [&u_op,
+                            &u_rotations,
+                            &distance_offsets,
+                            &neigh_count_ptr,
+                            &qlm_eval,
+                            &distances_ptr,
+                            &weights_ptr,
+                            this](const size_t start, const size_t stop) {
+        auto qlm_buf = std::vector<std::complex<double>>();
+        qlm_buf.reserve(qlm_eval.getNlm());
+        for (size_t i = start; i < stop; ++i) {
+            if (neigh_count_ptr[i] == 0) {
+                continue;
             }
-        };
+            const auto particle_op_rot
+                = this->compute_particle(util::normalize_distances(std::ranges::subrange(
+                                             distances_ptr + 3 * distance_offsets[i],
+                                             distances_ptr + 3 * distance_offsets[i + 1])),
+                                         std::vector<double>(weights_ptr + distance_offsets[i],
+                                                             weights_ptr + distance_offsets[i + 1]),
+                                         qlm_eval,
+                                         qlm_buf);
+            const auto particle_op = std::get<0>(particle_op_rot);
+            const auto particle_rotations = std::get<1>(particle_op_rot);
+            for (size_t j {0}; j < particle_op.size(); ++j) {
+                u_op(i, j) = particle_op[j];
+                u_rotations(i, j, 0) = particle_rotations[j].w;
+                u_rotations(i, j, 1) = particle_rotations[j].x;
+                u_rotations(i, j, 2) = particle_rotations[j].y;
+                u_rotations(i, j, 3) = particle_rotations[j].z;
+            }
+        }
+    };
     bool serial = false;
     // Enable profiling through serial mode.
     if (serial) {
@@ -95,11 +101,10 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP<distribution_type>::compute_particle(
-    const std::vector<data::Vec3>& positions,
-    const std::vector<double>& weights,
-    const util::QlmEval& qlm_eval,
-    std::vector<std::complex<double>>& qlm_buf) const
+PGOP<distribution_type>::compute_particle(const std::vector<data::Vec3>& positions,
+                                          const std::vector<double>& weights,
+                                          const util::QlmEval& qlm_eval,
+                                          std::vector<std::complex<double>>& qlm_buf) const
 {
     auto rotated_dist = std::vector<data::Vec3>(positions);
     auto sym_qlm_buf = std::vector<std::complex<double>>();
@@ -123,14 +128,14 @@ PGOP<distribution_type>::compute_particle(
 }
 
 template<typename distribution_type>
-std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
-    const std::vector<data::Vec3>& positions,
-    const std::vector<double>& weights,
-    std::vector<data::Vec3>& rotated_distances_buf,
-    const std::vector<std::complex<double>>& D_ij,
-    std::vector<std::complex<double>>& sym_qlm_buf,
-    const util::QlmEval& qlm_eval,
-    std::vector<std::complex<double>>& qlm_buf) const
+std::tuple<double, data::Quaternion>
+PGOP<distribution_type>::compute_symmetry(const std::vector<data::Vec3>& positions,
+                                          const std::vector<double>& weights,
+                                          std::vector<data::Vec3>& rotated_distances_buf,
+                                          const std::vector<std::complex<double>>& D_ij,
+                                          std::vector<std::complex<double>>& sym_qlm_buf,
+                                          const util::QlmEval& qlm_eval,
+                                          std::vector<std::complex<double>>& qlm_buf) const
 {
     // Optimize over the 4D unit sphere which has a bijective mapping from unit quaternions to the
     // hypersphere's surface.
@@ -149,6 +154,8 @@ std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
                                               qlm_buf);
         opt->record_objective(-particle_op);
     }
+    // TODO currently optimum.first can be empty resulting in a SEGFAULT. This only happens in badly
+    // formed arguments (particles with no neighbors), but can occur.
     const auto optimum = opt->get_optimum();
     return std::make_tuple(
         -optimum.second,
@@ -156,21 +163,20 @@ std::tuple<double, data::Quaternion> PGOP<distribution_type>::compute_symmetry(
 }
 
 template<typename distribution_type>
-double
-PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_pos,
-                                      const std::vector<data::Vec3>& positions,
-                                      const std::vector<double>& weights,
-                                      std::vector<data::Vec3>& rotated_positions,
-                                      const std::vector<std::complex<double>>& D_ij,
-                                      std::vector<std::complex<double>>& sym_qlm_buf,
-                                      const util::QlmEval& qlm_eval,
-                                      std::vector<std::complex<double>>& qlm_buf) const
+double PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_pos,
+                                             const std::vector<data::Vec3>& positions,
+                                             const std::vector<double>& weights,
+                                             std::vector<data::Vec3>& rotated_positions,
+                                             const std::vector<std::complex<double>>& D_ij,
+                                             std::vector<std::complex<double>>& sym_qlm_buf,
+                                             const util::QlmEval& qlm_eval,
+                                             std::vector<std::complex<double>>& qlm_buf) const
 {
     const auto R = data::quat_from_hypersphere(hsphere_pos[0], hsphere_pos[1], hsphere_pos[2])
                        .to_rotation_matrix();
     util::rotate_matrix(positions.begin(), positions.end(), rotated_positions.begin(), R);
-    const auto bond_order = BondOrder<distribution_type>(
-        getDistribution(), rotated_positions, weights);
+    const auto bond_order
+        = BondOrder<distribution_type>(getDistribution(), rotated_positions, weights);
     qlm_eval.eval<distribution_type>(bond_order, qlm_buf);
     util::symmetrize_qlm(qlm_buf, D_ij, sym_qlm_buf, m_max_l);
     return util::covariance(qlm_buf, sym_qlm_buf);

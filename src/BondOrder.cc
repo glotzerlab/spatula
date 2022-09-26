@@ -28,6 +28,7 @@ double UniformDistribution::operator()(double x) const
     return x > m_threshold ? m_prefactor : 0;
 }
 
+// Todo if no neighbors exist this will lead to nans.
 template<SphereSurfaceDistribution distribution_type>
 BondOrder<distribution_type>::BondOrder(distribution_type dist,
                                         const std::vector<data::Vec3>& positions,

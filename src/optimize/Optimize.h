@@ -7,6 +7,9 @@
 
 namespace py = pybind11;
 
+// TODO the optimizers currently do not return a properly sized array when optimization fails (e.g.
+// all points are at inf.
+
 namespace pgop { namespace optimize {
 /**
  * @brief Base class for pgop optimizers. We use a state model where an optimizer is always either
