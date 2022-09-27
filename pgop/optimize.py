@@ -1,5 +1,6 @@
 import abc
 import enum
+import itertools
 
 import numpy as np
 
@@ -41,6 +42,26 @@ class BruteForce(Optimizer):
         self._cpp = pgop._pgop.BruteForce(
             points.tolist(), bounds[:, 0].tolist(), bounds[:, 1].tolist()
         )
+
+    @classmethod
+    def from_mesh(cls, num_splits, bounds=None, use_end=None):
+        if bounds is None:
+            bounds = HYPERSPHERE_BOUNDS
+            use_end = (False, True, True)
+        if use_end is None:
+            use_end = True
+        if isinstance(use_end, bool):
+            use_end = itertools.repeat(use_end)
+        points = [
+            p
+            for p in itertools.product(
+                *[
+                    np.linspace(bound[0], bound[1], n, endpoint=end)
+                    for bound, n, end in zip(bounds, num_splits, use_end)
+                ]
+            )
+        ]
+        return cls(points, bounds)
 
 
 class NelderMead(Optimizer):
