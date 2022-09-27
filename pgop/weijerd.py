@@ -1,662 +1,76 @@
-import functools
+import collections.abc
 import itertools
+from pathlib import Path
 
-import numpy as np
+import pandas as pd
 
-import pgop._pgop
 
-from . import util
+class _WignerData(collections.abc.Mapping):
+    def __init__(self):
+        self._df = pd.read_hdf(Path(__file__).parent / "data.h5", "data")
 
-_tetrahedral = np.array(
-    [
-        # l = 0
-        1,
-        # l = 1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 2, mprime = -2
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = -1
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = -0
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = 1
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = 2
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 3, mprime = -3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = -2
-        0,
-        0.5,
-        0,
-        0,
-        0,
-        -0.5,
-        0,
-        # mprime = -1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = 0
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = 1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # mprime = 2
-        0,
-        -0.5,
-        0,
-        0,
-        0,
-        0.5,
-        0,
-        # mprime = 3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = -4
-        5 / 24,
-        0,
-        0,
-        0,
-        np.sqrt(70) / 24,
-        0,
-        0,
-        0,
-        5 / 24,
-        # l = 4, mprime = -3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = -2
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = -1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = -0
-        0,
-        0,
-        0,
-        0,
-        7 / 12,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = 1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = 2
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = 3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 4, mprime = 4
-        5 / 24,
-        0,
-        0,
-        np.sqrt(70) / 24,
-        0,
-        0,
-        0,
-        0,
-        5 / 24,
-        # l = 5, mprime = -5
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = -4
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = -3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = -2
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = -1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = 0
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = 1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = 2
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = 3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = 4
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 5, mprime = 5
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = -6
-        5 / 32,
-        0,
-        0,
-        0,
-        -np.sqrt(55) / 32,
-        0,
-        0,
-        0,
-        -np.sqrt(55) / 32,
-        0,
-        0,
-        0,
-        5 / 32,
-        # l = 6, mprime = -5
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = -4
-        0,
-        0,
-        7 / 16,
-        0,
-        0,
-        0,
-        -np.sqrt(14) / 16,
-        0,
-        0,
-        0,
-        7 / 16,
-        0,
-        0,
-        # l = 6, mprime = -3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = -2
-        0,
-        0,
-        0,
-        0,
-        11 / 32,
-        0,
-        0,
-        0,
-        11 / 32,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = -1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = 0
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1 / 8,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = 1
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = 2
-        0,
-        0,
-        0,
-        0,
-        11 / 32,
-        0,
-        0,
-        0,
-        11 / 32,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = 3
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = 4
-        0,
-        0,
-        7 / 16,
-        0,
-        0,
-        0,
-        -np.sqrt(14) / 16,
-        0,
-        0,
-        0,
-        7 / 16,
-        0,
-        0,
-        # l = 6, mprime = 5
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        # l = 6, mprime = 6
-        5 / 32,
-        0,
-        0,
-        0,
-        -np.sqrt(55) / 32,
-        0,
-        0,
-        0,
-        -np.sqrt(55) / 32,
-        0,
-        0,
-        0,
-        5 / 32,
-    ],
-    dtype=complex,
-)
+    def __getitem__(self, key):
+        if key not in self._df.columns:
+            raise KeyError(f"WignerD matrix for point group {key} not found.")
+        return self._df[key].to_numpy()
+
+    def __len__(self):
+        return len(self._df.columns)
+
+    def __contains__(self, key):
+        return key in self._df.columns
+
+    def __iter__(self):
+        yield from self._df.columns
+
+
+def _parse_point_group(schonflies_symbol):
+    family = schonflies_symbol[0]
+    if len(schonflies_symbol) == 1:
+        return (family, None, None)
+    if schonflies_symbol[-1].isalpha():
+        modifier = schonflies_symbol[-1]
+    else:
+        modifier = None
+    if len(schonflies_symbol) == 2 and modifier is not None:
+        return (family, modifier, None)
+    if modifier:
+        order = int(schonflies_symbol[1:-1])
+    else:
+        order = int(schonflies_symbol[1:])
+    return (family, modifier, order)
 
 
 class WeigerD:
+    _MAX_L = 12
+
     def __init__(self, max_l):
-        if max_l > 6:
-            raise ValueError("max_l cannot be greater than 6.")
+        if self._MAX_L < max_l:
+            raise ValueError(f"Maximum supported l value is {self._MAX_L}.")
         self._max_l = max_l
+        self._index = slice(0, self._compute_last_index(max_l))
+        self._data = _WignerData()
 
-    def _cyclic(self, order, inverse):
-        dij = (
-            np.array(
-                [
-                    util.delta(mprime, m) * util.delta(m % order, 0)
-                    for l, mprime, m in self._iter_sph_indices()
-                ],
-                dtype=complex,
-            )
-            / order
-        )
-        if inverse:
-            return self._inverse() * dij
-        return dij
+    @staticmethod
+    def _compute_last_index(max_l):
+        return sum((2 * l + 1) ** 2 for l in range(0, max_l + 1))
 
-    def _diherdral(self, order, inverse):
-        d_mprime_m_l = []
-        for l, mprime, m in self._iter_sph_indices():
-            if m % order:
-                d_mprime_m_l.append(0)
-                continue
-            sign = 1 if l % 2 == 0 else -1
-            d_mprime_m_l.append(
-                0.5 * (util.delta(mprime, m) + sign * util.delta(mprime, -m))
-            )
-        dij = np.array(d_mprime_m_l, dtype=complex) / (2 * order)
-        if inverse:
-            return self._inverse() * dij
-        return dij
-
-    def _tetrahedral(self):
-        elems = 0
-        for l in range(self._max_l + 1):
-            elems += (2 * l + 1) ** 2
-        return _tetrahedral[:elems] / 12
-
-    def _inverse(self):
-        return (
-            np.array(
-                [
-                    util.delta(mprime, m) * util.delta(l % 2, 0)
-                    for l, mprime, m in self._iter_sph_indices()
-                ],
-                dtype=complex,
-            )
-            / 2
-        )
+    def __getitem__(self, point_group):
+        family, modifier, order = _parse_point_group(point_group)
+        if family in "TOI":
+            if modifier is not None:
+                raise KeyError(f"{point_group} is not currently supported.")
+            return self._data[family][self._index]
+        if family in "CD":
+            if family == "C" and modifier == "i":
+                return self._data["Ci"]
+            if modifier is not None:
+                raise KeyError(f"{point_group} is not currently supported.")
+            sym = family + str(order)
+            return self._data[sym][self._index]
 
     def _iter_sph_indices(self):
         for l in range(self._max_l + 1):
             ms = range(-l, l + 1)
             for mprime, m in itertools.product(ms, repeat=2):
                 yield l, mprime, m
-
-    @functools.lru_cache(maxsize=6)
-    def qlm_indices(self, l=None):
-        ind = 0
-        indices = []
-        for l in range(self._max_l + 1):
-            ms = range(-l, l + 1)
-            for mprime in ms:
-                for ind_m in range(len(ms)):
-                    indices.append(ind + ind_m)
-            ind += len(ms)
-        return np.array(indices)
-
-    def __getitem__(self, sym):
-        if sym == "T":
-            return self._tetrahedral()
-        if sym == "i":
-            return self._inverse()
-        inverse = "i" in sym
-        order = int(sym[slice(2, None) if inverse else slice(1, None)])
-        if sym[0] == "C":
-            return self._cyclic(order, inverse)
-        if sym[0] == "D":
-            return self._diherdral(order, inverse)
-        else:
-            raise KeyError(
-                f"Point group {sym} is not supported or does not exist."
-            )
-
-    def group_cardinality(self, sym):
-        if sym == "T":
-            return 12
-        if sym == "i":
-            return 2
-        inverse = "i" in sym
-        order = int(sym[slice(2, None) if inverse else slice(1, None)])
-        inv_factor = 2 if inverse else 1
-        if sym[0] == "C":
-            return order * inv_factor
-        if sym[0] == "D":
-            return 2 * order * inv_factor
-        else:
-            raise ValueError(
-                f"Point group {sym} is not supported or does not exist."
-            )
-
-
-def _weijer_qlm_sum(Dij_dot_qlms, max_l):
-    size = sum(2 * l + 1 for l in range(max_l + 1))
-    sym_qlm = np.empty(size, dtype=complex)
-    start = 0
-    summed_ind = 0
-    for l in range(max_l + 1):
-        skip = 2 * l + 1
-        for ind_m in range(skip):
-            sym_qlm[summed_ind] = Dij_dot_qlms[start : start + skip].sum()
-            summed_ind += 1
-            start += skip
-    return sym_qlm
-
-
-def symmetrize_qlm(qlms, Dij, weijer):
-    cols = len(Dij)
-    rows = sum(2 * l + 1 for l in range(weijer._max_l + 1))
-    sym_qlm = np.empty((len(qlms), cols, rows), dtype=complex)
-    qshape = qlms.shape
-    dshape = Dij.shape
-    dij_dot_qlms = qlms.reshape((qshape[0], 1, qshape[1]))[
-        ..., weijer.qlm_indices()
-    ] * Dij.reshape((1, dshape[0], dshape[1]))
-    start = 0
-    summed_ind = 0
-    for l in range(weijer._max_l + 1):
-        skip = 2 * l + 1
-        for ind_m in range(skip):
-            sym_qlm[..., summed_ind] = dij_dot_qlms[
-                ..., start : start + skip
-            ].sum(axis=-1)
-            summed_ind += 1
-            start += skip
-    return sym_qlm
-
-
-def particle_symmetrize_qlm(qlms, Dij, weijer):
-    return pgop._pgop.symmetrize_qlms(qlms, Dij, weijer._max_l)
