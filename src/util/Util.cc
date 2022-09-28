@@ -73,28 +73,13 @@ void rotate_matrix(std::vector<Vec3>::const_iterator points_begin,
     }
 }
 
-std::vector<double> linspace(double start, double end, unsigned int n, bool include_end)
-{
-    double delta;
-    if (include_end) {
-        delta = (end - start) / static_cast<double>(n);
-    } else {
-        delta = (end - start) / static_cast<double>(n + 1);
-    }
-    auto v = std::vector<double>();
-    v.reserve(n);
-    for (unsigned int i {0}; i < n; ++i) {
-        v.push_back(start + (static_cast<double>(i) * delta));
-    }
-    return v;
-}
-
 void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     const std::vector<std::complex<double>>& D_ij,
                     std::vector<std::complex<double>>& sym_qlm_buf,
                     unsigned int max_l)
 {
     sym_qlm_buf.clear();
+    sym_qlm_buf.reserve(qlms.size());
     size_t qlm_i {0};
     size_t dij_index {0};
     for (size_t l {0}; l < max_l + 1; ++l) {

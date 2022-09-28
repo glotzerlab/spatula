@@ -13,8 +13,8 @@ PGOP<distribution_type>::PGOP(unsigned int max_l,
                               const py::array_t<std::complex<double>> D_ij,
                               std::shared_ptr<optimize::Optimizer>& optimizer,
                               typename distribution_type::param_type distribution_params)
-    : m_distribution_params(distribution_params), m_max_l(max_l), m_n_symmetries(D_ij.shape(0)),
-      m_Dij(), m_optimize(optimizer)
+    : m_distribution(distribution_params), m_max_l(max_l), m_n_symmetries(D_ij.shape(0)), m_Dij(),
+      m_optimize(optimizer)
 {
     m_Dij.reserve(m_n_symmetries);
     const auto u_D_ij = D_ij.unchecked<2>();
@@ -27,6 +27,7 @@ PGOP<distribution_type>::PGOP(unsigned int max_l,
 
 // TODO There is a memory leak somewhere down this path. Not necessarily unaccessable but this will
 // continue to eat memory until the system runs out if running for a long time.
+// TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
 py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                                            const py::array_t<double> weights,
@@ -165,7 +166,7 @@ double PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_
                        .to_rotation_matrix();
     util::rotate_matrix(positions.begin(), positions.end(), rotated_positions.begin(), R);
     const auto bond_order
-        = BondOrder<distribution_type>(getDistribution(), rotated_positions, weights);
+        = BondOrder<distribution_type>(m_distribution, rotated_positions, weights);
     // compute spherical harmonic values in-place (qlm_buf.qlms)
     qlm_eval.eval<distribution_type>(bond_order, qlm_buf.qlms);
     util::symmetrize_qlm(qlm_buf.qlms, D_ij, qlm_buf.sym_qlms, m_max_l);

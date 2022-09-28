@@ -33,8 +33,6 @@ template<typename distribution_type> class PGOP {
                       const py::array_t<double> quad_weights) const;
 
     private:
-    distribution_type getDistribution() const;
-
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
     compute_particle(const std::vector<data::Vec3>& positions,
                      const std::vector<double>& weights,
@@ -57,13 +55,11 @@ template<typename distribution_type> class PGOP {
                         const util::QlmEval& qlm_eval,
                         util::QlmBuf& qlm_buf) const;
 
-    typename distribution_type::param_type m_distribution_params;
+    distribution_type m_distribution;
     unsigned int m_max_l;
     unsigned int m_n_symmetries;
     std::vector<std::vector<std::complex<double>>> m_Dij;
     std::shared_ptr<const optimize::Optimizer> m_optimize;
-    std::vector<std::vector<std::complex<double>>> m_sym_qlms;
-    std::vector<std::complex<double>> m_qlms;
 };
 
 template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name);
