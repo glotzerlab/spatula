@@ -7,7 +7,7 @@ pybind11_add_module(_pgop export-module.cc
     util/Metrics.h util/Metrics.cc
     util/Util.h util/Util.cc
     util/QlmEval.h util/QlmEval.cc
-    util/Threads.h
+    util/Threads.h util/Threads.cc
 )
 
 set_target_properties(_pgop PROPERTIES

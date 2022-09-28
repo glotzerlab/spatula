@@ -3,6 +3,9 @@
 #include <functional>
 
 #include "BS_thread_pool.hpp"
+#include <pybind11/pybind11.h>
+
+namespace py = pybind11;
 
 namespace pgop { namespace util {
 class ThreadPool {
@@ -23,6 +26,15 @@ class ThreadPool {
         return m_out;
     }
 
+    void set_threads(unsigned int num_threads)
+    {
+        m_pool.reset(num_threads);
+    }
+
+    size_t get_num_threads()
+    {
+        return m_pool.get_thread_count();
+    }
     /**
      * @brief enable the serial execution of a given loop. This exists to help with profiling, as
      * this enables profilers like py-spy to determine the slow elements of the loop for
@@ -46,4 +58,6 @@ class ThreadPool {
     BS::synced_stream m_out;
     BS::thread_pool m_pool;
 };
+
+void export_threads(py::module& m);
 }} // namespace pgop::util
