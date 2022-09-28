@@ -87,9 +87,8 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
             }
         }
     };
-    bool serial = false;
-    // Enable profiling through serial mode.
-    if (serial) {
+    // Enable py-spy profiling through serial mode.
+    if (util::ThreadPool::get().get_num_threads() == 1) {
         util::ThreadPool::get().serial_compute<void, size_t>(0, N_particles, loop_func);
     } else {
         auto& pool = util::ThreadPool::get().get_pool();
