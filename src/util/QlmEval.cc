@@ -34,8 +34,8 @@ template<typename distribution_type>
 void QlmEval::eval(const BondOrder<distribution_type>& bod,
                    std::vector<std::complex<double>>& qlm_buf) const
 {
-    qlm_buf.reserve(m_n_lms);
     qlm_buf.clear();
+    qlm_buf.reserve(m_n_lms);
     const auto B_quad = bod(m_positions);
     std::transform(m_weighted_ylms.begin(),
                    m_weighted_ylms.end(),
@@ -72,5 +72,11 @@ template std::vector<std::complex<double>>
 QlmEval::eval<FisherDistribution>(const BondOrder<FisherDistribution>&) const;
 template void QlmEval::eval<FisherDistribution>(const BondOrder<FisherDistribution>&,
                                                 std::vector<std::complex<double>>&) const;
+
+QlmBuf::QlmBuf(size_t size) : qlms(), sym_qlms()
+{
+    qlms.reserve(size);
+    sym_qlms.reserve(size);
+}
 
 }} // namespace pgop::util

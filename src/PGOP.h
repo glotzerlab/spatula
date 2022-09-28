@@ -39,25 +39,23 @@ template<typename distribution_type> class PGOP {
     compute_particle(const std::vector<data::Vec3>& positions,
                      const std::vector<double>& weights,
                      const util::QlmEval& qlm_eval,
-                     std::vector<std::complex<double>>& qlm_buf) const;
+                     util::QlmBuf& qlm_buf) const;
 
     std::tuple<double, data::Quaternion>
     compute_symmetry(const std::vector<data::Vec3>& positions,
                      const std::vector<double>& weights,
                      std::vector<data::Vec3>& rotated_distances_buf,
                      const std::vector<std::complex<double>>& D_ij,
-                     std::vector<std::complex<double>>& sym_qlm_buf,
                      const util::QlmEval& qlm_eval,
-                     std::vector<std::complex<double>>& qlm_buf) const;
+                     util::QlmBuf& qlm_buf) const;
 
     double compute_pgop(const std::vector<double>& hsphere_pos,
                         const std::vector<data::Vec3>& position,
                         const std::vector<double>& weights,
                         std::vector<data::Vec3>& rotated_positions,
                         const std::vector<std::complex<double>>& D_ij,
-                        std::vector<std::complex<double>>& sym_qlm_buf,
                         const util::QlmEval& qlm_eval,
-                        std::vector<std::complex<double>>& qlm_buf) const;
+                        util::QlmBuf& qlm_buf) const;
 
     typename distribution_type::param_type m_distribution_params;
     unsigned int m_max_l;

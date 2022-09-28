@@ -73,4 +73,17 @@ class QlmEval {
     /// Precomputed weighted ylms of the provided quadrature and normalization.
     std::vector<std::vector<std::complex<double>>> m_weighted_ylms;
 };
+
+/**
+ * @brief A class to make passing buffers for spherical harmonic expansions and their symmetrized
+ * expensions easier.
+ */
+struct QlmBuf {
+    /// base values
+    std::vector<std::complex<double>> qlms;
+    /// symmetrized values
+    std::vector<std::complex<double>> sym_qlms;
+
+    QlmBuf(size_t size);
+};
 }} // namespace pgop::util

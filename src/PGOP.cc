@@ -62,8 +62,7 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                             &distances_ptr,
                             &weights_ptr,
                             this](const size_t start, const size_t stop) {
-        auto qlm_buf = std::vector<std::complex<double>>();
-        qlm_buf.reserve(qlm_eval.getNlm());
+        auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
         for (size_t i = start; i < stop; ++i) {
             if (neigh_count_ptr[i] == 0) {
                 continue;
@@ -104,23 +103,16 @@ std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 PGOP<distribution_type>::compute_particle(const std::vector<data::Vec3>& positions,
                                           const std::vector<double>& weights,
                                           const util::QlmEval& qlm_eval,
-                                          std::vector<std::complex<double>>& qlm_buf) const
+                                          util::QlmBuf& qlm_buf) const
 {
     auto rotated_dist = std::vector<data::Vec3>(positions);
-    auto sym_qlm_buf = std::vector<std::complex<double>>();
-    sym_qlm_buf.reserve(qlm_eval.getNlm());
     auto pgop = std::vector<double>();
     auto rotations = std::vector<data::Quaternion>();
     pgop.reserve(m_Dij.size());
     rotations.reserve(m_Dij.size());
     for (const auto& D_ij : m_Dij) {
-        const auto result = compute_symmetry(positions,
-                                             weights,
-                                             rotated_dist,
-                                             D_ij,
-                                             sym_qlm_buf,
-                                             qlm_eval,
-                                             qlm_buf);
+        const auto result
+            = compute_symmetry(positions, weights, rotated_dist, D_ij, qlm_eval, qlm_buf);
         pgop.push_back(std::get<0>(result));
         rotations.push_back(std::get<1>(result));
     }
@@ -133,9 +125,8 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<data::Vec3>& positio
                                           const std::vector<double>& weights,
                                           std::vector<data::Vec3>& rotated_distances_buf,
                                           const std::vector<std::complex<double>>& D_ij,
-                                          std::vector<std::complex<double>>& sym_qlm_buf,
                                           const util::QlmEval& qlm_eval,
-                                          std::vector<std::complex<double>>& qlm_buf) const
+                                          util::QlmBuf& qlm_buf) const
 {
     // Optimize over the 4D unit sphere which has a bijective mapping from unit quaternions to the
     // hypersphere's surface.
@@ -149,7 +140,6 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<data::Vec3>& positio
                                               weights,
                                               rotated_distances_buf,
                                               D_ij,
-                                              sym_qlm_buf,
                                               qlm_eval,
                                               qlm_buf);
         opt->record_objective(-particle_op);
@@ -168,24 +158,18 @@ double PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_
                                              const std::vector<double>& weights,
                                              std::vector<data::Vec3>& rotated_positions,
                                              const std::vector<std::complex<double>>& D_ij,
-                                             std::vector<std::complex<double>>& sym_qlm_buf,
                                              const util::QlmEval& qlm_eval,
-                                             std::vector<std::complex<double>>& qlm_buf) const
+                                             util::QlmBuf& qlm_buf) const
 {
     const auto R = data::quat_from_hypersphere(hsphere_pos[0], hsphere_pos[1], hsphere_pos[2])
                        .to_rotation_matrix();
     util::rotate_matrix(positions.begin(), positions.end(), rotated_positions.begin(), R);
     const auto bond_order
         = BondOrder<distribution_type>(getDistribution(), rotated_positions, weights);
-    qlm_eval.eval<distribution_type>(bond_order, qlm_buf);
-    util::symmetrize_qlm(qlm_buf, D_ij, sym_qlm_buf, m_max_l);
-    return util::covariance(qlm_buf, sym_qlm_buf);
-}
-
-template<typename distribution_type>
-distribution_type PGOP<distribution_type>::getDistribution() const
-{
-    return distribution_type(m_distribution_params);
+    // compute spherical harmonic values in-place (qlm_buf.qlms)
+    qlm_eval.eval<distribution_type>(bond_order, qlm_buf.qlms);
+    util::symmetrize_qlm(qlm_buf.qlms, D_ij, qlm_buf.sym_qlms, m_max_l);
+    return util::covariance(qlm_buf.qlms, qlm_buf.sym_qlms);
 }
 
 template class PGOP<UniformDistribution>;
