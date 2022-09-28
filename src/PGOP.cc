@@ -37,21 +37,16 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                                            const py::array_t<double> quad_positions,
                                            const py::array_t<double> quad_weights) const
 {
-    const size_t N_particles = num_neighbors.size();
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
-    const auto* neigh_count_ptr = static_cast<const int*>(num_neighbors.data(0));
-    const auto* distances_ptr = static_cast<const double*>(distances.data(0));
-    const auto* weights_ptr = static_cast<const double*>(weights.data(0));
-    const auto op_shape = std::vector<size_t>({N_particles, m_n_symmetries});
-    auto op = py::array_t<double>(op_shape);
+    const size_t N_particles = num_neighbors.size();
+    auto op = py::array_t<double>(std::vector<size_t> {N_particles, m_n_symmetries});
     auto u_op = op.mutable_unchecked<2>();
-    auto rotations_shape = op_shape;
-    rotations_shape.push_back(4);
-    auto rotations = py::array_t<double>(rotations_shape);
+    auto rotations = py::array_t<double>(std::vector<size_t> {N_particles, m_n_symmetries, 4});
     auto u_rotations = rotations.mutable_unchecked<3>();
     auto distance_offsets = std::vector<size_t>();
     distance_offsets.reserve(N_particles + 1);
     distance_offsets.emplace_back(0);
+    const auto* neigh_count_ptr = static_cast<const int*>(num_neighbors.data(0));
     std::partial_sum(neigh_count_ptr,
                      neigh_count_ptr + N_particles,
                      std::back_inserter(distance_offsets));
@@ -60,8 +55,8 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                             &distance_offsets,
                             &neigh_count_ptr,
                             &qlm_eval,
-                            &distances_ptr,
-                            &weights_ptr,
+                            distances_ptr = static_cast<const double*>(distances.data(0)),
+                            weights_ptr = static_cast<const double*>(weights.data(0)),
                             this](const size_t start, const size_t stop) {
         auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
         for (size_t i = start; i < stop; ++i) {
@@ -76,8 +71,8 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                                                              weights_ptr + distance_offsets[i + 1]),
                                          qlm_eval,
                                          qlm_buf);
-            const auto particle_op = std::get<0>(particle_op_rot);
-            const auto particle_rotations = std::get<1>(particle_op_rot);
+            const auto& particle_op = std::get<0>(particle_op_rot);
+            const auto& particle_rotations = std::get<1>(particle_op_rot);
             for (size_t j {0}; j < particle_op.size(); ++j) {
                 u_op(i, j) = particle_op[j];
                 u_rotations(i, j, 0) = particle_rotations[j].w;
