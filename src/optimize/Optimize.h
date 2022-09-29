@@ -35,6 +35,7 @@ class Optimizer {
      * std::numeric_limits<double>::infinity() for no maximum bounds.
      */
     Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds);
+    virtual ~Optimizer() = default;
 
     /// Get the next point to compute the objective for.
     virtual std::vector<double> next_point() = 0;
@@ -76,6 +77,8 @@ class PyOptimizer : public Optimizer {
     public:
     using Optimizer::Optimizer;
 
+    ~PyOptimizer() override = default;
+
     /// Get the next point to compute the objective for.
     std::vector<double> next_point() override;
     /// Record the objective function's value for the last querried point.
@@ -111,6 +114,8 @@ class BruteForce : public Optimizer {
     BruteForce(const std::vector<std::vector<double>>& points,
                const std::vector<double>& min_bounds,
                const std::vector<double>& max_bounds);
+
+    ~BruteForce() override = default;
 
     void record_objective(double) override;
     std::vector<double> next_point() override;
@@ -255,6 +260,8 @@ class NelderMead : public Optimizer {
                unsigned int max_iter,
                double m_dist_tol,
                double m_std_tol);
+
+    ~NelderMead() override = default;
 
     std::vector<double> next_point() override;
     bool terminate() const override;
