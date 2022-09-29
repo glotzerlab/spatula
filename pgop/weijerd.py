@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from . import _pgop
+
 
 class _WignerData(collections.abc.Mapping):
     def __init__(self):
@@ -58,16 +60,25 @@ class WeigerD:
     def __getitem__(self, point_group):
         family, modifier, order = _parse_point_group(point_group)
         if family in "TOI":
-            if modifier is not None:
+            if modifier == "h":
+                return _pgop.wignerD_semidirect_prod(
+                    self._data[family][self._index],
+                    self._data["Ci"][self._index],
+                )
+            elif modifier is not None:
                 raise KeyError(f"{point_group} is not currently supported.")
             return self._data[family][self._index]
         if family in "CD":
             if family == "C" and modifier == "i":
                 return self._data["Ci"]
+            if family == "C" and modifier == "h":
+                return _pgop.wignerD_semidirect_prod(
+                    self._data[family + str(order)][self._index],
+                    self._data["Ci"][self._index],
+                )
             if modifier is not None:
                 raise KeyError(f"{point_group} is not currently supported.")
-            sym = family + str(order)
-            return self._data[sym][self._index]
+            return self._data[family + str(order)][self._index]
 
     def _iter_sph_indices(self):
         for l in range(self._max_l + 1):

@@ -6,7 +6,7 @@ class PointGroupRotations:
     # We only store the required quaternions to avoid the 2 to 1 mapping problem
     # with quaternions where the negative of a quaternion is the same rotation
     # as the original quaternion.
-    _Q = np.array([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1])
+    _Q = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     _Hurwitz = np.array(
         [
             [0.5, 0.5, 0.5, 0.5],
@@ -99,13 +99,13 @@ class PointGroupRotations:
 
     def tetrahedral(self):
         # Create the 8 quaternions in group Q
-        return np.stack((self._Q, self._Hurwitz), axis=0)
+        return np.concatenate((self._Q, self._Hurwitz), axis=0)
 
     def octahedral(self):
-        return np.stack((self._Q, self._Hurwitz, self._Lipschitz), axis=0)
+        return np.concatenate((self._Q, self._Hurwitz, self._Lipschitz), axis=0)
 
     def icosahedral(self):
-        return np.stack((self._Q, self._Hurwitz, self._isocans), axis=0)
+        return np.concatenate((self._Q, self._Hurwitz, self._isocans), axis=0)
 
     @staticmethod
     def prod(a, b):

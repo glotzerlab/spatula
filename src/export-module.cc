@@ -3,10 +3,12 @@
 #include "PGOP.h"
 #include "optimize/Optimize.h"
 #include "util/Threads.h"
+#include "util/Util.h"
 
 PYBIND11_MODULE(_pgop, m)
 {
     pgop::optimize::export_optimize(m);
     pgop::export_pgop(m);
     pgop::util::export_threads(m);
+    pgop::util::export_util(m);
 }

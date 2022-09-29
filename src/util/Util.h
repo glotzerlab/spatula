@@ -7,7 +7,12 @@
 #include <ranges>
 #include <vector>
 
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+
 #include "../data/Vec3.h"
+
+namespace py = pybind11;
 
 namespace pgop { namespace util {
 
@@ -114,4 +119,25 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     const std::vector<std::complex<double>>& D_ij,
                     std::vector<std::complex<double>>& sym_qlm_buf,
                     unsigned int max_l);
+
+py::array_t<std::complex<double>>
+wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
+                         const py::array_t<std::complex<double>> D_b);
+
+template<std::floating_point f> f colapse_to_zero(f num, f tol)
+{
+    if (std::abs(num) < tol) {
+        return 0;
+    }
+    return num;
+}
+
+template<std::floating_point f> std::complex<f> colapse_to_zero(std::complex<f> num, f tol)
+{
+    if (std::abs(std::real(num)) < tol && std::abs(std::imag(num)) < tol) {
+        return std::complex<f>(0);
+    }
+    return num;
+}
+void export_util(py::module& m);
 }} // namespace pgop::util

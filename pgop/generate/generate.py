@@ -1,3 +1,4 @@
+"""Generates WignerD matrices for use in the main code base."""
 import itertools
 from pathlib import Path
 
@@ -16,11 +17,13 @@ POINT_GROUPS = itertools.chain(
     map("".join, itertools.product("C", map(str, range(2, 13)))),
     map("".join, itertools.product("D", map(str, range(2, 13)))),
     ("T", "O", "I"),
-    ("Ci"),
+    ("Ci",),
 )
 
 
 def inverse(max_l):
+    """Return the WignerD matrix for Ci up to the given l."""
+
     def delta(a, b):
         return int(a == b)
 
@@ -37,6 +40,7 @@ def inverse(max_l):
 
 
 def generate_wignerd(schonflies_symbol, max_l):
+    """Generate a single WignerD matrix for the given point group."""
     if schonflies_symbol == "Ci":
         return inverse(max_l)
     symmetry_operations = PG_ROTATION_CACHE[schonflies_symbol]
@@ -46,10 +50,12 @@ def generate_wignerd(schonflies_symbol, max_l):
 
 
 def generate_multiple(schonflies_symbols, max_l):
+    """Generate a multiple WignerD matrices for the given point groups."""
     return {sym: generate_wignerd(sym, max_l) for sym in schonflies_symbols}
 
 
 def save_wignerd(matrices, fn, mode, compression_level=5):
+    """Save the WignerD matrices into an HDF5 file with compression."""
     pd.DataFrame(matrices).to_hdf(fn, "data", mode, compression_level)
 
 
