@@ -46,40 +46,6 @@ void rotate_matrix(const InputIterator points_begin,
 }
 
 /**
- * @brief Rotate a set of points using a rotation matrix. Uses the Euler angle convention XYZ
- * intrinsic convention @todo check to see if this is correct. The points rotated are given by @c
- * (auto it = points_begin; it < points_end; ++it).
- *
- * @param points_begin constant iterator to the beginning of points to rotate.
- * @param points_end constant iterator to the end of points to rotate.
- * @param rotated_points_it iterator to the starting vector location to place rotated positions in.
- * @param alpha Euler angle
- * @param beta Euler angle
- * @param gamma Euler angle
- */
-void rotate_euler(const std::vector<Vec3>::const_iterator points_begin,
-                  const std::vector<Vec3>::const_iterator points_end,
-                  std::vector<Vec3>::iterator rotated_points_it,
-                  double alpha,
-                  double beta,
-                  double gamma);
-
-/**
- * @brief Rotate a set of points using a rotation matrix. Uses the Euler angle convention XYZ
- * intrinsic convention @todo check to see if this is correct.
- *
- * @param points_begin constant iterator to the beginning of points to rotate.
- * @param points_end constant iterator to the end of points to rotate.
- * @param rotated_points_it iterator to the starting vector location to place rotated positions in.
- * @param rotation a size 9 vector that is a 3x3 rotation matrix. This is the matrix used to rotate
- * the points given by @c (auto it = points_begin; it < points_end; ++it).
- */
-void rotate_euler(std::vector<Vec3>::const_iterator points_begin,
-                  std::vector<Vec3>::const_iterator points_end,
-                  std::vector<Vec3>::iterator rotated_points_it,
-                  const std::vector<double>& rotation);
-
-/**
  * @brief Compute the rotation matrix for the given Euler angles in ??? convention.
  *
  * @param alpha Euler angle
@@ -107,12 +73,13 @@ std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation)
  * direction but with unit magnitude.
  */
 template<std::ranges::input_range range_type>
-requires std::floating_point<std::ranges::range_value_t<range_type>>
-std::vector<Vec3> normalize_distances(const range_type& distances) {
+requires std::floating_point<std::ranges::range_value_t<range_type>> std::vector<Vec3>
+normalize_distances(const range_type& distances)
+{
     auto normalized_distances = std::vector<Vec3>();
     normalized_distances.reserve(distances.size() / 3);
     // In C++ 23 used strided view with a transform.
-    for (auto it = distances.begin(); it < distances.end(); it+=3) {
+    for (auto it = distances.begin(); it < distances.end(); it += 3) {
         const auto point = Vec3(it[0], it[1], it[2]);
         const double norm = 1 / std::sqrt(point.dot(point));
         normalized_distances.emplace_back(point * norm);
