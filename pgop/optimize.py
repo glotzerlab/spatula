@@ -6,7 +6,7 @@ import numpy as np
 
 import pgop._pgop
 
-HYPERSPHERE_BOUNDS = np.array([[0, 2 * np.pi], [np.pi / 2, np.pi], [0, np.pi]])
+HYPERSPHERE_BOUNDS = np.array([[0, np.pi], [0, np.pi], [0, np.pi]])
 
 
 class Optimizer(abc.ABC):
@@ -44,23 +44,22 @@ class BruteForce(Optimizer):
         )
 
     @classmethod
-    def from_mesh(cls, num_splits, bounds=None, use_end=None):
+    def from_mesh(cls, num_splits, bounds=None, use_ends=False):
         if bounds is None:
             bounds = HYPERSPHERE_BOUNDS
-            use_end = (False, True, True)
-        if use_end is None:
-            use_end = True
-        if isinstance(use_end, bool):
-            use_end = itertools.repeat(use_end)
-        points = [
-            p
-            for p in itertools.product(
-                *[
-                    np.linspace(bound[0], bound[1], n, endpoint=end)
-                    for bound, n, end in zip(bounds, num_splits, use_end)
-                ]
-            )
-        ]
+        if use_ends is None:
+            use_ends = True
+        if isinstance(use_ends, bool):
+            use_ends = itertools.repeat(use_ends)
+        if not hasattr(num_splits, "__iter__"):
+            num_splits = itertools.repeat(num_splits)
+        coords = []
+        for bound, n, use_end in zip(bounds, num_splits, use_ends):
+            if use_end:
+                coords.append(np.linspace(bound[0], bound[1], n))
+            else:
+                coords.append(np.linspace(bound[0], bound[1], n + 2)[1:-1])
+        points = [p for p in itertools.product(*coords)]
         return cls(points, bounds)
 
     @property
