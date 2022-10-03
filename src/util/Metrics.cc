@@ -22,6 +22,9 @@ double covariance(const std::vector<std::complex<double>>& qlms,
         sym_covar += std::norm(sym_qlms[j]);
         mixed_covar += std::real(qlms[j] * std::conj(sym_qlms[j]));
     }
+    if (qlm_cov == 0 || sym_covar == 0) {
+        return 0;
+    }
     return mixed_covar / std::sqrt(sym_covar * qlm_cov);
 }
 }} // namespace pgop::util
