@@ -35,12 +35,12 @@ class Optimizer(abc.ABC):
 
 class BruteForce(Optimizer):
     def __init__(self, points, bounds=None, max_iter=None):
-        points = np.asarray(points)
-        if points.ndim != 2:
+        self._points = np.copy(points)
+        if self._points.ndim != 2:
             raise ValueError("points must have shape (npoints, ndim)")
-        bounds = Optimizer._default_bounds(bounds, points.shape[1])
+        bounds = Optimizer._default_bounds(bounds, self._points.shape[1])
         self._cpp = pgop._pgop.BruteForce(
-            points.tolist(), bounds[:, 0].tolist(), bounds[:, 1].tolist()
+            self._points.tolist(), bounds[:, 0].tolist(), bounds[:, 1].tolist()
         )
 
     @classmethod
@@ -62,6 +62,10 @@ class BruteForce(Optimizer):
             )
         ]
         return cls(points, bounds)
+
+    @property
+    def points(self):
+        return self._points
 
 
 class NelderMead(Optimizer):
