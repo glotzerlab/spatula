@@ -38,7 +38,8 @@ void Optimizer::clip_point(std::vector<double>& point)
 BruteForce::BruteForce(const std::vector<std::vector<double>>& points,
                        const std::vector<double>& min_bounds,
                        const std::vector<double>& max_bounds)
-    : Optimizer(min_bounds, max_bounds), m_points(points), m_cnt(0), m_best_point(),
+    : Optimizer(min_bounds, max_bounds), m_points(points), m_cnt(0),
+      m_best_point(min_bounds.size(), NAN),
       m_best_objective(std::numeric_limits<double>::infinity())
 {
 }
