@@ -43,6 +43,7 @@ void QlmEval::eval(const BondOrder<distribution_type>& bod,
                    [&B_quad](const auto& w_ylm) {
                        std::complex<double> dot = 0;
                        for (size_t i {0}; i < w_ylm.size(); ++i) {
+                           // Simple summation seems to work here unlike in the BondOrder<> classes.
                            dot += B_quad[i] * w_ylm[i];
                        }
                        return dot;
