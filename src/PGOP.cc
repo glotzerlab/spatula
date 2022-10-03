@@ -25,8 +25,6 @@ PGOP<distribution_type>::PGOP(unsigned int max_l,
     }
 }
 
-// TODO There is a memory leak somewhere down this path. Not necessarily unaccessable but this will
-// continue to eat memory until the system runs out if running for a long time.
 // TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
 py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
@@ -61,6 +59,13 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
         auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
         for (size_t i = start; i < stop; ++i) {
             if (neigh_count_ptr[i] == 0) {
+                for (size_t j {0}; j < m_n_symmetries; ++j) {
+                    u_op(i, j) = 0;
+                    u_rotations(i, j, 0) = 1;
+                    u_rotations(i, j, 1) = 0;
+                    u_rotations(i, j, 2) = 0;
+                    u_rotations(i, j, 3) = 0;
+                }
                 continue;
             }
             const auto particle_op_rot
