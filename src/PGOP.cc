@@ -113,8 +113,8 @@ PGOP<distribution_type>::compute_particle(const std::vector<data::Vec3>& positio
     for (const auto& D_ij : m_Dij) {
         const auto result
             = compute_symmetry(positions, weights, rotated_dist, D_ij, qlm_eval, qlm_buf);
-        pgop.push_back(std::get<0>(result));
-        rotations.push_back(std::get<1>(result));
+        pgop.emplace_back(std::get<0>(result));
+        rotations.emplace_back(std::get<1>(result));
     }
     return std::make_tuple(std::move(pgop), std::move(rotations));
 }
