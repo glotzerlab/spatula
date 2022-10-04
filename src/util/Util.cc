@@ -54,28 +54,23 @@ wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
         max_l += 1;
         cnt += (2 * max_l + 1) * (2 * max_l + 1);
     }
-    std::vector<size_t> l_skips;
-    l_skips.emplace_back(0);
-    auto l_sizes = std::views::iota(static_cast<size_t>(0), max_l)
-                   | std::views::transform([](const auto& l) { return (2 * l + 1) * (2 * l + 1); });
-    std::partial_sum(l_sizes.begin(), l_sizes.end(), std::back_inserter(l_skips));
-
+    size_t l_skip = 0;
     py::array_t<std::complex<double>> D_ab(u_D_a.size());
     auto u_D_ab = D_ab.mutable_unchecked<1>();
     for (size_t l {0}; l < max_l; ++l) {
-        const size_t start_li = l_skips[l];
         const size_t max_m = 2 * l + 1;
         for (size_t m_prime {0}; m_prime < max_m; ++m_prime) {
-            const size_t start_lmprime_i = start_li + m_prime * max_m;
+            const size_t start_lmprime_i = l_skip + m_prime * max_m;
             for (size_t m {0}; m < max_m; ++m) {
                 std::complex<double> sum {0, 0};
                 for (size_t m_prime_2 {0}; m_prime_2 < max_m; ++m_prime_2) {
                     sum += u_D_a(start_lmprime_i + m_prime_2)
-                           * u_D_b(start_li + m_prime_2 * max_m + m);
+                           * u_D_b(l_skip + m_prime_2 * max_m + m);
                 }
                 u_D_ab(start_lmprime_i + m) = colapse_to_zero(sum, 1e-7);
             }
         }
+        l_skip += max_m * max_m;
     }
     return D_ab;
 }
