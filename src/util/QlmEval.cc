@@ -42,8 +42,17 @@ void QlmEval::eval(const BondOrder<distribution_type>& bod,
                    std::back_insert_iterator(qlm_buf),
                    [&B_quad](const auto& w_ylm) {
                        std::complex<double> dot = 0;
-                       for (size_t i {0}; i < w_ylm.size(); ++i) {
+                       size_t i = 0;
+                       // Attempt to unroll loop for improved performance.
+                       for (; i + 10 < w_ylm.size(); i += 10) {
                            // Simple summation seems to work here unlike in the BondOrder<> classes.
+                           dot += B_quad[i] * w_ylm[i] + B_quad[i + 1] * w_ylm[i + 1]
+                                  + B_quad[i + 2] * w_ylm[i + 2] + B_quad[i + 3] * w_ylm[i + 3]
+                                  + B_quad[i + 4] * w_ylm[i + 4] + B_quad[i + 5] * w_ylm[i + 5]
+                                  + B_quad[i + 6] * w_ylm[i + 6] + B_quad[i + 7] * w_ylm[i + 7]
+                                  + B_quad[i + 8] * w_ylm[i + 8] + B_quad[i + 9] * w_ylm[i + 9];
+                       }
+                       for (; i < w_ylm.size(); ++i) {
                            dot += B_quad[i] * w_ylm[i];
                        }
                        return dot;
