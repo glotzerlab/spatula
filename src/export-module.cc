@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 
 #include "PGOP.h"
-#include "optimize/Optimize.h"
+#include "optimize/export_optimize.h"
 #include "util/Threads.h"
 #include "util/Util.h"
 
