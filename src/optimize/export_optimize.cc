@@ -3,6 +3,7 @@
 #include "BruteForce.h"
 #include "NelderMead.h"
 #include "Optimize.h"
+#include "Union.h"
 #include "export_optimize.h"
 
 namespace pgop { namespace optimize {
@@ -48,5 +49,7 @@ void export_optimize(py::module& m)
                       unsigned int,
                       double,
                       double>());
+
+    export_union_optimizer(m);
 }
 }} // namespace pgop::optimize

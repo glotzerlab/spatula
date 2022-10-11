@@ -1,5 +1,6 @@
+"""Optimization schemes for PGOP."""
+
 import abc
-import enum
 import itertools
 
 import numpy as np
@@ -10,20 +11,46 @@ HYPERSPHERE_BOUNDS = np.array([[0, np.pi], [0, np.pi], [0, np.pi]])
 
 
 class Optimizer(abc.ABC):
+    """Base class for optimization schemes.
+
+    Defines the interface that optimizers must impliment.
+
+    The interface in Python is an state based iterator. The optimizer is
+    iterated over and at each iteration `~.record_objective` must be called with
+    the objective of the point provided in the last iteration. Iteration stops
+    when the `~.terminate` is ``True``.
+
+    Warning:
+        User created `Optimizer` subclasses are not currently supported.
+    """
+
     # User Interface
     @property
     def optimum(self):
+        """list[float]: The current best point."""
         return self._cpp.optimum
 
     @property
     def terminated(self):
+        """bool: Whether the optimization should be terminated."""
         return self._cpp.terminate
 
     def __iter__(self):
+        """Iterate over the points to test for optimization.
+
+        This iteration is unique in Python in that it requires
+        `~.report_objective` to be called inbetween iterations.
+
+        Yields
+        ------
+        points : list[float]
+            The next point to test.
+        """
         while not self.terminated:
             yield self._cpp.next_point()
 
     def report_objective(self, objective):
+        """Record the objective for the last iterated point."""
         self._cpp.record_objective(objective)
 
     @staticmethod
@@ -34,17 +61,36 @@ class Optimizer(abc.ABC):
 
 
 class BruteForce(Optimizer):
+    """Find the optimum among specified points.
+
+    While not an optimizer in the traditional sense, `BruteForce` will determine
+    the optimum from the set of points provided in its constructor.
+    """
+
     def __init__(self, points, bounds=None, max_iter=None):
         self._points = np.copy(points)
         if self._points.ndim != 2:
             raise ValueError("points must have shape (npoints, ndim)")
         bounds = Optimizer._default_bounds(bounds, self._points.shape[1])
+        self._bounds = bounds
         self._cpp = pgop._pgop.BruteForce(
             self._points.tolist(), bounds[:, 0].tolist(), bounds[:, 1].tolist()
         )
 
     @classmethod
     def from_mesh(cls, num_splits, bounds=None, use_ends=False):
+        """Create a mesh of points for constructing a `BruteForce` object.
+
+        Parameters
+        ----------
+        num_split : int or tuple[int]
+        bounds : array_like of shape :math:`(N_{dim}, 2)` of float, optional
+        use_ends : bool or list[bool]
+
+        Returns
+        -------
+        BruteForce
+        """
         if bounds is None:
             bounds = HYPERSPHERE_BOUNDS
         if use_ends is None:
@@ -64,6 +110,7 @@ class BruteForce(Optimizer):
 
     @property
     def points(self):
+        """:math:`(N, N_{dim})` numpy.ndarray of float: The points to query."""
         return self._points
 
 
@@ -100,3 +147,40 @@ class NelderMead(Optimizer):
         index = np.diag_indices(len(point))
         simplex[1:][index] += delta
         return simplex
+
+
+class Union(Optimizer):
+    @classmethod
+    def brute_force_to_nelder(
+        cls,
+        brute_force,
+        delta,
+        bounds=None,
+        alpha=1,
+        gamma=2,
+        rho=0.5,
+        sigma=0.5,
+        max_iter=None,
+        dist_tol=1e-2,
+        std_tol=1e-3,
+    ):
+        instance = cls()
+        if max_iter is None:
+            max_iter = 2**16 - 1
+        if bounds is None:
+            bounds = brute_force._bounds
+        else:
+            bounds = Optimizer._default_bounds(
+                bounds, brute_force.points.shape[1]
+            )
+        instance._cpp = pgop._pgop.Union(
+            brute_force._cpp,
+            pgop._pgop.NelderMeadParams(alpha, gamma, rho, sigma),
+            bounds[:, 0].tolist(),
+            bounds[:, 0].tolist(),
+            max_iter,
+            dist_tol,
+            std_tol,
+            delta,
+        )
+        return instance

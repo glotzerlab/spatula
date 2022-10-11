@@ -6,6 +6,7 @@ pybind11_add_module(_pgop export-module.cc
     optimize/Optimize.h optimize/Optimize.cc
     optimize/BruteForce.h optimize/BruteForce.cc
     optimize/NelderMead.h optimize/NelderMead.cc
+    optimize/Union.h optimize/Union.cc
     optimize/export_optimize.h optimize/export_optimize.cc
     util/Metrics.h util/Metrics.cc
     util/Util.h util/Util.cc
