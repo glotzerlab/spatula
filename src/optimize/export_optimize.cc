@@ -1,6 +1,7 @@
 #include <pybind11/stl.h>
 
 #include "BruteForce.h"
+#include "MonteCarlo.h"
 #include "NelderMead.h"
 #include "Optimize.h"
 #include "Union.h"
@@ -51,5 +52,6 @@ void export_optimize(py::module& m)
                       double>());
 
     export_union_optimizer(m);
+    export_monte_carlo(m);
 }
 }} // namespace pgop::optimize

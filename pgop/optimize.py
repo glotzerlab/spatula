@@ -184,3 +184,27 @@ class Union(Optimizer):
             delta,
         )
         return instance
+
+
+class MonteCarlo(Optimizer):
+    """Find the optimum using a random MC annealing."""
+
+    def __init__(
+        self,
+        initial_point,
+        kT,
+        max_move_size,
+        bounds=None,
+        seed=0,
+        max_iter=150,
+    ):
+        bounds = Optimizer._default_bounds(bounds, len(initial_point[0]))
+        self._cpp = pgop._pgop.MonteCarlo(
+            bounds[:, 0].tolist(),
+            bounds[:, 1].tolist(),
+            initial_point,
+            kT,
+            max_move_size,
+            seed,
+            max_iter,
+        )
