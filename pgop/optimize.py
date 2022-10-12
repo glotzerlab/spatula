@@ -173,7 +173,7 @@ class Union(Optimizer):
             bounds = Optimizer._default_bounds(
                 bounds, brute_force.points.shape[1]
             )
-        instance._cpp = pgop._pgop.Union(
+        instance._cpp = pgop._pgop.Union.brute_force_nelder_mead(
             brute_force._cpp,
             pgop._pgop.NelderMeadParams(alpha, gamma, rho, sigma),
             bounds[:, 0].tolist(),
@@ -182,6 +182,28 @@ class Union(Optimizer):
             dist_tol,
             std_tol,
             delta,
+        )
+        return instance
+
+    @classmethod
+    def brute_force_to_mc(
+        cls, brute_force, kT, max_move_size, bounds=None, seed=0, max_iter=150
+    ):
+        instance = cls()
+        if bounds is None:
+            bounds = brute_force._bounds
+        else:
+            bounds = Optimizer._default_bounds(
+                bounds, brute_force.points.shape[1]
+            )
+        instance._cpp = pgop._pgop.Union.brute_force_mc(
+            brute_force._cpp,
+            bounds[:, 0].tolist(),
+            bounds[:, 0].tolist(),
+            kT,
+            max_move_size,
+            seed,
+            max_iter,
         )
         return instance
 
