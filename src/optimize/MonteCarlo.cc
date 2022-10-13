@@ -59,6 +59,25 @@ bool TrialMoveGenerator::accept(double neg_energy_change)
     return acc;
 }
 
+void TrialMoveGenerator::setSeed(long unsigned int seed)
+{
+    m_rng_engine.seed(seed);
+}
+
+double TrialMoveGenerator::getDiameter() const
+{
+    return m_diameter;
+}
+void TrialMoveGenerator::setDiameter(double diameter)
+{
+    m_diameter = diameter;
+}
+
+void TrialMoveGenerator::setkT(double kT)
+{
+    m_inv_kT = 1 / kT;
+}
+
 MonteCarlo::MonteCarlo(const std::vector<double>& min_bounds,
                        const std::vector<double>& max_bounds,
                        const std::pair<std::vector<double>, double>& initial_point,
@@ -115,6 +134,44 @@ std::unique_ptr<Optimizer> MonteCarlo::clone() const
     return std::make_unique<MonteCarlo>(*this);
 }
 
+double MonteCarlo::getkT() const
+{
+    return m_kT;
+}
+void MonteCarlo::setkT(double kT)
+{
+    m_kT = kT;
+    m_move_generator.setkT(kT);
+}
+
+void MonteCarlo::setSeed(long unsigned int seed)
+{
+    m_move_generator.setSeed(seed);
+}
+
+unsigned int MonteCarlo::getIter() const
+{
+    return m_max_iter;
+}
+void MonteCarlo::setIter(unsigned int iter)
+{
+    m_max_iter = iter;
+}
+
+double MonteCarlo::getMaxMoveSize() const
+{
+    return m_move_generator.getDiameter();
+}
+void MonteCarlo::setMaxMoveSize(double max_move_size)
+{
+    m_move_generator.setDiameter(max_move_size);
+}
+
+unsigned int MonteCarlo::getCount() const
+{
+    return m_cnt;
+}
+
 void export_monte_carlo(py::module& m)
 {
     py::class_<MonteCarlo, Optimizer, std::shared_ptr<MonteCarlo>>(m, "MonteCarlo")
@@ -124,6 +181,11 @@ void export_monte_carlo(py::module& m)
                       double,
                       double,
                       long unsigned int,
-                      unsigned int>());
+                      unsigned int>())
+        .def_property_readonly("count", &MonteCarlo::getCount)
+        .def_property("max_move_size", &MonteCarlo::getMaxMoveSize, &MonteCarlo::setMaxMoveSize)
+        .def_property("iterations", &MonteCarlo::getIter, &MonteCarlo::setIter)
+        .def_property("kT", &MonteCarlo::getkT, &MonteCarlo::setkT)
+        .def("set_seed", &MonteCarlo::setSeed);
 }
 }} // namespace pgop::optimize

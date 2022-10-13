@@ -20,6 +20,13 @@ class TrialMoveGenerator {
 
     bool accept(double neg_energy_change);
 
+    void setSeed(long unsigned int seed);
+
+    double getDiameter() const;
+    void setDiameter(double diameter);
+
+    void setkT(double kT);
+
     private:
     std::vector<double> getSample();
     void getSample(std::vector<double>& buf);
@@ -49,6 +56,19 @@ class MonteCarlo : public Optimizer {
     bool terminate() const override;
     std::pair<std::vector<double>, double> get_optimum() const override;
     std::unique_ptr<Optimizer> clone() const override;
+
+    double getkT() const;
+    void setkT(double kT);
+
+    void setSeed(long unsigned int seed);
+
+    unsigned int getIter() const;
+    void setIter(unsigned int iter);
+
+    double getMaxMoveSize() const;
+    void setMaxMoveSize(double max_move_size);
+
+    unsigned int getCount() const;
 
     private:
     std::pair<std::vector<double>, double> m_best_point;
