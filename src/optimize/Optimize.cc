@@ -25,13 +25,7 @@ void Optimizer::record_objective(double objective)
 void Optimizer::clip_point(std::vector<double>& point)
 {
     for (size_t i {0}; i < point.size(); ++i) {
-        auto& x = point[i];
-        if (x < m_min_bounds[i]) {
-            x = m_min_bounds[i];
-        }
-        if (x > m_max_bounds[i]) {
-            x = m_max_bounds[i];
-        }
+        point[i] = std::clamp(point[i], m_min_bounds[i], m_max_bounds[i]);
     }
 }
 
