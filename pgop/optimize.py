@@ -177,7 +177,7 @@ class Union(Optimizer):
             brute_force._cpp,
             pgop._pgop.NelderMeadParams(alpha, gamma, rho, sigma),
             bounds[:, 0].tolist(),
-            bounds[:, 0].tolist(),
+            bounds[:, 1].tolist(),
             max_iter,
             dist_tol,
             std_tol,
@@ -199,7 +199,7 @@ class Union(Optimizer):
         instance._cpp = pgop._pgop.Union.brute_force_mc(
             brute_force._cpp,
             bounds[:, 0].tolist(),
-            bounds[:, 0].tolist(),
+            bounds[:, 1].tolist(),
             kT,
             max_move_size,
             seed,
