@@ -17,75 +17,28 @@ class Union : public Optimizer {
     Union(const std::shared_ptr<const Optimizer>& initial_opt,
           const std::vector<double>& min_bounds,
           const std::vector<double>& max_bounds,
-          std::function<std::unique_ptr<Optimizer>(const Optimizer&)> instantiate_final)
-        : Optimizer(min_bounds, max_bounds), m_inital_opt(initial_opt->clone()),
-          m_final_opt(nullptr), m_instantiate_final(instantiate_final), m_on_final_opt(false)
-    {
-    }
+          std::function<std::unique_ptr<Optimizer>(const Optimizer&)> instantiate_final);
 
-    Union(const Union& original)
-        : Optimizer(original.m_min_bounds, original.m_max_bounds),
-          m_inital_opt(original.m_inital_opt->clone()), m_final_opt(nullptr),
-          m_instantiate_final(original.m_instantiate_final), m_on_final_opt(original.m_on_final_opt)
-    {
-        if (m_on_final_opt) {
-            m_final_opt = original.m_final_opt->clone();
-        }
-    }
+    Union(const Union& original);
 
     ~Union() override = default;
 
-    void record_objective(double objective) override
-    {
-        getCurrentOptimizer().record_objective(objective);
-    }
+    void record_objective(double objective) override;
 
-    std::vector<double> next_point() override
-    {
-        if (!m_on_final_opt && getCurrentOptimizer().terminate()) {
-            createFinalOptimizer();
-            m_on_final_opt = true;
-        }
-        return getCurrentOptimizer().next_point();
-    }
+    std::vector<double> next_point() override;
 
-    bool terminate() const override
-    {
-        return !m_on_final_opt && getCurrentOptimizer().terminate();
-    }
+    bool terminate() const override;
 
-    std::pair<std::vector<double>, double> get_optimum() const override
-    {
-        return getCurrentOptimizer().get_optimum();
-    }
+    std::pair<std::vector<double>, double> get_optimum() const override;
 
-    std::unique_ptr<Optimizer> clone() const override
-    {
-        return std::make_unique<Union>(*this);
-    }
+    std::unique_ptr<Optimizer> clone() const override;
 
     private:
-    Optimizer& getCurrentOptimizer()
-    {
-        if (m_on_final_opt) {
-            return *m_final_opt.get();
-        } else {
-            return *m_inital_opt.get();
-        }
-    }
+    Optimizer& getCurrentOptimizer();
 
-    const Optimizer& getCurrentOptimizer() const
-    {
-        if (m_on_final_opt) {
-            return *m_final_opt.get();
-        } else {
-            return *m_inital_opt.get();
-        }
-    }
-    void createFinalOptimizer()
-    {
-        m_final_opt = m_instantiate_final(*m_inital_opt.get());
-    }
+    const Optimizer& getCurrentOptimizer() const;
+
+    void createFinalOptimizer();
 
     std::unique_ptr<Optimizer> m_inital_opt;
     std::unique_ptr<Optimizer> m_final_opt;

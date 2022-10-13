@@ -6,6 +6,78 @@
 #include "Union.h"
 
 namespace pgop { namespace optimize {
+Union::Union(const std::shared_ptr<const Optimizer>& initial_opt,
+             const std::vector<double>& min_bounds,
+             const std::vector<double>& max_bounds,
+             std::function<std::unique_ptr<Optimizer>(const Optimizer&)> instantiate_final)
+    : Optimizer(min_bounds, max_bounds), m_inital_opt(initial_opt->clone()), m_final_opt(nullptr),
+      m_instantiate_final(instantiate_final), m_on_final_opt(false)
+{
+}
+
+Union::Union(const Union& original)
+    : Optimizer(original.m_min_bounds, original.m_max_bounds),
+      m_inital_opt(original.m_inital_opt->clone()), m_final_opt(nullptr),
+      m_instantiate_final(original.m_instantiate_final), m_on_final_opt(original.m_on_final_opt)
+{
+    if (m_on_final_opt) {
+        m_final_opt = original.m_final_opt->clone();
+    }
+}
+
+void Union::record_objective(double objective)
+{
+    getCurrentOptimizer().record_objective(objective);
+}
+
+std::vector<double> Union::next_point()
+{
+    if (!m_on_final_opt && getCurrentOptimizer().terminate()) {
+        createFinalOptimizer();
+        m_on_final_opt = true;
+    }
+    auto point = getCurrentOptimizer().next_point();
+    return point;
+}
+
+bool Union::terminate() const
+{
+    return m_on_final_opt && getCurrentOptimizer().terminate();
+}
+
+std::pair<std::vector<double>, double> Union::get_optimum() const
+{
+    return getCurrentOptimizer().get_optimum();
+}
+
+std::unique_ptr<Optimizer> Union::clone() const
+{
+    return std::make_unique<Union>(*this);
+}
+
+Optimizer& Union::getCurrentOptimizer()
+{
+    if (m_on_final_opt) {
+        return *m_final_opt.get();
+    } else {
+        return *m_inital_opt.get();
+    }
+}
+
+const Optimizer& Union::getCurrentOptimizer() const
+{
+    if (m_on_final_opt) {
+        return *m_final_opt.get();
+    } else {
+        return *m_inital_opt.get();
+    }
+}
+
+void Union::createFinalOptimizer()
+{
+    m_final_opt = m_instantiate_final(*m_inital_opt.get());
+}
+
 void export_union_optimizer(py::module& m)
 {
     py::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "Union")
@@ -22,7 +94,8 @@ void export_union_optimizer(py::module& m)
                             initial_opt,
                             min_bounds,
                             max_bounds,
-                            [&](const Optimizer& brute_force) -> auto{
+                            [ params, max_bounds, min_bounds, max_iter, dist_tol, std_tol,
+                              delta ](const Optimizer& brute_force) -> auto{
                                 auto simplex = std::vector<std::vector<double>>();
                                 const auto& best_point = brute_force.get_optimum().first;
                                 for (size_t i {0}; i < simplex.size() + 1; ++i) {
@@ -49,19 +122,20 @@ void export_union_optimizer(py::module& m)
                double max_move_size,
                long unsigned int seed,
                unsigned int max_iter) -> auto{
-                return std::make_shared<Union>(initial_opt,
-                                               min_bounds,
-                                               max_bounds,
-                                               [&](const Optimizer& opt) {
-                                                   return std::make_unique<MonteCarlo>(
-                                                       min_bounds,
-                                                       max_bounds,
-                                                       opt.get_optimum(),
-                                                       kT,
-                                                       max_move_size,
-                                                       seed,
-                                                       max_iter);
-                                               });
+                return std::make_shared<Union>(
+                    initial_opt,
+                    min_bounds,
+                    max_bounds,
+                    [max_bounds, min_bounds, kT, max_move_size, seed, max_iter](
+                        const Optimizer& opt) {
+                        return std::make_unique<MonteCarlo>(min_bounds,
+                                                            max_bounds,
+                                                            opt.get_optimum(),
+                                                            kT,
+                                                            max_move_size,
+                                                            seed,
+                                                            max_iter);
+                    });
             });
 }
 }} // namespace pgop::optimize
