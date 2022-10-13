@@ -69,7 +69,7 @@ MonteCarlo::MonteCarlo(const std::vector<double>& min_bounds,
     : Optimizer(min_bounds, max_bounds), m_best_point(initial_point),
       m_current_point(initial_point), m_trial_point(initial_point.first.size()),
       m_move_generator(seed, max_move_size, kT, initial_point.first.size()),
-      m_max_iter {max_iter}, m_cnt {0}
+      m_move_buf(initial_point.first.size()), m_max_iter {max_iter}, m_cnt {0}
 {
 }
 
