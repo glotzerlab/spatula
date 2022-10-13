@@ -56,10 +56,12 @@ class MonteCarlo : public Optimizer {
     bool terminate() const override;
     std::pair<std::vector<double>, double> get_optimum() const override;
     std::unique_ptr<Optimizer> clone() const override;
+    void specialize(unsigned int particle_index) override;
 
     double getkT() const;
     void setkT(double kT);
 
+    long unsigned int getSeed() const;
     void setSeed(long unsigned int seed);
 
     unsigned int getIter() const;
@@ -75,6 +77,7 @@ class MonteCarlo : public Optimizer {
     std::pair<std::vector<double>, double> m_current_point;
     std::vector<double> m_trial_point;
 
+    long unsigned int m_seed;
     TrialMoveGenerator m_move_generator;
     std::vector<double> m_move_buf;
     double m_kT;

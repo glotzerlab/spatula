@@ -43,6 +43,9 @@ class Optimizer {
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const = 0;
 
+    /// Potentially modify optimizer for given particle (e.g. random algorithms).
+    virtual void specialize(unsigned int particle_index);
+
     protected:
     /// Take a point and wrap it to the nearest within bounds point.
     void clip_point(std::vector<double>& point);

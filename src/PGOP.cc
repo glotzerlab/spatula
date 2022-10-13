@@ -75,7 +75,8 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                                          std::vector<double>(weights_ptr + distance_offsets[i],
                                                              weights_ptr + distance_offsets[i + 1]),
                                          qlm_eval,
-                                         qlm_buf);
+                                         qlm_buf,
+                                         i);
             const auto& particle_op = std::get<0>(particle_op_rot);
             const auto& particle_rotations = std::get<1>(particle_op_rot);
             for (size_t j {0}; j < particle_op.size(); ++j) {
@@ -103,7 +104,8 @@ std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 PGOP<distribution_type>::compute_particle(const std::vector<data::Vec3>& positions,
                                           const std::vector<double>& weights,
                                           const util::QlmEval& qlm_eval,
-                                          util::QlmBuf& qlm_buf) const
+                                          util::QlmBuf& qlm_buf,
+                                          unsigned int particle_index) const
 {
     auto rotated_dist = std::vector<data::Vec3>(positions);
     auto pgop = std::vector<double>();
@@ -111,8 +113,13 @@ PGOP<distribution_type>::compute_particle(const std::vector<data::Vec3>& positio
     pgop.reserve(m_Dij.size());
     rotations.reserve(m_Dij.size());
     for (const auto& D_ij : m_Dij) {
-        const auto result
-            = compute_symmetry(positions, weights, rotated_dist, D_ij, qlm_eval, qlm_buf);
+        const auto result = compute_symmetry(positions,
+                                             weights,
+                                             rotated_dist,
+                                             D_ij,
+                                             qlm_eval,
+                                             qlm_buf,
+                                             particle_index);
         pgop.emplace_back(std::get<0>(result));
         rotations.emplace_back(std::get<1>(result));
     }
@@ -126,13 +133,15 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<data::Vec3>& positio
                                           std::vector<data::Vec3>& rotated_distances_buf,
                                           const std::vector<std::complex<double>>& D_ij,
                                           const util::QlmEval& qlm_eval,
-                                          util::QlmBuf& qlm_buf) const
+                                          util::QlmBuf& qlm_buf,
+                                          unsigned int particle_index) const
 {
     // Optimize over the 4D unit sphere which has a bijective mapping from unit quaternions to the
     // hypersphere's surface.
     const std::vector<double> opt_min_bounds {-M_PI, -M_PI_2, -M_PI_2};
     const std::vector<double> opt_max_bounds {M_PI, M_PI_2, M_PI_2};
     auto opt = m_optimize->clone();
+    opt->specialize(particle_index);
     while (!opt->terminate()) {
         const auto hsphere_pos = opt->next_point();
         const auto particle_op = compute_pgop(hsphere_pos,

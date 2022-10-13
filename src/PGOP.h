@@ -37,7 +37,8 @@ template<typename distribution_type> class PGOP {
     compute_particle(const std::vector<data::Vec3>& positions,
                      const std::vector<double>& weights,
                      const util::QlmEval& qlm_eval,
-                     util::QlmBuf& qlm_buf) const;
+                     util::QlmBuf& qlm_buf,
+                     unsigned int particle_index) const;
 
     std::tuple<double, data::Quaternion>
     compute_symmetry(const std::vector<data::Vec3>& positions,
@@ -45,7 +46,8 @@ template<typename distribution_type> class PGOP {
                      std::vector<data::Vec3>& rotated_distances_buf,
                      const std::vector<std::complex<double>>& D_ij,
                      const util::QlmEval& qlm_eval,
-                     util::QlmBuf& qlm_buf) const;
+                     util::QlmBuf& qlm_buf,
+                     unsigned int particle_index) const;
 
     double compute_pgop(const std::vector<double>& hsphere_pos,
                         const std::vector<data::Vec3>& position,

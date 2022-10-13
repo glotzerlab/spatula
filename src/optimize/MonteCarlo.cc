@@ -134,6 +134,11 @@ std::unique_ptr<Optimizer> MonteCarlo::clone() const
     return std::make_unique<MonteCarlo>(*this);
 }
 
+void MonteCarlo::specialize(unsigned int particle_index)
+{
+    setSeed(m_seed + particle_index);
+}
+
 double MonteCarlo::getkT() const
 {
     return m_kT;
@@ -144,8 +149,14 @@ void MonteCarlo::setkT(double kT)
     m_move_generator.setkT(kT);
 }
 
+long unsigned int MonteCarlo::getSeed() const
+{
+    return m_seed;
+}
+
 void MonteCarlo::setSeed(long unsigned int seed)
 {
+    m_seed = seed;
     m_move_generator.setSeed(seed);
 }
 

@@ -29,6 +29,11 @@ void Optimizer::clip_point(std::vector<double>& point)
     }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+void Optimizer::specialize(unsigned int particle_index) { }
+#pragma GCC diagnostic pop
+
 std::vector<double> PyOptimizer::next_point()
 {
     PYBIND11_OVERRIDE_PURE(std::vector<double>, Optimizer, next_point);
