@@ -82,7 +82,7 @@ class PGOP:
             neighbors.weights,
             neighbors.neighbor_counts,
             m,
-            self._ylms(m),
+            np.conj(self._ylms(m)),
             quad_positions,
             quad_weights,
         )
