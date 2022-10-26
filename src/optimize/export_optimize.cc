@@ -1,6 +1,8 @@
 #include <pybind11/stl.h>
 
 #include "BruteForce.h"
+#include "GradientDescent.h"
+#include "LocalBinaryOptimizer.h"
 #include "MonteCarlo.h"
 #include "NelderMead.h"
 #include "Optimize.h"
@@ -52,7 +54,9 @@ void export_optimize(py::module& m)
                       double,
                       double>());
 
-    export_union_optimizer(m);
+    export_gradient_descent(m);
+    export_local_binary(m);
     export_monte_carlo(m);
+    export_union_optimizer(m);
 }
 }} // namespace pgop::optimize

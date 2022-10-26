@@ -1,6 +1,8 @@
 #include <pybind11/stl.h>
 
 #include "BruteForce.h"
+#include "GradientDescent.h"
+#include "LocalBinaryOptimizer.h"
 #include "MonteCarlo.h"
 #include "NelderMead.h"
 #include "Union.h"
@@ -134,6 +136,44 @@ void export_union_optimizer(py::module& m)
                                                             seed,
                                                             max_iter);
                     });
+            })
+        .def_static(
+            "with_grad",
+            [](const std::shared_ptr<const Optimizer> initial_opt,
+               double alpha,
+               double max_move_size,
+               double tol,
+               unsigned int n_rounds) -> auto{
+                return std::make_shared<Union>(
+                    initial_opt,
+                    initial_opt->getMinBounds(),
+                    initial_opt->getMaxBounds(),
+                    [alpha, max_move_size, tol, n_rounds](const Optimizer& opt) {
+                        return std::make_unique<GradientDescent>(opt.getMinBounds(),
+                                                                 opt.getMaxBounds(),
+                                                                 opt.get_optimum().first,
+                                                                 alpha,
+                                                                 max_move_size,
+                                                                 tol,
+                                                                 n_rounds);
+                    });
+            })
+        .def_static(
+            "with_grad2",
+            [](const std::shared_ptr<const Optimizer> initial_opt,
+               double max_move_size,
+               unsigned short iter_max) -> auto{
+                return std::make_shared<Union>(initial_opt,
+                                               initial_opt->getMinBounds(),
+                                               initial_opt->getMaxBounds(),
+                                               [max_move_size, iter_max](const Optimizer& opt) {
+                                                   return std::make_unique<GradientDescent2>(
+                                                       opt.getMinBounds(),
+                                                       opt.getMaxBounds(),
+                                                       opt.get_optimum().first,
+                                                       max_move_size,
+                                                       iter_max);
+                                               });
             });
 }
 }} // namespace pgop::optimize

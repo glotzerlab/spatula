@@ -190,6 +190,24 @@ class Union(Optimizer):
         )
         return instance
 
+    @classmethod
+    def with_grad(
+        cls, optimizer, alpha=0.9, max_move_size=0.1, tol=1e-5, n_rounds=2
+    ):
+        instance = cls()
+        instance._cpp = pgop._pgop.Union.with_grad(
+            optimizer._cpp, alpha, tol, max_move_size, n_rounds
+        )
+        return instance
+
+    @classmethod
+    def with_local_binary(cls, optimizer, max_move_size=0.1, iter_max=4):
+        instance = cls()
+        instance._cpp = pgop._pgop.Union.with_grad2(
+            optimizer._cpp, max_move_size, iter_max
+        )
+        return instance
+
 
 class MonteCarlo(Optimizer):
     """Find the optimum using a random MC annealing."""
@@ -212,4 +230,37 @@ class MonteCarlo(Optimizer):
             max_move_size,
             seed,
             max_iter,
+        )
+
+
+class GradientDescent(Optimizer):
+    def __init__(
+        self,
+        bounds,
+        initial_point,
+        alpha=0.9,
+        max_move_size=0.1,
+        tol=1e-3,
+        n_rounds=2,
+    ):
+        bounds = Optimizer._default_bounds(bounds, len(initial_point))
+        self._cpp = pgop._pgop.GradientDescent(
+            bounds[:, 0].tolist(),
+            bounds[:, 1].tolist(),
+            initial_point,
+            alpha,
+            tol,
+            n_rounds,
+        )
+
+
+class LocalBinary(Optimizer):
+    def __init__(self, bounds, initial_point, max_move_size=0.1, iter_max=4):
+        bounds = Optimizer._default_bounds(bounds, len(initial_point))
+        self._cpp = pgop._pgop.GradientDescent2(
+            bounds[:, 0].tolist(),
+            bounds[:, 1].tolist(),
+            initial_point,
+            max_move_size,
+            iter_max,
         )
