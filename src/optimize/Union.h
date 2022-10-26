@@ -25,11 +25,9 @@ class Union : public Optimizer {
 
     void record_objective(double objective) override;
 
-    std::vector<double> next_point() override;
+    void internal_next_point() override;
 
     bool terminate() const override;
-
-    std::pair<std::vector<double>, double> get_optimum() const override;
 
     std::unique_ptr<Optimizer> clone() const override;
 

@@ -151,11 +151,10 @@ class NelderMead(Optimizer):
 
 class Union(Optimizer):
     @classmethod
-    def brute_force_to_nelder(
+    def with_nelder(
         cls,
-        brute_force,
+        optimizer,
         delta,
-        bounds=None,
         alpha=1,
         gamma=2,
         rho=0.5,
@@ -167,17 +166,9 @@ class Union(Optimizer):
         instance = cls()
         if max_iter is None:
             max_iter = 2**16 - 1
-        if bounds is None:
-            bounds = brute_force._bounds
-        else:
-            bounds = Optimizer._default_bounds(
-                bounds, brute_force.points.shape[1]
-            )
-        instance._cpp = pgop._pgop.Union.brute_force_nelder_mead(
-            brute_force._cpp,
+        instance._cpp = pgop._pgop.Union.with_nelder_mead(
+            optimizer._cpp,
             pgop._pgop.NelderMeadParams(alpha, gamma, rho, sigma),
-            bounds[:, 0].tolist(),
-            bounds[:, 1].tolist(),
             max_iter,
             dist_tol,
             std_tol,
@@ -186,20 +177,12 @@ class Union(Optimizer):
         return instance
 
     @classmethod
-    def brute_force_to_mc(
-        cls, brute_force, kT, max_move_size, bounds=None, seed=0, max_iter=150
+    def with_mc(
+        cls, optimizer, kT=0.1, max_move_size=0.05, seed=0, max_iter=150
     ):
         instance = cls()
-        if bounds is None:
-            bounds = brute_force._bounds
-        else:
-            bounds = Optimizer._default_bounds(
-                bounds, brute_force.points.shape[1]
-            )
-        instance._cpp = pgop._pgop.Union.brute_force_mc(
-            brute_force._cpp,
-            bounds[:, 0].tolist(),
-            bounds[:, 1].tolist(),
+        instance._cpp = pgop._pgop.Union.with_mc(
+            optimizer._cpp,
             kT,
             max_move_size,
             seed,

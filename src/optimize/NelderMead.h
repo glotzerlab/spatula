@@ -134,9 +134,8 @@ class NelderMead : public Optimizer {
 
     ~NelderMead() override = default;
 
-    std::vector<double> next_point() override;
+    void internal_next_point() override;
     bool terminate() const override;
-    std::pair<std::vector<double>, double> get_optimum() const override;
     std::unique_ptr<Optimizer> clone() const override;
 
     private:
@@ -164,7 +163,6 @@ class NelderMead : public Optimizer {
     OrderedSimplex m_current_simplex;
 
     unsigned int m_max_iter;
-    unsigned int m_iter;
     double m_dist_tol;
     double m_std_tol;
 

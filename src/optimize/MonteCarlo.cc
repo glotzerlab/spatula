@@ -86,49 +86,46 @@ MonteCarlo::MonteCarlo(const std::vector<double>& min_bounds,
                        long unsigned int seed,
                        unsigned int max_iter)
     : Optimizer(min_bounds, max_bounds), m_best_point(initial_point),
-      m_current_point(initial_point), m_trial_point(initial_point.first.size()),
+      m_current_point(initial_point),
       m_move_generator(seed, max_move_size, kT, initial_point.first.size()),
-      m_move_buf(initial_point.first.size()), m_max_iter {max_iter}, m_cnt {0}
+      m_move_buf(initial_point.first.size()), m_max_iter {max_iter}
 {
 }
 
 void MonteCarlo::record_objective(double objective)
 {
+    if (!m_need_objective) {
+        throw std::runtime_error("Must get new point before recording objective.");
+    }
+    m_need_objective = false;
     if (objective > m_current_point.second
         || !m_move_generator.accept(m_current_point.second - objective)) {
         return;
     }
-    m_current_point.first = m_trial_point;
+    m_current_point.first = m_point;
     m_current_point.second = objective;
     if (objective < m_best_point.second) {
-        m_best_point.first = m_trial_point;
+        m_best_point.first = m_point;
         m_best_point.second = objective;
     }
 }
 
-std::vector<double> MonteCarlo::next_point()
+void MonteCarlo::internal_next_point()
 {
-    m_cnt += 1;
     m_move_generator.generate(m_move_buf);
-    m_trial_point.clear();
+    m_point.clear();
     std::transform(m_current_point.first.cbegin(),
                    m_current_point.first.cend(),
                    m_move_buf.cbegin(),
-                   std::back_inserter(m_trial_point),
+                   std::back_inserter(m_point),
                    std::plus {});
-    clip_point(m_trial_point);
-    return m_trial_point;
 }
 
 bool MonteCarlo::terminate() const
 {
-    return m_cnt > m_max_iter;
+    return m_count > m_max_iter;
 }
 
-std::pair<std::vector<double>, double> MonteCarlo::get_optimum() const
-{
-    return m_best_point;
-}
 std::unique_ptr<Optimizer> MonteCarlo::clone() const
 {
     return std::make_unique<MonteCarlo>(*this);
@@ -178,11 +175,6 @@ void MonteCarlo::setMaxMoveSize(double max_move_size)
     m_move_generator.setDiameter(max_move_size);
 }
 
-unsigned int MonteCarlo::getCount() const
-{
-    return m_cnt;
-}
-
 void export_monte_carlo(py::module& m)
 {
     py::class_<MonteCarlo, Optimizer, std::shared_ptr<MonteCarlo>>(m, "MonteCarlo")
@@ -193,7 +185,6 @@ void export_monte_carlo(py::module& m)
                       double,
                       long unsigned int,
                       unsigned int>())
-        .def_property_readonly("count", &MonteCarlo::getCount)
         .def_property("max_move_size", &MonteCarlo::getMaxMoveSize, &MonteCarlo::setMaxMoveSize)
         .def_property("iterations", &MonteCarlo::getIter, &MonteCarlo::setIter)
         .def_property("kT", &MonteCarlo::getkT, &MonteCarlo::setkT)

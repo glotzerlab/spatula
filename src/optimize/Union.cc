@@ -27,27 +27,30 @@ Union::Union(const Union& original)
 
 void Union::record_objective(double objective)
 {
+    if (!m_need_objective) {
+        throw std::runtime_error("Must get new point before recording objective.");
+    }
+    m_need_objective = false;
+    m_objective = objective;
+    if (objective < m_best_point.second) {
+        m_best_point.first = m_point;
+        m_best_point.second = objective;
+    }
     getCurrentOptimizer().record_objective(objective);
 }
 
-std::vector<double> Union::next_point()
+void Union::internal_next_point()
 {
     if (!m_on_final_opt && getCurrentOptimizer().terminate()) {
         createFinalOptimizer();
         m_on_final_opt = true;
     }
-    auto point = getCurrentOptimizer().next_point();
-    return point;
+    m_point = getCurrentOptimizer().next_point();
 }
 
 bool Union::terminate() const
 {
     return m_on_final_opt && getCurrentOptimizer().terminate();
-}
-
-std::pair<std::vector<double>, double> Union::get_optimum() const
-{
-    return getCurrentOptimizer().get_optimum();
 }
 
 std::unique_ptr<Optimizer> Union::clone() const
@@ -81,55 +84,50 @@ void Union::createFinalOptimizer()
 void export_union_optimizer(py::module& m)
 {
     py::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "Union")
-        .def_static("brute_force_nelder_mead",
-                    [](const std::shared_ptr<const BruteForce> initial_opt,
-                       NelderMeadParams params,
-                       const std::vector<double>& min_bounds,
-                       const std::vector<double>& max_bounds,
-                       unsigned int max_iter,
-                       double dist_tol,
-                       double std_tol,
-                       double delta) {
-                        return std::make_shared<Union>(
-                            initial_opt,
-                            min_bounds,
-                            max_bounds,
-                            [ params, max_bounds, min_bounds, max_iter, dist_tol, std_tol,
-                              delta ](const Optimizer& brute_force) -> auto{
-                                auto simplex = std::vector<std::vector<double>>();
-                                const auto& best_point = brute_force.get_optimum().first;
-                                for (size_t i {0}; i < simplex.size() + 1; ++i) {
-                                    simplex.emplace_back(best_point);
-                                }
-                                for (size_t i {0}; i < simplex.size(); ++i) {
-                                    simplex[i + 1][i] += delta;
-                                }
-                                return std::make_unique<NelderMead>(params,
-                                                                    simplex,
-                                                                    min_bounds,
-                                                                    max_bounds,
-                                                                    max_iter,
-                                                                    dist_tol,
-                                                                    std_tol);
-                            });
-                    })
         .def_static(
-            "brute_force_mc",
-            [](const std::shared_ptr<const BruteForce> initial_opt,
-               const std::vector<double>& min_bounds,
-               const std::vector<double>& max_bounds,
+            "with_nelder_mead",
+            [](const std::shared_ptr<const Optimizer> initial_opt,
+               NelderMeadParams params,
+               unsigned int max_iter,
+               double dist_tol,
+               double std_tol,
+               double delta) {
+                return std::make_shared<Union>(
+                    initial_opt,
+                    initial_opt->getMinBounds(),
+                    initial_opt->getMaxBounds(),
+                    [ params, max_iter, dist_tol, std_tol, delta ](const Optimizer& opt) -> auto{
+                        auto simplex = std::vector<std::vector<double>>();
+                        const auto& best_point = opt.get_optimum().first;
+                        for (size_t i {0}; i < simplex.size() + 1; ++i) {
+                            simplex.emplace_back(best_point);
+                        }
+                        for (size_t i {0}; i < simplex.size(); ++i) {
+                            simplex[i + 1][i] += delta;
+                        }
+                        return std::make_unique<NelderMead>(params,
+                                                            simplex,
+                                                            opt.getMinBounds(),
+                                                            opt.getMaxBounds(),
+                                                            max_iter,
+                                                            dist_tol,
+                                                            std_tol);
+                    });
+            })
+        .def_static(
+            "with_mc",
+            [](const std::shared_ptr<const Optimizer> initial_opt,
                double kT,
                double max_move_size,
                long unsigned int seed,
                unsigned int max_iter) -> auto{
                 return std::make_shared<Union>(
                     initial_opt,
-                    min_bounds,
-                    max_bounds,
-                    [max_bounds, min_bounds, kT, max_move_size, seed, max_iter](
-                        const Optimizer& opt) {
-                        return std::make_unique<MonteCarlo>(min_bounds,
-                                                            max_bounds,
+                    initial_opt->getMinBounds(),
+                    initial_opt->getMaxBounds(),
+                    [kT, max_move_size, seed, max_iter](const Optimizer& opt) {
+                        return std::make_unique<MonteCarlo>(opt.getMinBounds(),
+                                                            opt.getMaxBounds(),
                                                             opt.get_optimum(),
                                                             kT,
                                                             max_move_size,

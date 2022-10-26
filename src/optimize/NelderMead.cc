@@ -184,7 +184,7 @@ NelderMead::NelderMead(NelderMeadParams params,
                        double dist_tol,
                        double std_tol)
     : Optimizer(min_bounds, max_bounds), m_stage(NelderMead::Stage::NEW_SIMPLEX), m_params(params),
-      m_dim(initial_simplex.size() - 1), m_current_simplex(m_dim), m_max_iter(max_iter), m_iter(0),
+      m_dim(initial_simplex.size() - 1), m_current_simplex(m_dim), m_max_iter(max_iter),
       m_dist_tol(dist_tol), m_std_tol(std_tol), m_last_reflect(), m_new_simplex_index(0),
       m_new_simplex(initial_simplex.begin(), initial_simplex.end())
 {
@@ -265,11 +265,8 @@ std::vector<double> NelderMead::shrink()
     return m_new_simplex[1];
 }
 
-std::vector<double> NelderMead::next_point()
+void NelderMead::internal_next_point()
 {
-    if (m_need_objective) {
-        throw std::runtime_error("Must record objective for new point first.");
-    }
     switch (m_stage) {
     case NelderMead::Stage::NEW_SIMPLEX:
         if (m_new_simplex_index != 0) {
@@ -321,10 +318,6 @@ std::vector<double> NelderMead::next_point()
     default:
         break;
     }
-    m_need_objective = true;
-    ++m_iter;
-    clip_point(m_point);
-    return m_point;
 }
 
 bool NelderMead::terminate() const
@@ -332,7 +325,7 @@ bool NelderMead::terminate() const
     if (m_stage == NelderMead::Stage::NEW_SIMPLEX) {
         return false;
     }
-    return m_iter > m_max_iter || m_current_simplex.get_objective_std() < m_std_tol
+    return m_count > m_max_iter || m_current_simplex.get_objective_std() < m_std_tol
            || m_current_simplex.get_min_dist() < m_dist_tol;
 }
 
@@ -340,16 +333,4 @@ std::unique_ptr<Optimizer> NelderMead::clone() const
 {
     return std::make_unique<NelderMead>(*this);
 }
-
-std::pair<std::vector<double>, double> NelderMead::get_optimum() const
-{
-    if (m_current_simplex.size() > 0) {
-        const auto& simplex_best = m_current_simplex[0];
-        if (!m_need_objective && simplex_best.second > m_objective) {
-            return std::make_pair(m_point, m_objective);
-        }
-        return m_current_simplex[0];
-    }
-    return std::pair<std::vector<double>, double>();
-}
-}} // End namespace pgop::optimize
+}} // end namespace pgop::optimize

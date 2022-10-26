@@ -52,9 +52,8 @@ class MonteCarlo : public Optimizer {
     ~MonteCarlo() override = default;
 
     void record_objective(double) override;
-    std::vector<double> next_point() override;
+    void internal_next_point() override;
     bool terminate() const override;
-    std::pair<std::vector<double>, double> get_optimum() const override;
     std::unique_ptr<Optimizer> clone() const override;
     void specialize(unsigned int particle_index) override;
 
@@ -75,7 +74,6 @@ class MonteCarlo : public Optimizer {
     private:
     std::pair<std::vector<double>, double> m_best_point;
     std::pair<std::vector<double>, double> m_current_point;
-    std::vector<double> m_trial_point;
 
     long unsigned int m_seed;
     TrialMoveGenerator m_move_generator;
@@ -83,7 +81,6 @@ class MonteCarlo : public Optimizer {
     double m_kT;
 
     unsigned int m_max_iter;
-    unsigned int m_cnt;
 };
 
 void export_monte_carlo(py::module& m);

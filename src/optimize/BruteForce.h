@@ -32,17 +32,13 @@ class BruteForce : public Optimizer {
 
     ~BruteForce() override = default;
 
-    void record_objective(double) override;
-    std::vector<double> next_point() override;
+    void internal_next_point() override;
     bool terminate() const override;
-    std::pair<std::vector<double>, double> get_optimum() const override;
     std::unique_ptr<Optimizer> clone() const override;
 
     private:
     /// The set of points to evaluate.
     std::vector<std::vector<double>> m_points;
-    /// The current iteration of the optimizer.
-    size_t m_cnt;
 
     /// Current optimum point.
     std::vector<double> m_best_point;

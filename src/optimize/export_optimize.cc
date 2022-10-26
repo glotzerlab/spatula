@@ -14,7 +14,8 @@ void export_optimize(py::module& m)
         .def("next_point", &Optimizer::next_point)
         .def("record_objective", &Optimizer::record_objective)
         .def_property_readonly("terminate", &Optimizer::terminate)
-        .def_property_readonly("optimum", &Optimizer::get_optimum);
+        .def_property_readonly("optimum", &Optimizer::get_optimum)
+        .def_property_readonly("count", &Optimizer::getCount);
 
     py::class_<BruteForce, Optimizer, std::shared_ptr<BruteForce>>(m, "BruteForce")
         .def(py::init<const std::vector<std::vector<double>>&,

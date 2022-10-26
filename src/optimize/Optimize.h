@@ -32,19 +32,28 @@ class Optimizer {
     virtual ~Optimizer() = default;
 
     /// Get the next point to compute the objective for.
-    virtual std::vector<double> next_point() = 0;
+    std::vector<double> next_point();
     /// Record the objective function's value for the last querried point.
     virtual void record_objective(double);
     /// Returns whether or not convergence or termination conditions have been met.
     virtual bool terminate() const = 0;
+
     /// Get the current best point and the value of the objective function at that point.
-    virtual std::pair<std::vector<double>, double> get_optimum() const = 0;
+    std::pair<std::vector<double>, double> get_optimum() const;
 
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const = 0;
 
     /// Potentially modify optimizer for given particle (e.g. random algorithms).
     virtual void specialize(unsigned int particle_index);
+
+    /// Set the next point to compute the objective for to m_point.
+    virtual void internal_next_point() = 0;
+
+    unsigned int getCount() const;
+
+    const std::vector<double>& getMinBounds() const;
+    const std::vector<double>& getMaxBounds() const;
 
     protected:
     /// Take a point and wrap it to the nearest within bounds point.
@@ -59,6 +68,12 @@ class Optimizer {
     std::vector<double> m_point;
     /// The last recorded objective function value.
     double m_objective;
+
+    /// The best (as of yet) point computed.
+    std::pair<std::vector<double>, double> m_best_point;
+
+    /// The number of iterations thus far.
+    unsigned int m_count;
 
     /// A flag for which operation, next_point or record_objective, is allowed.
     bool m_need_objective;
@@ -77,13 +92,11 @@ class PyOptimizer : public Optimizer {
     ~PyOptimizer() override = default;
 
     /// Get the next point to compute the objective for.
-    std::vector<double> next_point() override;
+    void internal_next_point() override;
     /// Record the objective function's value for the last querried point.
     void record_objective(double) override;
     /// Returns whether or not convergence or termination conditions have been met.
     bool terminate() const override;
-    /// Get the current best point and the value of the objective function at that point.
-    std::pair<std::vector<double>, double> get_optimum() const override;
 
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const override;
