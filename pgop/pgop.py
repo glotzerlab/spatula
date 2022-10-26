@@ -21,7 +21,7 @@ class PGOP:
     the surface of the sphere (e.g. von-Mises-Fisher or uniform distributions).
     """
 
-    def __init__(self, dist, max_l, symmetries, optimizer, bo_kwargs):
+    def __init__(self, dist, max_l, symmetries, optimizer, bo_arg):
         """Create a PGOP object.
 
         Parameters
@@ -37,22 +37,18 @@ class PGOP:
         optimizer : pgop.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
-        bo_kwargs : dict[str, float]
-            A dictionary to pass as keyword arguments to the distribution's
-            constructor. The "fisher" distribution expects ``kappa``
-            (concentration parameter) and "uniform" ``max_theta`` (angle after
-            which distribution is zero).
+        bo_arg : double
+            The corresponding distribution parameter.
         """
         self._symmetries = symmetries
         self._weijer = weijerd.WeigerD(max_l)
         self._optmizer = optimizer
-        dist_param = bo_kwargs.popitem()[1]
         D_ij = self._precompute_weijer_d()  # noqa :D806
-        if dist == "uniform":
-            cls_ = pgop._pgop.PGOPUniform
-        if dist == "fisher":
-            cls_ = pgop._pgop.PGOPFisher
-        self._cpp = cls_(max_l, D_ij, optimizer._cpp, dist_param)
+        try:
+            cls_ = getattr(pgop._pgop, "PGOP" + dist.title())
+        except AttributeError:
+            raise ValueError(f"Distribution {dist} not supported.")
+        self._cpp = cls_(max_l, D_ij, optimizer._cpp, bo_arg)
         self._sph_harm = sph_harm.SphHarm(max_l)
         self._pgop = None
 
