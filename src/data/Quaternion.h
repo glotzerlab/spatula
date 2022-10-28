@@ -11,6 +11,7 @@ struct Quaternion {
     double y;
     double z;
 
+    Quaternion();
     Quaternion(double w_, double x_, double y_, double z_);
 
     Quaternion conjugate() const;
