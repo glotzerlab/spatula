@@ -7,6 +7,17 @@ Quaternion::Quaternion() : w(1.0), x(0.0), y(0.0), z(0.0) { }
 
 Quaternion::Quaternion(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) { }
 
+Quaternion::Quaternion(Vec3 axis, double angle)
+{
+    axis.normalize();
+    const double half_angle = 0.5 * angle;
+    w = std::cos(half_angle);
+    const double sin_half_angle = std::sin(half_angle);
+    x = sin_half_angle * axis.x;
+    y = sin_half_angle * axis.y;
+    z = sin_half_angle * axis.z;
+}
+
 Quaternion Quaternion::conjugate() const
 {
     return Quaternion(w, -x, -y, -z);
@@ -28,6 +39,13 @@ std::vector<double> Quaternion::to_rotation_matrix() const
                                 xz - wy,
                                 yz + wx,
                                 1 - xx - yy};
+}
+
+std::pair<Vec3, double> Quaternion::to_axis_angle() const
+{
+    const double half_angle = std::acos(w);
+    const double sin_qw = half_angle != 0 ? 1 / std::sin(half_angle) : 0;
+    return std::make_pair<Vec3, double>({x * sin_qw, y * sin_qw, z * sin_qw}, 2 * half_angle);
 }
 
 Vec3 quat_to_vec3(const Quaternion& q)
