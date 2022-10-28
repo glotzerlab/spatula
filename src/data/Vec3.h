@@ -32,6 +32,8 @@ struct Vec3 {
      * @param b the point to compute the dot product of.
      */
     double dot(const Vec3& b) const;
+
+    void normalize();
 };
 
 /// Vec3 addition.

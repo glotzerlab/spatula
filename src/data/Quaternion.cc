@@ -23,6 +23,15 @@ Quaternion Quaternion::conjugate() const
     return Quaternion(w, -x, -y, -z);
 }
 
+void Quaternion::normalize()
+{
+    const double norm = 1 / std::sqrt(w * w + x * x + y * y + z * z);
+    w *= norm;
+    x *= norm;
+    y *= norm;
+    z *= norm;
+}
+
 std::vector<double> Quaternion::to_rotation_matrix() const
 {
     // Necessary if not unit quaternion. Otherwise it is just 2 / 1 = 2.

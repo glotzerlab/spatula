@@ -17,6 +17,7 @@ struct Quaternion {
     Quaternion(Vec3 axis, double angle);
 
     Quaternion conjugate() const;
+    void normalize();
     friend Quaternion quat_from_hypersphere(double phi, double theta, double psi);
     friend Quaternion quat_from_vec(const Vec3& v);
     std::vector<double> to_rotation_matrix() const;

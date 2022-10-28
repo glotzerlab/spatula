@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Vec3.h"
 
 namespace pgop { namespace data {
@@ -10,6 +12,14 @@ Vec3::Vec3() : x(0.0), y(0.0), z(0.0) { }
 double Vec3::dot(const Vec3& b) const
 {
     return x * b.x + y * b.y + z * b.z;
+}
+
+void Vec3::normalize()
+{
+    const double norm = 1 / std::sqrt(x * x + y * y + z * z);
+    x *= norm;
+    y *= norm;
+    z *= norm;
 }
 
 template<typename number_type> Vec3 operator+(const Vec3& a, const number_type& b)
