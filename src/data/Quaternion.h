@@ -28,6 +28,7 @@ struct Quaternion {
 };
 
 Quaternion operator*(const Quaternion& a, const Quaternion& b);
+Quaternion operator*=(Quaternion& a, const Quaternion& b);
 
 Quaternion quat_from_hypersphere(double phi, double theta, double psi);
 Quaternion quat_from_vec(const Vec3& v);

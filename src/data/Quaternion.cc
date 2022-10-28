@@ -65,6 +65,12 @@ Quaternion operator*(const Quaternion& a, const Quaternion& b)
                       a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w);
 }
 
+Quaternion operator*=(Quaternion& a, const Quaternion& b)
+{
+    a = a * b;
+    return a;
+}
+
 Vec3 quat_to_vec3(const Quaternion& q)
 {
     return Vec3(q.x, q.y, q.z);
