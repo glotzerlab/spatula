@@ -57,6 +57,14 @@ std::pair<Vec3, double> Quaternion::to_axis_angle() const
     return std::make_pair<Vec3, double>({x * sin_qw, y * sin_qw, z * sin_qw}, 2 * half_angle);
 }
 
+Quaternion operator*(const Quaternion& a, const Quaternion& b)
+{
+    return Quaternion(a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
+                      a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+                      a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+                      a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w);
+}
+
 Vec3 quat_to_vec3(const Quaternion& q)
 {
     return Vec3(q.x, q.y, q.z);

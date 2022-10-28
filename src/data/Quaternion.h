@@ -27,6 +27,8 @@ struct Quaternion {
     double scale_factor() const;
 };
 
+Quaternion operator*(const Quaternion& a, const Quaternion& b);
+
 Quaternion quat_from_hypersphere(double phi, double theta, double psi);
 Quaternion quat_from_vec(const Vec3& v);
 Vec3 quat_to_vec3(const Quaternion& q);
