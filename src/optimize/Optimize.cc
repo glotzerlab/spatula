@@ -7,8 +7,9 @@
 #include "Optimize.h"
 
 namespace pgop { namespace optimize {
-Optimizer::Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds)
-    : m_min_bounds(min_bounds), m_max_bounds(max_bounds), m_point(), m_objective(), m_count(0),
+Optimizer::Optimizer()
+    : m_point(), m_objective(),
+      m_best_point({1.0, 0.0, 0.0, 0.0}, std::numeric_limits<double>::max()), m_count(0),
       m_need_objective(false)
 {
 }
@@ -26,25 +27,17 @@ void Optimizer::record_objective(double objective)
     }
 }
 
-std::pair<std::vector<double>, double> Optimizer::get_optimum() const
+std::pair<data::Quaternion, double> Optimizer::get_optimum() const
 {
     return m_best_point;
 }
 
-void Optimizer::clip_point(std::vector<double>& point)
-{
-    for (size_t i {0}; i < point.size(); ++i) {
-        point[i] = std::clamp(point[i], m_min_bounds[i], m_max_bounds[i]);
-    }
-}
-
-std::vector<double> Optimizer::next_point()
+data::Quaternion Optimizer::next_point()
 {
     if (m_need_objective) {
         throw std::runtime_error("Must record objective for new point first.");
     }
     internal_next_point();
-    clip_point(m_point);
     ++m_count;
     m_need_objective = true;
     return m_point;
@@ -53,14 +46,6 @@ std::vector<double> Optimizer::next_point()
 unsigned int Optimizer::getCount() const
 {
     return m_count;
-}
-const std::vector<double>& Optimizer::getMinBounds() const
-{
-    return m_min_bounds;
-}
-const std::vector<double>& Optimizer::getMaxBounds() const
-{
-    return m_max_bounds;
 }
 
 #pragma GCC diagnostic push
@@ -85,5 +70,13 @@ bool PyOptimizer::terminate() const
 std::unique_ptr<Optimizer> PyOptimizer::clone() const
 {
     return std::make_unique<PyOptimizer>(*this);
+}
+
+void export_base_optimize(py::module& m)
+{
+    py::class_<Optimizer, PyOptimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
+        .def("record_objective", &Optimizer::record_objective)
+        .def_property_readonly("terminate", &Optimizer::terminate)
+        .def_property_readonly("count", &Optimizer::getCount);
 }
 }} // namespace pgop::optimize

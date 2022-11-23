@@ -4,7 +4,6 @@
 
 #include "BondOrder.h"
 #include "PGOP.h"
-#include "optimize/Optimize.h"
 #include "util/Threads.h"
 
 namespace pgop {
@@ -136,15 +135,11 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<data::Vec3>& positio
                                           util::QlmBuf& qlm_buf,
                                           unsigned int particle_index) const
 {
-    // Optimize over the 4D unit sphere which has a bijective mapping from unit quaternions to the
-    // hypersphere's surface.
-    const std::vector<double> opt_min_bounds {-M_PI, -M_PI_2, -M_PI_2};
-    const std::vector<double> opt_max_bounds {M_PI, M_PI_2, M_PI_2};
     auto opt = m_optimize->clone();
     opt->specialize(particle_index);
     while (!opt->terminate()) {
-        const auto hsphere_pos = opt->next_point();
-        const auto particle_op = compute_pgop(hsphere_pos,
+        const auto quaternion = opt->next_point();
+        const auto particle_op = compute_pgop(quaternion,
                                               positions,
                                               weights,
                                               rotated_distances_buf,
@@ -156,13 +151,11 @@ PGOP<distribution_type>::compute_symmetry(const std::vector<data::Vec3>& positio
     // TODO currently optimum.first can be empty resulting in a SEGFAULT. This only happens in badly
     // formed arguments (particles with no neighbors), but can occur.
     const auto optimum = opt->get_optimum();
-    return std::make_tuple(
-        -optimum.second,
-        util::quat_from_hypersphere(optimum.first[0], optimum.first[1], optimum.first[2]));
+    return std::make_tuple(-optimum.second, optimum.first);
 }
 
 template<typename distribution_type>
-double PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_pos,
+double PGOP<distribution_type>::compute_pgop(const data::Quaternion& quaternion,
                                              const std::vector<data::Vec3>& positions,
                                              const std::vector<double>& weights,
                                              std::vector<data::Vec3>& rotated_positions,
@@ -170,8 +163,7 @@ double PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_
                                              const util::QlmEval& qlm_eval,
                                              util::QlmBuf& qlm_buf) const
 {
-    const auto R = data::quat_from_hypersphere(hsphere_pos[0], hsphere_pos[1], hsphere_pos[2])
-                       .to_rotation_matrix();
+    const auto R = quaternion.to_rotation_matrix();
     util::rotate_matrix(positions.begin(), positions.end(), rotated_positions.begin(), R);
     const auto bond_order
         = BondOrder<distribution_type>(m_distribution, rotated_positions, weights);
@@ -183,6 +175,7 @@ double PGOP<distribution_type>::compute_pgop(const std::vector<double>& hsphere_
 
 template class PGOP<UniformDistribution>;
 template class PGOP<FisherDistribution>;
+template class PGOP<ApproxLinearDistribution>;
 
 template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name)
 {
@@ -198,5 +191,6 @@ void export_pgop(py::module& m)
 {
     export_pgop_class<UniformDistribution>(m, "PGOPUniform");
     export_pgop_class<FisherDistribution>(m, "PGOPFisher");
+    export_pgop_class<ApproxLinearDistribution>(m, "PGOPLinear");
 }
 } // End namespace pgop

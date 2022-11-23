@@ -4,16 +4,21 @@
 #include <utility>
 #include <vector>
 
+#include <pybind11/pybind11.h>
+
+#include "../data/Quaternion.h"
+
+namespace py = pybind11;
+
 namespace pgop { namespace optimize {
 /**
  * @brief Base class for pgop optimizers. We use a state model where an optimizer is always either
  * expecting an objective for a queried point or to be queried for a point. To do the other
  * operation is an error and leads to an exception.
  *
- * The optimizer also includes support for bounded optimization domains through minimum and maximum
- * bounds. Given that many solvers do not natively support bounds on the solution's domain, users
- * should be careful in using this feature, and when doing so attempt to start solvers away from the
- * bounds.
+ * The optimizer exclusively optimizes over O(3) or the space of 3D rotations.
+ * The class also assumes that all generated points will lie on the unit 4D
+ * hypersphere (or in other words the quaternion is normalized).
  *
  * Note: All optimizations are assumed to be minimizations. Multiply the objective function by -1 to
  * switch an maximization to a minimization.
@@ -22,24 +27,19 @@ class Optimizer {
     public:
     /**
      * @brief Create an Optimizer. The only thing this does is set up the bounds.
-     *
-     * @param min_bounds The minimum value allowed for each dimension. Set to
-     * -std::numeric_limits<double>::infinity() for no minimum bounds.
-     * @param max_bounds The maximum value allowed for each dimension. Set to
-     * std::numeric_limits<double>::infinity() for no maximum bounds.
      */
-    Optimizer(const std::vector<double>& min_bounds, const std::vector<double>& max_bounds);
+    Optimizer();
     virtual ~Optimizer() = default;
 
     /// Get the next point to compute the objective for.
-    std::vector<double> next_point();
+    data::Quaternion next_point();
     /// Record the objective function's value for the last querried point.
     virtual void record_objective(double);
     /// Returns whether or not convergence or termination conditions have been met.
     virtual bool terminate() const = 0;
 
     /// Get the current best point and the value of the objective function at that point.
-    std::pair<std::vector<double>, double> get_optimum() const;
+    std::pair<data::Quaternion, double> get_optimum() const;
 
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const = 0;
@@ -52,25 +52,14 @@ class Optimizer {
 
     unsigned int getCount() const;
 
-    const std::vector<double>& getMinBounds() const;
-    const std::vector<double>& getMaxBounds() const;
-
     protected:
-    /// Take a point and wrap it to the nearest within bounds point.
-    void clip_point(std::vector<double>& point);
-
-    /// The minimum value allowed for each dimension.
-    const std::vector<double> m_min_bounds;
-    /// The maximum value allowed for each dimension.
-    const std::vector<double> m_max_bounds;
-
     /// The current point to evaluate the objective function for.
-    std::vector<double> m_point;
+    data::Quaternion m_point;
     /// The last recorded objective function value.
     double m_objective;
 
     /// The best (as of yet) point computed.
-    std::pair<std::vector<double>, double> m_best_point;
+    std::pair<data::Quaternion, double> m_best_point;
 
     /// The number of iterations thus far.
     unsigned int m_count;
@@ -101,5 +90,7 @@ class PyOptimizer : public Optimizer {
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const override;
 };
+
+void export_base_optimize(py::module& m);
 
 }} // namespace pgop::optimize

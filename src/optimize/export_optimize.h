@@ -4,4 +4,4 @@ namespace py = pybind11;
 
 namespace pgop { namespace optimize {
 void export_optimize(py::module& m);
-}} // End namespace pgop::optimize
+}} // namespace pgop::optimize

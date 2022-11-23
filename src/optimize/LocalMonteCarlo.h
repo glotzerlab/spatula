@@ -13,26 +13,24 @@ namespace py = pybind11;
 namespace pgop { namespace optimize {
 class TrialMoveGenerator {
     public:
-    TrialMoveGenerator(long unsigned int seed, double diameter, double kT, unsigned int dim);
+    TrialMoveGenerator(long unsigned int seed, double max_theta, double kT);
 
-    std::vector<double> generate();
-    void generate(std::vector<double>& buf);
+    data::Quaternion generate();
 
     bool accept(double neg_energy_change);
 
     void setSeed(long unsigned int seed);
 
-    double getDiameter() const;
-    void setDiameter(double diameter);
+    double getMaxTheta() const;
+    void setMaxTheta(double diameter);
 
     void setkT(double kT);
 
     private:
-    std::vector<double> getSample();
-    void getSample(std::vector<double>& buf);
+    data::Vec3 getSample();
+    void getSample(data::Vec3& buf);
 
-    unsigned int m_dim;
-    double m_diameter;
+    double m_max_theta;
     std::mt19937_64 m_rng_engine;
     std::uniform_real_distribution<> m_uniform_dist;
     double m_inv_kT;
@@ -41,17 +39,14 @@ class TrialMoveGenerator {
 
 class MonteCarlo : public Optimizer {
     public:
-    MonteCarlo(const std::vector<double>& min_bounds,
-               const std::vector<double>& max_bounds,
-               const std::pair<std::vector<double>, double>& initial_point,
+    MonteCarlo(const std::pair<data::Quaternion, double>& initial_point,
                double kT,
-               double max_move_size,
+               double max_theta,
                long unsigned int seed,
-               unsigned int max_iter);
+               unsigned int iterations);
 
     ~MonteCarlo() override = default;
 
-    void record_objective(double) override;
     void internal_next_point() override;
     bool terminate() const override;
     std::unique_ptr<Optimizer> clone() const override;
@@ -66,18 +61,16 @@ class MonteCarlo : public Optimizer {
     unsigned int getIter() const;
     void setIter(unsigned int iter);
 
-    double getMaxMoveSize() const;
-    void setMaxMoveSize(double max_move_size);
+    double getMaxTheta() const;
+    void setMaxTheta(double max_move_size);
 
     unsigned int getCount() const;
 
     private:
-    std::pair<std::vector<double>, double> m_best_point;
-    std::pair<std::vector<double>, double> m_current_point;
+    std::pair<data::Quaternion, double> m_current_point;
 
     long unsigned int m_seed;
     TrialMoveGenerator m_move_generator;
-    std::vector<double> m_move_buf;
     double m_kT;
 
     unsigned int m_max_iter;

@@ -15,8 +15,6 @@ namespace py = pybind11;
 class Union : public Optimizer {
     public:
     Union(const std::shared_ptr<const Optimizer>& initial_opt,
-          const std::vector<double>& min_bounds,
-          const std::vector<double>& max_bounds,
           std::function<std::unique_ptr<Optimizer>(const Optimizer&)> instantiate_final);
 
     Union(const Union& original);
@@ -44,5 +42,5 @@ class Union : public Optimizer {
     bool m_on_final_opt;
 };
 
-void export_union_optimizer(py::module& m);
+void export_union(py::module& m);
 }} // namespace pgop::optimize

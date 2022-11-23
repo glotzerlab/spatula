@@ -49,7 +49,7 @@ template<typename distribution_type> class PGOP {
                      util::QlmBuf& qlm_buf,
                      unsigned int particle_index) const;
 
-    double compute_pgop(const std::vector<double>& hsphere_pos,
+    double compute_pgop(const data::Quaternion& quaternion,
                         const std::vector<data::Vec3>& position,
                         const std::vector<double>& weights,
                         std::vector<data::Vec3>& rotated_positions,
