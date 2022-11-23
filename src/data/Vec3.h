@@ -33,7 +33,14 @@ struct Vec3 {
      */
     double dot(const Vec3& b) const;
 
+    double norm() const;
+
     void normalize();
+
+    Vec3 cross(const Vec3& a) const;
+
+    double& operator[](size_t i);
+    const double& operator[](size_t i) const;
 };
 
 /// Vec3 addition.
@@ -59,4 +66,7 @@ template<typename number_type> Vec3& operator*=(Vec3& a, const number_type& b);
 
 /// Vec3 inplace division.
 template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b);
+
+/// Vec3 equality
+bool operator==(const Vec3& a, const Vec3& b);
 }} // namespace pgop::data

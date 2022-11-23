@@ -14,12 +14,44 @@ double Vec3::dot(const Vec3& b) const
     return x * b.x + y * b.y + z * b.z;
 }
 
+double Vec3::norm() const
+{
+    return std::sqrt(x * x + y * y + z * z);
+}
+
 void Vec3::normalize()
 {
-    const double norm = 1 / std::sqrt(x * x + y * y + z * z);
-    x *= norm;
-    y *= norm;
-    z *= norm;
+    const double inv_norm = 1 / norm();
+    x *= inv_norm;
+    y *= inv_norm;
+    z *= inv_norm;
+}
+
+Vec3 Vec3::cross(const Vec3& a) const
+{
+    return Vec3(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
+}
+
+double& Vec3::operator[](const size_t i)
+{
+    if (i == 0) {
+        return x;
+    }
+    if (i == 1) {
+        return y;
+    }
+    return z;
+}
+
+const double& Vec3::operator[](size_t i) const
+{
+    if (i == 0) {
+        return x;
+    }
+    if (i == 1) {
+        return y;
+    }
+    return z;
 }
 
 template<typename number_type> Vec3 operator+(const Vec3& a, const number_type& b)
@@ -134,4 +166,9 @@ template Vec3& operator+=(Vec3& a, const double& b);
 template Vec3& operator-=(Vec3& a, const double& b);
 template Vec3& operator*=(Vec3& a, const double& b);
 template Vec3& operator/=(Vec3& a, const double& b);
+
+bool operator==(const Vec3& a, const Vec3& b)
+{
+    return a.x == b.x && a.y == b.y && a.z == b.z;
+}
 }} // namespace pgop::data
