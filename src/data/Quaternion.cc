@@ -23,13 +23,28 @@ Quaternion Quaternion::conjugate() const
     return Quaternion(w, -x, -y, -z);
 }
 
+double Quaternion::norm() const
+{
+    return std::sqrt(w * w + x * x + y * y + z * z);
+}
+
 void Quaternion::normalize()
 {
-    const double norm = 1 / std::sqrt(w * w + x * x + y * y + z * z);
-    w *= norm;
-    x *= norm;
-    y *= norm;
-    z *= norm;
+    const double inv_norm = 1 / norm();
+    w *= inv_norm;
+    x *= inv_norm;
+    y *= inv_norm;
+    z *= inv_norm;
+}
+
+Quaternion Quaternion::recipical() const
+{
+    const auto norm_ = norm();
+    const auto neg_inv_norm_sq = -1 / (norm_ * norm_);
+    return Quaternion(w * neg_inv_norm_sq,
+                      x * neg_inv_norm_sq,
+                      y * neg_inv_norm_sq,
+                      z * neg_inv_norm_sq);
 }
 
 std::vector<double> Quaternion::to_rotation_matrix() const
