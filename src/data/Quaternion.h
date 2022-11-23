@@ -3,7 +3,11 @@
 #include <utility>
 #include <vector>
 
+#include <pybind11/pybind11.h>
+
 #include "Vec3.h"
+
+namespace py = pybind11;
 
 namespace pgop { namespace data {
 struct Quaternion {
@@ -13,6 +17,7 @@ struct Quaternion {
     double z;
 
     Quaternion();
+    Quaternion(const py::object& obj);
     Quaternion(double w_, double x_, double y_, double z_);
     Quaternion(Vec3 axis, double angle);
 
@@ -35,4 +40,6 @@ Quaternion operator*=(Quaternion& a, const Quaternion& b);
 Quaternion quat_from_hypersphere(double phi, double theta, double psi);
 Quaternion quat_from_vec(const Vec3& v);
 Vec3 quat_to_vec3(const Quaternion& q);
+
+void export_quaternion(py::module& m);
 }} // namespace pgop::data

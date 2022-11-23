@@ -18,6 +18,21 @@ Quaternion::Quaternion(Vec3 axis, double angle)
     z = sin_half_angle * axis.z;
 }
 
+Quaternion::Quaternion(const py::object& obj)
+{
+    if (!py::hasattr(obj, "__len__")) {
+        throw std::runtime_error("Quaternion object requires a 4 length sequence like object.");
+    }
+    if (py::len(obj) < 4) {
+        throw std::runtime_error("Quaternion object requires a 4 length sequence like object.");
+    }
+    py::tuple t = py::tuple(obj);
+    w = t[0].cast<double>();
+    x = t[1].cast<double>();
+    y = t[2].cast<double>();
+    z = t[3].cast<double>();
+}
+
 Quaternion Quaternion::conjugate() const
 {
     return Quaternion(w, -x, -y, -z);
@@ -104,5 +119,10 @@ Quaternion quat_from_hypersphere(double phi, double theta, double psi)
 Quaternion quat_from_vec(const Vec3& v)
 {
     return Quaternion(0, v.x, v.y, v.z);
+}
+
+void export_quaternion(py::module& m)
+{
+    py::class_<Quaternion>(m, "Quaternion").def(py::init<const py::object&>());
 }
 }} // namespace pgop::data
