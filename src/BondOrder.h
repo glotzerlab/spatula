@@ -69,7 +69,6 @@ class UniformDistribution {
     /// The normalization constant for the distribution.
     double m_prefactor;
 };
-static_assert(SphereSurfaceDistribution<UniformDistribution>);
 
 /**
  * @brief Represents a von-Mises-Fisher distribution centered at a given position on the unit
@@ -103,7 +102,34 @@ class FisherDistribution {
     /// The normalization constant for the distribution.
     double m_prefactor;
 };
-static_assert(SphereSurfaceDistribution<FisherDistribution>);
+
+/**
+ * @brief A computationally efficient differentiable distribution. The distribution is
+ * differentiable from \f$ \theta \in [0, \alpha) \f$ where \f$ \alpha \f$ is the distribution's
+ * cuttoff angle in radian. This is approximately a linear distribution peaked at 0 except that in
+ * place of \f$ x \f$, \f$ \cos{x} \f$ is used for computational efficiency.
+ */
+class ApproxLinearDistribution {
+    public:
+    using param_type = double;
+
+    /**
+     * Create a ApproxLinear distribution.
+     *
+     * @param alpha the cutoff angle in radian. At this point the distribution goes to zero.
+     */
+    ApproxLinearDistribution(param_type alpha);
+
+    double operator()(double x) const;
+
+    static const bool use_theta = false;
+
+    private:
+    /// The normalization constant for the distribution.
+    double m_prefactor;
+    /// The amount to shift \f$ \cos{x} \f$ by (\f$ cos{\alpha} \f$).
+    double m_shift;
+};
 
 /**
  * @brief Representation of a bond order diagram where each point in the diagram is represented by a

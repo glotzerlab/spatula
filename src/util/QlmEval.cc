@@ -83,6 +83,11 @@ QlmEval::eval<FisherDistribution>(const BondOrder<FisherDistribution>&) const;
 template void QlmEval::eval<FisherDistribution>(const BondOrder<FisherDistribution>&,
                                                 std::vector<std::complex<double>>&) const;
 
+template std::vector<std::complex<double>>
+QlmEval::eval<ApproxLinearDistribution>(const BondOrder<ApproxLinearDistribution>&) const;
+template void QlmEval::eval<ApproxLinearDistribution>(const BondOrder<ApproxLinearDistribution>&,
+                                                      std::vector<std::complex<double>>&) const;
+
 QlmBuf::QlmBuf(size_t size) : qlms(), sym_qlms()
 {
     qlms.reserve(size);
