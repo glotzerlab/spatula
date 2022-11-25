@@ -84,8 +84,8 @@ void LocalFIRE::searchAlongGradient()
         m_delta = 0.1;
         // Both ensure that we are improving and at an appreciable rate.
     } else if (objective_change > 0) {
-        /* m_opt_point.first = m_point; */
-        /* m_opt_point.second = m_objective; */
+        m_opt_point.first = m_point;
+        m_opt_point.second = m_objective;
         const double grad = objective_change / m_delta;
         m_delta = (m_delta * m_beta + (1 - m_beta) * grad);
         // Went uphill readjust direction.
