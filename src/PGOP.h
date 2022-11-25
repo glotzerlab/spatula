@@ -17,6 +17,37 @@
 namespace py = pybind11;
 
 namespace pgop {
+
+struct LocalNeighborhood {
+    LocalNeighborhood(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
+
+    void rotate(const data::Quaternion& q);
+
+    const std::vector<data::Vec3> positions;
+    const std::vector<double> weights;
+    std::vector<data::Vec3> rotated_positions;
+};
+
+class Neighborhoods {
+    public:
+    Neighborhoods(size_t N,
+                  const int* neighbor_counts,
+                  const double* weights,
+                  const double* distance);
+
+    LocalNeighborhood getNeighborhood(size_t i) const;
+    std::vector<data::Vec3> getNormalizedDistances(size_t i) const;
+    std::vector<double> getWeights(size_t i) const;
+    int getNeighborCount(size_t i) const;
+
+    private:
+    const size_t m_N;
+    const int* m_neighbor_counts;
+    const double* m_distances;
+    const double* m_weights;
+    std::vector<size_t> m_neighbor_offsets;
+};
+
 template<typename distribution_type> class PGOP {
     public:
     PGOP(unsigned int max_l,
@@ -34,28 +65,24 @@ template<typename distribution_type> class PGOP {
 
     private:
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(const std::vector<data::Vec3>& positions,
-                     const std::vector<double>& weights,
+    compute_particle(LocalNeighborhood& neighborhood,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf,
                      unsigned int particle_index) const;
 
     std::tuple<double, data::Quaternion>
-    compute_symmetry(const std::vector<data::Vec3>& positions,
-                     const std::vector<double>& weights,
-                     std::vector<data::Vec3>& rotated_distances_buf,
+    compute_symmetry(LocalNeighborhood& neighborhood,
                      const std::vector<std::complex<double>>& D_ij,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf,
                      unsigned int particle_index) const;
 
-    double compute_pgop(const data::Quaternion& quaternion,
-                        const std::vector<data::Vec3>& position,
-                        const std::vector<double>& weights,
-                        std::vector<data::Vec3>& rotated_positions,
+    double compute_pgop(LocalNeighborhood& neighborhood,
                         const std::vector<std::complex<double>>& D_ij,
                         const util::QlmEval& qlm_eval,
                         util::QlmBuf& qlm_buf) const;
+
+    void execute_func(std::function<void(size_t, size_t)> func, size_t N) const;
 
     distribution_type m_distribution;
     unsigned int m_max_l;
