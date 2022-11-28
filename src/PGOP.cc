@@ -148,6 +148,52 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
 }
 
 template<typename distribution_type>
+py::array_t<double> PGOP<distribution_type>::refine(const py::array_t<double> distances,
+                                                    const py::array_t<double> rotations,
+                                                    const py::array_t<double> weights,
+                                                    const py::array_t<int> num_neighbors,
+                                                    const unsigned int m,
+                                                    const py::array_t<std::complex<double>> ylms,
+                                                    const py::array_t<double> quad_positions,
+                                                    const py::array_t<double> quad_weights) const
+{
+    const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
+    const auto neighborhoods = Neighborhoods(num_neighbors.size(),
+                                             num_neighbors.data(0),
+                                             weights.data(0),
+                                             distances.data(0));
+    const size_t N_particles = num_neighbors.size();
+    py::array_t<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
+    auto u_op_store = op_store.mutable_unchecked<2>();
+    auto u_rotations = rotations.unchecked<3>();
+    const auto loop_func
+        = [&u_op_store, &u_rotations, &neighborhoods, &qlm_eval, this](const size_t start,
+                                                                       const size_t stop) {
+              auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
+              for (size_t i = start; i < stop; ++i) {
+                  if (neighborhoods.getNeighborCount(i) == 0) {
+                      for (size_t j {0}; j < m_n_symmetries; ++j) {
+                          u_op_store(i, j) = 0;
+                      }
+                      continue;
+                  }
+                  auto neighborhood = neighborhoods.getNeighborhood(i);
+                  for (size_t j {0}; j < m_n_symmetries; ++j) {
+                      const auto rot = data::Quaternion(u_rotations(i, j, 0),
+                                                        u_rotations(i, j, 1),
+                                                        u_rotations(i, j, 2),
+                                                        u_rotations(i, j, 3));
+                      neighborhood.rotate(rot);
+                      u_op_store(i, j)
+                          = this->compute_pgop(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
+                  }
+              }
+          };
+    execute_func(loop_func, N_particles);
+    return op_store;
+}
+
+template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 PGOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
                                           const util::QlmEval& qlm_eval,
@@ -225,7 +271,8 @@ template<typename distribution_type> void export_pgop_class(py::module& m, const
         .def(py::init<const py::array_t<std::complex<double>>,
                       std::shared_ptr<optimize::Optimizer>&,
                       typename distribution_type::param_type>())
-        .def("compute", &PGOP<distribution_type>::compute);
+        .def("compute", &PGOP<distribution_type>::compute)
+        .def("refine", &PGOP<distribution_type>::refine);
 }
 
 void export_pgop(py::module& m)

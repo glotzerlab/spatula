@@ -53,7 +53,16 @@ class PGOP:
         self._cpp = cls_(D_ij, optimizer._cpp, bo_arg)
         self._pgop = None
 
-    def compute(self, system, neighbors, max_l=6, m=5):
+    def compute(
+        self,
+        system,
+        neighbors,
+        max_l=6,
+        m=6,
+        refine=True,
+        refine_l=9,
+        refine_m=9,
+    ):
         """Compute the point group symmetry for a given system and neighbor.
 
         Note:
@@ -78,9 +87,23 @@ class PGOP:
             to 6. Can go up to 12.
         m : int, optional
             The number of points to use in the longitudinal direction for
-            spherical Gauss-Legrende quadrature. More concentrated distributions
-            require larger ``m`` to properly evaluate bond order functions. The
-            number of points to evaluate scales as :math:`4 m^2`.
+            spherical Gauss-Legrende quadrature. Defaults to 5. More
+            concentrated distributions require larger ``m`` to properly evaluate
+            bond order functions. The number of points to evaluate scales as
+            :math:`4 m^2`.
+        refine: bool, optional
+            Whether to recompute the PGOP after optimizing. Defaults to
+            ``True``. This is used to enable a higher fidelity calculation
+            after a lower fidelity optimization.
+        refine_l : int, optional
+            The maximum spherical harmonic l to use for refining. Defaults
+            to 9. Can go up to 12.
+        refine_m : int, optional
+            The number of points to use in the longitudinal direction for
+            spherical Gauss-Legrende quadrature in refining. Defaults to 9. More
+            concentrated distributions require larger ``m`` to properly evaluate
+            bond order functions. The number of points to evaluate scales as
+            :math:`4 m^2`.
         """
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
         dist = self._compute_distances(neigh_query, neighbors)
@@ -94,6 +117,18 @@ class PGOP:
             quad_positions,
             quad_weights,
         )
+        if refine:
+            quad_positions, quad_weights = self._get_cartesian_quad(refine_m)
+            self._pgop = self._cpp.refine(
+                dist,
+                self._rotations,
+                neighbors.weights,
+                neighbors.neighbor_counts,
+                refine_m,
+                np.conj(self._ylms(refine_l, refine_m)),
+                quad_positions,
+                quad_weights,
+            )
 
     def _compute_distances(self, neigh_query, neighbors):
         """Given a query and neighbors get wrapped distances to neighbors."""

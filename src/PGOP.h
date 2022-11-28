@@ -77,6 +77,15 @@ template<typename distribution_type> class PGOP {
                       const py::array_t<double> quad_positions,
                       const py::array_t<double> quad_weights) const;
 
+    py::array_t<double> refine(const py::array_t<double> distances,
+                               const py::array_t<double> rotations,
+                               const py::array_t<double> weights,
+                               const py::array_t<int> num_neighbors,
+                               const unsigned int m,
+                               const py::array_t<std::complex<double>> ylms,
+                               const py::array_t<double> quad_positions,
+                               const py::array_t<double> quad_weights) const;
+
     private:
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
     compute_particle(LocalNeighborhood& neighborhood,
