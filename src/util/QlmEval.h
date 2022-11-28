@@ -62,9 +62,15 @@ class QlmEval {
     /// Get the number of unique combintations of \f$ l \f$ and \f$ m \f$.
     unsigned int getNlm() const;
 
+    /// Get the maximum l value represented in the stored Ylms.
+    unsigned int getMaxL() const;
+
     private:
     /// Number of unique combintations of \f$ l \f$ and \f$ m \f$.
     unsigned int m_n_lms;
+
+    /// Maximum l computed from the input size of Ylms
+    unsigned int m_max_l;
     // TODO just make this a fuction this->m_positions.size()
     /// Number of points in quadrature.
     unsigned int m_n_points;

@@ -9,8 +9,14 @@ QlmEval::QlmEval(unsigned int m,
                  const py::array_t<double> positions,
                  const py::array_t<double> weights,
                  const py::array_t<std::complex<double>> ylms)
-    : m_n_lms(ylms.shape(0)), m_n_points(ylms.shape(1)), m_positions(), m_weighted_ylms()
+    : m_n_lms(ylms.shape(0)), m_max_l(0), m_n_points(ylms.shape(1)), m_positions(),
+      m_weighted_ylms()
 {
+    unsigned int count = 1;
+    while (count != m_n_lms) {
+        ++m_max_l;
+        count += 2 * m_max_l + 1;
+    }
     m_weighted_ylms.reserve(m_n_lms);
     const auto unchecked_ylms = ylms.unchecked<2>();
     const auto u_weights = static_cast<const double*>(weights.data());
@@ -28,6 +34,11 @@ QlmEval::QlmEval(unsigned int m,
     for (size_t i {0}; i < static_cast<size_t>(positions.shape(0)); ++i) {
         m_positions.emplace_back(u_positions.data(i, 0));
     }
+}
+
+unsigned int QlmEval::getMaxL() const
+{
+    return m_max_l;
 }
 
 template<typename distribution_type>

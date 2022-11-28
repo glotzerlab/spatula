@@ -65,8 +65,7 @@ struct PGOPStore {
 
 template<typename distribution_type> class PGOP {
     public:
-    PGOP(unsigned int max_l,
-         const py::array_t<std::complex<double>> D_ij,
+    PGOP(const py::array_t<std::complex<double>> D_ij,
          std::shared_ptr<optimize::Optimizer>& optimizer,
          typename distribution_type::param_type distribution_params);
 
@@ -100,7 +99,6 @@ template<typename distribution_type> class PGOP {
     void execute_func(std::function<void(size_t, size_t)> func, size_t N) const;
 
     distribution_type m_distribution;
-    unsigned int m_max_l;
     unsigned int m_n_symmetries;
     std::vector<std::vector<std::complex<double>>> m_Dij;
     std::shared_ptr<const optimize::Optimizer> m_optimize;

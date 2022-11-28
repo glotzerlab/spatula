@@ -4,6 +4,8 @@ Provides the `PGOP` class which computes the point group symmetry for a
 particle's neighborhood.
 """
 
+import functools
+
 import freud
 import numpy as np
 
@@ -21,7 +23,7 @@ class PGOP:
     the surface of the sphere (e.g. von-Mises-Fisher or uniform distributions).
     """
 
-    def __init__(self, dist, max_l, symmetries, optimizer, bo_arg):
+    def __init__(self, dist, symmetries, optimizer, bo_arg):
         """Create a PGOP object.
 
         Parameters
@@ -29,8 +31,6 @@ class PGOP:
         dist : str
             The distribution to use. Either "fisher" for the von-Mises-Fisher
             distribution or "uniform" for a uniform distribution.
-        max_l : int
-            The maximum :math:`l` spherical harmonic to use. Supports l upto 6.
         symmetries : list[str]
             A list of point groups to test each particles' neighborhood. Uses
             Schoenflies notation and is case sensitive.
@@ -41,19 +41,28 @@ class PGOP:
             The corresponding distribution parameter.
         """
         self._symmetries = symmetries
-        self._weijer = weijerd.WeigerD(max_l)
+        # Always use maximum l and let compute decide the ls to use for
+        # computing the PGOP
+        self._weijer = weijerd.WeigerD(12)
         self._optmizer = optimizer
         D_ij = self._precompute_weijer_d()  # noqa :D806
         try:
             cls_ = getattr(pgop._pgop, "PGOP" + dist.title())
         except AttributeError:
             raise ValueError(f"Distribution {dist} not supported.")
-        self._cpp = cls_(max_l, D_ij, optimizer._cpp, bo_arg)
-        self._sph_harm = sph_harm.SphHarm(max_l)
+        self._cpp = cls_(D_ij, optimizer._cpp, bo_arg)
         self._pgop = None
 
-    def compute(self, system, neighbors, m=6):
+    def compute(self, system, neighbors, max_l=6, m=5):
         """Compute the point group symmetry for a given system and neighbor.
+
+        Note:
+            A ``max_l`` of at least 6 is needed to caputure icosahedral ordering
+            and a max of 4 is needed for octahedral.
+
+        Note:
+            Higher ``max_l`` requires higher ``m``. A rough equality is usually
+            good enough to ensure accurate results for the given fidelity.
 
         Parameter
         ---------
@@ -64,6 +73,9 @@ class PGOP:
         neighbors :
             A ``freud`` neighbor query object. Defines neighbors for the system.
             Weights provided by a neighbor list are currently unused.
+        max_l : int, optional
+            The maximum spherical harmonic l to use for computations. Defaults
+            to 6. Can go up to 12.
         m : int, optional
             The number of points to use in the longitudinal direction for
             spherical Gauss-Legrende quadrature. More concentrated distributions
@@ -78,7 +90,7 @@ class PGOP:
             neighbors.weights,
             neighbors.neighbor_counts,
             m,
-            np.conj(self._ylms(m)),
+            np.conj(self._ylms(max_l, m)),
             quad_positions,
             quad_weights,
         )
@@ -99,13 +111,14 @@ class PGOP:
             return query, neighbors
         return query, query.query(query.points, neighbors).toNeighborList()
 
-    def _ylms(self, m):
+    @functools.lru_cache
+    def _ylms(self, l, m):
         """Return the spherical harmonics at the Gauss-Legrende points.
 
         Returns all spherical harmonics upto ``self._max_l`` at the points of
         the Gauss-Legrende quadrature of the given ``m``.
         """
-        return self._sph_harm(*integrate.gauss_legendre_quad_points(m))
+        return sph_harm.SphHarm(l)(*integrate.gauss_legendre_quad_points(m))
 
     @property
     def pgop(self):

@@ -98,11 +98,10 @@ py::tuple PGOPStore::getArrays()
 }
 
 template<typename distribution_type>
-PGOP<distribution_type>::PGOP(unsigned int max_l,
-                              const py::array_t<std::complex<double>> D_ij,
+PGOP<distribution_type>::PGOP(const py::array_t<std::complex<double>> D_ij,
                               std::shared_ptr<optimize::Optimizer>& optimizer,
                               typename distribution_type::param_type distribution_params)
-    : m_distribution(distribution_params), m_max_l(max_l), m_n_symmetries(D_ij.shape(0)), m_Dij(),
+    : m_distribution(distribution_params), m_n_symmetries(D_ij.shape(0)), m_Dij(),
       m_optimize(optimizer)
 {
     m_Dij.reserve(m_n_symmetries);
@@ -199,7 +198,7 @@ double PGOP<distribution_type>::compute_pgop(LocalNeighborhood& neighborhood,
                                                          neighborhood.weights);
     // compute spherical harmonic values in-place (qlm_buf.qlms)
     qlm_eval.eval<distribution_type>(bond_order, qlm_buf.qlms);
-    util::symmetrize_qlm(qlm_buf.qlms, D_ij, qlm_buf.sym_qlms, m_max_l);
+    util::symmetrize_qlm(qlm_buf.qlms, D_ij, qlm_buf.sym_qlms, qlm_eval.getMaxL());
     return util::covariance(qlm_buf.qlms, qlm_buf.sym_qlms);
 }
 
@@ -223,8 +222,7 @@ template class PGOP<ApproxLinearDistribution>;
 template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name)
 {
     py::class_<PGOP<distribution_type>>(m, name.c_str())
-        .def(py::init<unsigned int,
-                      const py::array_t<std::complex<double>>,
+        .def(py::init<const py::array_t<std::complex<double>>,
                       std::shared_ptr<optimize::Optimizer>&,
                       typename distribution_type::param_type>())
         .def("compute", &PGOP<distribution_type>::compute);
