@@ -60,6 +60,43 @@ void LocalNeighborhood::rotate(const data::Quaternion& q)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
+PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
+    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
+      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
+      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
+{
+}
+
+void PGOPStore::addOp(size_t i,
+                      const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
+{
+    const auto& values = std::get<0>(op_);
+    const auto& rots = std::get<1>(op_);
+    for (size_t j {0}; j < N_syms; ++j) {
+        u_op(i, j) = values[j];
+        u_rotations(i, j, 0) = rots[j].w;
+        u_rotations(i, j, 1) = rots[j].x;
+        u_rotations(i, j, 2) = rots[j].y;
+        u_rotations(i, j, 3) = rots[j].z;
+    }
+}
+
+void PGOPStore::addNull(size_t i)
+{
+    for (size_t j {0}; j < N_syms; ++j) {
+        u_op(i, j) = 0;
+        u_rotations(i, j, 0) = 1;
+        u_rotations(i, j, 1) = 0;
+        u_rotations(i, j, 2) = 0;
+        u_rotations(i, j, 3) = 0;
+    }
+}
+
+py::tuple PGOPStore::getArrays()
+{
+    return py::make_tuple(op, rotations);
+}
+
 template<typename distribution_type>
 PGOP<distribution_type>::PGOP(unsigned int max_l,
                               const py::array_t<std::complex<double>> D_ij,
@@ -93,41 +130,22 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                                              weights.data(0),
                                              distances.data(0));
     const size_t N_particles = num_neighbors.size();
-    auto op = py::array_t<double>(std::vector<size_t> {N_particles, m_n_symmetries});
-    auto u_op = op.mutable_unchecked<2>();
-    auto rotations = py::array_t<double>(std::vector<size_t> {N_particles, m_n_symmetries, 4});
-    auto u_rotations = rotations.mutable_unchecked<3>();
-    const auto loop_func
-        = [&u_op, &u_rotations, &neighborhoods, &qlm_eval, this](const size_t start,
-                                                                 const size_t stop) {
-              auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
-              for (size_t i = start; i < stop; ++i) {
-                  if (neighborhoods.getNeighborCount(i) == 0) {
-                      for (size_t j {0}; j < m_n_symmetries; ++j) {
-                          u_op(i, j) = 0;
-                          u_rotations(i, j, 0) = 1;
-                          u_rotations(i, j, 1) = 0;
-                          u_rotations(i, j, 2) = 0;
-                          u_rotations(i, j, 3) = 0;
-                      }
-                      continue;
-                  }
-                  auto neighborhood = neighborhoods.getNeighborhood(i);
-                  const auto particle_op_rot
-                      = this->compute_particle(neighborhood, qlm_eval, qlm_buf, i);
-                  const auto& particle_op = std::get<0>(particle_op_rot);
-                  const auto& particle_rotations = std::get<1>(particle_op_rot);
-                  for (size_t j {0}; j < particle_op.size(); ++j) {
-                      u_op(i, j) = particle_op[j];
-                      u_rotations(i, j, 0) = particle_rotations[j].w;
-                      u_rotations(i, j, 1) = particle_rotations[j].x;
-                      u_rotations(i, j, 2) = particle_rotations[j].y;
-                      u_rotations(i, j, 3) = particle_rotations[j].z;
-                  }
-              }
-          };
+    auto op_store = PGOPStore(N_particles, m_n_symmetries);
+    const auto loop_func = [&op_store, &neighborhoods, &qlm_eval, this](const size_t start,
+                                                                        const size_t stop) {
+        auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
+        for (size_t i = start; i < stop; ++i) {
+            if (neighborhoods.getNeighborCount(i) == 0) {
+                op_store.addNull(i);
+                continue;
+            }
+            auto neighborhood = neighborhoods.getNeighborhood(i);
+            const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf, i);
+            op_store.addOp(i, particle_op_rot);
+        }
+    };
     execute_func(loop_func, N_particles);
-    return py::make_tuple(op, rotations);
+    return op_store.getArrays();
 }
 
 template<typename distribution_type>

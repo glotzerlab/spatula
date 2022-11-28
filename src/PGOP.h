@@ -48,6 +48,21 @@ class Neighborhoods {
     std::vector<size_t> m_neighbor_offsets;
 };
 
+struct PGOPStore {
+    PGOPStore(size_t N_particles, size_t N_symmetries);
+    size_t N_syms;
+    py::array_t<double> op;
+    py::array_t<double> rotations;
+
+    void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
+    void addNull(size_t i);
+    py::tuple getArrays();
+
+    private:
+    py::detail::unchecked_mutable_reference<double, 2> u_op;
+    py::detail::unchecked_mutable_reference<double, 3> u_rotations;
+};
+
 template<typename distribution_type> class PGOP {
     public:
     PGOP(unsigned int max_l,
