@@ -58,10 +58,10 @@ class PGOP:
         system,
         neighbors,
         max_l=6,
-        m=6,
+        m=7,
         refine=True,
         refine_l=9,
-        refine_m=9,
+        refine_m=10,
     ):
         """Compute the point group symmetry for a given system and neighbor.
 
