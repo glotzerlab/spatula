@@ -10,7 +10,7 @@ namespace pgop { namespace optimize {
 
 class LocalFIRE : public Optimizer {
     public:
-    LocalFIRE(const data::Quaternion& initial_point, unsigned int max_iter);
+    LocalFIRE(const data::Quaternion& initial_point, unsigned int max_iter, double initial_jump);
     ~LocalFIRE() override = default;
     /// Returns whether or not convergence or termination conditions have been met.
     bool terminate() const override;
@@ -28,7 +28,6 @@ class LocalFIRE : public Optimizer {
     void searchAlongGradient();
 
     unsigned int m_max_iter;
-    unsigned int m_opt_cnt;
     Stage m_stage;
     unsigned short m_current_dim;
     std::pair<data::Quaternion, double> m_opt_point;
@@ -36,6 +35,7 @@ class LocalFIRE : public Optimizer {
     std::tuple<data::Vec3, data::Vec3, data::Vec3> m_axes;
     double m_beta;
     double m_delta;
+    double m_initial_jump;
 };
 
 void export_localfire(py::module& m);

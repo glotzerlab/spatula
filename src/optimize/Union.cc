@@ -83,10 +83,16 @@ void export_union(py::module& m)
     py::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "QUnion")
         .def_static(
             "with_fire",
-            [](const std::shared_ptr<const Optimizer> initial_opt, unsigned int max_iter) -> auto{
-                return std::make_shared<Union>(initial_opt, [max_iter](const Optimizer& opt) {
-                    return std::make_unique<LocalFIRE>(opt.get_optimum().first, max_iter);
-                });
+            [](const std::shared_ptr<const Optimizer> initial_opt,
+               unsigned int max_iter,
+               double initial_jump) -> auto{
+                return std::make_shared<Union>(initial_opt,
+                                               [max_iter, initial_jump](const Optimizer& opt) {
+                                                   return std::make_unique<LocalFIRE>(
+                                                       opt.get_optimum().first,
+                                                       max_iter,
+                                                       initial_jump);
+                                               });
             })
         .def_static(
             "with_mc",
