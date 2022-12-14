@@ -2,6 +2,7 @@
 
 #include "LocalFIRE.h"
 #include "LocalMonteCarlo.h"
+#include "LocalSequential.h"
 #include "RandomSearch.h"
 #include "Union.h"
 
@@ -94,6 +95,20 @@ void export_union(py::module& m)
                                                        initial_jump);
                                                });
             })
+        .def_static(
+            "with_seq",
+            [](const std::shared_ptr<const Optimizer> initial_opt,
+               unsigned int max_iter,
+               double initial_jump) -> auto{
+                return std::make_shared<Union>(initial_opt,
+                                               [max_iter, initial_jump](const Optimizer& opt) {
+                                                   return std::make_unique<LocalSequential>(
+                                                       opt.get_optimum().first,
+                                                       max_iter,
+                                                       initial_jump);
+                                               });
+            })
+
         .def_static(
             "with_mc",
             [](const std::shared_ptr<const Optimizer> initial_opt,

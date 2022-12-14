@@ -24,6 +24,18 @@ class LocalSearch:
         )
 
 
+class LocalSequentialSearch:
+    def __init__(
+        self,
+        initial_point=(1.0, 0.0, 0.0, 0.0),
+        max_iter=200,
+        initial_jump=0.01,
+    ):
+        self._cpp = _pgop.LocalSequential(
+            _pgop.Quaternion(initial_point), max_iter, initial_jump
+        )
+
+
 def _expand_shape(shape):
     verts = np.empty((len(shape.vertices) + len(shape.faces), 3))
     verts[: len(shape.vertices)] = shape.vertices
@@ -111,6 +123,14 @@ class Union:
     def with_fire(cls, optimizer, max_iter=200, initial_jump=0.001):
         instance = cls()
         instance._cpp = _pgop.QUnion.with_fire(
+            optimizer._cpp, max_iter, initial_jump
+        )
+        return instance
+
+    @classmethod
+    def with_seq(cls, optimizer, max_iter=200, initial_jump=0.001):
+        instance = cls()
+        instance._cpp = _pgop.QUnion.with_seq(
             optimizer._cpp, max_iter, initial_jump
         )
         return instance

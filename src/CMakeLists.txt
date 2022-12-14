@@ -6,6 +6,7 @@ pybind11_add_module(_pgop export-module.cc
     optimize/Optimize.h optimize/Optimize.cc
     optimize/RandomSearch.h optimize/RandomSearch.cc
     optimize/LocalFIRE.h optimize/LocalFIRE.cc
+    optimize/LocalSequential.h optimize/LocalSequential.cc
     optimize/LocalMonteCarlo.h optimize/LocalMonteCarlo.cc
     optimize/Mesh.h optimize/Mesh.cc
     optimize/Union.h optimize/Union.cc
