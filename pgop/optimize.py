@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import rowan
 import scipy as sp
@@ -15,44 +17,38 @@ class LocalSearch:
         self._cpp = _pgop.LocalFIRE(_pgop.Quaternion(initial_point), max_iter)
 
 
+def _expand_shape(shape):
+    verts = np.empty((len(shape.vertices) + len(shape.faces), 3))
+    verts[: len(shape.vertices)] = shape.vertices
+    for i, f in enumerate(shape.faces, start=len(shape.vertices)):
+        center = np.mean(shape.vertices[f], axis=0)
+        verts[i] = center / np.linalg.norm(center)
+    return coxeter.shapes.ConvexPolyhedron(verts)
+
+
+def _load_sphere_codes():
+    fn = Path(__file__).parent / "sphere-codes.npz"
+    with np.load(str(fn)) as data:
+        return [arr for arr in data.values()]
+
+
 class Mesh:
-    _dodehedron_vertices = np.array(
-        [
-            [-0.69813, 0.0, 0.13333],
-            [0.69813, 0.0, -0.13333],
-            [-0.21573, -0.66396, 0.13333],
-            [-0.21573, 0.66396, 0.13333],
-            [0.5648, -0.41035, 0.13333],
-            [0.5648, 0.41035, 0.13333],
-            [-0.13333, -0.41035, 0.5648],
-            [-0.13333, 0.41035, 0.5648],
-            [-0.34907, -0.25361, -0.5648],
-            [-0.34907, 0.25361, -0.5648],
-            [0.34907, -0.25361, 0.5648],
-            [0.34907, 0.25361, 0.5648],
-            [0.43147, 0.0, -0.5648],
-            [-0.5648, -0.41035, -0.13333],
-            [-0.5648, 0.41035, -0.13333],
-            [-0.43147, 0.0, 0.5648],
-            [0.13333, -0.41035, -0.5648],
-            [0.13333, 0.41035, -0.5648],
-            [0.21573, -0.66396, -0.13333],
-            [0.21573, 0.66396, -0.13333],
-        ]
-    )
+
+    _sphere_codes = _load_sphere_codes()
 
     def __init__(self, points):
         self._cpp = _pgop.Mesh([_pgop.Quaternion(p) for p in points])
 
     @classmethod
-    def from_grid(cls, n_angles=6):
-        points = np.empty(
-            (n_angles * len(cls._dodehedron_vertices) + 1, 4), dtype=float
-        )
+    def from_grid(cls, n_axes=40, n_angles=5):
+        if n_axes < 1 or n_axes > 250:
+            raise ValueError("Can only chose [1, 250] for n_axes.")
+        axes = cls._sphere_codes[n_axes - 1].reshape((-1, 1, 3))
+        points = np.empty((n_angles * n_axes + 1, 4), dtype=float)
         points[0] = np.array([1.0, 0.0, 0.0, 0.0])
-        angles = cls.sample_angles(n_angles)
+        angles = cls.sample_angles(n_angles).reshape((1, -1, 1))
         points[1:] = rowan.from_axis_angle(
-            cls._dodehedron_vertices[:, None], angles[None, :]
+            axes[:, None, :], angles[None, :, None]
         ).reshape((-1, 4))
         return cls(points)
 
