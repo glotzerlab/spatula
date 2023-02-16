@@ -20,6 +20,7 @@ struct Quaternion {
     Quaternion(const py::object& obj);
     Quaternion(double w_, double x_, double y_, double z_);
     Quaternion(Vec3 axis, double angle);
+    Quaternion(Vec3 axis);
 
     Quaternion conjugate() const;
     double norm() const;
@@ -29,6 +30,7 @@ struct Quaternion {
     friend Quaternion quat_from_vec(const Vec3& v);
     std::vector<double> to_rotation_matrix() const;
     std::pair<Vec3, double> to_axis_angle() const;
+    Vec3 to_axis_angle_3D() const;
 
     protected:
     double scale_factor() const;

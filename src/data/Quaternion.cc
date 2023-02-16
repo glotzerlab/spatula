@@ -18,6 +18,8 @@ Quaternion::Quaternion(Vec3 axis, double angle)
     z = sin_half_angle * axis.z;
 }
 
+Quaternion::Quaternion(Vec3 v) : Quaternion(v, v.norm()) { }
+
 Quaternion::Quaternion(const py::object& obj)
 {
     if (!py::hasattr(obj, "__len__")) {
@@ -85,6 +87,14 @@ std::pair<Vec3, double> Quaternion::to_axis_angle() const
     const double half_angle = std::acos(w);
     const double sin_qw = half_angle != 0 ? 1 / std::sin(half_angle) : 0;
     return std::make_pair<Vec3, double>({x * sin_qw, y * sin_qw, z * sin_qw}, 2 * half_angle);
+}
+
+Vec3 Quaternion::to_axis_angle_3D() const
+{
+    const double half_angle = std::acos(w);
+    const double angle = 2 * half_angle;
+    const double sin_qw = half_angle != 0 ? 1 / std::sin(half_angle) : 0;
+    return Vec3(angle * x * sin_qw, angle * y * sin_qw, angle * z * sin_qw);
 }
 
 Quaternion operator*(const Quaternion& a, const Quaternion& b)
