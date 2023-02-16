@@ -8,9 +8,8 @@
 
 namespace pgop { namespace optimize {
 Optimizer::Optimizer()
-    : m_point(), m_objective(),
-      m_best_point({1.0, 0.0, 0.0, 0.0}, std::numeric_limits<double>::max()), m_count(0),
-      m_need_objective(false)
+    : m_point(), m_objective(), m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<double>::max()),
+      m_count(0), m_need_objective(false)
 {
 }
 
@@ -27,12 +26,12 @@ void Optimizer::record_objective(double objective)
     }
 }
 
-std::pair<data::Quaternion, double> Optimizer::get_optimum() const
+std::pair<data::Vec3, double> Optimizer::get_optimum() const
 {
     return m_best_point;
 }
 
-data::Quaternion Optimizer::next_point()
+data::Vec3 Optimizer::next_point()
 {
     if (m_need_objective) {
         throw std::runtime_error("Must record objective for new point first.");

@@ -6,7 +6,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include "../data/Quaternion.h"
+#include "../data/Vec3.h"
 
 namespace py = pybind11;
 
@@ -32,14 +32,14 @@ class Optimizer {
     virtual ~Optimizer() = default;
 
     /// Get the next point to compute the objective for.
-    data::Quaternion next_point();
+    data::Vec3 next_point();
     /// Record the objective function's value for the last querried point.
     virtual void record_objective(double);
     /// Returns whether or not convergence or termination conditions have been met.
     virtual bool terminate() const = 0;
 
     /// Get the current best point and the value of the objective function at that point.
-    std::pair<data::Quaternion, double> get_optimum() const;
+    std::pair<data::Vec3, double> get_optimum() const;
 
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const = 0;
@@ -54,12 +54,12 @@ class Optimizer {
 
     protected:
     /// The current point to evaluate the objective function for.
-    data::Quaternion m_point;
+    data::Vec3 m_point;
     /// The last recorded objective function value.
     double m_objective;
 
     /// The best (as of yet) point computed.
-    std::pair<data::Quaternion, double> m_best_point;
+    std::pair<data::Vec3, double> m_best_point;
 
     /// The number of iterations thus far.
     unsigned int m_count;

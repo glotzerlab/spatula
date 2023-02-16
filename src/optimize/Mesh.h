@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "../data/Quaternion.h"
+#include "../data/Vec3.h"
 #include "Optimize.h"
 
 namespace pgop { namespace optimize {
@@ -30,7 +32,7 @@ class Mesh : public Optimizer {
 
     private:
     /// The set of points to evaluate.
-    std::vector<data::Quaternion> m_points;
+    std::vector<data::Vec3> m_points;
 };
 
 void export_mesh(py::module& m);

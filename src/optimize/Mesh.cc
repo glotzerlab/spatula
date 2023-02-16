@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iterator>
 #include <limits>
 
 #include <pybind11/stl.h>
@@ -6,7 +7,13 @@
 #include "Mesh.h"
 
 namespace pgop { namespace optimize {
-Mesh::Mesh(const std::vector<data::Quaternion>& points) : Optimizer(), m_points(points) { }
+Mesh::Mesh(const std::vector<data::Quaternion>& points) : Optimizer(), m_points()
+{
+    m_points.reserve(m_points.size());
+    std::transform(points.cbegin(), points.cend(), std::back_inserter(m_points), [](const auto& q) {
+        return q.to_axis_angle_3D();
+    });
+}
 
 void Mesh::internal_next_point()
 {
