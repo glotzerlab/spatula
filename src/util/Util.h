@@ -51,6 +51,16 @@ void rotate_matrix(const InputIterator points_begin,
 }
 
 /**
+ * @brief Convert a Vec3 representing an axis, angle rotation parametrization to a rotation matrix.
+ *
+ * This method assumes that \f$ || v || = \theta \f$ and \f$ x = \frac{v}{||v||} \f$ where \f$ x \f$
+ * is the axis of rotation.
+ *
+ * @param v the rotation coded according to the 3 vector axis angle parametrization.
+ */
+std::vector<double> to_rotation_matrix(const Vec3& v);
+
+/**
  * @brief Compute the rotation matrix for the given Euler angles in ??? convention.
  *
  * @param alpha Euler angle

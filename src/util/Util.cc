@@ -12,6 +12,26 @@ double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
     return std::acos(ref_x.dot(x));
 }
 
+std::vector<double> to_rotation_matrix(const Vec3& v)
+{
+    const auto angle = v.norm();
+    const auto axis = v / angle;
+    const double c {std::cos(angle)}, s {std::sin(angle)};
+    const double C = 1 - c;
+    const auto sv = axis * s;
+    return std::vector<double> {{
+        C * axis.x * axis.x + c,
+        C * axis.x * axis.y - sv.z,
+        C * axis.x * axis.z + sv.y,
+        C * axis.y * axis.x + sv.z,
+        C * axis.y * axis.y + c,
+        C * axis.y * axis.z - sv.x,
+        C * axis.z * axis.x + sv.y,
+        C * axis.z * axis.y - sv.x,
+        C * axis.z * axis.z + c,
+    }};
+}
+
 void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R)
 {
     x_prime.x = R[0] * x.x + R[1] * x.y + R[2] * x.z;
