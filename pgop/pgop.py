@@ -23,7 +23,7 @@ class PGOP:
     the surface of the sphere (e.g. von-Mises-Fisher or uniform distributions).
     """
 
-    def __init__(self, dist, symmetries, optimizer, bo_arg):
+    def __init__(self, dist, symmetries, optimizer, kappa=11.5, max_theta=0.61):
         """Create a PGOP object.
 
         Parameters
@@ -37,20 +37,31 @@ class PGOP:
         optimizer : pgop.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
-        bo_arg : double
-            The corresponding distribution parameter.
+        kappa : double
+            The concentration parameter for the von-Mises-Fisher distribution.
+            Only used when ``dist`` is "fisher". Defaults to 11.5.
+        max_theta : double
+            The maximum angle (in radians) that the uniform distribution
+            extends. Only used when ``dist`` is uniform. Defauts to 0.61
+            (roughly 35 degrees).
         """
+        if isinstance(symmetries, str):
+            raise ValueError("symmetries must be an iterable of str instances.")
         self._symmetries = symmetries
         # Always use maximum l and let compute decide the ls to use for
         # computing the PGOP
         self._weijer = weijerd.WeigerD(12)
         self._optmizer = optimizer
         D_ij = self._precompute_weijer_d()  # noqa :D806
+        if dist == "fisher":
+            dist_param = kappa
+        elif dist == "uniform":
+            dist_param = max_theta
         try:
             cls_ = getattr(pgop._pgop, "PGOP" + dist.title())
         except AttributeError:
             raise ValueError(f"Distribution {dist} not supported.")
-        self._cpp = cls_(D_ij, optimizer._cpp, bo_arg)
+        self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
         self._pgop = None
 
     def compute(
