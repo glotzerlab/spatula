@@ -1,9 +1,8 @@
 #include <pybind11/stl.h>
 
-#include "LocalFIRE.h"
-#include "LocalMonteCarlo.h"
-#include "LocalSequential.h"
-#include "RandomSearch.h"
+#include "LineSearch.h"
+#include "StepGradientDescent.h"
+/* #include "RandomSearch.h" */
 #include "Union.h"
 
 namespace pgop { namespace optimize {
@@ -81,49 +80,39 @@ void Union::createFinalOptimizer()
 
 void export_union(py::module& m)
 {
-    py::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "QUnion")
+    py::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "Union")
         .def_static(
-            "with_fire",
+            "with_line_search",
             [](const std::shared_ptr<const Optimizer> initial_opt,
                unsigned int max_iter,
-               double initial_jump) -> auto{
-                return std::make_shared<Union>(initial_opt,
-                                               [max_iter, initial_jump](const Optimizer& opt) {
-                                                   return std::make_unique<LocalFIRE>(
-                                                       opt.get_optimum().first,
-                                                       max_iter,
-                                                       initial_jump);
-                                               });
-            })
-        .def_static(
-            "with_seq",
-            [](const std::shared_ptr<const Optimizer> initial_opt,
-               unsigned int max_iter,
-               double initial_jump) -> auto{
-                return std::make_shared<Union>(initial_opt,
-                                               [max_iter, initial_jump](const Optimizer& opt) {
-                                                   return std::make_unique<LocalSequential>(
-                                                       opt.get_optimum().first,
-                                                       max_iter,
-                                                       initial_jump);
-                                               });
-            })
-
-        .def_static(
-            "with_mc",
-            [](const std::shared_ptr<const Optimizer> initial_opt,
-               double kT,
-               double max_theta,
-               long unsigned int seed,
-               unsigned int iterations) -> auto{
+               double initial_jump,
+               double learning_rate,
+               double tol) -> auto{
                 return std::make_shared<Union>(
                     initial_opt,
-                    [kT, max_theta, seed, iterations](const Optimizer& opt) {
-                        return std::make_unique<MonteCarlo>(opt.get_optimum(),
-                                                            kT,
-                                                            max_theta,
-                                                            seed,
-                                                            iterations);
+                    [max_iter, initial_jump, learning_rate, tol](const Optimizer& opt) {
+                        return std::make_unique<LineSearch>(opt.get_optimum().first,
+                                                            max_iter,
+                                                            initial_jump,
+                                                            learning_rate,
+                                                            tol);
+                    });
+            })
+        .def_static(
+            "with_step_gradient_descent",
+            [](const std::shared_ptr<const Optimizer> initial_opt,
+               unsigned int max_iter,
+               double initial_jump,
+               double learning_rate,
+               double tol) -> auto{
+                return std::make_shared<Union>(
+                    initial_opt,
+                    [max_iter, initial_jump, learning_rate, tol](const Optimizer& opt) {
+                        return std::make_unique<StepGradientDescent>(opt.get_optimum().first,
+                                                                     max_iter,
+                                                                     initial_jump,
+                                                                     learning_rate,
+                                                                     tol);
                     });
             });
 }

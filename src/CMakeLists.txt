@@ -5,9 +5,8 @@ pybind11_add_module(_pgop export-module.cc
     data/Quaternion.h data/Quaternion.cc
     optimize/Optimize.h optimize/Optimize.cc
     optimize/RandomSearch.h optimize/RandomSearch.cc
-    optimize/LocalFIRE.h optimize/LocalFIRE.cc
-    optimize/LocalSequential.h optimize/LocalSequential.cc
-    optimize/LocalMonteCarlo.h optimize/LocalMonteCarlo.cc
+    optimize/LineSearch.h optimize/LineSearch.cc
+    optimize/StepGradientDescent.h optimize/StepGradientDescent.cc
     optimize/Mesh.h optimize/Mesh.cc
     optimize/Union.h optimize/Union.cc
     optimize/export_optimize.h optimize/export_optimize.cc

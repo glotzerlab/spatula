@@ -1,4 +1,5 @@
 #include "RandomSearch.h"
+#include "../data/Quaternion.h"
 
 namespace pgop { namespace optimize {
 
@@ -24,7 +25,7 @@ void RandomSearch::internal_next_point()
                        m_normal_dist(m_rng),
                        m_normal_dist(m_rng));
     q.normalize();
-    m_point = q;
+    m_point = q.to_axis_angle_3D();
 }
 
 long unsigned int RandomSearch::getSeed() const

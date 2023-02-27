@@ -12,27 +12,39 @@ class RandomSearch:
         self._cpp = _pgop.RandomSearch(max_iter, seed)
 
 
-class LocalSearch:
+class LineSearch:
     def __init__(
         self,
         initial_point=(1.0, 0.0, 0.0, 0.0),
-        max_iter=200,
-        initial_jump=0.01,
+        max_iter=100,
+        initial_jump=0.001,
+        learning_rate=0.05,
+        tol=1e-6,
     ):
-        self._cpp = _pgop.LocalFIRE(
-            _pgop.Quaternion(initial_point), max_iter, initial_jump
+        self._cpp = _pgop.LineSearch(
+            _pgop.Quaternion(initial_point).to_axis_angle_3D(),
+            max_iter,
+            initial_jump,
+            learning_rate,
+            tol,
         )
 
 
-class LocalSequentialSearch:
+class StepGradientDescent:
     def __init__(
         self,
         initial_point=(1.0, 0.0, 0.0, 0.0),
-        max_iter=200,
-        initial_jump=0.01,
+        max_iter=80,
+        initial_jump=0.001,
+        learning_rate=0.05,
+        tol=1e-6,
     ):
-        self._cpp = _pgop.LocalSequential(
-            _pgop.Quaternion(initial_point), max_iter, initial_jump
+        self._cpp = _pgop.StepGradientDescent(
+            _pgop.Quaternion(initial_point).to_axis_angle_3D(),
+            max_iter,
+            initial_jump,
+            learing_rate,
+            tol,
         )
 
 
@@ -120,18 +132,32 @@ class LocalMonteCarlo:
 
 class Union:
     @classmethod
-    def with_fire(cls, optimizer, max_iter=200, initial_jump=0.001):
+    def with_line_search(
+        cls,
+        optimizer,
+        max_iter=80,
+        initial_jump=0.001,
+        learning_rate=0.05,
+        tol=1e-6,
+    ):
         instance = cls()
-        instance._cpp = _pgop.QUnion.with_fire(
-            optimizer._cpp, max_iter, initial_jump
+        instance._cpp = _pgop.Union.with_line_search(
+            optimizer._cpp, max_iter, initial_jump, learning_rate, tol
         )
         return instance
 
     @classmethod
-    def with_seq(cls, optimizer, max_iter=200, initial_jump=0.001):
+    def with_step_gradient_descent(
+        cls,
+        optimizer,
+        max_iter=50,
+        initial_jump=0.001,
+        learning_rate=0.055,
+        tol=1e-6,
+    ):
         instance = cls()
-        instance._cpp = _pgop.QUnion.with_seq(
-            optimizer._cpp, max_iter, initial_jump
+        instance._cpp = _pgop.Union.with_step_gradient_descent(
+            optimizer._cpp, max_iter, initial_jump, learning_rate, tol
         )
         return instance
 
@@ -140,7 +166,7 @@ class Union:
         cls, optimizer, kT=1.0, max_theta=0.017, seed=42, iterations=200
     ):
         instance = cls()
-        instance._cpp = _pgop.QUnion.with_mc(
+        instance._cpp = _pgop.Union.with_mc(
             optimizer._cpp, kT, max_theta, seed, iterations
         )
         return instance
