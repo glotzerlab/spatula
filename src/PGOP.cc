@@ -54,9 +54,9 @@ LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
 {
 }
 
-void LocalNeighborhood::rotate(const data::Quaternion& q)
+void LocalNeighborhood::rotate(const data::Vec3& v)
 {
-    const auto R = q.to_rotation_matrix();
+    const auto R = util::to_rotation_matrix(v);
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
@@ -182,7 +182,8 @@ py::array_t<double> PGOP<distribution_type>::refine(const py::array_t<double> di
                       const auto rot = data::Quaternion(u_rotations(i, j, 0),
                                                         u_rotations(i, j, 1),
                                                         u_rotations(i, j, 2),
-                                                        u_rotations(i, j, 3));
+                                                        u_rotations(i, j, 3))
+                                           .to_axis_angle_3D();
                       neighborhood.rotate(rot);
                       u_op_store(i, j)
                           = this->compute_pgop(neighborhood, m_Dij[j], qlm_eval, qlm_buf);

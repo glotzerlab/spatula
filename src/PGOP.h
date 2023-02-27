@@ -21,7 +21,7 @@ namespace pgop {
 struct LocalNeighborhood {
     LocalNeighborhood(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
 
-    void rotate(const data::Quaternion& q);
+    void rotate(const data::Vec3& q);
 
     const std::vector<data::Vec3> positions;
     const std::vector<double> weights;
