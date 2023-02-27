@@ -1,4 +1,9 @@
 #include <cmath>
+#include <sstream>
+#include <string>
+
+#include <pybind11/operators.h>
+#include <pybind11/stl.h>
 
 #include "Quaternion.h"
 
@@ -91,10 +96,8 @@ std::pair<Vec3, double> Quaternion::to_axis_angle() const
 
 Vec3 Quaternion::to_axis_angle_3D() const
 {
-    const double half_angle = std::acos(w);
-    const double angle = 2 * half_angle;
-    const double sin_qw = half_angle != 0 ? 1 / std::sin(half_angle) : 0;
-    return Vec3(angle * x * sin_qw, angle * y * sin_qw, angle * z * sin_qw);
+    const auto axis_angle = to_axis_angle();
+    return axis_angle.first * axis_angle.second;
 }
 
 Quaternion operator*(const Quaternion& a, const Quaternion& b)
@@ -105,34 +108,35 @@ Quaternion operator*(const Quaternion& a, const Quaternion& b)
                       a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w);
 }
 
-Quaternion operator*=(Quaternion& a, const Quaternion& b)
+Quaternion& operator*=(Quaternion& a, const Quaternion& b)
 {
     a = a * b;
     return a;
 }
 
-Vec3 quat_to_vec3(const Quaternion& q)
-{
-    return Vec3(q.x, q.y, q.z);
-}
-
-Quaternion quat_from_hypersphere(double phi, double theta, double psi)
-{
-    const double sin_phi = std::sin(phi);
-    const double sin_psi = std::sin(psi);
-    return Quaternion(std::cos(phi),
-                      sin_phi * std::cos(psi),
-                      sin_phi * sin_psi * std::cos(theta),
-                      sin_phi * sin_psi * std::sin(theta));
-}
-
-Quaternion quat_from_vec(const Vec3& v)
-{
-    return Quaternion(0, v.x, v.y, v.z);
-}
-
 void export_quaternion(py::module& m)
 {
-    py::class_<Quaternion>(m, "Quaternion").def(py::init<const py::object&>());
+    py::class_<Quaternion>(m, "Quaternion")
+        .def(py::init<const py::object&>())
+        .def_readwrite("w", &Quaternion::w)
+        .def_readwrite("x", &Quaternion::x)
+        .def_readwrite("y", &Quaternion::y)
+        .def_readwrite("z", &Quaternion::z)
+        .def("__repr__",
+             [](const Quaternion& q) {
+                 auto repr = std::ostringstream();
+                 repr << "Quaternion(" << std::to_string(q.w) << ", " << std::to_string(q.x) << ", "
+                      << std::to_string(q.y) << ", " << std::to_string(q.z) << ")";
+                 return repr.str();
+             })
+        .def("recipical", &Quaternion::recipical)
+        .def("conjugate", &Quaternion::conjugate)
+        .def("to_axis_angle", &Quaternion::to_axis_angle)
+        .def("to_axis_angle_3D", &Quaternion::to_axis_angle_3D)
+        .def("norm", &Quaternion::norm)
+        .def("normalize", &Quaternion::normalize)
+        .def("to_rotation_matrix", &Quaternion::to_rotation_matrix)
+        .def(py::self * py::self)
+        .def(py::self *= py::self);
 }
 }} // namespace pgop::data

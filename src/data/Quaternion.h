@@ -26,8 +26,6 @@ struct Quaternion {
     double norm() const;
     void normalize();
     Quaternion recipical() const;
-    friend Quaternion quat_from_hypersphere(double phi, double theta, double psi);
-    friend Quaternion quat_from_vec(const Vec3& v);
     std::vector<double> to_rotation_matrix() const;
     std::pair<Vec3, double> to_axis_angle() const;
     Vec3 to_axis_angle_3D() const;
@@ -37,11 +35,7 @@ struct Quaternion {
 };
 
 Quaternion operator*(const Quaternion& a, const Quaternion& b);
-Quaternion operator*=(Quaternion& a, const Quaternion& b);
-
-Quaternion quat_from_hypersphere(double phi, double theta, double psi);
-Quaternion quat_from_vec(const Vec3& v);
-Vec3 quat_to_vec3(const Quaternion& q);
+Quaternion& operator*=(Quaternion& a, const Quaternion& b);
 
 void export_quaternion(py::module& m);
 }} // namespace pgop::data

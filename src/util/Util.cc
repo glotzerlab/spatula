@@ -3,6 +3,8 @@
 #include <numeric>
 #include <ranges>
 
+#include <pybind11/stl.h>
+
 #include "Util.h"
 
 namespace pgop { namespace util {
@@ -26,8 +28,8 @@ std::vector<double> to_rotation_matrix(const Vec3& v)
         C * axis.y * axis.x + sv.z,
         C * axis.y * axis.y + c,
         C * axis.y * axis.z - sv.x,
-        C * axis.z * axis.x + sv.y,
-        C * axis.z * axis.y - sv.x,
+        C * axis.z * axis.x - sv.y,
+        C * axis.z * axis.y + sv.x,
         C * axis.z * axis.z + c,
     }};
 }
@@ -98,5 +100,7 @@ wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
 void export_util(py::module& m)
 {
     m.def("wignerD_semidirect_prod", &wignerDSemidirectProduct);
+    m.def("to_rotation_matrix", &to_rotation_matrix);
+    m.def("single_rotate", &single_rotate);
 }
 }} // namespace pgop::util
