@@ -69,7 +69,7 @@ class PGOP:
         system,
         neighbors,
         max_l=6,
-        m=7,
+        m=5,
         refine=True,
         refine_l=9,
         refine_m=10,
