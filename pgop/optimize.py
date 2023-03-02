@@ -8,7 +8,7 @@ from . import _pgop
 
 
 class RandomSearch:
-    def __init__(self, max_iter=200, seed=42):
+    def __init__(self, max_iter=150, seed=42):
         self._cpp = _pgop.RandomSearch(max_iter, seed)
 
 
@@ -16,7 +16,7 @@ class LineSearch:
     def __init__(
         self,
         initial_point=(1.0, 0.0, 0.0, 0.0),
-        max_iter=100,
+        max_iter=150,
         initial_jump=0.001,
         learning_rate=0.05,
         tol=1e-6,
@@ -34,7 +34,7 @@ class StepGradientDescent:
     def __init__(
         self,
         initial_point=(1.0, 0.0, 0.0, 0.0),
-        max_iter=80,
+        max_iter=150,
         initial_jump=0.001,
         learning_rate=0.05,
         tol=1e-6,
@@ -135,7 +135,7 @@ class Union:
     def with_line_search(
         cls,
         optimizer,
-        max_iter=80,
+        max_iter=150,
         initial_jump=0.001,
         learning_rate=0.05,
         tol=1e-6,
@@ -150,7 +150,7 @@ class Union:
     def with_step_gradient_descent(
         cls,
         optimizer,
-        max_iter=50,
+        max_iter=150,
         initial_jump=0.001,
         learning_rate=0.055,
         tol=1e-6,
