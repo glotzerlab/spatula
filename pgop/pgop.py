@@ -68,6 +68,7 @@ class PGOP:
         self,
         system,
         neighbors,
+        query_points=None,
         max_l=6,
         m=5,
         refine=True,
@@ -117,7 +118,7 @@ class PGOP:
             :math:`4 m^2`.
         """
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
-        dist = self._compute_distances(neigh_query, neighbors)
+        dist = self._compute_distances(neigh_query, neighbors, query_points)
         quad_positions, quad_weights = self._get_cartesian_quad(m)
         self._pgop, self._rotations = self._cpp.compute(
             dist,
@@ -141,10 +142,15 @@ class PGOP:
                 quad_weights,
             )
 
-    def _compute_distances(self, neigh_query, neighbors):
+    def _compute_distances(self, neigh_query, neighbors, query_points):
         """Given a query and neighbors get wrapped distances to neighbors."""
         pos, box = neigh_query.points, neigh_query.box
-        return box.wrap(pos[neighbors[:, 0]] - pos[neighbors[:, 1]])
+        if query_points is None:
+            query_points = pos
+        return box.wrap(
+            query_points[neighbors.query_point_indices]
+            - pos[neighbors.point_indices]
+        )
 
     def _get_neighbors(self, system, neighbors):
         """Get a NeighborQuery and NeighborList object.
