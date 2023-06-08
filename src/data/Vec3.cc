@@ -207,8 +207,14 @@ void export_Vec3(py::module& m)
         .def(py::self / float())
         .def(py::self + float())
         .def(py::self - float())
-        .def(py::self -= py::self)
-        .def(py::self /= py::self)
+        .def(
+            "__isub__",
+            [](Vec3 a, const Vec3 b) { a -= b; },
+            py::is_operator())
+        .def(
+            "__idiv__",
+            [](Vec3 a, const Vec3 b) { a /= b; },
+            py::is_operator())
         .def(py::self *= py::self)
         .def(py::self += py::self)
         .def(py::self == py::self)
