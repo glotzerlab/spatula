@@ -107,7 +107,7 @@ void LineSearch::searchAlongGradient()
         return;
     }
     const double grad = objective_change / m_last_dv;
-    m_last_dv = -0.05 * grad;
+    m_last_dv = -m_learning_rate * grad;
     m_delta += m_last_dv;
     m_point = m_round_point.first - (m_grad * m_delta);
 }
