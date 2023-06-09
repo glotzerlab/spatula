@@ -22,15 +22,11 @@ concept SphereSurfaceDistribution = requires(T d, double x)
     /// Require a type alias for the constructor's single argument's type.
     typename T::param_type;
     /// Require constructor of only param_type.
-    std::constructible_from<typename T::param_type>;
-
+    {std::as_const(d)(x)} -> std::floating_point;
+} && std::constructible_from<typename T::param_type> &&
     /// Require a static member use_theta which determines the value passed to operator().
     std::same_as<decltype(T::use_theta), const bool>;
-    /// Require Distribution::operator()(double x) -> double or float.
-    {
-        std::as_const(d)(x)
-        } -> std::floating_point;
-};
+/// Require Distribution::operator()(double x) -> double or float.
 
 /**
  * @brief Represents a uniform and normalized distribution centered at a given position on the unit
