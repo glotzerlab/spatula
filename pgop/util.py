@@ -1,9 +1,9 @@
 """General utility functions for the package and users."""
 
 import collections
+import operator
 
 import numpy as np
-import operators
 
 from . import _pgop
 
@@ -88,9 +88,7 @@ class _Cache:
         if self.max_size is None:
             return
         if len(self._data) > self.max_size:
-            removal_order = sorted(
-                self._key_counts, key=operators.itemgetter(1)
-            )
+            removal_order = sorted(self._key_counts, key=operator.itemgetter(1))
             for k, _ in removal_order:
                 if k not in self._recent_keys:
                     del self._data[k]
