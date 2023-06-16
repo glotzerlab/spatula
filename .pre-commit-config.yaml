@@ -25,8 +25,7 @@ repos:
   rev: v0.0.272
   hooks:
   - id: ruff
-    args:
-      - --fix
+    args: [ --fix, --exit-non-zero-on-fix ]
 - repo: https://github.com/pre-commit/mirrors-clang-format
   rev: v15.0.6
   hooks:

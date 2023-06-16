@@ -3,7 +3,9 @@ __pycache__
 build
 .venv
 .cache
+*.log
+*.so
+*.dll
 compile_commands.json
 *.egg-info
-_pgop.cpython*
 dist
