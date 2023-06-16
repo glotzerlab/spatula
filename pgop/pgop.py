@@ -4,8 +4,6 @@ Provides the `PGOP` class which computes the point group symmetry for a
 particle's neighborhood.
 """
 
-import functools
-
 import freud
 import numpy as np
 
@@ -15,6 +13,7 @@ from . import integrate, sph_harm, util, weijerd
 
 
 class PGOP:
+
     """Compute the degree of point group symmetry for specified point groups.
 
     This class detects the point group symmetry of the modified bond order
@@ -59,10 +58,11 @@ class PGOP:
             dist_param = max_theta
         try:
             cls_ = getattr(pgop._pgop, "PGOP" + dist.title())
-        except AttributeError:
-            raise ValueError(f"Distribution {dist} not supported.")
+        except AttributeError as err:
+            raise ValueError(f"Distribution {dist} not supported.") from err
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
         self._pgop = None
+        self._ylm_cache = util._Cache(100)
 
     def compute(
         self,
@@ -78,10 +78,12 @@ class PGOP:
         """Compute the point group symmetry for a given system and neighbor.
 
         Note:
+        ----
             A ``max_l`` of at least 6 is needed to caputure icosahedral ordering
             and a max of 4 is needed for octahedral.
 
         Note:
+        ----
             Higher ``max_l`` requires higher ``m``. A rough equality is usually
             good enough to ensure accurate results for the given fidelity.
 
@@ -163,14 +165,18 @@ class PGOP:
             return query, neighbors
         return query, query.query(query.points, neighbors).toNeighborList()
 
-    @functools.lru_cache
     def _ylms(self, l, m):
         """Return the spherical harmonics at the Gauss-Legrende points.
 
         Returns all spherical harmonics upto ``self._max_l`` at the points of
         the Gauss-Legrende quadrature of the given ``m``.
         """
-        return sph_harm.SphHarm(l)(*integrate.gauss_legendre_quad_points(m))
+        key = (l, m)
+        if key not in self._ylm_cache:
+            self._ylm_cache[key] = sph_harm.SphHarm(l)(
+                *integrate.gauss_legendre_quad_points(m)
+            )
+        return self._ylm_cache[key]
 
     @property
     def pgop(self):

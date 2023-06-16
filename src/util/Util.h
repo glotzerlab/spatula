@@ -88,8 +88,8 @@ std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation)
  * direction but with unit magnitude.
  */
 template<std::ranges::input_range range_type>
-requires std::floating_point<std::ranges::range_value_t<range_type>> std::vector<Vec3>
-normalize_distances(const range_type& distances)
+    requires std::floating_point<std::ranges::range_value_t<range_type>>
+std::vector<Vec3> normalize_distances(const range_type& distances)
 {
     auto normalized_distances = std::vector<Vec3>();
     normalized_distances.reserve(distances.size() / 3);

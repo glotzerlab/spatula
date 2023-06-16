@@ -30,16 +30,14 @@ def _parse_point_group(schonflies_symbol):
     family = schonflies_symbol[0]
     if len(schonflies_symbol) == 1:
         return (family, None, None)
-    if schonflies_symbol[-1].isalpha():
-        modifier = schonflies_symbol[-1]
-    else:
-        modifier = None
+    modifier = (
+        schonflies_symbol[-1] if schonflies_symbol[-1].isalpha() else None
+    )
     if len(schonflies_symbol) == 2 and modifier is not None:
         return (family, modifier, None)
-    if modifier:
-        order = int(schonflies_symbol[1:-1])
-    else:
-        order = int(schonflies_symbol[1:])
+    order = (
+        int(schonflies_symbol[1:-1]) if modifier else int(schonflies_symbol[1:])
+    )
     return (family, modifier, order)
 
 
@@ -47,7 +45,7 @@ class WeigerD:
     _MAX_L = 12
 
     def __init__(self, max_l):
-        if self._MAX_L < max_l:
+        if max_l > self._MAX_L:
             raise ValueError(f"Maximum supported l value is {self._MAX_L}.")
         self._max_l = max_l
         self._index = slice(0, self._compute_last_index(max_l))

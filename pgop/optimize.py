@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import coxeter
 import numpy as np
 import rowan
 import scipy as sp
@@ -43,7 +44,7 @@ class StepGradientDescent:
             _pgop.Quaternion(initial_point).to_axis_angle_3D(),
             max_iter,
             initial_jump,
-            learing_rate,
+            learning_rate,
             tol,
         )
 
@@ -64,7 +65,6 @@ def _load_sphere_codes():
 
 
 class Mesh:
-
     _sphere_codes = _load_sphere_codes()
 
     def __init__(self, points):
@@ -114,7 +114,7 @@ class LocalMonteCarlo:
     def __init__(
         self,
         initial_point=None,
-        kT=1.0,
+        kT=1.0,  # noqa: N803
         max_theta=0.017,
         seed=42,
         iterations=200,
@@ -163,7 +163,12 @@ class Union:
 
     @classmethod
     def with_mc(
-        cls, optimizer, kT=1.0, max_theta=0.017, seed=42, iterations=200
+        cls,
+        optimizer,
+        kT=1.0,  # noqa: N803
+        max_theta=0.017,
+        seed=42,
+        iterations=200,
     ):
         instance = cls()
         instance._cpp = _pgop.Union.with_mc(

@@ -48,7 +48,7 @@ def find_cmake_package(
         tmp_path = pathlib.Path(tmpdirname)
 
         # write the cmakelists file
-        with open(tmp_path / "CMakeLists.txt", "w") as f:
+        with (tmp_path / "CMakeLists.txt", "w").open("w") as f:
             f.write(
                 f"""
 project(test)
@@ -62,7 +62,7 @@ find_package({name} {version} CONFIG REQUIRED {find_package_options})
         env = copy.copy(os.environ)
         env["CMAKE_PREFIX_PATH"] = sys.prefix
 
-        os.mkdir(tmp_path / "build")
+        tmp_path.mkdir("build")
         cmake_out = subprocess.run(
             ["cmake", tmpdirname],
             cwd=tmp_path / "build",
@@ -78,7 +78,7 @@ find_package({name} {version} CONFIG REQUIRED {find_package_options})
         # if cmake completed correctly, the package was found
         if cmake_out.returncode == 0:
             location = ""
-            with open(tmp_path / "build" / "CMakeCache.txt") as f:
+            with (tmp_path / "build" / "CMakeCache.txt").open("w") as f:
                 for line in f.readlines():
                     if line.startswith(location_variable):
                         location = line.strip()
@@ -97,21 +97,21 @@ def install_cmake_package(url, cmake_options):
 
         log.info(f"Fetching {url}")
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with open(tmp_path / "file.tar.gz", "wb") as f:
+        with (tmp_path / "file.tar.gz", "wb").open("w") as f:
             f.write(urllib.request.urlopen(req).read())
 
         with tarfile.open(tmp_path / "file.tar.gz") as tar:
             tar.extractall(path=tmp_path)
             root = tar.getnames()[0]
             if "/" in root:
-                root = os.path.dirname(root)
+                root = pathlib.Path(root).parent
 
         # add the python prefix to the cmake prefix path
         env = copy.copy(os.environ)
         env["CMAKE_PREFIX_PATH"] = sys.prefix
 
         log.info(f"Configuring {root}")
-        os.mkdir(tmp_path / "build")
+        tmp_path.mkdir("build")
         cmake_out = subprocess.run(
             ["cmake", tmp_path / root, f"-DCMAKE_INSTALL_PREFIX={sys.prefix}"]
             + cmake_options,

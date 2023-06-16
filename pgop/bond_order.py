@@ -1,10 +1,4 @@
-import numpy as np
-import scipy as sp
-import scipy.stats
-
 import pgop._pgop
-
-from . import util
 
 
 class BondOrder:

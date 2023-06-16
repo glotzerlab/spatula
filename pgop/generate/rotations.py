@@ -93,9 +93,9 @@ class PointGroupRotations:
         return self.cyclic_quaternions(order, self._cyclic_axis)
 
     def dihedral(self, order):
-        Cn = self.cyclic(order)
-        C2 = self.cyclic_quaternions(2, self._dihedral_axis)
-        return self.prod(Cn, C2)
+        cyclic_n = self.cyclic(order)
+        cyclic_2 = self.cyclic_quaternions(2, self._dihedral_axis)
+        return self.prod(cyclic_n, cyclic_2)
 
     def tetrahedral(self):
         # Create the 8 quaternions in group Q

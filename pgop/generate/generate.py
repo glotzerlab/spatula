@@ -6,9 +6,8 @@ import numpy as np
 import pandas as pd
 import quaternionic
 import spherical
-from rotations import PointGroupRotations
-
 import util
+from rotations import PointGroupRotations
 
 PG_ROTATION_CACHE = PointGroupRotations()
 
