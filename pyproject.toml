@@ -15,14 +15,16 @@ exclude = '''
 [tool.ruff]
 # Add D when documentation is finished
 select = ["E", "F", "I", "B", "SIM", "PTH", "C90", "UP", "N"]
-ignore = ["E741", "B905", "D213", "D211"]
+ignore = ["E740", "B905", "D213", "D211", "UP006"]
 line-length = 80
+target-version = "py38"
 
 [build-system]
 requires = ["hatchling", "pybind11>=2.10"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
+artifacts = ["*.so", "*.dll"]
 only-include = ["pgop", "src", "dependencies"]
 exclude = [".gitignore"]
 
@@ -30,7 +32,7 @@ skip-excluded-dir = true
 pure-python = false
 
 [tool.hatch.build.hooks.custom]
-path = "hatch-cmake.py"
+path = "hatch_cmake.py"
 src-mapping = {"**/*.#lext" = "pgop"}
 dependencies = ["pydantic > 1.10"]
 build-dir = "build"
@@ -43,9 +45,23 @@ generator = "Visual Studio 17 2022"  # latest windows runner on GitHub Actions
 # VS is a multi-target generator we need to specify release type
 build-options = {cmake = "--config release"}
 
+[tool.cibuildwheel]
+# Must include because cibuildwheel nor hatch will clean up after themselves
+before-build = "rm -r build || true"
+# The compilation due to thread_pools requires at least this manylinux container
+manylinux-x86_64-image = "manylinux2014"
+build-frontend = "build"
+skip = ["*-win32", "*-manylinux_i686", "*-musllinux_*", "pp*"]
+test-command = 'python -c "import pgop; pgop._pgop; print(pgop.PGOP.__doc__)"'
+build-verbosity = 1
+
+[tool.cibuildwheel.linux]
+before-build = "rm -r build || true && python -m pip install ninja --disable-pip-version-check --progress-bar=off"
+
 [project]
 name = "pgop"
 version = "0.0.1"
+requires-python = ">=3.8"
 description = "Local environment point group analysis for point cloud data."
 maintainers = [{name = "Brandon Butler", email = "butlerbr@umich.edu"}]
 authors = [{name = "Brandon Butler et al.", email = "butlerbr@umich.edu"}]
@@ -63,4 +79,5 @@ dependencies = [
     "coxeter",
     "numpy",  # basic numerical Python
     "freud-analysis",  # for neighbor finding
+    "pandas",
 ]
