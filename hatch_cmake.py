@@ -1,7 +1,6 @@
 import glob
 import os
 import platform
-import shlex
 import shutil
 import subprocess
 import sys
@@ -106,10 +105,10 @@ class CMakeBuildHook(BuildHookInterface):
     def run_cmd(self, cmd: str, msg: str, logfile: typing.Optional[str] = None):
         self.app.display_info(msg)
         if logfile is None:
-            subprocess.run(cmd, check=True, shell=True)
+            subprocess.run(cmd, check=True)
             return
         with Path(logfile).open("w") as fh:
-            subprocess.run(cmd, shell=True, check=True, stdout=fh, stderr=fh)
+            subprocess.run(cmd, check=True, stdout=fh, stderr=fh)
 
     def clean(self, versions: typing.List[str]) -> None:
         build_dir = Path(self._config.build_dir)
@@ -144,23 +143,17 @@ class CMakeBuildHook(BuildHookInterface):
 
     @property
     def cmake_cmd(self):
-        cmd = "cmake -B " + self._config.build_dir
-        cmd += " -G " + shlex.quote(self._config.generator)
+        cmd = ["cmake", "-B", self._config.build_dir]
+        cmd.extend(["-G", self._config.generator])
         full_options = get_full_cmake_options(self._config.options)
-        options = " ".join(
-            "-D" + f"{opt}={val}" for opt, val in full_options.items()
-        )
-        return cmd + " " + options
+        cmd.extend("-D" + f"{opt}={val}" for opt, val in full_options.items())
+        return cmd
 
     @property
     def build_cmd(self):
-        cmd = "cmake --build " + self._config.build_dir
-        cmake_options = " ".join(self._config.build_options.cmake)
-        if cmake_options != "":
-            cmd += " " + cmake_options
-        generator_options = " ".join(self._config.build_options.generator)
-        if generator_options != "":
-            cmd += " -- " + generator_options
+        cmd = ["cmake", "--build", self._config.build_dir]
+        cmd.extend(self._config.build_options.cmake)
+        cmd.extend(self._config.build_options.generator)
         return cmd
 
     def copy_shared_objects(self):
