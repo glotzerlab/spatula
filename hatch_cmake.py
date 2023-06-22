@@ -137,17 +137,17 @@ class CMakeBuildHook(BuildHookInterface):
             3. System specific
             4. General
         """
-        if getattr(self, "__config", None) is None:
+        if getattr(self, "_config_", None) is None:
             plat = get_platform()
             sys_config = self.config.pop(plat, {})
             config = {**self.config, **sys_config}
             if in_cibw():
-                cibw_config = self.config.pop("cibuildwheel", {})
+                cibw_config = config.pop("cibuildwheel", {})
                 config.update(cibw_config)
                 cibw_sys_config = cibw_config.pop(plat, {})
                 config.update(cibw_sys_config)
-            self.__config = Config(**config)
-        return self.__config
+            self._config_ = Config(**config)
+        return self._config_
 
     @property
     def cmake_cmd(self):

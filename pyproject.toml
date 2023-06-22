@@ -43,7 +43,7 @@ options = {CMAKE_PREFIX_PATH = "cmd@pybind11-config --cmakedir"}
 [tool.hatch.build.hooks.custom.cibuildwheel.windows]
 generator = "Visual Studio 17 2022"  # latest windows runner on GitHub Actions
 # VS is a multi-target generator we need to specify release type
-build-options = {cmake = "--config release"}
+build-options = {cmake = ["--config release"]}
 
 [tool.cibuildwheel]
 # Must include because cibuildwheel nor hatch will clean up after themselves
