@@ -6,6 +6,9 @@
 #include "data/Vec3.h"
 
 namespace pgop {
+// Model concept to show expected interface. We cannot use C++20 for now so we have commented it
+// out.
+
 /**
  * @brief Concept to show the necessary interface for a spherical surface distribution. Given the
  * performance critical nature of the evaluation the bond order diagram, we should use concepts and
@@ -16,17 +19,17 @@ namespace pgop {
  *   2. The dot product of the mean with the point which when the arccos is taken produces the angle
  *      from 1. Therefore, this can be faster if the distribtion can be expressed without the angle.
  */
-template<typename T>
-concept SphereSurfaceDistribution = requires(T d, double x)
-{
-    /// Require a type alias for the constructor's single argument's type.
-    typename T::param_type;
-    /// Require constructor of only param_type.
-    {std::as_const(d)(x)} -> std::floating_point;
-} && std::constructible_from<typename T::param_type> &&
-    /// Require a static member use_theta which determines the value passed to operator().
-    std::same_as<decltype(T::use_theta), const bool>;
-/// Require Distribution::operator()(double x) -> double or float.
+/* template<typename T> */
+/* concept SphereSurfaceDistribution = requires(T d, double x) */
+/* { */
+/*     // Require a type alias for the constructor's single argument's type. */
+/*     typename T::param_type; */
+/*     // Require Distribution::operator()(double x) -> double or float. */
+/*     {std::as_const(d)(x)} -> std::floating_point; */
+/*     // Require constructor of only param_type. */
+/* } && std::constructible_from<typename T::param_type> && */
+/*     // Require a static member use_theta which determines the value passed to operator(). */
+/*     std::same_as<decltype(T::use_theta), const bool>; */
 
 /**
  * @brief Represents a uniform and normalized distribution centered at a given position on the unit
@@ -127,6 +130,8 @@ class ApproxLinearDistribution {
     double m_shift;
 };
 
+// When updating to C++20, use SphereSurfaceDistribution instead of typename below.
+
 /**
  * @brief Representation of a bond order diagram where each point in the diagram is represented by a
  * provided distribution. The class's main function is to compute the bond order diagram's value at
@@ -140,7 +145,7 @@ class ApproxLinearDistribution {
  *
  * @tparam distribution_type A type that matches the SphereSurfaceDistribution concept.
  */
-template<SphereSurfaceDistribution distribution_type> class BondOrder {
+template<typename distribution_type> class BondOrder {
     public:
     /**
      * @brief Create a BondOrder<distribution_type> object from a distribution and normalized

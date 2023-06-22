@@ -26,15 +26,14 @@ LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     return LocalNeighborhood(
-        util::normalize_distances(
-            std::ranges::subrange(m_distances + 3 * start, m_distances + 3 * end)),
+        util::normalize_distances(m_distances, std::make_pair(3 * start, 3 * end)),
         std::vector(m_weights + start, m_weights + end));
 }
 
 std::vector<data::Vec3> Neighborhoods::getNormalizedDistances(size_t i) const
 {
     const size_t start {3 * m_neighbor_offsets[i]}, end {3 * m_neighbor_offsets[i + 1]};
-    return util::normalize_distances(std::ranges::subrange(m_distances + start, m_distances + end));
+    return util::normalize_distances(m_distances, std::make_pair(start, end));
 }
 
 std::vector<double> Neighborhoods::getWeights(size_t i) const

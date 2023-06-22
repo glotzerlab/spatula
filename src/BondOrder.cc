@@ -2,7 +2,6 @@
 #include <cmath>
 #include <math.h>
 #include <numeric>
-#include <ranges>
 
 #include "BondOrder.h"
 #include "util/Util.h"
@@ -39,7 +38,7 @@ double ApproxLinearDistribution::operator()(double x) const
 }
 
 // Todo if no neighbors exist this will lead to nans.
-template<SphereSurfaceDistribution distribution_type>
+template<typename distribution_type>
 BondOrder<distribution_type>::BondOrder(distribution_type dist,
                                         const std::vector<data::Vec3>& positions,
                                         const std::vector<double>& weights)
@@ -48,19 +47,23 @@ BondOrder<distribution_type>::BondOrder(distribution_type dist,
 {
 }
 
-template<SphereSurfaceDistribution distribution_type>
+template<typename distribution_type>
 double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
 {
     double sum_correction = 0;
     // Get the unweighted contribution from each distribution lazily.
-    auto single_contributions
-        = std::views::transform(m_positions, [this, &point](const auto& p) -> double {
-              if constexpr (distribution_type::use_theta) {
-                  return this->m_dist(util::fast_angle_eucledian(p, point));
-              } else {
-                  return this->m_dist(p.dot(point));
-              }
-          });
+    auto single_contributions = std::vector<double>();
+    single_contributions.resize(m_positions.size());
+    std::transform(m_positions.cbegin(),
+                   m_positions.cend(),
+                   single_contributions.begin(),
+                   [this, &point](const auto& p) -> double {
+                       if constexpr (distribution_type::use_theta) {
+                           return this->m_dist(util::fast_angle_eucledian(p, point));
+                       } else {
+                           return this->m_dist(p.dot(point));
+                       }
+                   });
     // Normalize the value and weight the contributions.
     return m_normalization
            * std::transform_reduce(
@@ -79,7 +82,7 @@ double BondOrder<distribution_type>::single_call(const data::Vec3& point) const
                std::multiplies<>());
 }
 
-template<SphereSurfaceDistribution distribution_type>
+template<typename distribution_type>
 std::vector<double>
 BondOrder<distribution_type>::operator()(const std::vector<data::Vec3>& points) const
 {

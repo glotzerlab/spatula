@@ -2,9 +2,8 @@
 
 #include <cmath>
 #include <complex>
-#include <concepts>
 #include <iterator>
-#include <ranges>
+#include <utility>
 #include <vector>
 
 #include <pybind11/numpy.h>
@@ -19,6 +18,9 @@ namespace pgop { namespace util {
 // Bring Vec3 and Quaternion into namespace.
 using namespace pgop::data;
 
+using vec3_iter = decltype(std::declval<std::vector<Vec3>>().begin());
+using cvec3_iter = decltype(std::declval<const std::vector<Vec3>>().begin());
+
 /// Compute and return the angle (in radians) between two vectors in 3D.
 double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x);
 
@@ -32,23 +34,15 @@ void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R);
  * This method is templated to enable more easy refactoring of container types in PGOP.cc.
  *
  * @tparam IntputIterator An input iterator (or derived iterator concept).
- * @tparam OutputIterator An output iterator (or derived iterator concept).
- *
  * @param points_begin constant iterator to the beginning of points to rotate.
  * @param points_end constant iterator to the end of points to rotate.
  * @param rotated_points_it iterator to the starting vector location to place rotated positions in.
  * @param R The rotation matrix given in row column order.
  */
-template<std::input_iterator InputIterator, std::output_iterator<Vec3> OutputIterator>
-void rotate_matrix(const InputIterator points_begin,
-                   const InputIterator points_end,
-                   OutputIterator rotated_points_it,
-                   const std::vector<double>& R)
-{
-    for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
-        single_rotate(*it, *rotated_points_it, R);
-    }
-}
+void rotate_matrix(cvec3_iter points_begin,
+                   cvec3_iter points_end,
+                   vec3_iter rotated_points_it,
+                   const std::vector<double>& R);
 
 /**
  * @brief Convert a Vec3 representing an axis, angle rotation parametrization to a rotation matrix.
@@ -87,20 +81,7 @@ std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation)
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
-template<std::ranges::input_range range_type>
-    requires std::floating_point<std::ranges::range_value_t<range_type>>
-std::vector<Vec3> normalize_distances(const range_type& distances)
-{
-    auto normalized_distances = std::vector<Vec3>();
-    normalized_distances.reserve(distances.size() / 3);
-    // In C++ 23 used strided view with a transform.
-    for (auto it = distances.begin(); it < distances.end(); it += 3) {
-        const auto point = Vec3(it[0], it[1], it[2]);
-        const double norm = 1 / std::sqrt(point.dot(point));
-        normalized_distances.emplace_back(point * norm);
-    }
-    return normalized_distances;
-}
+std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t, size_t> slice);
 
 /**
  * @brief Return a vector of linearly spaced points between start and end.
@@ -134,7 +115,7 @@ py::array_t<std::complex<double>>
 wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
                          const py::array_t<std::complex<double>> D_b);
 
-template<std::floating_point f> f colapse_to_zero(f num, f tol)
+template<typename f> f colapse_to_zero(f num, f tol)
 {
     if (std::abs(num) < tol) {
         return 0;
@@ -142,7 +123,7 @@ template<std::floating_point f> f colapse_to_zero(f num, f tol)
     return num;
 }
 
-template<std::floating_point f> std::complex<f> colapse_to_zero(std::complex<f> num, f tol)
+template<typename f> std::complex<f> colapse_to_zero(std::complex<f> num, f tol)
 {
     if (std::abs(std::real(num)) < tol && std::abs(std::imag(num)) < tol) {
         return std::complex<f>(0);

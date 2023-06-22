@@ -1,8 +1,6 @@
 #include <cmath>
 #include <iterator>
 #include <numeric>
-#include <ranges>
-
 #include <pybind11/stl.h>
 
 #include "Util.h"
@@ -40,6 +38,29 @@ void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R)
     x_prime.y = R[3] * x.x + R[4] * x.y + R[5] * x.z;
     x_prime.z = R[6] * x.x + R[7] * x.y + R[8] * x.z;
 };
+
+void rotate_matrix(cvec3_iter points_begin,
+                   cvec3_iter points_end,
+                   vec3_iter rotated_points_it,
+                   const std::vector<double>& R)
+{
+    for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
+        single_rotate(*it, *rotated_points_it, R);
+    }
+}
+
+std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t, size_t> slice)
+{
+    auto normalized_distances = std::vector<Vec3>();
+    normalized_distances.reserve((slice.second - slice.first) / 3);
+    // In C++ 23 used strided view with a transform.
+    for (size_t i = slice.first; i < slice.second; i += 3) {
+        const auto point = Vec3(distances[i], distances[i + 1], distances[i + 2]);
+        const double norm = 1 / std::sqrt(point.dot(point));
+        normalized_distances.emplace_back(point * norm);
+    }
+    return normalized_distances;
+}
 
 void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     const std::vector<std::complex<double>>& D_ij,

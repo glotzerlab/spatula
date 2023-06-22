@@ -2,7 +2,6 @@
 
 #include "LineSearch.h"
 #include "StepGradientDescent.h"
-/* #include "RandomSearch.h" */
 #include "Union.h"
 
 namespace pgop { namespace optimize {
