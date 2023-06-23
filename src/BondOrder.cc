@@ -1,10 +1,11 @@
 #include <algorithm>
 #include <cmath>
-#include <math.h>
 #include <numeric>
 
 #include "BondOrder.h"
 #include "util/Util.h"
+
+#define M_PI 3.14159265358979323846
 
 namespace pgop {
 FisherDistribution::FisherDistribution(double kappa)
