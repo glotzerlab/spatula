@@ -21,9 +21,7 @@ def get_platform() -> str:
 
 
 def in_cibw() -> bool:
-    return "HATCH_CMAKE_CIBW" in os.environ or any(
-        "CIBW" in var for var in os.environ
-    )
+    return "CIBUILDWHEEL" in os.environ
 
 
 def default_generator():
@@ -49,7 +47,7 @@ def evaluate_option(opt: str):
         completed_process = subprocess.run(
             opt[4:], shell=True, check=True, capture_output=True, text=True
         )
-        return completed_process.stdout
+        return completed_process.stdout.strip()
     return opt
 
 
