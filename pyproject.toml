@@ -19,7 +19,7 @@ ignore = ["E741", "B905", "D213", "D211"]
 line-length = 80
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "pybind11>=2.10"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
@@ -35,9 +35,8 @@ src-mapping = {"**/*.#lext" = "pgop"}
 dependencies = ["pydantic > 1.10"]
 build-dir = "build"
 # uncomment to force rerun of cmake with new options
-# force = True
-# Uncomment to provide cmake options to build type etc.
-# options = {CMAKE_BUILD_TYPE = "RelWithDebInfo"}
+# force = true
+options = {CMAKE_PREFIX_PATH = "cmd@pybind11-config --cmakedir"}
 
 [tool.hatch.build.hooks.custom.cibuildwheel.windows]
 generator = "Visual Studio 17 2022"  # latest windows runner on GitHub Actions
