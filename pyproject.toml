@@ -79,5 +79,5 @@ dependencies = [
     "coxeter",
     "numpy",  # basic numerical Python
     "freud-analysis",  # for neighbor finding
-    "pandas",
+    "h5py",
 ]
