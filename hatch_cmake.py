@@ -44,6 +44,15 @@ def get_python_cmake_opts():
     }
 
 
+def evaluate_option(opt: str):
+    if opt.startswith("cmd@"):
+        completed_process = subprocess.run(
+            opt[4:], shell=True, check=True, capture_output=True, text=True
+        )
+        return completed_process.stdout
+    return opt
+
+
 def replace_library_suffix(pattern: str) -> str:
     extension = "so" if get_platform() != "windows" else "dll"
     return pattern.replace(_LIBRARY_EXTENSION, extension)
@@ -67,7 +76,8 @@ def get_full_cmake_options(
     options = get_python_cmake_opts()
     if in_cibw():
         options.update(get_cibw_cmake_opts())
-    options.update(config)
+    for option, value in config.items():
+        options[option] = evaluate_option(value)
     return options
 
 
