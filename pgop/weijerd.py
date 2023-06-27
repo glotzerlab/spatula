@@ -1,29 +1,31 @@
 import collections.abc
 import itertools
 from pathlib import Path
-
-import pandas as pd
+import numpy as np
+import h5py
 
 from . import _pgop
 
 
 class _WignerData(collections.abc.Mapping):
     def __init__(self):
-        self._df = pd.read_hdf(Path(__file__).parent / "data.h5", "data")
+        with h5py.File(Path(__file__).parent / "data.h5","r") as f:
+            data = list(f["data"])
+            self._df = data
 
     def __getitem__(self, key):
-        if key not in self._df.columns:
+        if key not in list(self._df.keys()):
             raise KeyError(f"WignerD matrix for point group {key} not found.")
-        return self._df[key].to_numpy()
+        return np.asarray(self._df[key])
 
     def __len__(self):
-        return len(self._df.columns)
+        return len(list(self._df.keys()))
 
     def __contains__(self, key):
-        return key in self._df.columns
+        return key in list(self._df.keys())
 
     def __iter__(self):
-        yield from self._df.columns
+        yield from self._df.keys()
 
 
 def _parse_point_group(schonflies_symbol):
