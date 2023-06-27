@@ -1,7 +1,6 @@
 import collections.abc
 import itertools
 from pathlib import Path
-import numpy as np
 import h5py
 
 from . import _pgop
