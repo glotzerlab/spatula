@@ -1,6 +1,7 @@
-import pytest
 import numpy as np
-from pgop.weijerd import _WignerData, _parse_point_group, WeigerD
+import pytest
+
+from pgop.weijerd import WeigerD, _parse_point_group, _WignerData
 
 
 def test_init():
@@ -36,7 +37,7 @@ def test_iter():
 def test_getitem_invalid_key():
     data = _WignerData()
     with pytest.raises(KeyError):
-        item = data["invalid_key"]
+        data["invalid_key"]
 
 
 def test_parse_point_group():
@@ -53,7 +54,7 @@ def test_weigerD_init():
 
 def test_weigerD_init_fail():
     with pytest.raises(ValueError):
-        wig = WeigerD(13)  # more than the max l
+        WeigerD(13)  # more than the max l
 
 
 def test_weigerD_getitem():
@@ -65,7 +66,7 @@ def test_weigerD_getitem():
 def test_weigerD_getitem_invalid():
     wig = WeigerD(10)
     with pytest.raises(KeyError):
-        item = wig["TT"]  # not supported
+        wig["TT"]  # not supported
 
 
 def test_weigerD_iter_sph_indices():
