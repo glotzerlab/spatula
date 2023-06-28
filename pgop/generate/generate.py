@@ -3,7 +3,7 @@ import itertools
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
+import h5py
 import quaternionic
 import spherical
 import util
@@ -55,7 +55,18 @@ def generate_multiple(schonflies_symbols, max_l):
 
 def save_wignerd(matrices, fn, mode, compression_level=5):
     """Save the WignerD matrices into an HDF5 file with compression."""
-    pd.DataFrame(matrices).to_hdf(fn, "data", mode, compression_level)
+    with h5py.File(fn, mode) as f:
+        columns = list(matrices.keys())
+        data = np.array(list(matrices.values()))
+
+        # Create and write the datasets
+        dataset = f.create_dataset(
+            "data/matrices",
+            data=data,
+            compression="gzip",
+            compression_opts=compression_level,
+        )
+        dataset.attrs["point_groups"] = columns
 
 
 if __name__ == "__main__":

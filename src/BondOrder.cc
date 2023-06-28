@@ -5,7 +5,9 @@
 #include "BondOrder.h"
 #include "util/Util.h"
 
+#ifdef _MSC_VER
 #define M_PI 3.14159265358979323846
+#endif
 
 namespace pgop {
 FisherDistribution::FisherDistribution(double kappa)
