@@ -2,6 +2,7 @@ import collections.abc
 import itertools
 from pathlib import Path
 import h5py
+import numpy as np
 
 from . import _pgop
 
@@ -11,16 +12,14 @@ class _WignerData(collections.abc.Mapping):
         # Open the HDF5 file
         with h5py.File(Path(__file__).parent / "data.h5", "r") as f:
             # Get the data
-            self._data = f["/data/block0_values"][:]
-
-            # Get the columns
-            self._columns = f["/data/axis0"][:]
-            self._columns = [col.decode("utf-8") for col in self._columns]
+            dataset = f["/data/matrices"]
+            self._data = dataset[:]
+            self._columns = dataset.attrs["point_groups"]
 
     def __getitem__(self, key):
         if key not in self._columns:
             raise KeyError(f"WignerD matrix for point group {key} not found.")
-        idx = self._columns.index(key)
+        idx = np.where(self._columns == key)[0]
         return self._data[:, idx]
 
     def __len__(self):
