@@ -9,24 +9,29 @@ from . import _pgop
 
 class _WignerData(collections.abc.Mapping):
     def __init__(self):
-        self._file = h5py.File(Path(__file__).parent / "data.h5", "r")
+        # Open the HDF5 file
+        with h5py.File(Path(__file__).parent / "data.h5", "r") as f:
+            # Get the data
+            self._data = f["/data/block0_values"][:]
+
+            # Get the columns
+            self._columns = f["/data/axis0"][:]
+            self._columns = [col.decode("utf-8") for col in self._columns]
 
     def __getitem__(self, key):
-        if key not in self._file.keys():
+        if key not in self._columns:
             raise KeyError(f"WignerD matrix for point group {key} not found.")
-        return self._file[key][:]
+        idx = self._columns.index(key)
+        return self._data[:, idx]
 
     def __len__(self):
-        return len(self._file.keys())
+        return len(self._columns)
 
     def __contains__(self, key):
-        return key in self._file.keys()
+        return key in self._columns
 
     def __iter__(self):
-        yield from self._file.keys()
-
-    def __del__(self):
-        self._file.close()
+        yield from self._columns
 
 
 def _parse_point_group(schonflies_symbol):
