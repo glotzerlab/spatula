@@ -21,6 +21,9 @@ set_target_properties(_pgop PROPERTIES
     CMAKE_CXX_STANDARD_REQUIRED True
     THREADS_PREFER_PTHREAD_FLAG ON
 )
+if (CMAKE_SYSTEM_NAME EQUAL "Linux")
+    target_compile_options(_pgop PRIVATE -pthreads)
+endif (CMAKE_SYSTEM_NAME EQUAL "Linux")
 if (UNIX)
     target_link_libraries(_pgop PRIVATE Threads::Threads)
     target_compile_options(_pgop PRIVATE -Werror -Wall -Wextra)
