@@ -66,20 +66,13 @@ def save_wignerd(matrices, fn, mode, compression_level=5):
             data = matrices
 
         # Create and write the datasets
-        f.create_dataset(
-            "data/block0_values",
+        dataset = f.create_dataset(
+            "data/matrices",
             data=data,
             compression="gzip",
             compression_opts=compression_level,
         )
-        str_type = h5py.string_dtype("utf-8")
-        f.create_dataset(
-            "data/axis0",
-            data=columns,
-            dtype=str_type,
-            compression="gzip",
-            compression_opts=compression_level,
-        )
+        dataset.attrs["point_groups"] = columns
 
 
 if __name__ == "__main__":
