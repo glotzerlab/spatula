@@ -56,14 +56,8 @@ def generate_multiple(schonflies_symbols, max_l):
 def save_wignerd(matrices, fn, mode, compression_level=5):
     """Save the WignerD matrices into an HDF5 file with compression."""
     with h5py.File(fn, mode) as f:
-        # If matrices is a dictionary, get the column names and data separately
-        if isinstance(matrices, dict):
-            columns = list(matrices.keys())
-            data = np.array(list(matrices.values()))
-        # If matrices is a 2D numpy array, create default column names
-        else:
-            columns = [str(i) for i in range(matrices.shape[1])]
-            data = matrices
+        columns = list(matrices.keys())
+        data = np.array(list(matrices.values()))
 
         # Create and write the datasets
         dataset = f.create_dataset(
