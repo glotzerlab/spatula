@@ -19,8 +19,8 @@ class _WignerData(collections.abc.Mapping):
     def __getitem__(self, key):
         if key not in self._columns:
             raise KeyError(f"WignerD matrix for point group {key} not found.")
-        idx = np.where(self._columns == key)[0]
-        return self._data[:, idx]
+        idx = np.flatnonzero(self._columns == key)[0]
+        return self._data[idx, :]
 
     def __len__(self):
         return len(self._columns)
@@ -56,7 +56,6 @@ class WeigerD:
         self._max_l = max_l
         self._index = slice(0, self._compute_last_index(max_l))
         self._data = _WignerData()
-
     @staticmethod
     def _compute_last_index(max_l):
         return sum((2 * l + 1) ** 2 for l in range(0, max_l + 1))
