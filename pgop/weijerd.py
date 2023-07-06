@@ -75,6 +75,8 @@ class WeigerD:
             if family == "C" and modifier == "i":
                 return self._data["Ci"]
             if family == "C" and modifier == "h":
+                # regression happened no longer have data here:
+                raise KeyError(f"{point_group} is not currently supported.")
                 return _pgop.wignerD_semidirect_prod(
                     self._data[family + str(order)][self._index],
                     self._data["Ci"][self._index],
