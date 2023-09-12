@@ -165,7 +165,7 @@ class PGOP:
             return query, neighbors
         return query, query.query(query.points, neighbors).toNeighborList()
 
-    def _ylms(self, l, m):
+    def _ylm_sin(self, l, m):
         """Return the spherical harmonics at the Gauss-Legrende points.
 
         Returns all spherical harmonics upto ``self._max_l`` at the points of
@@ -173,9 +173,9 @@ class PGOP:
         """
         key = (l, m)
         if key not in self._ylm_cache:
-            self._ylm_cache[key] = sph_harm.SphHarm(l)(
-                *integrate.gauss_legendre_quad_points(m)
-            )
+            thetas, phis = integrate.gauss_legendre_quad_points(m)
+            sin = np.sin(thetas)
+            self._ylm_cache[key] = sph_harm.SphHarm(l)(thetas, phis) * sin
         return self._ylm_cache[key]
 
     @property
