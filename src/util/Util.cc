@@ -15,6 +15,9 @@ double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
 std::vector<double> to_rotation_matrix(const Vec3& v)
 {
     const auto angle = v.norm();
+    if (angle == 0) {
+        return std::vector<double> {{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}};
+    }
     const auto axis = v / angle;
     const double c {std::cos(angle)}, s {std::sin(angle)};
     const double C = 1 - c;
