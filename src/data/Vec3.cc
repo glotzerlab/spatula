@@ -25,7 +25,11 @@ double Vec3::norm() const
 
 void Vec3::normalize()
 {
-    const double inv_norm = 1 / norm();
+    const auto n=norm();
+    if (n == 0) {
+        return;
+    }
+    const double inv_norm = 1 / n;
     x *= inv_norm;
     y *= inv_norm;
     z *= inv_norm;
