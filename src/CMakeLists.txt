@@ -1,20 +1,23 @@
-pybind11_add_module(_pgop export-module.cc
-    BondOrder.h BondOrder.cc
-    PGOP.h PGOP.cc
-    data/Vec3.h data/Vec3.cc
-    data/Quaternion.h data/Quaternion.cc
-    optimize/Optimize.h optimize/Optimize.cc
-    optimize/RandomSearch.h optimize/RandomSearch.cc
-    optimize/LineSearch.h optimize/LineSearch.cc
-    optimize/StepGradientDescent.h optimize/StepGradientDescent.cc
-    optimize/Mesh.h optimize/Mesh.cc
-    optimize/Union.h optimize/Union.cc
-    optimize/export_optimize.h optimize/export_optimize.cc
-    util/Metrics.h util/Metrics.cc
-    util/Util.h util/Util.cc
-    util/QlmEval.h util/QlmEval.cc
-    util/Threads.h util/Threads.cc
+list(APPEND pgop_sources
+    "export-module.cc"
+    "BondOrder.h" "BondOrder.cc"
+    "PGOP.h" "PGOP.cc"
+    "data/Vec3.h" "data/Vec3.cc"
+    "data/Quaternion.h" "data/Quaternion.cc"
+    "optimize/Optimize.h" "optimize/Optimize.cc"
+    "optimize/RandomSearch.h" "optimize/RandomSearch.cc"
+    "optimize/LineSearch.h" "optimize/LineSearch.cc"
+    "optimize/StepGradientDescent.h" "optimize/StepGradientDescent.cc"
+    "optimize/Mesh.h" "optimize/Mesh.cc"
+    "optimize/Union.h" "optimize/Union.cc"
+    "optimize/export_optimize.h" "optimize/export_optimize.cc"
+    "util/Metrics.h" "util/Metrics.cc"
+    "util/Util.h" "util/Util.cc"
+    "util/QlmEval.h" "util/QlmEval.cc"
+    "util/Threads.h" "util/Threads.cc"
 )
+
+pybind11_add_module(_pgop ${pgop_sources})
 
 set_target_properties(_pgop PROPERTIES
     CXX_STANDARD 17
@@ -33,3 +36,6 @@ if (MSVC)
     target_compile_options(_pgop PRIVATE /Wall  /permissive-)
 endif (MSVC)
 target_compile_definitions(_pgop PRIVATE VERSION_INFO=${VERSION_INFO})
+
+# Installs C++ extension into the root of the Python package
+install(TARGETS _pgop LIBRARY DESTINATION pgop)
