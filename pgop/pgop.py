@@ -62,7 +62,7 @@ class PGOP:
             raise ValueError(f"Distribution {dist} not supported.") from err
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
         self._pgop = None
-        self._ylm_cache = util._Cache(100)
+        self._ylm_cache = util._Cache(5)
 
     def compute(
         self,
