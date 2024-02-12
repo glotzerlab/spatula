@@ -85,7 +85,8 @@ class PGOP:
         Note:
         ----
             Higher ``max_l`` requires higher ``m``. A rough equality is usually
-            good enough to ensure accurate results for the given fidelity.
+            good enough to ensure accurate results for the given fidelity,
+            though setting ``m`` to 1 to 2 higher often still improves results.
 
         Parameter
         ---------
@@ -120,7 +121,9 @@ class PGOP:
             :math:`4 m^2`.
         """
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
-        dist = self._compute_distances(neigh_query, neighbors, query_points)
+        dist = self._compute_distance_vectors(
+            neigh_query, neighbors, query_points
+        )
         quad_positions, quad_weights = self._get_cartesian_quad(m)
         self._pgop, self._rotations = self._cpp.compute(
             dist,
@@ -144,8 +147,13 @@ class PGOP:
                 quad_weights,
             )
 
-    def _compute_distances(self, neigh_query, neighbors, query_points):
-        """Given a query and neighbors get wrapped distances to neighbors."""
+    def _compute_distance_vectors(self, neigh_query, neighbors, query_points):
+        """Given a query and neighbors get wrapped distances to neighbors.
+
+        .. todo::
+            This should be unnecessary come freud 3.0 as distance vectors should
+            be directly available.
+        """
         pos, box = neigh_query.points, neigh_query.box
         if query_points is None:
             query_points = pos
