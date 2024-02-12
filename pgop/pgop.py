@@ -9,7 +9,7 @@ import numpy as np
 
 import pgop._pgop
 
-from . import integrate, sph_harm, util, weijerd
+from . import integrate, sph_harm, util, wignerd
 
 
 class PGOP:
@@ -49,9 +49,9 @@ class PGOP:
         self._symmetries = symmetries
         # Always use maximum l and let compute decide the ls to use for
         # computing the PGOP
-        self._weijer = weijerd.WeigerD(12)
+        self._wigner = wignerd.WeigerD(12)
         self._optmizer = optimizer
-        D_ij = self._precompute_weijer_d()  # noqa :D806
+        D_ij = self._precompute_wigner_d()  # noqa :D806
         if dist == "fisher":
             dist_param = kappa
         elif dist == "uniform":
@@ -207,9 +207,9 @@ class PGOP:
         """
         return self._rotations
 
-    def _precompute_weijer_d(self):
+    def _precompute_wigner_d(self):
         """Return a NumPy array of WignerD matrices for given symmetries."""
         matrices = []
         for point_group in self._symmetries:
-            matrices.append(self._weijer[point_group])
+            matrices.append(self._wigner[point_group])
         return np.stack(matrices, axis=0)
