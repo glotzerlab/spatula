@@ -63,27 +63,46 @@ def get_num_threads():
 
 
 class _Cache:
-    def __init__(self, max_size=None):
+    """A simple cache that supports a maximum size.
+
+    Size restraints by removing the least frequently used keys. The cache also
+    supports preventing deleting the most recently used keys as well through a
+    FIFO stack.
+    """
+
+    def __init__(self, max_size=None, keep_n_most_recent=1):
+        """Construct a cache object.
+
+        Parameters
+        ----------
+        max_size : int, optional
+            The maximum size for the cache. Defaults to ``None`` which means no
+            limit on cache size.
+        keep_n_most_recent : int, optional
+            The number of recent examples to not allow for removal regardless of
+            popularity. Defaults to 1 key.
+        """
         self._data = {}
         self._key_counts = collections.Counter()
-        self._recent_keys = collections.deque()
+        self._recent_keys = collections.deque(max_size=keep_n_most_recent)
         self.max_size = max_size
 
     def __contains__(self, key):
+        """Return whether the given key is in the cache."""
         return key in self._data
 
     def __getitem__(self, key):
+        """Get the cached value for key and error if not present."""
         data = self._data.get(key, None)
         if data is None:
             return data
         if self.max_size is not None:
-            self._key_counts[key] += 1
             self._recent_keys.append(key)
-            if self.max_size // 10 > len(self._recent_keys):
-                self._recent_keys.popleft()
+            self._key_counts[key] += 1
         return data
 
     def __setitem__(self, key, data):
+        """Set the cached value for key overwriting if necessary."""
         self._data[key] = data
         if self.max_size is None:
             return
