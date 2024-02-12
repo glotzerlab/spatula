@@ -1,6 +1,7 @@
 import collections.abc
 import itertools
 from pathlib import Path
+
 import h5py
 import numpy as np
 
@@ -56,6 +57,7 @@ class WeigerD:
         self._max_l = max_l
         self._index = slice(0, self._compute_last_index(max_l))
         self._data = _WignerData()
+
     @staticmethod
     def _compute_last_index(max_l):
         return sum((2 * l + 1) ** 2 for l in range(0, max_l + 1))

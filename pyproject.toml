@@ -20,7 +20,7 @@ exclude = '''
 # Add D when documentation is finished
 select = ["E", "F", "I", "B", "SIM", "PTH", "C90", "UP", "N"]
 ignore = ["E741", "B905", "D213", "D211", "UP006"]
-per-file-ignores = {"tests/test_weijerd.py" = ["N802"]}
+per-file-ignores = {"tests/test_wignerd.py" = ["N802"]}
 line-length = 80
 target-version = "py38"
 

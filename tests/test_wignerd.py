@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pgop.weijerd import WeigerD, _parse_point_group, _WignerData
+from pgop.wignerd import WeigerD, _parse_point_group, _WignerData
 
 
 def test_init():
