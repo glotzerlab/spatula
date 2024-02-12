@@ -13,24 +13,6 @@ class RandomSearch:
         self._cpp = _pgop.RandomSearch(max_iter, seed)
 
 
-class LineSearch:
-    def __init__(
-        self,
-        initial_point=(1.0, 0.0, 0.0, 0.0),
-        max_iter=150,
-        initial_jump=0.001,
-        learning_rate=0.05,
-        tol=1e-6,
-    ):
-        self._cpp = _pgop.LineSearch(
-            _pgop.Quaternion(initial_point).to_axis_angle_3D(),
-            max_iter,
-            initial_jump,
-            learning_rate,
-            tol,
-        )
-
-
 class StepGradientDescent:
     def __init__(
         self,
