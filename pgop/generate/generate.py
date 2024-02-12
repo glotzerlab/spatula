@@ -2,8 +2,8 @@
 import itertools
 from pathlib import Path
 
-import numpy as np
 import h5py
+import numpy as np
 import quaternionic
 import spherical
 import util

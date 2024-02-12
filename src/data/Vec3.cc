@@ -25,7 +25,7 @@ double Vec3::norm() const
 
 void Vec3::normalize()
 {
-    const auto n=norm();
+    const auto n = norm();
     if (n == 0) {
         return;
     }
