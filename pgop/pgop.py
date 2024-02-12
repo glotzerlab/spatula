@@ -124,7 +124,9 @@ class PGOP:
         dist = self._compute_distance_vectors(
             neigh_query, neighbors, query_points
         )
-        quad_positions, quad_weights = self._get_cartesian_quad(m)
+        quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
+            m=m, weights=True, cartesian=True
+        )
         self._pgop, self._rotations = self._cpp.compute(
             dist,
             neighbors.weights,
@@ -135,7 +137,9 @@ class PGOP:
             quad_weights,
         )
         if refine:
-            quad_positions, quad_weights = self._get_cartesian_quad(refine_m)
+            quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
+                m=refine_m, weights=True, cartesian=True
+            )
             self._pgop = self._cpp.refine(
                 dist,
                 self._rotations,
@@ -209,11 +213,3 @@ class PGOP:
         for point_group in self._symmetries:
             matrices.append(self._weijer[point_group])
         return np.stack(matrices, axis=0)
-
-    @staticmethod
-    def _get_cartesian_quad(m):
-        """Get the Cartesian coordinates for the Gauss-Legrende quadrature."""
-        (quad_theta, quad_phi), wij = integrate.gauss_legendre_quad_points(
-            m, True
-        )
-        return util.sph_to_cart(quad_theta, quad_phi), wij
