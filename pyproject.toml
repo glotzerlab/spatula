@@ -1,3 +1,7 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
 [tool.black]
 line-length = 80
 include = '\.pyi?$'
@@ -19,44 +23,6 @@ ignore = ["E741", "B905", "D213", "D211", "UP006"]
 per-file-ignores = {"tests/test_weijerd.py" = ["N802"]}
 line-length = 80
 target-version = "py38"
-
-[build-system]
-requires = ["hatchling", "pybind11>=2.10"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build]
-artifacts = ["*.so", "*.dll"]
-only-include = ["pgop", "src", "dependencies"]
-exclude = [".gitignore"]
-skip-excluded-dir = true
-pure-python = false
-
-[tool.hatch.build.hooks.custom]
-path = "hatch_cmake.py"
-src-mapping = {"**/*.#lext" = "pgop"}
-dependencies = ["pydantic > 1.10"]
-build-dir = "build"
-# uncomment to force rerun of cmake with new options
-# force = true
-options = {CMAKE_PREFIX_PATH = "cmd@pybind11-config --cmakedir"}
-
-[tool.hatch.build.hooks.custom.cibuildwheel.windows]
-generator = "Visual Studio 17 2022"  # latest windows runner on GitHub Actions
-# VS is a multi-target generator we need to specify release type
-build-options = {cmake = ["--config release"]}
-
-[tool.cibuildwheel]
-# Must include because cibuildwheel nor hatch will clean up after themselves
-before-build = "rm -r build || true"
-# The compilation due to thread_pools requires at least this manylinux container
-manylinux-x86_64-image = "manylinux2014"
-build-frontend = "build"
-skip = ["*-win32", "*-manylinux_i686", "*-musllinux_*", "pp*"]
-test-command = 'python -c "import pgop; pgop._pgop; print(pgop.PGOP.__doc__)"'
-build-verbosity = 1
-
-[tool.cibuildwheel.linux]
-before-build = "rm -r build || true && python -m pip install ninja --disable-pip-version-check --progress-bar=off"
 
 [project]
 name = "pgop"
