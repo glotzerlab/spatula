@@ -6,7 +6,6 @@ list(APPEND pgop_sources
     "data/Quaternion.h" "data/Quaternion.cc"
     "optimize/Optimize.h" "optimize/Optimize.cc"
     "optimize/RandomSearch.h" "optimize/RandomSearch.cc"
-    "optimize/LineSearch.h" "optimize/LineSearch.cc"
     "optimize/StepGradientDescent.h" "optimize/StepGradientDescent.cc"
     "optimize/Mesh.h" "optimize/Mesh.cc"
     "optimize/Union.h" "optimize/Union.cc"
