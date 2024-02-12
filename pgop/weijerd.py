@@ -1,6 +1,7 @@
 import collections.abc
 import itertools
 from pathlib import Path
+
 import h5py
 import numpy as np
 
@@ -8,10 +9,24 @@ from . import _pgop
 
 
 class _WignerData(collections.abc.Mapping):
+    """Mapping interface to stored WignerD matrices.
+
+    ``pgop`` stores WignerD matrices in a data file. Thus, we only support a
+    subset of the infinite number of point groups.
+
+    Note
+    ----
+    We use the Schönflies symbol to represent point groups.
+
+    Warning
+    -------
+    Use a `WignerD` instance to access point groups rather than this class
+    directly.
+    """
+
     def __init__(self):
-        # Open the HDF5 file
+        # load data into memory
         with h5py.File(Path(__file__).parent / "data.h5", "r") as f:
-            # Get the data
             dataset = f["/data/matrices"]
             self._data = dataset[:]
             self._columns = dataset.attrs["point_groups"]
@@ -33,6 +48,12 @@ class _WignerData(collections.abc.Mapping):
 
 
 def _parse_point_group(schonflies_symbol):
+    """Parse a Schönflies symbol into its component parts.
+
+    For example, Ih would have the family "I" and modifier "h" with no order
+    while C6 would have the family "C" and order "6" with no modifier, and the
+    point group C6h would have famile "C", modifier "h", and order "6".
+    """
     family = schonflies_symbol[0]
     if len(schonflies_symbol) == 1:
         return (family, None, None)
@@ -48,19 +69,45 @@ def _parse_point_group(schonflies_symbol):
 
 
 class WeigerD:
+    """Interface to work with WignerD matrices in Python.
+
+    The class provides `dict` like access to supported point groups, and a
+    method for indexing into the provided WignerD matrices.
+    """
+
+    # Note: We don't store all point groups directly and use the semidirect
+    # product to obtain some groups such as the fully polyhedral symmetry
+    # groups.
+
+    # We also only store to spherical harmonic number 12.
     _MAX_L = 12
 
     def __init__(self, max_l):
+        """Create a WignerD object.
+
+        Parameters
+        ----------
+        max_l : int
+            The highest spherical harmonic to include in the WignerD matrices.
+        """
         if max_l > self._MAX_L:
             raise ValueError(f"Maximum supported l value is {self._MAX_L}.")
         self._max_l = max_l
         self._index = slice(0, self._compute_last_index(max_l))
         self._data = _WignerData()
+
     @staticmethod
     def _compute_last_index(max_l):
         return sum((2 * l + 1) ** 2 for l in range(0, max_l + 1))
 
     def __getitem__(self, point_group):
+        """Retreive the specified point group.
+
+        Parameters
+        ----------
+        point_group: str
+            The point group in Schönflies notation to return.
+        """
         family, modifier, order = _parse_point_group(point_group)
         if family in "TOI":
             if modifier == "h":
@@ -83,7 +130,8 @@ class WeigerD:
                 raise KeyError(f"{point_group} is not currently supported.")
             return self._data[family + str(order)][self._index]
 
-    def _iter_sph_indices(self):
+    def iter_sph_indices(self):
+        """Yield the l, m', and m values in order of appearance in matrices."""
         for l in range(self._max_l + 1):
             ms = range(-l, l + 1)
             for mprime, m in itertools.product(ms, repeat=2):
