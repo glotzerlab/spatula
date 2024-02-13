@@ -9,22 +9,22 @@
 #include "Metrics.h"
 
 namespace pgop { namespace util {
-double covariance(const std::vector<std::complex<double>>& qlms,
-                  const std::vector<std::complex<double>>& sym_qlms)
+double covariance(const std::vector<std::complex<double>>& f,
+                  const std::vector<std::complex<double>>& g)
 {
     // For the covariance we must skip the first element as it adds a spurious
     // detection of symmetry/covariance.
-    double qlm_cov = 0;
-    double sym_covar = 0;
+    double f_cov = 0;
+    double g_covar = 0;
     double mixed_covar = 0;
-    for (size_t j {1}; j < qlms.size(); ++j) {
-        qlm_cov += std::norm(qlms[j]);
-        sym_covar += std::norm(sym_qlms[j]);
-        mixed_covar += std::real(qlms[j] * std::conj(sym_qlms[j]));
+    for (size_t j {1}; j < f.size(); ++j) {
+        f_cov += std::norm(f[j]);
+        g_covar += std::norm(g[j]);
+        mixed_covar += std::real(f[j] * std::conj(g[j]));
     }
-    if (qlm_cov == 0 || sym_covar == 0) {
+    if (f_cov == 0 || g_covar == 0) {
         return 0;
     }
-    return mixed_covar / std::sqrt(sym_covar * qlm_cov);
+    return mixed_covar / std::sqrt(g_covar * f_cov);
 }
 }} // namespace pgop::util
