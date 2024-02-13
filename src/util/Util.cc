@@ -5,13 +5,38 @@
 
 #include "Util.h"
 
+/**
+ * @brief Utility methods primarily for rotating vectors.
+ *
+ * Many methods extensively use references to avoid allocatings and copying. This does result in
+ * function signatures reminescent of C, but is necessary the best possible performance.
+ */
+
 namespace pgop { namespace util {
-// Assumes points are on the unit sphere
+/**
+ * @brief Get the angle between two vectors.
+ *
+ * Assumes points are on the unit sphere
+ *
+ * @param ref_x the vector to measure an angle from
+ * @param x the vector to measure the angle from ref_x
+ */
 double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
 {
     return std::acos(ref_x.dot(x));
 }
 
+/**
+ * @brief Convert from the 3-vector representation to a rotation matrix.
+ *
+ * The 3-vector has a rotation axis of its unit vector and angle in radians equal to its norm.
+ *
+ * Rotating via a rotation matrix is more efficient operation than either direct quaternion or
+ * axis-angle rotations. Already by rotating two point the same converting first is more efficient.
+ *
+ *
+ * @param v The 3-vector to convert to a rotation matrix.
+ */
 std::vector<double> to_rotation_matrix(const Vec3& v)
 {
     const auto angle = v.norm();
@@ -35,6 +60,12 @@ std::vector<double> to_rotation_matrix(const Vec3& v)
     }};
 }
 
+/**
+ * @brief Rotate a single vector via a provided rotation matrix.
+ *
+ * @param x The vector to rotate.
+ * @param x_prime The location to store the rotated vector.
+ */
 void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R)
 {
     x_prime.x = R[0] * x.x + R[1] * x.y + R[2] * x.z;
@@ -42,6 +73,14 @@ void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R)
     x_prime.z = R[6] * x.x + R[7] * x.y + R[8] * x.z;
 };
 
+/**
+ * @brief rotate an array of vectors by a provided rotation matrix.
+ *
+ * @param points_begin The start of the vectors to rotate iterator.
+ * @param points_end The end of the vectors to rotate iterator.
+ * @param rotated_points_it The start of the location to store rotated vectors.
+ * @param R The rotation matrix to rotate vectors by.
+ */
 void rotate_matrix(cvec3_iter points_begin,
                    cvec3_iter points_end,
                    vec3_iter rotated_points_it,
@@ -52,6 +91,13 @@ void rotate_matrix(cvec3_iter points_begin,
     }
 }
 
+/**
+ * @brief Normalize distance vectors to unit vectors.
+ *
+ * @param distances The array of distances to normalize. Note that the array is single dimensional
+ * and the second dimension is implicit in the ordering. This impacts indexing into the array.
+ * @param slice the index to start and end the normalization in absolute indices.
+ */
 std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t, size_t> slice)
 {
     auto normalized_distances = std::vector<Vec3>();
@@ -65,6 +111,16 @@ std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t,
     return normalized_distances;
 }
 
+/**
+ * @brief Perform a symmetrization of a spherical harmonic expansion via a Wigner D matrix.
+ *
+ * @param qlms The spherical harmonic expansion coefficients.
+ * @param D_ij The Wigner D matrix to symmetrize Qlms by
+ * @param sym_qlm_buf The buffer/array to store the symmetrized Qlms
+ * @param max_l The max_l of the provided Qlms and D_ij. This is not strictly necessary, but it
+ * prevents the need to determine the max_l from the qlms vector or create a custom struct that
+ * stores this.
+ */
 void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     const std::vector<std::complex<double>>& D_ij,
                     std::vector<std::complex<double>>& sym_qlm_buf,
@@ -88,6 +144,15 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
     }
 }
 
+/**
+ * @brief Compute the semidirect product for two Wigner D matrices.
+ *
+ * This operation results in a Wigner D matrix that has the symmetries of both matrices and all
+ * combinations of rotations.
+ *
+ * @param D_a One of the two Wigner D matrix.
+ * @param D_b One of the two Wigner D matrix.
+ */
 py::array_t<std::complex<double>>
 wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
                          const py::array_t<std::complex<double>> D_b)
