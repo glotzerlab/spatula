@@ -55,8 +55,14 @@ class UniformDistribution {
      */
     UniformDistribution(param_type max_theta);
 
+    /**
+     * @brief Return the value of the distribution at the given point.
+     *
+     * @param x The distance from the mean to evaluate the distribution at.
+     */
     double operator()(double x) const;
 
+    /// operator() uses the distance to evaluate
     static const bool use_theta = false;
 
     private:
@@ -88,8 +94,14 @@ class FisherDistribution {
      */
     FisherDistribution(param_type kappa);
 
+    /**
+     * @brief Return the value of the distribution at the given point.
+     *
+     * @param x The distance from the mean to evaluate the distribution at.
+     */
     double operator()(double x) const;
 
+    /// operator() uses the distance to evaluate
     static const bool use_theta = false;
 
     private:
