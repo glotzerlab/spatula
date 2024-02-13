@@ -12,13 +12,23 @@ namespace py = pybind11;
 
 namespace pgop { namespace optimize {
 /**
- * @brief Base class for pgop optimizers. We use a state model where an optimizer is always either
- * expecting an objective for a queried point or to be queried for a point. To do the other
- * operation is an error and leads to an exception.
+ * @brief Base class for pgop optimizers.
  *
- * The optimizer exclusively optimizes over O(3) or the space of 3D rotations.
- * The class also assumes that all generated points will lie on the unit 4D
- * hypersphere (or in other words the quaternion is normalized).
+ * We use a state model where an optimizer is always either expecting an objective for a queried
+ * point or to be queried for a point. To do the other * operation is an error and leads to an
+ * exception.
+ *
+ * The optimizer exclusively optimizes over SO(3) or the space of 3D rotations. The class also
+ * assumes that all generated points will lie on the unit 4D * hypersphere (or in other words the
+ * quaternion is normalized).
+ *
+ * The optimizers uses a 3-vector, \f$ \nu \f$ to represent rotations in
+ * \f$ SO(3) \f. The conversion to the axis-angle representation for
+ * \f$ \nu \f$ is
+
+ * \f$ \alpha = \frac{\nu}{||\nu||} \f$
+ * \f$ \theta = ||\nu||. \f$
+
  *
  * Note: All optimizations are assumed to be minimizations. Multiply the objective function by -1 to
  * switch an maximization to a minimization.
