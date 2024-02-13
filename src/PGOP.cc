@@ -138,7 +138,7 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
                 continue;
             }
             auto neighborhood = neighborhoods.getNeighborhood(i);
-            const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf, i);
+            const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf);
             op_store.addOp(i, particle_op_rot);
         }
     };
@@ -197,15 +197,14 @@ template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 PGOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
                                           const util::QlmEval& qlm_eval,
-                                          util::QlmBuf& qlm_buf,
-                                          unsigned int particle_index) const
+                                          util::QlmBuf& qlm_buf) const
 {
     auto pgop = std::vector<double>();
     auto rotations = std::vector<data::Quaternion>();
     pgop.reserve(m_Dij.size());
     rotations.reserve(m_Dij.size());
     for (const auto& D_ij : m_Dij) {
-        const auto result = compute_symmetry(neighborhood, D_ij, qlm_eval, qlm_buf, particle_index);
+        const auto result = compute_symmetry(neighborhood, D_ij, qlm_eval, qlm_buf);
         pgop.emplace_back(std::get<0>(result));
         rotations.emplace_back(std::get<1>(result));
     }
@@ -217,11 +216,9 @@ std::tuple<double, data::Quaternion>
 PGOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
                                           const std::vector<std::complex<double>>& D_ij,
                                           const util::QlmEval& qlm_eval,
-                                          util::QlmBuf& qlm_buf,
-                                          unsigned int particle_index) const
+                                          util::QlmBuf& qlm_buf) const
 {
     auto opt = m_optimize->clone();
-    opt->specialize(particle_index);
     while (!opt->terminate()) {
         neighborhood.rotate(opt->next_point());
         const auto particle_op = compute_pgop(neighborhood, D_ij, qlm_eval, qlm_buf);

@@ -44,9 +44,6 @@ class Optimizer {
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const = 0;
 
-    /// Potentially modify optimizer for given particle (e.g. random algorithms).
-    virtual void specialize(unsigned int particle_index);
-
     /// Set the next point to compute the objective for to m_point.
     virtual void internal_next_point() = 0;
 

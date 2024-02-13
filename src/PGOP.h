@@ -90,15 +90,12 @@ template<typename distribution_type> class PGOP {
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
     compute_particle(LocalNeighborhood& neighborhood,
                      const util::QlmEval& qlm_eval,
-                     util::QlmBuf& qlm_buf,
-                     unsigned int particle_index) const;
-
+                     util::QlmBuf& qlm_buf) const;
     std::tuple<double, data::Quaternion>
     compute_symmetry(LocalNeighborhood& neighborhood,
                      const std::vector<std::complex<double>>& D_ij,
                      const util::QlmEval& qlm_eval,
-                     util::QlmBuf& qlm_buf,
-                     unsigned int particle_index) const;
+                     util::QlmBuf& qlm_buf) const;
 
     double compute_pgop(LocalNeighborhood& neighborhood,
                         const std::vector<std::complex<double>>& D_ij,
