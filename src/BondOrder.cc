@@ -30,16 +30,6 @@ double UniformDistribution::operator()(double x) const
     return x > m_threshold ? m_prefactor : 0;
 }
 
-ApproxLinearDistribution::ApproxLinearDistribution(double alpha)
-    : m_prefactor {2.0 / std::sin(alpha)}, m_shift {std::cos(alpha)}
-{
-}
-
-double ApproxLinearDistribution::operator()(double x) const
-{
-    return x < m_shift ? 0 : m_prefactor * (x - m_shift);
-}
-
 // Todo if no neighbors exist this will lead to nans.
 template<typename distribution_type>
 BondOrder<distribution_type>::BondOrder(distribution_type dist,
@@ -101,5 +91,4 @@ BondOrder<distribution_type>::operator()(const std::vector<data::Vec3>& points) 
 // explicitly create templates
 template class BondOrder<UniformDistribution>;
 template class BondOrder<FisherDistribution>;
-template class BondOrder<ApproxLinearDistribution>;
 } // End namespace pgop
