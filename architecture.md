@@ -32,6 +32,10 @@ The code uses pre-commit to format and lint code before committing.
 ## Testing
 Testing is done through `pytest`.
 
+## Documentation
+`sphinx-doc` NumPy styling is used for Python code.
+Doxygen documentation styling is used for C++ code.
+
 ## Adding New Point Groups
 To add a new point group, `pgop/data.h5` needs to be regenerated with the new Wigner D matrix (there is one exception).
 We store all the point group Wigner D matrices except those that are formed by a semi-direct product with a reflection or inversion.
