@@ -42,6 +42,6 @@ The procedure to add a new point group is thus,
 2. Add point group to `pgop/generate/generate.py`.
 3. Run `pgop/generate/generate.py` (the file will be saved in the correct location).
 4. Add logic to `pgop.wignerd._WignerData` and `pgop.wignerd.WignerD` to correctly get the WignerD matrix.
-   a. If the semi-direct product is needed it should be computed here.
-   b. You may need to add logic to `pgop.wignerd._parse_point_group` to correct get the point group information.
+    * If the semi-direct product is needed it should be computed here.
+    * You may need to add logic to `pgop.wignerd._parse_point_group` to correct get the point group information.
 5. Test the new point group by testing a known shape with the given symmetry as the local environment.
