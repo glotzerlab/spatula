@@ -1,2 +1,3 @@
  # Defaults to site-packages so only need package name
- INSTALL(DIRECTORY ./ DESTINATION pgop FILES_MATCHING PATTERN "*.py")
+ install(DIRECTORY ./ DESTINATION pgop FILES_MATCHING PATTERN "*.py")
+ install(FILES ./data.h5 sphere-codes.npz DESTINATION pgop)
