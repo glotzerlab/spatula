@@ -180,51 +180,6 @@ class Mesh(Optimizer):
         return np.array(angles)
 
 
-class LocalMonteCarlo(Optimizer):
-    """Optimize by a Monte Carlo search.
-
-    Optimization steps are small jumps in SO(3).
-    """
-
-    def __init__(
-        self,
-        initial_point=None,
-        kT=1.0,  # noqa: N803
-        max_theta=0.017,
-        seed=42,
-        iterations=200,
-    ):
-        """Create a LocalMonteCarlo optimizer
-
-        Parameters
-        ----------
-        initial_point : tuple[float, float, float, float], optional
-            The starting point for the optimization. Defaults to
-            ``(1.0, 0.0, 0.0, 0.0)``.
-        kT : float, optional
-            The pseudo-temperature to perform the simulation over. Higher values
-            lead to more explorative searches while lower temperature better
-            descent local minima. Defaults to 1.0.
-        max_theta : float, optional
-            The max angular rotation (in radian) per step. Defaults to 0.017
-            which is approximately :math:`1^{\circ}`.
-        seed : int, optional
-            The random seed to generate trial moves. Defaults to 42.
-        iterations : int, optional
-            The number of iterations to run the optimization before stopping.
-            Defaults to 200.
-        """
-        if initial_point is None:
-            initial_point = ((1.0, 0.0, 0.0, 0.0), np.inf)
-        self._cpp = _pgop.QMonteCarlo(
-            (_pgop.Quaternion(initial_point[0]), initial_point[1]),
-            kT,
-            max_theta,
-            seed,
-            iterations,
-        )
-
-
 class Union(Optimizer):
     """Combine an optimization scheme with a specific secondary optimizer.
 
@@ -270,45 +225,5 @@ class Union(Optimizer):
         instance = cls()
         instance._cpp = _pgop.Union.with_step_gradient_descent(
             optimizer._cpp, max_iter, initial_jump, learning_rate, tol
-        )
-        return instance
-
-    @classmethod
-    def with_mc(
-        cls,
-        optimizer,
-        kT=1.0,  # noqa: N803
-        max_theta=0.017,
-        seed=42,
-        iterations=200,
-    ):
-        """Create a Union optimizer with a `LocalMonteCarlo` second step.
-
-        Arguments are passed through to the constructor of `LocalMonteCarlo`.
-
-        Parameters
-        ----------
-        optimizer : Optimizer
-            The initial optimizer. The best/final point of this optimizer will
-            be sent to the `StepGradientDescent` as the initial point.
-        initial_point : tuple[float, float, float, float], optional
-            The starting point for the optimization. Defaults to
-            ``(1.0, 0.0, 0.0, 0.0)``.
-        kT : float, optional
-            The pseudo-temperature to perform the simulation over. Higher values
-            lead to more explorative searches while lower temperature better
-            descent local minima. Defaults to 1.0.
-        max_theta : float, optional
-            The max angular rotation (in radian) per step. Defaults to 0.017
-            which is approximately :math:`1^{\circ}`.
-        seed : int, optional
-            The random seed to generate trial moves. Defaults to 42.
-        iterations : int, optional
-            The number of iterations to run the optimization before stopping.
-            Defaults to 200.
-        """
-        instance = cls()
-        instance._cpp = _pgop.Union.with_mc(
-            optimizer._cpp, kT, max_theta, seed, iterations
         )
         return instance
