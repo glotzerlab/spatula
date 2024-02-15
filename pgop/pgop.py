@@ -36,10 +36,10 @@ class PGOP:
         optimizer : pgop.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
-        kappa : double
+        kappa : float
             The concentration parameter for the von-Mises-Fisher distribution.
             Only used when ``dist`` is "fisher". Defaults to 11.5.
-        max_theta : double
+        max_theta : float
             The maximum angle (in radians) that the uniform distribution
             extends. Only used when ``dist`` is uniform. Defauts to 0.61
             (roughly 35 degrees).
@@ -77,43 +77,43 @@ class PGOP:
     ):
         """Compute the point group symmetry for a given system and neighbor.
 
-        Note:
+        Note
         ----
             A ``max_l`` of at least 6 is needed to caputure icosahedral ordering
             and a max of 4 is needed for octahedral.
 
-        Note:
+        Note
         ----
             Higher ``max_l`` requires higher ``m``. A rough equality is usually
             good enough to ensure accurate results for the given fidelity,
             though setting ``m`` to 1 to 2 higher often still improves results.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         system :
              A ``freud`` system-like object. Common examples include a tuple of
              a `freud.box.Box` and a `numpy.ndarray` of positions and a
-             `gsd.hoomd.Snapshot`.
+             `gsd.hoomd.Frame`.
         neighbors :
             A ``freud`` neighbor query object. Defines neighbors for the system.
             Weights provided by a neighbor list are currently unused.
-        max_l : int, optional
+        max_l : `int`, optional
             The maximum spherical harmonic l to use for computations. Defaults
             to 6. Can go up to 12.
-        m : int, optional
+        m : `int`, optional
             The number of points to use in the longitudinal direction for
             spherical Gauss-Legrende quadrature. Defaults to 5. More
             concentrated distributions require larger ``m`` to properly evaluate
             bond order functions. The number of points to evaluate scales as
             :math:`4 m^2`.
-        refine: bool, optional
+        refine: `bool`, optional
             Whether to recompute the PGOP after optimizing. Defaults to
             ``True``. This is used to enable a higher fidelity calculation
             after a lower fidelity optimization.
-        refine_l : int, optional
+        refine_l : `int`, optional
             The maximum spherical harmonic l to use for refining. Defaults
             to 9. Can go up to 12.
-        refine_m : int, optional
+        refine_m : `int`, optional
             The number of points to use in the longitudinal direction for
             spherical Gauss-Legrende quadrature in refining. Defaults to 9. More
             concentrated distributions require larger ``m`` to properly evaluate
@@ -170,7 +170,7 @@ class PGOP:
         """Get a NeighborQuery and NeighborList object.
 
         Returns the query and neighbor list consistent with the system and
-        neighbors passed to `~.compute`.
+        neighbors passed to `PGOP.compute`.
         """
         query = freud.locality.AABBQuery.from_system(system)
         if isinstance(neighbors, freud.locality.NeighborList):
@@ -194,7 +194,8 @@ class PGOP:
     def pgop(self):
         """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter.
 
-        The symmetry order is consistent with the order passed to `~.compute`.
+        The symmetry order is consistent with the order passed to
+        `PGOP.compute`.
         """
         return self._pgop
 

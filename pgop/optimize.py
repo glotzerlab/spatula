@@ -21,9 +21,9 @@ class RandomSearch(Optimizer):
 
         Parameters
         ----------
-        max_iter : int, optional
+        max_iter : `int`, optional
             The number of rotations to try. Defaults to 150.
-        seed : int, optional
+        seed : `int`, optional
             The random number seed to use for generating random rotations.
             Defaults to 42.
         """
@@ -65,17 +65,17 @@ class StepGradientDescent(Optimizer):
         optimizer : Optimizer
             The initial optimizer. The best/final point of this optimizer will
             be sent to the `StepGradientDescent` as the initial point.
-        max_iter : int, optional
+        max_iter : `int`, optional
             The maximum number of iterations before stopping optimization.
             Defaults to 150.
-        initial_jump : float, optional
+        initial_jump : `float`, optional
             The size of the initial jump in each dimension to get an initial
             gradient. Defaults to 0.001.
-        learning_rate : float, optional
+        learning_rate : `float`, optional
             The degree to move along the gradient. Higher values lead to larger
             moves and can result in quicker convergence or failure to converge.
             Defaults to 0.05.
-        tol : float, optional
+        tol : `float`, optional
             The value that when the reduction in the object is less than the
             current optimization stops. The entire optimization stops when the
             objective from the last round of 1 dimensional optimizations is
@@ -129,9 +129,9 @@ class Mesh(Optimizer):
 
         Parameters
         ----------
-        n_axes : int, optional
+        n_axes : `int`, optional
             The number of axes to rotate about. Defaults to 40.
-        n_angles : int, optional
+        n_angles : `int`, optional
             The number of angles to rotate per axes. Defaults to 5.
 
         Returns
@@ -206,17 +206,17 @@ class Union(Optimizer):
         optimizer : Optimizer
             The initial optimizer. The best/final point of this optimizer will
             be sent to the `StepGradientDescent` as the initial point.
-        max_iter : int, optional
+        max_iter : `int`, optional
             The maximum number of iterations before stopping optimization.
             Defaults to 150.
-        initial_jump : float, optional
+        initial_jump : `float`, optional
             The size of the initial jump in each dimension to get an initial
             gradient. Defaults to 0.001.
-        learning_rate : float, optional
+        learning_rate : `float`, optional
             The degree to move along the gradient. Higher values lead to larger
             moves and can result in quicker convergence or failure to converge.
             Defaults to 0.05.
-        tol : float, optional
+        tol : `float`, optional
             The value that when the reduction in the object is less than the
             current optimization stops. The entire optimization stops when the
             objective from the last round of 1 dimensional optimizations is
