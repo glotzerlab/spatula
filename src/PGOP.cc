@@ -260,7 +260,6 @@ void PGOP<distribution_type>::execute_func(std::function<void(size_t, size_t)> f
 
 template class PGOP<UniformDistribution>;
 template class PGOP<FisherDistribution>;
-template class PGOP<ApproxLinearDistribution>;
 
 template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name)
 {
@@ -276,6 +275,5 @@ void export_pgop(py::module& m)
 {
     export_pgop_class<UniformDistribution>(m, "PGOPUniform");
     export_pgop_class<FisherDistribution>(m, "PGOPFisher");
-    export_pgop_class<ApproxLinearDistribution>(m, "PGOPLinear");
 }
 } // End namespace pgop
