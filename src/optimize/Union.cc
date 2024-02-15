@@ -1,6 +1,5 @@
 #include <pybind11/stl.h>
 
-#include "LineSearch.h"
 #include "StepGradientDescent.h"
 #include "Union.h"
 
