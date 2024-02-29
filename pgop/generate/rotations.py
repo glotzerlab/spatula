@@ -127,7 +127,7 @@ class PointGroupRotations:
         if schonflies_symbol.startswith("C"):
             return self.cyclic(int(schonflies_symbol[1:]))
         if schonflies_symbol.startswith("D"):
-            return self.cyclic(int(schonflies_symbol[1:]))
+            return self.dihedral(int(schonflies_symbol[1:]))
         else:
             raise KeyError(
                 f"Point group {schonflies_symbol} is not currently supported."

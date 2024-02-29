@@ -52,7 +52,11 @@ double Quaternion::norm() const
 
 void Quaternion::normalize()
 {
-    const double inv_norm = 1 / norm();
+    const double n = norm();
+    if (n == 0) {
+        return;
+    }
+    const double inv_norm = 1 / n;
     w *= inv_norm;
     x *= inv_norm;
     y *= inv_norm;
@@ -72,7 +76,11 @@ Quaternion Quaternion::recipical() const
 std::vector<double> Quaternion::to_rotation_matrix() const
 {
     // Necessary if not unit quaternion. Otherwise it is just 2 / 1 = 2.
-    const double s = 2 / (w * w + x * x + y * y + z * z);
+    const double denominator = w * w + x * x + y * y + z * z;
+    if (denominator == 0) {
+        return std::vector<double> {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+    }
+    const double s = 2 / denominator;
     const double xs {x * s}, ys {y * s}, zs {z * s};
     const double wx {w * xs}, wy {w * ys}, wz {w * zs}, xx {x * xs}, xy {x * ys}, xz {x * zs},
         yy {y * ys}, yz {y * zs}, zz {z * zs};

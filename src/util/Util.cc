@@ -59,8 +59,12 @@ std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t,
     // In C++ 23 used strided view with a transform.
     for (size_t i = slice.first; i < slice.second; i += 3) {
         const auto point = Vec3(distances[i], distances[i + 1], distances[i + 2]);
-        const double norm = 1 / std::sqrt(point.dot(point));
-        normalized_distances.emplace_back(point * norm);
+        const double norm = std::sqrt(point.dot(point));
+        if (norm == 0) {
+            normalized_distances.emplace_back(point);
+        } else {
+            normalized_distances.emplace_back(point / norm);
+        }
     }
     return normalized_distances;
 }

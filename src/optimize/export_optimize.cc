@@ -1,6 +1,5 @@
 #include <pybind11/stl.h>
 
-#include "LineSearch.h"
 #include "Mesh.h"
 #include "Optimize.h"
 #include "RandomSearch.h"
@@ -13,7 +12,6 @@ void export_optimize(py::module& m)
 {
     export_base_optimize(m);
     export_step_gradient_descent(m);
-    export_linesearch(m);
     export_mesh(m);
     export_random_search(m);
     export_union(m);
