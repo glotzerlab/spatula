@@ -7,9 +7,18 @@
 
 namespace pgop { namespace optimize {
 
+/**
+ * @brief Perform a random search through SO(3) for optimization.
+ *
+ * The optimizer choses random points until m_iterations iterations. In general, Mesh should be
+ * preferred since it gives deterministic results and well spaces the test points for local
+ * optimization. This should not be used as the final/only optimization algorithm.
+ *
+ * We use a the built in Mersenne Twister for generating random numbers.
+ */
 class RandomSearch : public Optimizer {
     public:
-    RandomSearch(unsigned int max_iter, long unsigned int seed);
+    RandomSearch(unsigned int iterations, long unsigned int seed);
     ~RandomSearch() override = default;
     /// Returns whether or not convergence or termination conditions have been met.
     bool terminate() const override;
@@ -23,14 +32,20 @@ class RandomSearch : public Optimizer {
 
     void setSeed(long unsigned int seed);
 
-    unsigned int getMaxIter() const;
+    unsigned int getIterations() const;
 
-    void setMaxIter(unsigned int iter);
+    void setIterations(unsigned int iter);
 
     private:
-    unsigned int m_max_iter;
+    /// The total number of iterations to run the search
+    unsigned int m_iterations;
+    /// The random number seed used to generate random numbers
     long unsigned int m_seed;
+    /// The Mersenne Twister object for generating random numbers
     std::mt19937_64 m_rng;
+    /** A normal distribution instance for generating normally distributed data from a random number
+     *  generator like std::mt19937_64.
+     */
     std::normal_distribution<double> m_normal_dist;
 };
 

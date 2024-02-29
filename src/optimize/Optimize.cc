@@ -47,11 +47,6 @@ unsigned int Optimizer::getCount() const
     return m_count;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-void Optimizer::specialize(unsigned int particle_index) { }
-#pragma GCC diagnostic pop
-
 void PyOptimizer::internal_next_point()
 {
     PYBIND11_OVERRIDE_PURE(void, Optimizer, internal_next_point);

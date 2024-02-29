@@ -10,8 +10,9 @@
 namespace pgop { namespace optimize {
 
 /**
- * @brief An Optimizer that just tests prescribed points. The optimizer picks the best point out of
- * all provided test points.
+ * @brief An Optimizer that just tests prescribed points.
+ *
+ * The optimizer picks the best point out of all provided test points.
  */
 class Mesh : public Optimizer {
     public:

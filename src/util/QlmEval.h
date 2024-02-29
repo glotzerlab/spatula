@@ -13,10 +13,11 @@ namespace py = pybind11;
 namespace pgop { namespace util {
 // TODO: pass normalization factor not m for generalizing.
 /**
- * @brief Helper class to make computation of \f$ Q_{m}^{l} \f$ more efficient. The class upon
- * initialization computes weighted spherical harmonics according to the provided weights and
- * positions. Currently this expects a spherical surface Gauss-Legendre quadrature where m is the
- * order of the quadrature.
+ * @brief Helper class to make computation of \f$ Q_{m}^{l} \f$ more efficient.
+ *
+ * The class upon initialization computes weighted spherical harmonics according to the provided
+ * weights and positions. Currently this expects a spherical surface Gauss-Legendre quadrature where
+ * m is the order of the quadrature.
  */
 class QlmEval {
     public:
@@ -39,6 +40,7 @@ class QlmEval {
      * coefficients. The method is templated on bond order type.
      *
      * We could use a base type and std::unique_ptr to avoid the template if desired in the future.
+     * This would be slower though.
      *
      * @param bod the bond order diagram to use for evaluating the quadrature positions.
      * @returns the \f$ Q_{m}^{l} \f$ for the spherical harmonic expansion.
@@ -51,6 +53,7 @@ class QlmEval {
      * coefficients in-place. The method is templated on bond order type.
      *
      * We could use a base type and std::unique_ptr to avoid the template if desired in the future.
+     * Though this would make the conputation slower.
      *
      * @param bod the bond order diagram to use for evaluating the quadrature positions.
      * @qlm_buf the buffer to place the \f$ Q_{m}^{l} \f$ for the spherical harmonic expansion in.

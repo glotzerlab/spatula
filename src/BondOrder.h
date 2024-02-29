@@ -55,8 +55,14 @@ class UniformDistribution {
      */
     UniformDistribution(param_type max_theta);
 
+    /**
+     * @brief Return the value of the distribution at the given point.
+     *
+     * @param x The distance from the mean to evaluate the distribution at.
+     */
     double operator()(double x) const;
 
+    /// operator() uses the distance to evaluate
     static const bool use_theta = false;
 
     private:
@@ -88,8 +94,14 @@ class FisherDistribution {
      */
     FisherDistribution(param_type kappa);
 
+    /**
+     * @brief Return the value of the distribution at the given point.
+     *
+     * @param x The distance from the mean to evaluate the distribution at.
+     */
     double operator()(double x) const;
 
+    /// operator() uses the distance to evaluate
     static const bool use_theta = false;
 
     private:
@@ -100,34 +112,6 @@ class FisherDistribution {
     double m_kappa;
     /// The normalization constant for the distribution.
     double m_prefactor;
-};
-
-/**
- * @brief A computationally efficient differentiable distribution. The distribution is
- * differentiable from \f$ \theta \in [0, \alpha) \f$ where \f$ \alpha \f$ is the distribution's
- * cuttoff angle in radian. This is approximately a linear distribution peaked at 0 except that in
- * place of \f$ x \f$, \f$ \cos{x} \f$ is used for computational efficiency.
- */
-class ApproxLinearDistribution {
-    public:
-    using param_type = double;
-
-    /**
-     * Create a ApproxLinear distribution.
-     *
-     * @param alpha the cutoff angle in radian. At this point the distribution goes to zero.
-     */
-    ApproxLinearDistribution(param_type alpha);
-
-    double operator()(double x) const;
-
-    static const bool use_theta = false;
-
-    private:
-    /// The normalization constant for the distribution.
-    double m_prefactor;
-    /// The amount to shift \f$ \cos{x} \f$ by (\f$ cos{\alpha} \f$).
-    double m_shift;
 };
 
 // When updating to C++20, use SphereSurfaceDistribution instead of typename below.
