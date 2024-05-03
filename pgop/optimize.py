@@ -37,7 +37,7 @@ class StepGradientDescent(Optimizer):
     :math:`SO(3)`. The conversion to the axis-angle representation for
     :math:`\nu` is
 
-    .. eq::
+    .. math::
 
         \alpha = \frac{\nu}{||\nu||} \\
         \theta = ||\nu||.
