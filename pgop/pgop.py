@@ -49,7 +49,7 @@ class PGOP:
         self._symmetries = symmetries
         # Always use maximum l and let compute decide the ls to use for
         # computing the PGOP
-        self._wigner = wignerd.WeigerD(12)
+        self._wigner = wignerd.WignerD(12)
         self._optmizer = optimizer
         D_ij = self._precompute_wigner_d()  # noqa :D806
         if dist == "fisher":
