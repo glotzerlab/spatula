@@ -71,7 +71,7 @@ def test_weigerD_getitem_invalid():
 
 def test_weigerD_iter_sph_indices():
     wig = WeigerD(2)
-    indices = list(wig._iter_sph_indices())
+    indices = list(wig.iter_sph_indices())
     expected_indices = [
         (0, 0, 0),
         (1, -1, -1),
