@@ -132,7 +132,7 @@ def test_D2_direct_product():
 
 
 def test_against_old_data():
-    with h5py.File("tests/data/data.h5", "r") as file:
+    with h5py.File("data/data.h5", "r") as file:
         point_groups = file["data"]["matrices"].attrs["point_groups"]
         matrices = file["data"]["matrices"]
         for point_group, matrix in zip(point_groups, matrices):
