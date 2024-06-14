@@ -477,6 +477,8 @@ class WignerD:
 
         Parameters
         ----------
+        point_group : str
+            The point group in Schoenflies notation.
         max_l : int
             The highest spherical harmonic to include in the WignerD matrices.
         """
