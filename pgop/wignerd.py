@@ -240,6 +240,42 @@ def identity(max_l: int) -> np.ndarray:  # noqa: N802
     )
 
 
+def Cs(max_l: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Cs up to the given l.
+
+    Cs={E, sigma_yz}
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Cs up to the given l.
+    """
+    return condensed_wignerD_from_operations([identity(max_l), sigma_yz(max_l)])
+
+
+def Ch(max_l: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Ch up to the given l.
+
+    Ch={E, sigma_xy}
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Ch up to the given l.
+    """
+    return condensed_wignerD_from_operations([identity(max_l), sigma_xy(max_l)])
+
+
 def iter_sph_indices(max_l: int) -> Generator[int, int, int]:
     """Yield the l, m', and m values in order of appearance in matrices.
 
