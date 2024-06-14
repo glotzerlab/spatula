@@ -3,23 +3,19 @@ import pytest
 
 import pgop
 from pgop.wignerd import (
+    Ci,
+    Cn,
+    Dn,
     WignerD,
     _parse_point_group,
     condensed_wignerD_from_operations,
+    direct_product,
     identity,
+    inversion,
     n_z,
+    semidirect_product,
     two_x,
     two_y,
-    inversion,
-    identity,
-    Dn,
-    Cn,
-    Ci,
-    sigma_xy,
-    sigma_xz,
-    sigma_yz,
-    semidirect_product,
-    direct_product,
 )
 
 
