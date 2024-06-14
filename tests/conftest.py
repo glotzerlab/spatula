@@ -16,11 +16,13 @@ def get_shape_sys_nlist(vertices):
     # vertices = shape.vertices
     query_point_indices = np.zeros(len(vertices), dtype=int)
     point_indices = np.arange(0, len(vertices), dtype=int)
+    # compute bond vectors between from query points to points
+    vectors = vertices[point_indices] - vertices[query_point_indices]
     distances = np.linalg.norm(vertices, axis=1)
     return (
         (freud.Box.cube(2.1 * np.max(distances)), vertices),
         freud.locality.NeighborList.from_arrays(
-            1, len(vertices), query_point_indices, point_indices, distances
+            1, len(vertices), query_point_indices, point_indices, vectors
         ),
     )
 

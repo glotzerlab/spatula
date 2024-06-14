@@ -31,7 +31,9 @@ classifiers = [
     ]
 dependencies = [
     "numpy",  # basic numerical Python
-    "freud-analysis",  # for neighbor finding
+    "freud-analysis>=3.0.0",  # for neighbor finding
+    "scipy",
+    "rowan",
 ]
 
 [project.optional-dependencies]
