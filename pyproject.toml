@@ -30,8 +30,13 @@ classifiers = [
         "Programming Language :: Python :: 3.11",
     ]
 dependencies = [
-    "coxeter",
     "numpy",  # basic numerical Python
     "freud-analysis",  # for neighbor finding
-    "h5py",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "coxeter",
+    "h5py"
 ]

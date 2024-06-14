@@ -13,7 +13,6 @@ from . import integrate, sph_harm, util, wignerd
 
 
 class PGOP:
-
     """Compute the degree of point group symmetry for specified point groups.
 
     This class detects the point group symmetry of the modified bond order
@@ -22,7 +21,14 @@ class PGOP:
     the surface of the sphere (e.g. von-Mises-Fisher or uniform distributions).
     """
 
-    def __init__(self, dist, symmetries, optimizer, kappa=11.5, max_theta=0.61):
+    def __init__(
+        self,
+        dist: str,
+        symmetries: list[str],
+        optimizer: pgop.optimize.Optimizer,
+        kappa: float = 11.5,
+        max_theta: float = 0.61,
+    ):
         """Create a PGOP object.
 
         Parameters
@@ -47,11 +53,8 @@ class PGOP:
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
         self._symmetries = symmetries
-        # Always use maximum l and let compute decide the ls to use for
         # computing the PGOP
-        self._wigner = wignerd.WignerD(12)
         self._optmizer = optimizer
-        D_ij = self._precompute_wigner_d()  # noqa :D806
         if dist == "fisher":
             dist_param = kappa
         elif dist == "uniform":
@@ -60,20 +63,21 @@ class PGOP:
             cls_ = getattr(pgop._pgop, "PGOP" + dist.title())
         except AttributeError as err:
             raise ValueError(f"Distribution {dist} not supported.") from err
+        D_ij = self._stack_wigner_d_matrices()  # noqa N806
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
         self._pgop = None
         self._ylm_cache = util._Cache(5)
 
     def compute(
         self,
-        system,
-        neighbors,
-        query_points=None,
-        max_l=6,
-        m=5,
-        refine=True,
-        refine_l=9,
-        refine_m=10,
+        system: tuple[freud.box.Box, np.ndarray],
+        neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
+        query_points: np.ndarray = None,
+        max_l: int = 6,
+        m: int = 5,
+        refine: bool = True,
+        refine_l: int = 9,
+        refine_m: int = 10,
     ):
         """Compute the point group symmetry for a given system and neighbor.
 
@@ -97,6 +101,10 @@ class PGOP:
         neighbors :
             A ``freud`` neighbor query object. Defines neighbors for the system.
             Weights provided by a neighbor list are currently unused.
+        query_points : `numpy.ndarray`, optional
+            The points to compute the PGOP for. Defaults to ``None`` which
+            computes the PGOP for all points in the system. The shape should be
+            ``(N_p, 3)`` where ``N_p`` is the number of points.
         max_l : `int`, optional
             The maximum spherical harmonic l to use for computations. Defaults
             to 6. Can go up to 12.
@@ -121,9 +129,7 @@ class PGOP:
             :math:`4 m^2`.
         """
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
-        dist = self._compute_distance_vectors(
-            neigh_query, neighbors, query_points
-        )
+        dist = self._compute_distance_vectors(neigh_query, neighbors, query_points)
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
         )
@@ -162,8 +168,7 @@ class PGOP:
         if query_points is None:
             query_points = pos
         return box.wrap(
-            query_points[neighbors.query_point_indices]
-            - pos[neighbors.point_indices]
+            query_points[neighbors.query_point_indices] - pos[neighbors.point_indices]
         )
 
     def _get_neighbors(self, system, neighbors):
@@ -191,7 +196,7 @@ class PGOP:
         return self._ylm_cache[key]
 
     @property
-    def pgop(self):
+    def pgop(self) -> np.ndarray:
         """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter.
 
         The symmetry order is consistent with the order passed to
@@ -200,7 +205,7 @@ class PGOP:
         return self._pgop
 
     @property
-    def rotations(self):
+    def rotations(self) -> np.ndarray:
         """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimial rotations.
 
         The optimial rotations expressed as quaternions for each particles and
@@ -208,9 +213,9 @@ class PGOP:
         """
         return self._rotations
 
-    def _precompute_wigner_d(self):
+    def _stack_wigner_d_matrices(self) -> np.ndarray:
         """Return a NumPy array of WignerD matrices for given symmetries."""
         matrices = []
         for point_group in self._symmetries:
-            matrices.append(self._wigner[point_group])
+            matrices.append(wignerd.WignerD(point_group, 12).condensed_matrices)
         return np.stack(matrices, axis=0)
