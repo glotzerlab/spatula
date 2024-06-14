@@ -1,43 +1,26 @@
 import numpy as np
 import pytest
 
-from pgop.wignerd import WignerD, _parse_point_group, _WignerData
-
-
-def test_init():
-    data = _WignerData()
-    assert len(data._columns) > 0
-    assert len(data._data) > 0
-
-
-def test_getitem():
-    data = _WignerData()
-    key = data._columns[0]
-    item = data[key]
-    assert isinstance(item, np.ndarray)
-
-
-def test_len():
-    data = _WignerData()
-    assert len(data) == len(data._columns)
-
-
-def test_contains():
-    data = _WignerData()
-    key = data._columns[0]
-    assert key in data
-
-
-def test_iter():
-    data = _WignerData()
-    for key in data:
-        assert key in data._columns
-
-
-def test_getitem_invalid_key():
-    data = _WignerData()
-    with pytest.raises(KeyError):
-        data["invalid_key"]
+import pgop
+from pgop.wignerd import (
+    WignerD,
+    _parse_point_group,
+    condensed_wignerD_from_operations,
+    identity,
+    n_z,
+    two_x,
+    two_y,
+    inversion,
+    identity,
+    Dn,
+    Cn,
+    Ci,
+    sigma_xy,
+    sigma_xz,
+    sigma_yz,
+    semidirect_product,
+    direct_product,
+)
 
 
 def test_parse_point_group():
@@ -47,31 +30,22 @@ def test_parse_point_group():
 
 
 def test_WignerD_init():
-    wig = WignerD(10)
-    assert wig._max_l == 10
-    assert isinstance(wig._data, _WignerData)
+    wig = WignerD("C2", 10)
+    assert wig.max_l == 10
 
 
-def test_WignerD_init_fail():
-    with pytest.raises(ValueError):
-        WignerD(13)  # more than the max l
+def test_WignerD_valid_point_group():
+    wig = WignerD("C2", 10)
+    assert isinstance(wig.condensed_matrices, np.ndarray)
 
 
-def test_WignerD_getitem():
-    wig = WignerD(10)
-    item = wig["T"]
-    assert isinstance(item, np.ndarray)
-
-
-def test_WignerD_getitem_invalid():
-    wig = WignerD(10)
+def test_WignerD_invalid_point_group():
     with pytest.raises(KeyError):
-        wig["TT"]  # not supported
+        _ = WignerD("TT", 10)
 
 
 def test_WignerD_iter_sph_indices():
-    wig = WignerD(2)
-    indices = list(wig.iter_sph_indices())
+    indices = list(pgop.wignerd.iter_sph_indices(2))
     expected_indices = [
         (0, 0, 0),
         (1, -1, -1),
@@ -110,3 +84,51 @@ def test_WignerD_iter_sph_indices():
         (2, 2, 2),
     ]
     assert indices == expected_indices
+
+
+maxl = 12
+
+
+def test_C2_from_operations():
+    # C2={E, 2_z}
+    assert np.isclose(
+        condensed_wignerD_from_operations([identity(maxl), n_z(maxl, 2)]), Cn(maxl, 2)
+    ).all()
+
+
+def test_Ci_from_operations():
+    # Ci={E, i}
+    assert np.isclose(
+        condensed_wignerD_from_operations([identity(maxl), inversion(maxl)]), Ci(maxl)
+    ).all()
+
+
+def test_D2_from_operations():
+    # D2={E, 2_z, 2_y, 2_x}
+    assert np.isclose(
+        condensed_wignerD_from_operations(
+            [identity(maxl), n_z(maxl, 2), two_y(maxl), two_x(maxl)]
+        ),
+        Dn(maxl, 2),
+    ).all()
+
+
+def test_D2_semidirect_product():
+    # C2'={E, 2_y}
+    WignerD_C2prime = condensed_wignerD_from_operations([identity(maxl), two_y(maxl)])
+    # D2=C2 x| C2'
+    assert np.isclose(
+        semidirect_product(Cn(maxl, 2), WignerD_C2prime), Dn(maxl, 2)
+    ).all()
+
+
+def test_D2_direct_product():
+    # C2'={E, 2_y}
+    WignerD_C2prime = condensed_wignerD_from_operations([identity(maxl), two_y(maxl)])
+    C2prime = WignerD.from_condensed_matrix_maxl_point_group(
+        WignerD_C2prime, maxl, "C2'"
+    )
+    # D2=C2 x C2'
+    assert np.isclose(
+        direct_product(WignerD("C2", maxl).matrices, C2prime.matrices), Dn(maxl, 2)
+    ).all()
