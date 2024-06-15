@@ -38,7 +38,7 @@ def test_WignerD_valid_point_group():
 
 def test_WignerD_invalid_point_group():
     with pytest.raises(KeyError):
-        _ = WignerD("TT", 10)
+        _ = WignerD("J", 10)
 
 
 def test_WignerD_iter_sph_indices():
@@ -131,19 +131,27 @@ def test_D2_direct_product():
     ).all()
 
 
-def test_against_old_data():
-    with h5py.File("data/data.h5", "r") as file:
-        point_groups = file["data"]["matrices"].attrs["point_groups"]
-        matrices = file["data"]["matrices"]
-        for point_group, matrix in zip(point_groups, matrices):
-            # TODO remove when TOI gets implemented
-            if point_group in "TOI":
-                continue
-            if point_group == "Ci":
-                assert np.isclose(
-                    WignerD(point_group, 12).condensed_matrices / 2, matrix
-                ).all()
-            else:
-                assert np.isclose(
-                    WignerD(point_group, 12).condensed_matrices, matrix
-                ).all()
+@pytest.mark.parametrize("n", [x * 2 - 1 for x in range(1, 6)])
+def test_Dnh_odd_n(n):
+    assert np.isclose(
+        WignerD("D" + str(n) + "h", maxl).condensed_matrices,
+        direct_product(
+            WignerD("C" + str(n) + "v", maxl).matrices, WignerD("Ch", maxl).matrices
+        ),
+    ).all()
+
+
+file = h5py.File("data/data.h5", "r")
+point_groups = file["data"]["matrices"].attrs["point_groups"]
+matrices = file["data"]["matrices"]
+
+
+@pytest.mark.parametrize("point_group, matrix", zip(point_groups, matrices))
+def test_against_old_data(point_group, matrix):
+    # TODO remove when OI gets implemented
+    if point_group in "OI":
+        return
+    if point_group == "Ci":
+        assert np.isclose(WignerD(point_group, 12).condensed_matrices / 2, matrix).all()
+    else:
+        assert np.isclose(WignerD(point_group, 12).condensed_matrices, matrix).all()

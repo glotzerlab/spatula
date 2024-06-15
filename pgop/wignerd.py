@@ -471,8 +471,230 @@ def condensed_wignerD_from_operations(  # noqa N802
     return np.sum(operations, axis=0) / len(operations)
 
 
+def compute_condensed_wignerD_for_C_family(  # noqa N802
+    max_l: int, modifier: str, order: int
+) -> np.ndarray:
+    """
+    Compute the condensed WignerD matrix for a given C family.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include in the WignerD matrices.
+    modifier : str
+        The modifier for the point group.
+    order : int
+        The order of the cyclic group.
+
+    Returns
+    -------
+    np.ndarray
+        The condensed WignerD matrix for the point group.
+    """
+    if modifier == "i" and order is not None:
+        return direct_product(Cn(max_l, order), Ci(max_l))
+    elif modifier == "h" and order is not None:
+        return direct_product(Cn(max_l, order), Ch(max_l))
+    elif modifier == "v" and order is not None:
+        return semidirect_product(Cn(max_l, order), Cs(max_l))
+    elif modifier is None and order is not None:
+        return Cn(max_l, order)
+    elif modifier == "i" and order is None:
+        return Ci(max_l)
+    elif modifier == "h" and order is None:
+        return Ch(max_l)
+    elif modifier == "s" and order is None:
+        return Cs(max_l)
+    else:
+        return None
+
+
+def compute_condensed_wignerD_for_D_family(  # noqa N802
+    max_l: int, modifier: str, order: int
+) -> np.ndarray:
+    """
+    Compute the condensed WignerD matrix for a given D family.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include in the WignerD matrices.
+    modifier : str
+        The modifier for the point group.
+    order : int
+        The order of the dihedral group.
+
+    Returns
+    -------
+    np.ndarray
+        The condensed WignerD matrix for the point group.
+    """
+    if (modifier == "d" and order % 2 == 1) or (modifier == "h" and order % 2 == 0):
+        return direct_product(Dn(max_l, order), Ci(max_l))
+    elif modifier == "h" and order % 2 == 1:
+        return direct_product(Dn(max_l, order), Ch(max_l))
+    elif modifier is None and order is not None:
+        return Dn(max_l, order)
+    else:
+        return None
+
+
+def compute_condensed_wignerD_for_S_family(  # noqa N802
+    max_l: int, modifier: str, order: int
+) -> np.ndarray:
+    """
+    Compute the condensed WignerD matrix for a given S family.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include in the WignerD matrices.
+    modifier : str
+        The modifier for the point group.
+    order : int
+        The order of the group.
+
+    Returns
+    -------
+    np.ndarray
+        The condensed WignerD matrix for the point group.
+    """
+    if modifier is None and (order % 2 == 0 and (order // 2) % 2 == 1):
+        return direct_product(Cn(max_l, order // 2), Ci(max_l))
+    else:
+        return None
+
+
+def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
+    max_l: int, modifier: str
+) -> np.ndarray:
+    """
+    Compute the condensed WignerD matrix for a given terahedral family.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include in the WignerD matrices.
+    modifier : str
+        The modifier for the point group.
+
+    Returns
+    -------
+    np.ndarray
+        The condensed WignerD matrix for the point group.
+    """
+    D2 = Dn(max_l, 2)  # noqa N806
+    if modifier == "d":
+        C3v = semidirect_product(Cn(max_l, 3), Cs(max_l))  # noqa N806
+        return semidirect_product(D2, C3v)
+    else:
+        T = semidirect_product(D2, Cn(max_l, 3))  # noqa N806
+        if modifier == "h":
+            return direct_product(T, Ci(max_l))
+        elif modifier is None:
+            return T
+        else:
+            return None
+
+
+def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
+    max_l: int, modifier: str
+) -> np.ndarray:
+    """
+    Compute the condensed WignerD matrix for a given octahedral family.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include in the WignerD matrices.
+    modifier : str
+        The modifier for the point group.
+
+    Returns
+    -------
+    np.ndarray
+        The condensed WignerD matrix for the point group.
+    """
+    # O = ?? # noqa N806
+    # if modifier == "h":
+    #    return semidirect_product(O, Ci(max_l))
+    # elif modifier is None:
+    #    return O
+    # else:
+    #    return None
+    return None
+
+
+def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
+    max_l: int, modifier: str
+) -> np.ndarray:
+    """
+    Compute the condensed WignerD matrix for a given icosahedral family.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include in the WignerD matrices.
+    modifier : str
+        The modifier for the point group.
+
+    Returns
+    -------
+    np.ndarray
+        The condensed WignerD matrix for the point group.
+    """
+    # I = ?? # noqa N806
+    # if modifier == "h":
+    ### Should this be semidirect or direct???
+    #    return semidirect_product(I, Ci(max_l))
+    # elif modifier is None:
+    #    return I
+    # else:
+    #    return None
+    return None
+
+
+def compute_condensed_wignerD_matrix_for_a_given_point_group(  # noqa N802
+    point_group: str, max_l: int
+) -> np.ndarray:
+    """
+    Compute the condensed WignerD matrix for a given point group.
+
+    Parameters
+    ----------
+    point_group : str
+        The point group in Schoenflies notation.
+    max_l : int
+        The maximum l value to include in the WignerD matrices.
+
+    Returns
+    -------
+    np.ndarray
+        The condensed WignerD matrix for the point group.
+    """
+    family, modifier, order = _parse_point_group(point_group)
+    if family == "T":
+        matrix = compute_condensed_wignerD_for_tetrahedral_family(max_l, modifier)
+    elif family == "O":
+        matrix = compute_condensed_wignerD_for_octahedral_family(max_l, modifier)
+    elif family == "I":
+        matrix = compute_condensed_wignerD_for_icosahedral_family(max_l, modifier)
+    elif family == "C":
+        matrix = compute_condensed_wignerD_for_C_family(max_l, modifier, order)
+    elif family == "D":
+        matrix = compute_condensed_wignerD_for_D_family(max_l, modifier, order)
+    elif family == "S":
+        matrix = compute_condensed_wignerD_for_S_family(max_l, modifier, order)
+    else:
+        matrix = None
+    if matrix is not None:
+        return matrix
+    else:
+        raise KeyError(f"{point_group} is not currently supported.")
+
+
 class WignerD:
-    def __init__(self, point_group: str, max_l: int):
+    def __init__(self, point_group: str, max_l: int) -> None:
         """Create a WignerD object.
 
         Parameters
@@ -484,35 +706,9 @@ class WignerD:
         """
         self._max_l = max_l
         self._point_group = point_group
-        family, modifier, order = _parse_point_group(point_group)
-        if family in "TOI":
-            raise KeyError(f"{point_group} is not currently supported.")
-            # if modifier == "h":
-            #    self._matrix = semidirect_prod(????, Ci(max_l))
-            # elif modifier is not None:
-            #    raise KeyError(f"{point_group} is not currently supported.")
-        if point_group == "Ci":
-            self._matrix = Ci(max_l)
-        if family == "C":
-            if (modifier == "i" and order is not None) or (
-                modifier == "h" and order % 2 == 0
-            ):
-                self._matrix = direct_product(Cn(max_l, order), Ci(max_l))
-            elif modifier is None:
-                self._matrix = Cn(max_l, order)
-            elif modifier == "i" and order is None:
-                self._matrix = Ci(max_l)
-            else:
-                raise KeyError(f"{point_group} is not currently supported.")
-        if family == "D":
-            if (modifier == "d" and order % 2 == 1) or (
-                modifier == "h" and order % 2 == 0
-            ):
-                self._matrix = direct_product(Dn(max_l, order), Ci(max_l))
-            elif modifier is None:
-                self._matrix = Dn(max_l, order)
-            else:
-                raise KeyError(f"{point_group} is not currently supported.")
+        self._matrix = compute_condensed_wignerD_matrix_for_a_given_point_group(
+            point_group, max_l
+        )
 
     @property
     def max_l(self) -> int:
