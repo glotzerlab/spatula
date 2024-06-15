@@ -110,12 +110,13 @@ def test_D2_from_operations():
     ).all()
 
 
-def test_D2_semidirect_product():
+@pytest.mark.parametrize("n", range(2, 12))
+def test_Dn_semidirect_product(n):
     # C2'={E, 2_y}
     wignerd_c2prime = condensed_wignerD_from_operations([identity(maxl), two_y(maxl)])
-    # D2=C2 x| C2'
+    # Dn=Cn x| C2'
     assert np.isclose(
-        semidirect_product(Cn(maxl, 2), wignerd_c2prime), Dn(maxl, 2)
+        semidirect_product(Cn(maxl, n), wignerd_c2prime), Dn(maxl, n)
     ).all()
 
 
