@@ -78,10 +78,7 @@ cyclic_non_symmetry = {
     12: 5,
 }
 non_shape_symmetries.update(
-    {
-        f"C{i}": [f"RegularNGonFamily.{cyclic_non_symmetry[i]}"]
-        for i in range(3, 13)
-    }
+    {f"C{i}": [f"RegularNGonFamily.{cyclic_non_symmetry[i]}"] for i in range(3, 13)}
 )
 non_shape_symmetries.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
 non_shape_symmetries.update(
@@ -99,9 +96,7 @@ non_shape_symmetries.update(
     ids=_id_func,
 )
 def test_symmetries(symmetry, shape, vertices):
-    conftest.check_symmetry(
-        symmetry=symmetry, vertices=vertices, threshold=0.98
-    )
+    conftest.check_symmetry(symmetry=symmetry, vertices=vertices, threshold=0.98)
 
 
 @pytest.mark.parametrize(

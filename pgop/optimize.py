@@ -1,4 +1,5 @@
 """Classes to optimize over SO(3) for `pgop.PGOP`."""
+
 from pathlib import Path
 
 import numpy as np
