@@ -2,8 +2,8 @@
 from pathlib import Path
 
 import numpy as np
-import rowan
 import scipy as sp
+from scipy.spatial.transform import Rotation
 
 from . import _pgop
 
@@ -146,9 +146,13 @@ class Mesh(Optimizer):
         points = np.empty((n_angles * n_axes + 1, 4), dtype=float)
         points[0] = np.array([1.0, 0.0, 0.0, 0.0])
         angles = cls._sample_angles(n_angles).reshape((1, -1, 1))
-        points[1:] = rowan.from_axis_angle(
-            axes[:, None, :], angles[None, :, None]
-        ).reshape((-1, 4))
+        # Flatten axes and angles for creating the rotation objects
+        axes = axes.repeat(n_angles, axis=1).reshape(-1, 3)
+        angles = angles.repeat(n_axes, axis=0).reshape(-1)
+        # Generate quaternions from axis-angle
+        quaternions = Rotation.from_rotvec(axes * angles[:, None]).as_quat()
+        quaternions = quaternions.reshape((n_axes * n_angles, 4))
+        points[1:] = np.hstack((quaternions[:, -1].reshape(-1, 1), quaternions[:, :-1]))
         return cls(points)
 
     @staticmethod
