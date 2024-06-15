@@ -133,7 +133,7 @@ def test_D2_direct_product():
 
 
 @pytest.mark.parametrize("n", [x * 2 - 1 for x in range(1, 6)])
-def test_Dnh_odd_n(n):
+def test_Dnh_odd_n_direct_product(n):
     assert np.isclose(
         WignerD("D" + str(n) + "h", maxl).condensed_matrices,
         direct_product(
