@@ -86,13 +86,6 @@ def test_WignerD_iter_sph_indices():
 maxl = 12
 
 
-def test_C2_from_operations():
-    # C2={E, 2_z}
-    assert np.isclose(
-        condensed_wignerD_from_operations([identity(maxl), n_z(maxl, 2)]), Cn(maxl, 2)
-    ).all()
-
-
 def test_Ci_from_operations():
     # Ci={E, i}
     assert np.isclose(
@@ -110,8 +103,25 @@ def test_D2_from_operations():
     ).all()
 
 
+@pytest.mark.parametrize("n", range(2, 13))
+def test_Cn_from_operations(n):
+    """Ezra p.188 or p.191
+    Cn = {E, n_z, n_z^2, ..., n_z^(n-1)}
+    direct product = matrix multiplication here?
+    """
+    operations = [identity(maxl), n_z(maxl, n)]
+    for i in range(2, n):
+        new_op = n_z(maxl, n)
+        for _ in range(1, i):
+            new_op = direct_product(new_op, n_z(maxl, n))
+        operations.append(new_op)
+    assert np.isclose(condensed_wignerD_from_operations(operations), Cn(maxl, n)).all()
+
+
+
 @pytest.mark.parametrize("n", range(2, 12))
 def test_Dn_semidirect_product(n):
+    """According to Altman Dn=Cn x| C2' Table 2 (p. 222)"""
     # C2'={E, 2_y}
     wignerd_c2prime = condensed_wignerD_from_operations([identity(maxl), two_y(maxl)])
     # Dn=Cn x| C2'
