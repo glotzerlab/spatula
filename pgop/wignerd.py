@@ -336,11 +336,13 @@ def convert_to_list_of_matrices(D: np.ndarray, max_l: int) -> list[np.ndarray]: 
     """
     matrices = []
     current = 0
-    for i in range(max_l + 1):
+    i = 0
+    while current < D.size:
         dimz = i * 2 + 1
         matrix = D[current : current + dimz**2]
         current += dimz**2
         matrices.append(matrix.reshape(dimz, dimz))
+        i += 1
     return matrices
 
 
@@ -743,7 +745,7 @@ class WignerD:
         list[np.ndarray]
             The WignerD matrices for the point group up to the given l.
         """
-        return convert_to_list_of_matrices(self._matrix, self._max_l)
+        return convert_to_list_of_matrices(self._matrix)
 
     @property
     def condensed_matrices(self) -> np.ndarray:
