@@ -91,8 +91,11 @@ def inversion(max_l: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for inversion up to the given l.
     """
-    return np.array(
-        [delta(mprime, m) * ((-1) ** l) for l, mprime, m in iter_sph_indices(max_l)],
+    return np.concatenate(
+        [
+            np.eye(2 * l + 1, 2 * l + 1, dtype=complex).flatten() * (-1) ** l
+            for l in range(0, max_l + 1)
+        ],
         dtype=complex,
     )
 
