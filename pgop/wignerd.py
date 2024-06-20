@@ -2,6 +2,49 @@ import itertools
 from typing import Generator
 
 import numpy as np
+import scipy.special
+
+
+base_rotations = (
+    np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 0.5, 0.5],
+            [1.0, 0.5, -0.5],
+            [1.0, 0.5, 0.5],
+            [0.0, 0.5, -0.5],
+            [0.5, 0.5, 1.0],
+            [-0.5, 0.5, 0.0],
+            [0.5, 0.5, 0.0],
+            [-0.5, 0.5, 1.0],
+        ]
+    )
+    * np.pi
+)
+
+octahedral_rotations = (
+    np.array(
+        [
+            [0.5, 0.5, -0.5],
+            [-0.5, 0.5, 0.5],
+            [0.5, 1.0, 0.0],
+            [-0.5, 1.0, 0.0],
+            [1.0, 0.5, 0.0],
+            [0.0, 0.5, 1.0],
+            [0.0, 0.5, 0.0],
+            [1.0, 0.5, 1.0],
+            [0.5, 0.0, 0.0],
+            [-0.5, 0.0, 0.0],
+            [0.5, 0.5, 0.5],
+            [-0.5, 0.5, -0.5],
+        ]
+    )
+    * np.pi
+)
+
 
 
 def Ci(max_l: int) -> np.ndarray:  # noqa: N802
@@ -95,9 +138,120 @@ def inversion(max_l: int) -> np.ndarray:  # noqa: N802
         [
             np.eye(2 * l + 1, 2 * l + 1, dtype=complex).flatten() * (-1) ** l
             for l in range(0, max_l + 1)
-        ],
-        dtype=complex,
-    )
+
+
+def generalized_rotation(
+    max_l: int, alpha: float, beta: float, gamma: float
+) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for a generalized rotation up to the given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    alpha : float
+        The angle of rotation around the z-axis. Must be between 0 and 2*pi.
+    beta : float
+        The angle of rotation around the y-axis. Must be between 0 and pi.
+    gamma : float
+        The angle of rotation around the z-axis. Must be between 0 and 2*pi.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for the generalized rotation up to the given l.
+    """
+
+    def S_sum(l, m, mprime):  # noqa: N802
+        return np.sum(
+            [
+                (
+                    ((-1) ** k)
+                    / (
+                        scipy.special.factorial(l - mprime - k)
+                        * scipy.special.factorial(l + m - k)
+                        * scipy.special.factorial(k)
+                        * scipy.special.factorial(k - m + mprime)
+                    )
+                )
+                * np.cos(beta * 0.5) ** (2 * l + m - mprime - 2 * k)
+                * np.sin(beta * 0.5) ** (-m + mprime + 2 * k)
+                for k in range(max(0, m - mprime), min(l - mprime, l + m) + 1)
+            ],
+            dtype=complex,
+        )
+
+    def S_sum_when_beta_half_pi(l, m, mprime):  # noqa: N802
+        return (2 ** (-l)) * np.sum(
+            [
+                (
+                    ((-1) ** k)
+                    / (
+                        scipy.special.factorial(l - mprime - k)
+                        * scipy.special.factorial(l + m - k)
+                        * scipy.special.factorial(k)
+                        * scipy.special.factorial(k - m + mprime)
+                    )
+                )
+                for k in range(max(0, m - mprime), min(l - mprime, l + m) + 1)
+            ],
+            dtype=complex,
+        )
+
+    def Cmprimem(m, mprime, l):  # noqa: N802
+        return (1j ** (np.abs(mprime) + mprime)) * 1j ** (np.abs(m) + m)
+
+    def root_factorial(m, mprime, l):
+        return np.sqrt(
+            scipy.special.factorial(l + m)
+            * scipy.special.factorial(l - m)
+            * scipy.special.factorial(l + mprime)
+            * scipy.special.factorial(l - mprime)
+        )
+
+    if np.isclose(beta, 0):
+        return np.array(
+            [
+                np.exp(1j * m * alpha) * np.exp(1j * m * gamma) * delta(mprime, m)
+                for _, mprime, m in iter_sph_indices(max_l)
+            ],
+            dtype=complex,
+        )
+    elif np.isclose(beta, np.pi / 2):
+        return np.array(
+            [
+                S_sum_when_beta_half_pi(l, m, mprime)
+                * Cmprimem(m, mprime, l)
+                * root_factorial(m, mprime, l)
+                * np.exp(1j * m * alpha)
+                * np.exp(1j * mprime * gamma)
+                for l, mprime, m in iter_sph_indices(max_l)
+            ],
+            dtype=complex,
+        )
+    elif np.isclose(beta, np.pi):
+        return np.array(
+            [
+                ((-1) ** l)
+                * np.exp(1j * m * alpha)
+                * np.exp(-1j * m * gamma)
+                * delta(mprime, -m)
+                for l, mprime, m in iter_sph_indices(max_l)
+            ],
+            dtype=complex,
+        )
+    else:
+        return np.array(
+            [
+                Cmprimem(m, mprime, l)
+                * root_factorial(m, mprime, l)
+                * S_sum(l, m, mprime)
+                * np.exp(1j * m * alpha)
+                * np.exp(1j * mprime * gamma)
+                for l, mprime, m in iter_sph_indices(max_l)
+            ],
+            dtype=complex,
+        )
 
 
 def sigma_yz(max_l: int) -> np.ndarray:  # noqa: N802
@@ -319,7 +473,7 @@ def delta(a: int, b: int) -> int:
     return int(a == b)
 
 
-def convert_to_list_of_matrices(D: np.ndarray, max_l: int) -> list[np.ndarray]:  # noqa N802
+def convert_to_list_of_matrices(D: np.ndarray) -> list[np.ndarray]:  # noqa N802
     """Convert a condensed WignerD matrix for all l's to a list of matrices per l.
 
     Parameters
@@ -593,9 +747,12 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
         C3v = semidirect_product(Cn(max_l, 3), Cs(max_l))  # noqa N806
         return semidirect_product(D2, C3v)
     else:
-        T = semidirect_product(D2, Cn(max_l, 3))  # noqa N806
+        operations = []
+        for rot in base_rotations:
+            operations.append(generalized_rotation(max_l, *rot))
+        T = condensed_wignerD_from_operations(operations)  # noqa N806
         if modifier == "h":
-            return direct_product(T, Ci(max_l))
+            return semidirect_product(T, Ci(max_l))
         elif modifier is None:
             return T
         else:
@@ -620,14 +777,16 @@ def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    # O = ?? # noqa N806
-    # if modifier == "h":
-    #    return semidirect_product(O, Ci(max_l))
-    # elif modifier is None:
-    #    return O
-    # else:
-    #    return None
-    return None
+    operations = []
+    for rot in np.concatenate((base_rotations, octahedral_rotations)):
+        operations.append(generalized_rotation(max_l, *rot))
+    O = condensed_wignerD_from_operations(operations)  # noqa N806
+    if modifier == "h":
+        return semidirect_product(O, Ci(max_l))
+    elif modifier is None:
+        return O
+    else:
+        return None
 
 
 def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
