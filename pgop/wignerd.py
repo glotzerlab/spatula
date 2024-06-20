@@ -4,6 +4,7 @@ from typing import Generator
 import numpy as np
 import scipy.special
 
+golden_mean = (1 + np.sqrt(5)) / 2
 
 base_rotations = (
     np.array(
@@ -45,6 +46,62 @@ octahedral_rotations = (
     * np.pi
 )
 
+icosahedral_rotations = (
+    np.array(
+        [  # note to self np.arctan2(1/2,-golden_mean/2)/np.pi = 0.8237918088252166
+            # note to self np.arctan2(1/2,golden_mean/2)/np.pi = 0.17620819117478337
+            [0.82379181, 0.4, 0.17620819],
+            [0.17620819, 0.4, 0.82379181],
+            [-0.82379181, 0.4, -0.17620819],
+            [-0.17620819, 0.4, -0.82379181],
+            [0.82379181, 0.2, -0.17620819],
+            [-0.82379181, 0.2, 0.17620819],
+            [-0.17620819, 0.2, 0.82379181],
+            [0.17620819, 0.2, -0.82379181],
+            [1 - 1 / golden_mean, 2 / 3, 1 / golden_mean - 1],
+            [-1 / golden_mean, 2 / 3, 1 / golden_mean],
+            [1 / golden_mean - 1, 2 / 3, 1 - 1 / golden_mean],
+            [1 / golden_mean, 2 / 3, -1 / golden_mean],
+            [1 - 1 / golden_mean, 1 / 3, 1 - 1 / golden_mean],
+            [1 / golden_mean, 1 / 3, 1 / golden_mean],
+            [-1 / golden_mean, 1 / 3, -1 / golden_mean],
+            [1 / golden_mean - 1, 1 / 3, 1 / golden_mean - 1],
+            [0.82379181, 0.6, -0.17620819],
+            [-0.82379181, 0.6, 0.17620819],
+            [-0.17620819, 0.6, 0.82379181],
+            [0.17620819, 0.6, -0.82379181],
+            [0.17620819, 0.4, -0.17620819],
+            [-0.82379181, 0.4, 0.82379181],
+            [-0.17620819, 0.4, 0.17620819],
+            [0.82379181, 0.4, -0.82379181],
+            [0.17620819, 0.2, 0.17620819],
+            [0.82379181, 0.2, 0.82379181],
+            [-0.82379181, 0.2, -0.82379181],
+            [-0.17620819, 0.2, -0.17620819],
+            [0.17620819, 0.6, 0.17620819],
+            [0.82379181, 0.6, 0.82379181],
+            [-0.82379181, 0.6, -0.82379181],
+            [-0.17620819, 0.6, -0.17620819],
+            [0.17620819, 0.8, -0.17620819],
+            [-0.82379181, 0.8, 0.82379181],
+            [-0.17620819, 0.8, 0.17620819],
+            [0.82379181, 0.8, -0.82379181],
+            [1 / golden_mean, 1 / 3, 1 / golden_mean - 1],
+            [-1 / golden_mean, 1 / 3, 1 - 1 / golden_mean],
+            [1 / golden_mean - 1, 1 / 3, 1 / golden_mean],
+            [1 - 1 / golden_mean, 1 / 3, -1 / golden_mean],
+            [1 / golden_mean, 2 / 3, 1 - 1 / golden_mean],
+            [1 - 1 / golden_mean, 2 / 3, 1 / golden_mean],
+            [-1 / golden_mean, 2 / 3, 1 / golden_mean - 1],
+            [1 / golden_mean - 1, 2 / 3, -1 / golden_mean],
+            [0.82379181, 0.8, 0.17620819],
+            [0.17620819, 0.8, 0.82379181],
+            [-0.82379181, 0.8, -0.17620819],
+            [-0.17620819, 0.8, -0.82379181],
+        ]
+    )
+    * np.pi
+)
 
 
 def Ci(max_l: int) -> np.ndarray:  # noqa: N802
@@ -807,15 +864,16 @@ def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    # I = ?? # noqa N806
-    # if modifier == "h":
-    ### Should this be semidirect or direct???
-    #    return semidirect_product(I, Ci(max_l))
-    # elif modifier is None:
-    #    return I
-    # else:
-    #    return None
-    return None
+    operations = []
+    for rot in np.concatenate((base_rotations, icosahedral_rotations)):
+        operations.append(generalized_rotation(max_l, *rot))
+    I = condensed_wignerD_from_operations(operations)  # noqa N806
+    if modifier == "h":
+        return semidirect_product(I, Ci(max_l))
+    elif modifier is None:
+        return I
+    else:
+        return None
 
 
 def compute_condensed_wignerD_matrix_for_a_given_point_group(  # noqa N802
