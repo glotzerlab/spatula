@@ -798,9 +798,9 @@ def compute_condensed_wignerD_for_C_family(  # noqa N802
         The condensed WignerD matrix for the point group.
     """
     if modifier == "i" and order is not None:
-        return direct_product(Cn(max_l, order), Ci(max_l))
+        return semidirect_product(Cn(max_l, order), Ci(max_l))
     elif modifier == "h" and order is not None:
-        return direct_product(Cn(max_l, order), Ch(max_l))
+        return semidirect_product(Cn(max_l, order), Ch(max_l))
     elif modifier == "v" and order is not None:
         return semidirect_product(Cn(max_l, order), Cs(max_l))
     elif modifier is None and order is not None:
