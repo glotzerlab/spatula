@@ -195,6 +195,66 @@ def inversion(max_l: int) -> np.ndarray:  # noqa: N802
         [
             np.eye(2 * l + 1, 2 * l + 1, dtype=complex).flatten() * (-1) ** l
             for l in range(0, max_l + 1)
+        ],
+        dtype=complex,
+    )
+
+
+def rotoreflection(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for rotoreflection up to the given l.
+
+    Implementation according to Altman, Mathematical Proceedings of the Cambridge
+    Philosophical Society , Volume 53 , Issue 2 , April 1957
+    (https://doi.org/10.1017/S0305004100032370), p.347 (bottom of the page).
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the rotation group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for rotoreflection up to the given l.
+    """
+    inversion_matrices = inversion(max_l)
+    rotation_matrices = n_z(max_l, n) if n % 2 == 0 else n_z(max_l, 2 * n)
+    return dot_product(inversion_matrices, rotation_matrices)
+
+
+def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Sn (rotoreflection group) up to the given l.
+    
+    Elements of Sn are given by Sn = {I, Sn, Cn**2, Sn**3, Cn**4, Sn**5, ... until n-1
+    (last can be C or S depending if n is odd or even)} according to
+    https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions and character tables.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the rotation group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Sn up to the given l.
+    """
+    operations = [identity(max_l)]
+    for i in range(1, n):
+        if i % 2 == 0:
+            new_op = Cn(max_l, n)
+            for _ in range(1,i):
+                new_op = dot_product(new_op, Cn(max_l, n))
+        else:
+            new_op = rotoreflection(max_l, n)
+            for _ in range(1,i):
+                new_op = dot_product(new_op, rotoreflection(max_l, n))
+        operations.append(new_op)
+    return condensed_wignerD_from_operations(operations)
 
 
 def generalized_rotation(
@@ -805,8 +865,8 @@ def compute_condensed_wignerD_for_S_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    if modifier is None and (order % 2 == 0 and (order // 2) % 2 == 1):
-        return direct_product(Cn(max_l, order // 2), Ci(max_l))
+    if modifier is None and order is not None:
+        return Sn(max_l, order)
     else:
         return None
 
