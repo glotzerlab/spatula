@@ -192,6 +192,7 @@ def test_D2_from_operations():
     ).all()
 
 
+# tests point groups from operations
 @pytest.mark.parametrize("n", range(2, 13))
 def test_Cn_from_operations(n):
     """Ezra p.188 or p.191
@@ -202,7 +203,7 @@ def test_Cn_from_operations(n):
     for i in range(2, n):
         new_op = n_z(maxl, n)
         for _ in range(1, i):
-            new_op = direct_product(new_op, n_z(maxl, n))
+            new_op = dot_product(new_op, n_z(maxl, n))
         operations.append(new_op)
     assert np.isclose(condensed_wignerD_from_operations(operations), Cn(maxl, n)).all()
 
