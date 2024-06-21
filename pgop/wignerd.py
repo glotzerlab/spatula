@@ -625,6 +625,32 @@ def semidirect_product(D_a: np.ndarray, D_b: np.ndarray) -> np.ndarray:  # noqa 
     return D_ab.reshape(D_a.shape)
 
 
+def dot_product(
+    condensed_operation_a: np.ndarray, condensed_operation_b: np.ndarray
+) -> np.ndarray:  # noqa N802
+    """Direct product of two sets of WignerD matrices.
+
+    Parameters
+    ----------
+    condensed_operation_a : np.ndarray
+        The first set of WignerD matrices.
+    condensed_operation_b : np.ndarray
+        The second set of WignerD matrices.
+
+    Returns
+    -------
+    np.ndarray
+        The direct product of the two sets of WignerD matrices.
+    """
+    result = []
+    for matrix1, matrix2 in zip(
+        convert_to_list_of_matrices(condensed_operation_a),
+        convert_to_list_of_matrices(condensed_operation_b),
+    ):
+        result.append(np.dot(matrix1, matrix2).flatten())
+    return np.concatenate(result)
+
+
 def direct_product(matrices_a: np.ndarray, matrices_b: np.ndarray) -> np.ndarray:  # noqa N802
     """Direct product of two sets of WignerD matrices.
 
