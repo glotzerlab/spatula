@@ -166,6 +166,10 @@ def Dn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for Dn up to the given l.
     """
+    # return semidirect_product(
+    #    Cn(max_l, n),
+    #    condensed_wignerD_from_operations([identity(max_l), two_y(max_l)]),
+    # )
     return (
         np.array(
             [
