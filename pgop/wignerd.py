@@ -325,7 +325,7 @@ def sigma_yz(max_l: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for sigma_xy up to the given l.
     """
     return np.array(
-        [delta(mprime, -m) for _, mprime, m in iter_sph_indices(max_l)],
+        [delta(mprime, -m) * ((-1) ** m) for _, mprime, m in iter_sph_indices(max_l)],
         dtype=complex,
     )
 
@@ -344,7 +344,7 @@ def sigma_xz(max_l: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for sigma_xz up to the given l.
     """
     return np.array(
-        [delta(mprime, -m) * ((-1) ** m) for _, mprime, m in iter_sph_indices(max_l)],
+        [delta(mprime, -m) for _, mprime, m in iter_sph_indices(max_l)],
         dtype=complex,
     )
 
@@ -374,6 +374,8 @@ def sigma_xy(max_l: int) -> np.ndarray:  # noqa: N802
 def two_x(max_l: int) -> np.ndarray:  # noqa: N802
     """Return the WignerD matrix for rotation for 180 around x up to the given l.
 
+    Note: Michaels paper has values for 2x and 2y swapped!
+
     Parameters
     ----------
     max_l : int
@@ -385,13 +387,18 @@ def two_x(max_l: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for rotation for 180 around x up to the given l.
     """
     return np.array(
-        [delta(mprime, -m) * ((-1) ** l) for l, mprime, m in iter_sph_indices(max_l)],
+        [
+            delta(mprime, -m) * ((-1) ** (l + m))
+            for l, mprime, m in iter_sph_indices(max_l)
+        ],
         dtype=complex,
     )
 
 
 def two_y(max_l: int) -> np.ndarray:  # noqa: N802
     """Return the WignerD matrix for rotation for 180 around y up to the given l.
+
+    Note: Michaels paper has values for 2x and 2y swapped!
 
     Parameters
     ----------
@@ -404,10 +411,7 @@ def two_y(max_l: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for rotation for 180 around y up to the given l.
     """
     return np.array(
-        [
-            delta(mprime, -m) * ((-1) ** (m + l))
-            for l, mprime, m in iter_sph_indices(max_l)
-        ],
+        [delta(mprime, -m) * ((-1) ** (l)) for l, mprime, m in iter_sph_indices(max_l)],
         dtype=complex,
     )
 
