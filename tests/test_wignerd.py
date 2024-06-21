@@ -208,16 +208,87 @@ def test_Cn_from_operations(n):
     assert np.isclose(condensed_wignerD_from_operations(operations), Cn(maxl, n)).all()
 
 
+@pytest.mark.parametrize("n", range(2, 12, 2))
+def test_rotoinversion_even_from_operations(n):
+    """https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions"""
+    operations = [identity(maxl)]
+    cnz = n_z(maxl, n)
+    for i in range(1, n, 2):
+        new_operation = identity(maxl)
+        for _ in range(1, i):
+            new_operation = dot_product(new_operation, cnz)
+        new_operation = dot_product(new_operation, sigma_xy(maxl))
+        operations.append(new_operation)
+    assert np.allclose(condensed_wignerD_from_operations(operations), Sn(maxl, n))
 
-@pytest.mark.parametrize("n", range(2, 12))
-def test_Dn_semidirect_product(n):
-    """According to Altman Dn=Cn x| C2' Table 2 (p. 222)"""
-    # C2'={E, 2_y}
-    wignerd_c2prime = condensed_wignerD_from_operations([identity(maxl), two_y(maxl)])
-    # Dn=Cn x| C2'
-    assert np.isclose(
-        semidirect_product(Cn(maxl, n), wignerd_c2prime), Dn(maxl, n)
-    ).all()
+
+@pytest.mark.parametrize("n", range(2, 13))
+def test_Cnh_from_operations(n):
+    """https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions"""
+    operations = [identity(maxl), sigma_xy(maxl)]
+    cnz = n_z(maxl, n)
+    for i in range(1, n):
+        new_operation = identity(maxl)
+        for _ in range(1, i):
+            new_operation = dot_product(new_operation, cnz)
+        new_operation = dot_product(new_operation, sigma_xy(maxl))
+        operations.append(new_operation)
+    assert np.allclose(
+        condensed_wignerD_from_operations(operations),
+        WignerD("C" + str(n) + "h", maxl).condensed_matrices,
+    )
+
+
+# @pytest.mark.parametrize("n", range(3, 12, 2))
+# def test_Dn_even_from_operations(n):
+#    """Ezra p193.
+#    D={E, n_z, n_z^2, ..., n_z^(n/2), 2_y, 2_y x n_z}
+#    """
+# # all is wrong here
+#    operations = [identity(maxl), n_z(maxl, n)]
+#    for i in range(2, (n - 1) // 2):
+#        new_op = n_z(maxl, n)
+#        for _ in range(1, i):
+#            new_op = dot_product(new_op, n_z(maxl, n))
+#        operations.append(new_op)
+#    operations.append(n_z(maxl, 2))
+#    operations.append(two_y(maxl))
+#    operations.append(direct_product(two_y(maxl), n_z(maxl, n)))
+#    assert np.isclose(
+#        condensed_wignerD_from_operations(operations), Dn(maxl, n)
+#    ).all()
+
+
+@pytest.mark.parametrize("n", range(3, 12, 2))
+def test_Dn_odd_from_operations(n):
+    """Ezra p192.
+    D={E, n_z, n_z^2, ..., n_z^((n-1)/2), 2_y}
+    mult ={1,2,2,...2,n}"""
+    operations = [identity(maxl), n_z(maxl, n)]
+    for i in range(2, (n - 1) // 2 + 1):
+        new_op = n_z(maxl, n)
+        for _ in range(1, i):
+            new_op = dot_product(new_op, n_z(maxl, n))
+        operations.append(new_op)
+    operations.append(two_y(maxl))
+    assert np.isclose(condensed_wignerD_from_operations(operations), Dn(maxl, n)).all()
+
+
+@pytest.mark.parametrize("n", range(3, 12))
+def test_Cni_equivalence_to_Sn(n):
+    """https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups"""
+    assert np.allclose(
+        WignerD("C" + str(n) + "i", maxl).condensed_matrices, Sn(maxl, n)
+    )
+
+
+# direct product tests
+@pytest.mark.parametrize("n", range(2, 12, 4))
+def test_rotoinversion_even_from_odd_direct_product(n):
+    """Ezra p. 189:
+    S2n = Cn x Ci for odd n"""
+    cn_half = Cn(maxl, n // 2)
+    assert np.allclose(Sn(maxl, n), direct_product(cn_half, Ci(maxl)))
 
 
 def test_D2_direct_product():
@@ -234,11 +305,24 @@ def test_D2_direct_product():
 
 @pytest.mark.parametrize("n", [x * 2 - 1 for x in range(1, 6)])
 def test_Dnh_odd_n_direct_product(n):
+    """Ezra, p. 189"""
     assert np.isclose(
         WignerD("D" + str(n) + "h", maxl).condensed_matrices,
         direct_product(
             WignerD("C" + str(n) + "v", maxl).matrices, WignerD("Ch", maxl).matrices
         ),
+    ).all()
+
+
+# Semidirect product tests
+@pytest.mark.parametrize("n", range(2, 12))
+def test_Dn_semidirect_product(n):
+    """According to Altman Dn=Cn x| C2' Table 2 (p. 222)"""
+    # C2'={E, 2_y}
+    wignerd_c2prime = condensed_wignerD_from_operations([identity(maxl), two_y(maxl)])
+    # Dn=Cn x| C2'
+    assert np.isclose(
+        semidirect_product(Cn(maxl, n), wignerd_c2prime), Dn(maxl, n)
     ).all()
 
 
