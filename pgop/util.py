@@ -84,7 +84,7 @@ class _Cache:
         """
         self._data = {}
         self._key_counts = collections.Counter()
-        self._recent_keys = collections.deque(max_size=keep_n_most_recent)
+        self._recent_keys = collections.deque(maxlen=keep_n_most_recent)
         self.max_size = max_size
 
     def __contains__(self, key):
