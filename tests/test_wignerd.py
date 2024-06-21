@@ -7,14 +7,23 @@ from pgop.wignerd import (
     Ci,
     Cn,
     Dn,
+    Sn,
     WignerD,
     _parse_point_group,
     condensed_wignerD_from_operations,
+    delta,
     direct_product,
+    dot_product,
+    generalized_rotation,
     identity,
     inversion,
+    iter_sph_indices,
     n_z,
+    rotoreflection,
     semidirect_product,
+    sigma_xy,
+    sigma_xz,
+    sigma_yz,
     two_x,
     two_y,
 )
@@ -84,6 +93,86 @@ def test_WignerD_iter_sph_indices():
 
 
 maxl = 12
+
+
+# test operations themselves
+def test_inversion():
+    """According to Michaels paper (https://arxiv.org/pdf/2106.14846) :"""
+    m_inv = np.array(
+        [delta(mprime, m) * ((-1) ** l) for l, mprime, m in iter_sph_indices(maxl)],
+        dtype=complex,
+    )
+    assert np.allclose(m_inv, inversion(maxl))
+
+
+def test_sigmaxy():
+    """According to 7S. L. Altmann, “On the symmetries of spherical harmonics,”
+    Mathematical Proceedings of the Cambridge Philosophical Society, page 347"""
+    sxy = dot_product(inversion(maxl), n_z(maxl, 2))
+    assert np.allclose(sigma_xy(maxl), sxy)
+
+
+def test_sigmaxz():
+    """According to 7S. L. Altmann, “On the symmetries of spherical harmonics,”
+    Mathematical Proceedings of the Cambridge Philosophical Society, page 347"""
+    sxz = dot_product(inversion(maxl), two_y(maxl))
+    assert np.allclose(sigma_xz(maxl), sxz)
+
+
+def test_sigmayz():
+    """According to 7S. L. Altmann, “On the symmetries of spherical harmonics,”
+    Mathematical Proceedings of the Cambridge Philosophical Society, page 347"""
+    syz = dot_product(inversion(maxl), two_x(maxl))
+    assert np.allclose(sigma_yz(maxl), syz)
+
+
+def test_identity():
+    assert np.allclose(identity(maxl), generalized_rotation(maxl, 0, 0, 0))
+
+
+def test_two_x():
+    """According to paper by Michael (https://arxiv.org/pdf/2106.14846)"""
+    assert np.allclose(two_x(maxl), dot_product(inversion(maxl), sigma_yz(maxl)))
+
+
+def test_two_y():
+    """According to paper by Michael (https://arxiv.org/pdf/2106.14846)"""
+    assert np.allclose(two_y(maxl), dot_product(inversion(maxl), sigma_xz(maxl)))
+
+
+def test_2x():
+    """According to 7S. L. Altmann, “On the symmetries of spherical harmonics,”
+    Mathematical Proceedings of the Cambridge Philosophical Society, page 347"""
+    assert np.allclose(two_x(maxl), generalized_rotation(maxl, np.pi, np.pi, 0))
+
+
+def test_2y():
+    """According to 7S. L. Altmann, “On the symmetries of spherical harmonics,”
+    Mathematical Proceedings of the Cambridge Philosophical Society, page 347"""
+    assert np.allclose(two_y(maxl), generalized_rotation(maxl, 0, np.pi, 0))
+
+
+def test_2z():
+    """According to 7S. L. Altmann, “On the symmetries of spherical harmonics,”
+    Mathematical Proceedings of the Cambridge Philosophical Society, page 347"""
+    assert np.allclose(n_z(maxl, 2), generalized_rotation(maxl, np.pi, 0, 0))
+
+
+def test_inversion_as_reflections():
+    """According to paper by Michael (https://arxiv.org/pdf/2106.14846)"""
+    assert np.allclose(
+        inversion(maxl),
+        dot_product(dot_product(sigma_yz(maxl), sigma_xz(maxl)), sigma_xy(maxl)),
+    )
+
+
+@pytest.mark.parametrize("n", range(2, 12, 2))
+def test_rotoreflection(n):
+    """According to https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions a
+    rotoreflection is equivalent to Cn followed by sigma h for even n"""
+    assert np.allclose(
+        rotoreflection(maxl, n), dot_product(n_z(maxl, n), sigma_xy(maxl))
+    )
 
 
 def test_Ci_from_operations():
