@@ -8,6 +8,7 @@ Table of Contents
    :caption: Contents:
 
    installation
+   theory
    api
    contributing
    authors
