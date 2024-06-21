@@ -230,7 +230,7 @@ def rotoreflection(max_l: int, n: int) -> np.ndarray:  # noqa: N802
 
 def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     """Return the WignerD matrix for Sn (rotoreflection group) up to the given l.
-    
+
     Elements of Sn are given by Sn = {I, Sn, Cn**2, Sn**3, Cn**4, Sn**5, ... until n-1
     (last can be C or S depending if n is odd or even)} according to
     https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions and character tables.
@@ -251,11 +251,11 @@ def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     for i in range(1, n):
         if i % 2 == 0:
             new_op = Cn(max_l, n)
-            for _ in range(1,i):
+            for _ in range(1, i):
                 new_op = dot_product(new_op, Cn(max_l, n))
         else:
             new_op = rotoreflection(max_l, n)
-            for _ in range(1,i):
+            for _ in range(1, i):
                 new_op = dot_product(new_op, rotoreflection(max_l, n))
         operations.append(new_op)
     return condensed_wignerD_from_operations(operations)
