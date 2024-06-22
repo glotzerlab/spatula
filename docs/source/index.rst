@@ -1,4 +1,8 @@
-.. include:: ../readme.rst
+=============================
+Welcome to PgOP documentation
+=============================
+
+.. include:: ../../readme.rst
 
 Table of Contents
 =================
@@ -10,9 +14,9 @@ Table of Contents
    installation
    theory
    api
-   contributing
-   authors
-   changelog
+   ../../contributing
+   ../../authors
+   ../../changelog
    citing
 
 Indices and tables

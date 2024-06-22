@@ -7,7 +7,7 @@ Installation
 From PyPI
 ---------
 
-The easiest way to install event-detection is using pip:
+The easiest way to install **PgOP** is from **PyPI** with `pip <https://pip.pypa.io/en/stable/>`__:
 
 .. code-block:: console
 
@@ -17,7 +17,7 @@ The easiest way to install event-detection is using pip:
 From conda-forge
 ----------------
 
-PgOP is also available on conda-forge:
+PgOP is also available on **conda-forge**:
 
 .. code-block:: console
 
