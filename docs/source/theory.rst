@@ -1,5 +1,3 @@
-.. highlight:: shell
-
 ======
 Theory
 ======
@@ -33,6 +31,54 @@ types of symmetry operations that are often encountered in physics, such as rota
 reflections, and translations. These operations can be combined to form more complex 
 symmetry operations. Below we overview some of the most common types of symmetry used in
 physics and crystallography that are relevant for the PgOP code.
+
+There are two main types of symmetry operations associated with point groups: rotations
+and reflections. Inversion can be considered as a special case of reflection, while
+rotoreflections can be constructed using combination of rotations and inversions. In
+space groups in addition to the abovementioned symmetry elements we also have
+translational symmetry. This symmetry can be combined with elements of point group
+symmetry to obtain new unique type of symmetry operations such as screw axes (rotation +
+translation) and glide planes (reflections + translations).
+
+Rotations are defined by the axis of rotation and the angle of rotation. Many
+representations of rotations exist and here we give several common ones. The most common
+representation of rotations is the rotation matrix. The rotation matrix is a 3x3 matrix
+that rotates a vector in 3D space by a given angle around a given axis. The formula is:
+
+Formula
+
+Another common representation of rotations is the Euler angles. The Euler angles are a
+set of three angles that describe the orientation of a rigid body in 3D space. The Euler
+angles can also be used to construct the rotation matrix, but the formula depends on the
+convention chosen. The Euler angles are not unique, meaning that there are many sets of
+Euler angles that describe the same rotation. The Euler angles also suffer from the
+so-called gimbal lock problem (ADD LINK). 
+
+Another common and useful representation are quaternions. Quaternions are a
+four-dimensional extension of complex numbers. Quaternions can be used to represent
+rotations in 3D space and live on the unit hypersphere in 4D space. Quaternions are
+useful because they do not suffer from the gimbal lock problem and are more
+computationally efficient than the rotation matrix. 
+
+Add example for each representation
+for same rotataion.
+
+Reflections are defined by the plane of reflection. Reflections are a type of symmetry
+operation that flips the object across the plane of reflection. Reflections cannot be
+represented as rotations, or combination of rotations in a general sense.
+
+Inversion is a symmetry operation that flips the object across the center of inversion.
+It can be shown that inversion can be represented as application of 3 orthogonal
+reflection:
+
+Formula here
+
+Rotoreflections are a combination of rotations and reflections, sometimes called
+improper rotations. They are a type of symmetry operation that combines rotation and
+reflection. The easiest way to write such operation is to first apply inversion,
+followed by the rotation of given degree:
+
+Formula here
 
 
 Crystals
@@ -80,11 +126,24 @@ particle is with respect to some symmetry operation throughout the trajectory.
 
 Point groups
 ------------
-There are two main types of symmetry operations associated with point groups: rotations
-and reflections. Inversion can be considered as a special case of reflection. 
+
+Infinitely many point groups exist, but only 32 of them are allowed by crystallographic
+restriction theorem (ADD LINK?). Point groups can loosely be divided into categories
+according to the elements they contain: Cyclic groups (starting with Schoenflies symbol
+C) which contain operations related to a rotation of a given degree n, rotoreflection
+groups (S) which contain rotoreflection operations, Dihedral groups (D) which contain
+operations related to rotation of a given degree n and reflection across a plane
+perpendicular to the rotation axis, and Cubic/polyhedral groups (O, T, I) which contain
+operations related to important polyhedra in 3D space.
 
 Wigner D matrices
 ~~~~~~~~~~~~~~~~~
+
+Group theory
+~~~~~~~~~~~~
+
+Construction of point groups
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Point group Order Parameter (PgOP)
 ----------------------------------
