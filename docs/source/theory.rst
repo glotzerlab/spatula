@@ -10,7 +10,7 @@ relevant concepts.
 Introduction
 ------------
 
-PgOP main use case is to determine if the local structure around a selected point in
+PgOP's main use case is to determine if the local structure around a selected point in
 space (which can belong to a particle location, or not) is symmetric with some specific
 symmetry in mind. Symmetry is defined as a binary relation between two objects that are
 the same under some transformation. Some objects or points in space or systems can
@@ -134,10 +134,41 @@ C) which contain operations related to a rotation of a given degree n, rotorefle
 groups (S) which contain rotoreflection operations, Dihedral groups (D) which contain
 operations related to rotation of a given degree n and reflection across a plane
 perpendicular to the rotation axis, and Cubic/polyhedral groups (O, T, I) which contain
-operations related to important polyhedra in 3D space.
+symmetry operations related to important polyhedra in 3D space.
 
 Wigner D matrices
 ~~~~~~~~~~~~~~~~~
+Symmetry operations can be represented as matrices acting on a vector space. These will
+be different based on the representation we chose. One such choice is the Wigner D
+matrix, which are matrices representing symmetry operations in the space spanned by
+spherical harmonics. Spherical harmonics are a set of functions which make a complete
+basis in the space of functions on the sphere. This is exactly what we will need for
+PGOP and choice for it will become apparent later. For now, we focus our attention on
+how to construct these matrices for basic operations.
+
+A single Wigner D matrix is defined for a given symmetry operation and a given l, which
+is the degree of the spherical harmonic. The Wigner D matrix is a square matrix of size
+2l+1. The indecies of the matrix are often written as m and m` and they range from -l to
+l. The vectors which these matrices operate on are coefficeints for a spherical harmonic
+given by l and m (each vector element is different m).
+
+Lets turn now our attention to Wigner D matrices for rotations. The Wigner D matrix for
+a general rotation from Euler angles in zyz convention is given by the formula
+(according to CITE!!!):
+
+
+This expression can be simplified for values of beta of 0, pi/2, pi which are all the
+rotations relevent for crystallographic point groups. For beta = 0, the Wigner D matrix
+is given by:
+
+
+For beta = pi/2, the Wigner D matrix is given by:
+
+
+For beta = pi, the Wigner D matrix is given by:
+
+
+
 
 Group theory
 ~~~~~~~~~~~~
