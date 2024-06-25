@@ -5,6 +5,12 @@
 
 #include "data/Vec3.h"
 
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+namespace py = pybind11;
+
 namespace pgop {
 // Model concept to show expected interface. We cannot use C++20 for now so we have commented it
 // out.
@@ -164,4 +170,7 @@ template<typename distribution_type> class BondOrder {
     /// The normalization constant @c 1 / std::reduce(m_weights).
     double m_normalization;
 };
+
+void export_bod(py::module& m);
+
 } // End namespace pgop
