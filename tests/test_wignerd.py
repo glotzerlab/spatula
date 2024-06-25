@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pgop.wignerd import WeigerD, _parse_point_group, _WignerData
+from pgop.wignerd import WignerD, _parse_point_group, _WignerData
 
 
 def test_init():
@@ -46,31 +46,31 @@ def test_parse_point_group():
     assert _parse_point_group("C4") == ("C", None, 4)
 
 
-def test_weigerD_init():
-    wig = WeigerD(10)
+def test_WignerD_init():
+    wig = WignerD(10)
     assert wig._max_l == 10
     assert isinstance(wig._data, _WignerData)
 
 
-def test_weigerD_init_fail():
+def test_WignerD_init_fail():
     with pytest.raises(ValueError):
-        WeigerD(13)  # more than the max l
+        WignerD(13)  # more than the max l
 
 
-def test_weigerD_getitem():
-    wig = WeigerD(10)
+def test_WignerD_getitem():
+    wig = WignerD(10)
     item = wig["T"]
     assert isinstance(item, np.ndarray)
 
 
-def test_weigerD_getitem_invalid():
-    wig = WeigerD(10)
+def test_WignerD_getitem_invalid():
+    wig = WignerD(10)
     with pytest.raises(KeyError):
         wig["TT"]  # not supported
 
 
-def test_weigerD_iter_sph_indices():
-    wig = WeigerD(2)
+def test_WignerD_iter_sph_indices():
+    wig = WignerD(2)
     indices = list(wig.iter_sph_indices())
     expected_indices = [
         (0, 0, 0),

@@ -68,7 +68,7 @@ def _parse_point_group(schonflies_symbol):
     return (family, modifier, order)
 
 
-class WeigerD:
+class WignerD:
     """Interface to work with WignerD matrices in Python.
 
     The class provides `dict` like access to supported point groups, and a
