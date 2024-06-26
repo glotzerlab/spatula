@@ -216,7 +216,7 @@ This expression can be simplified for values of :math:`\beta` equal to :math:`0`
 :math:`\frac{\pi}{2}`, and :math:`\pi`, which are all the rotations relevant for
 crystallographic point groups. 
 
-For :math:`\beta=0`, the Wigner :math:`D` matrix is given by:
+For :math:`\beta=0`, the Wigner :math:`D` matrix is given by :cite:`Altmann_WignerD`:
 
 .. math::
     D^{(l)}_{m'm}(\hat{R}\left(\alpha, 0, \gamma\right)) = 
@@ -224,23 +224,107 @@ For :math:`\beta=0`, the Wigner :math:`D` matrix is given by:
 
 where :math:`\delta_{m',m}` is the Kronecker delta.
 
-For :math:`\beta=\frac{\pi}{2}`, the Wigner :math:`D` matrix is given by:
+For :math:`\beta=\frac{\pi}{2}`, the Wigner :math:`D` matrix is given by the general
+expression with simplified :math:`S^{(l)}_{m'm}(\beta)` :cite:`Altmann_WignerD` :
 
 .. math::
-    D^{(l)}_{m'm}(\hat{R}\left(\alpha, \frac{\pi}{2}, \gamma\right)) = 
+    S^{(l)}_{m'm}\left(\frac{\pi}{2}\right) = 
+    2^{-l} \sum_{k=\max(0, m - m')}^{\min(l - m', l + m)} 
+    \frac{(-1)^k}{(l - m' - k)! (l + m - k)! k! (k - m + m')!}
 
-
-For :math:`\beta=\pi`, the Wigner :math:`D` matrix is given by:
+For :math:`\beta=\pi`, the Wigner :math:`D` matrix is given by :cite:`Altmann_WignerD` :
 
 .. math::
     D^{(l)}_{m'm}(\hat{R}\left(\alpha, \pi, \gamma\right)) = 
     (-1)^l e^{im\alpha} e^{im'\gamma} \delta_{m',-m}
 
+From here we can derive Wigner :math:`D` matrices for useful rotations such as a general
+:math:`\hat{C}_n` rotation around the :math:`z` axis by evaluating
+:math:`D^{(l)}_{m'm}(\hat{R}(\frac{2\pi}{n}, 0, 0))`:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{C}_n) = e^{im\frac{2\pi}{n}} \delta_{m',m}.
+
+Two fold rotation around the :math:`y` axis is given by :math:`D^{(l)}_{m'm}(\hat{R}(0,
+\pi, 0))`:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{C}_{2y}) = (-1)^l \delta_{m',-m}
+
+while two fold rotation around the :math:`x` axis is given by
+:math:`D^{(l)}_{m'm}(\hat{R}(\pi,\pi,0))`:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{C}_{2x}) = (-1)^{(l+m)} \delta_{m',-m}
+
+Inversion operation is given by the formula :cite:`Altmann_WignerD, engel2021point`:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{i}) = (-1)^l \delta_{m',m} 
+
+Another important operation is the identity operation, which is given by the formula:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{E}) = \delta_{m',m}
+
+From these elementary formulas we can construct several Wigner :math:`D` matrices for
+other useful operations such as reflections and rotoreflections. We have already shown
+that reflections can be constructed from inversions and rotations using the formula
+:math:`\hat{\sigma} = \hat{i} \hat{C}_2`. To compute the resulting :math:`D` matrix for
+the reflection operation we simply perform matrix multiplication to obtain the matrix
+representation of the new operator. Let's consider formulas for several useful
+situations, when the reflection plane lies in the :math:`xy`, :math:`xz`, and :math:`yz`
+plane. The Wigner :math:`D` matrix for reflection across the :math:`xy` plane is given
+by :cite:`Altmann_WignerD`:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{\sigma}_{xy}) = D^{(l)}_{m'm}(\hat{i}) \times 
+    D^{(l)}_{m'm}(\hat{C}_{2z}) = (-1)^{m+l} \delta_{m',m}
+
+The Wigner :math:`D` matrix for reflection across the :math:`xz` plane is given by:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{\sigma}_{xz}) = D^{(l)}_{m'm}(\hat{i}) \times 
+    D^{(l)}_{m'm}(\hat{C}_{2y}) =  \delta_{m',-m}
+
+The Wigner :math:`D` matrix for reflection across the :math:`yz` plane is given by:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{\sigma}_{yz}) = D^{(l)}_{m'm}(\hat{i}) \times 
+    D^{(l)}_{m'm}(\hat{C}_{2x}) = (-1)^m \delta_{m',-m}
+
+Lastly we attempt to derive formulas for rotoreflections. We have already shown that
+rotoreflections can be constructed from inversions and rotations using the formula
+:math:`\hat{S}_n = \hat{i} \hat{C}_n` for even :math:`n` and :math:`\hat{S}_n = \hat{i}
+\hat{C}_{2n}` for odd :math:`n`. The resulting :math:`D` matrix for the odd :math:`n`
+rotoreflection operation is given by:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{S}_{n}) = D^{(l)}_{m'm}(\hat{i}) \times D^{(l)}_{m'm}(\hat{C}_n) = 
+    (-1)^l e^{im\frac{2\pi}{n}} \delta_{m',m} =
+    (-1)^l \delta_{m',m} ????? \quad \text{for } n \text{ even}
+
+and the formula for the even :math:`n` rotoreflection operation is given by:
+
+.. math::
+    D^{(l)}_{m'm}(\hat{S}_{n}) = D^{(l)}_{m'm}(\hat{i}) \times D^{(l)}_{m'm}(\hat{C}_{2n}) = 
+    (-1)^l e^{im\frac{2\pi}{n}} \delta_{m',m} =
+    (-1)^{l+\frac{m}{n}} \delta_{m',m} ???? \quad \text{for } n \text{ odd}
+
 Group theory
 ~~~~~~~~~~~~
 
+what groups are what operation
+semidirect product
+combining operations using dot product
+
+
 Construction of point groups
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Also have a table that lists all subgroups of all crystallographic point groups as well
+as a guide how to figure out what subgroup of point group wyckoff site is from
+designation such as 24l or similar?
 
 Point group Order Parameter (PgOP)
 ----------------------------------
