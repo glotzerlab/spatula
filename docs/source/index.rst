@@ -14,9 +14,9 @@ Table of Contents
    installation
    theory
    api
-   ../../contributing
-   ../../authors
-   ../../changelog
+   contributing
+   credits
+   changelog
    citing
 
 Indices and tables
