@@ -10,11 +10,13 @@
 
 PYBIND11_MODULE(_pgop, m)
 {
+    // TODO: pybind11 export distributions
     pgop::data::export_Vec3(m);
     pgop::data::export_quaternion(m);
     pgop::optimize::export_optimize(m);
-    pgop::export_pgop(m);
+    pgop::export_distributions(m);
     pgop::export_bod(m);
+    pgop::export_pgop(m);
     pgop::util::export_threads(m);
     pgop::util::export_util(m);
 }
