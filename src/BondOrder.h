@@ -172,5 +172,6 @@ template<typename distribution_type> class BondOrder {
 };
 
 void export_bod(py::module& m);
+void export_distributions(py::module& m);
 
 } // End namespace pgop

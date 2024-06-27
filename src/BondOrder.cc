@@ -95,18 +95,31 @@ template class BondOrder<FisherDistribution>;
 template<typename distribution_type> void export_bod_class(py::module& m, const std::string& name)
 {
     py::class_<BondOrder<distribution_type>>(m, name.c_str())
-        .def(py::init<
-             // TODO: Figure out how to pass in the templated distribution
-             const std::vector<data::Vec3> & positions,
-             const std::vector<float> & weights>())
+        .def(py::init<distribution_type,
+                      const std::vector<data::Vec3>&,
+                      const std::vector<double>&>())
         //  Ideally, we would export this as __call__ using PYBIND11_OVERRIDE_NAME
         //  But because we are wrapping everything on the python level, we can cheat
         .def("_call", &BondOrder<distribution_type>::operator());
+}
+
+template<typename distribution_type>
+void export_distribution(py::module& m, const std::string& name)
+{
+    py::class_<distribution_type>(m, name.c_str())
+        .def(py::init<double>())
+        .def("_call", &distribution_type::operator());
 }
 
 void export_bod(py::module& m)
 {
     export_bod_class<UniformDistribution>(m, "BondOrderUniform");
     export_bod_class<FisherDistribution>(m, "BondOrderFisher");
+}
+
+void export_distributions(py::module& m)
+{
+    export_distribution<UniformDistribution>(m, "UniformDistribution");
+    export_distribution<FisherDistribution>(m, "FisherDistribution");
 }
 } // End namespace pgop
