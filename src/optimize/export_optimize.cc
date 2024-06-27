@@ -8,7 +8,7 @@
 #include "export_optimize.h"
 
 namespace pgop { namespace optimize {
-void export_optimize(nb::module& m)
+void export_optimize(nb::module_& m)
 {
     export_base_optimize(m);
     export_step_gradient_descent(m);

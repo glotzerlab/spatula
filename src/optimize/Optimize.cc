@@ -67,7 +67,7 @@ std::unique_ptr<Optimizer> PyOptimizer::clone() const
     return std::make_unique<PyOptimizer>(*this);
 }
 
-void export_base_optimize(nb::module& m)
+void export_base_optimize(nb::module_& m)
 {
     nb::class_<Optimizer, PyOptimizer>(m, "Optimizer")
         .def("record_objective", &Optimizer::record_objective)

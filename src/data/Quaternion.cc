@@ -3,7 +3,7 @@
 #include <string>
 
 #include <nanobind/operators.h>
-#include <nanobind.nanobind.h>
+#include <nanobind/nanobind.h>
 
 #include "Quaternion.h"
 
@@ -122,7 +122,7 @@ Quaternion& operator*=(Quaternion& a, const Quaternion& b)
     return a;
 }
 
-void export_quaternion(nb::module& m)
+void export_quaternion(nb::module_& m)
 {
     nb::class_<Quaternion>(m, "Quaternion")
         .def(nb::init<const nb::object&>())

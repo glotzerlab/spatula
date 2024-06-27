@@ -75,5 +75,5 @@ template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b);
 /// Vec3 equality
 bool operator==(const Vec3& a, const Vec3& b);
 
-void export_Vec3(nb::module& m);
+void export_Vec3(nb::module_& m);
 }} // namespace pgop::data

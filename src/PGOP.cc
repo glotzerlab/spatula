@@ -261,7 +261,7 @@ void PGOP<distribution_type>::execute_func(std::function<void(size_t, size_t)> f
 template class PGOP<UniformDistribution>;
 template class PGOP<FisherDistribution>;
 
-template<typename distribution_type> void export_pgop_class(nb::module& m, const std::string& name)
+template<typename distribution_type> void export_pgop_class(nb::module_& m, const std::string& name)
 {
     nb::class_<PGOP<distribution_type>>(m, name.c_str())
         .def(nb::init<const nb::ndarray<std::complex<double>, nb::device::cpu>,
@@ -271,7 +271,7 @@ template<typename distribution_type> void export_pgop_class(nb::module& m, const
         .def("refine", &PGOP<distribution_type>::refine);
 }
 
-void export_pgop(nb::module& m)
+void export_pgop(nb::module_& m)
 {
     export_pgop_class<UniformDistribution>(m, "PGOPUniform");
     export_pgop_class<FisherDistribution>(m, "PGOPFisher");

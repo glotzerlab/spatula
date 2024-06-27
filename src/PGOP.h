@@ -240,7 +240,7 @@ template<typename distribution_type> class PGOP {
     std::shared_ptr<const optimize::Optimizer> m_optimize;
 };
 
-template<typename distribution_type> void export_pgop_class(nb::module& m, const std::string& name);
+template<typename distribution_type> void export_pgop_class(nb::module_& m, const std::string& name);
 
-void export_pgop(nb::module& m);
+void export_pgop(nb::module_& m);
 } // End namespace pgop

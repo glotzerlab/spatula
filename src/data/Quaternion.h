@@ -60,5 +60,5 @@ struct Quaternion {
 Quaternion operator*(const Quaternion& a, const Quaternion& b);
 Quaternion& operator*=(Quaternion& a, const Quaternion& b);
 
-void export_quaternion(nb::module& m);
+void export_quaternion(nb::module_& m);
 }} // namespace pgop::data

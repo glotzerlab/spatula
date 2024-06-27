@@ -180,7 +180,7 @@ bool operator==(const Vec3& a, const Vec3& b)
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-void export_Vec3(nb::module& m)
+void export_Vec3(nb::module_& m)
 {
     nb::class_<Vec3>(m, "Vec3")
         .def(nb::init<double, double, double>())
