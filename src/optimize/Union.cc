@@ -78,7 +78,7 @@ void Union::createFinalOptimizer()
     m_final_opt = m_instantiate_final(*m_inital_opt.get());
 }
 
-void export_union(nb::module& m)
+void export_union(nb::module_& m)
 {
     nb::class_<Union, Optimizer>(m, "Union")
         .def_static(

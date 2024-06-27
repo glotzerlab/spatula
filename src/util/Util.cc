@@ -191,7 +191,7 @@ wignerDSemidirectProduct(const nb::ndarray<std::complex<double>> D_a,
     return D_ab;
 }
 
-void export_util(nb::module& m)
+void export_util(nb::module_& m)
 {
     m.def("wignerD_semidirect_prod", &wignerDSemidirectProduct);
     m.def("to_rotation_matrix", &to_rotation_matrix);

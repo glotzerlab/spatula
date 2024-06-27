@@ -50,7 +50,7 @@ void RandomSearch::setIterations(unsigned int iter)
     m_iterations = iter;
 }
 
-void export_random_search(nb::module& m)
+void export_random_search(nb::module_& m)
 {
     nb::class_<RandomSearch, Optimizer>(m, "RandomSearch")
         .def(nb::init<unsigned int, unsigned int>())

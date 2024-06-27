@@ -42,5 +42,5 @@ class Union : public Optimizer {
     bool m_on_final_opt;
 };
 
-void export_union(nb::module& m);
+void export_union(nb::module_& m);
 }} // namespace pgop::optimize

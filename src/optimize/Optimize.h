@@ -99,6 +99,6 @@ class PyOptimizer : public Optimizer {
     virtual std::unique_ptr<Optimizer> clone() const override;
 };
 
-void export_base_optimize(nb::module& m);
+void export_base_optimize(nb::module_& m);
 
 }} // namespace pgop::optimize

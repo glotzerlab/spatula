@@ -130,5 +130,5 @@ template<typename f> std::complex<f> colapse_to_zero(std::complex<f> num, f tol)
     }
     return num;
 }
-void export_util(nb::module& m);
+void export_util(nb::module_& m);
 }} // namespace pgop::util

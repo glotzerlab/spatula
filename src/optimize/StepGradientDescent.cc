@@ -92,7 +92,7 @@ void StepGradientDescent::searchAlongGradient()
     m_point[m_current_dim] -= m_delta;
 }
 
-void export_step_gradient_descent(nb::module& m)
+void export_step_gradient_descent(nb::module_& m)
 {
     nb::class_<StepGradientDescent, Optimizer>(
         m,

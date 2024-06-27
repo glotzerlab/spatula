@@ -78,5 +78,5 @@ class ThreadPool {
     BS::thread_pool m_pool;
 };
 
-void export_threads(nb::module& m);
+void export_threads(nb::module_& m);
 }} // namespace pgop::util

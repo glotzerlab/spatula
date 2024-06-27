@@ -85,5 +85,5 @@ class StepGradientDescent : public Optimizer {
     double m_delta;
 };
 
-void export_step_gradient_descent(nb::module& m);
+void export_step_gradient_descent(nb::module_& m);
 }} // namespace pgop::optimize
