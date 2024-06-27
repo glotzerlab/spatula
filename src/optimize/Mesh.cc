@@ -3,7 +3,8 @@
 #include <iterator>
 #include <limits>
 
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/shared_ptr.h>
 
 #include "Mesh.h"
 
@@ -31,9 +32,9 @@ std::unique_ptr<Optimizer> Mesh::clone() const
     return std::make_unique<Mesh>(*this);
 }
 
-void export_mesh(py::module& m)
+void export_mesh(nb::module& m)
 {
-    py::class_<Mesh, Optimizer, std::shared_ptr<Mesh>>(m, "Mesh").def(
-        py::init<const std::vector<data::Quaternion>&>());
+    nb::class_<Mesh, Optimizer>(m, "Mesh").def(
+        nb::init<const std::vector<data::Quaternion>&>());
 }
 }} // end namespace pgop::optimize

@@ -2,8 +2,8 @@
 #include <sstream>
 #include <string>
 
-#include <pybind11/operators.h>
-#include <pybind11/stl.h>
+#include <nanobind/operators.h>
+#include <nanobind.nanobind.h>
 
 #include "Quaternion.h"
 
@@ -25,15 +25,15 @@ Quaternion::Quaternion(Vec3 axis, double angle)
 
 Quaternion::Quaternion(Vec3 v) : Quaternion(v, v.norm()) { }
 
-Quaternion::Quaternion(const py::object& obj)
+Quaternion::Quaternion(const nb::object& obj)
 {
-    if (!py::hasattr(obj, "__len__")) {
+    if (!nb::hasattr(obj, "__len__")) {
         throw std::runtime_error("Quaternion object requires a 4 length sequence like object.");
     }
-    if (py::len(obj) < 4) {
+    if (nb::len(obj) < 4) {
         throw std::runtime_error("Quaternion object requires a 4 length sequence like object.");
     }
-    py::tuple t = py::tuple(obj);
+    nb::tuple t = nb::tuple(obj);
     w = t[0].cast<double>();
     x = t[1].cast<double>();
     y = t[2].cast<double>();
@@ -122,14 +122,14 @@ Quaternion& operator*=(Quaternion& a, const Quaternion& b)
     return a;
 }
 
-void export_quaternion(py::module& m)
+void export_quaternion(nb::module& m)
 {
-    py::class_<Quaternion>(m, "Quaternion")
-        .def(py::init<const py::object&>())
-        .def_readwrite("w", &Quaternion::w)
-        .def_readwrite("x", &Quaternion::x)
-        .def_readwrite("y", &Quaternion::y)
-        .def_readwrite("z", &Quaternion::z)
+    nb::class_<Quaternion>(m, "Quaternion")
+        .def(nb::init<const nb::object&>())
+        .def_rw("w", &Quaternion::w)
+        .def_rw("x", &Quaternion::x)
+        .def_rw("y", &Quaternion::y)
+        .def_rw("z", &Quaternion::z)
         .def("__repr__",
              [](const Quaternion& q) {
                  auto repr = std::ostringstream();
@@ -144,7 +144,7 @@ void export_quaternion(py::module& m)
         .def("norm", &Quaternion::norm)
         .def("normalize", &Quaternion::normalize)
         .def("to_rotation_matrix", &Quaternion::to_rotation_matrix)
-        .def(py::self * py::self)
-        .def(py::self *= py::self);
+        .def(nb::self * nb::self)
+        .def(nb::self *= nb::self);
 }
 }} // namespace pgop::data

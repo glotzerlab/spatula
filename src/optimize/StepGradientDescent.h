@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 #include "Optimize.h"
 
@@ -85,5 +85,5 @@ class StepGradientDescent : public Optimizer {
     double m_delta;
 };
 
-void export_step_gradient_descent(py::module& m);
+void export_step_gradient_descent(nb::module& m);
 }} // namespace pgop::optimize

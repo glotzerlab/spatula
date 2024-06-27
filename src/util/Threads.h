@@ -3,9 +3,9 @@
 #include <functional>
 
 #include "BS_thread_pool.hpp"
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace pgop { namespace util {
 /**
@@ -78,5 +78,5 @@ class ThreadPool {
     BS::thread_pool m_pool;
 };
 
-void export_threads(py::module& m);
+void export_threads(nb::module& m);
 }} // namespace pgop::util

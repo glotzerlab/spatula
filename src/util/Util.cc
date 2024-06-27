@@ -1,7 +1,8 @@
 #include <cmath>
 #include <iterator>
 #include <numeric>
-#include <pybind11/stl.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/nanobind.h>
 
 #include "Util.h"
 
@@ -157,9 +158,9 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
  * @param D_a One of the two Wigner D matrix.
  * @param D_b One of the two Wigner D matrix.
  */
-py::array_t<std::complex<double>>
-wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
-                         const py::array_t<std::complex<double>> D_b)
+nb::ndarray<std::complex<double>>
+wignerDSemidirectProduct(const nb::ndarray<std::complex<double>> D_a,
+                         const nb::ndarray<std::complex<double>> D_b)
 {
     auto u_D_a = D_a.unchecked<1>();
     auto u_D_b = D_b.unchecked<1>();
@@ -170,7 +171,7 @@ wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
         cnt += (2 * max_l + 1) * (2 * max_l + 1);
     }
     size_t l_skip = 0;
-    py::array_t<std::complex<double>> D_ab(u_D_a.size());
+    nb::ndarray<std::complex<double>> D_ab(u_D_a.size());
     auto u_D_ab = D_ab.mutable_unchecked<1>();
     for (size_t l {0}; l < max_l; ++l) {
         const size_t max_m = 2 * l + 1;
@@ -190,7 +191,7 @@ wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
     return D_ab;
 }
 
-void export_util(py::module& m)
+void export_util(nb::module& m)
 {
     m.def("wignerD_semidirect_prod", &wignerDSemidirectProduct);
     m.def("to_rotation_matrix", &to_rotation_matrix);

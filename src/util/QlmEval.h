@@ -2,13 +2,13 @@
 #include <complex>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/nanobind.h>
 
 #include "../BondOrder.h"
 #include "Util.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace pgop { namespace util {
 // TODO: pass normalization factor not m for generalizing.
@@ -31,9 +31,9 @@ class QlmEval {
      * ordering of the first dimension is in accending order of \f$ l \f$ and \f$ m \f$.
      */
     QlmEval(unsigned int m,
-            const py::array_t<double> positions,
-            const py::array_t<double> weights,
-            const py::array_t<std::complex<double>> ylms);
+            const nb::ndarray<double> positions,
+            const nb::ndarray<double> weights,
+            const nb::ndarray<std::complex<double>> ylms);
 
     /**
      * @brief For the provided bond order diagram compute the spherical harmonic expansion

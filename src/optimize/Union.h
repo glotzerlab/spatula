@@ -3,12 +3,12 @@
 #include <functional>
 #include <memory>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 #include "Optimize.h"
 
 namespace pgop { namespace optimize {
-namespace py = pybind11;
+namespace nb = nanobind;
 /**
  * @brief Combine two optimizers into one optimization.
  */
@@ -42,5 +42,5 @@ class Union : public Optimizer {
     bool m_on_final_opt;
 };
 
-void export_union(py::module& m);
+void export_union(nb::module& m);
 }} // namespace pgop::optimize

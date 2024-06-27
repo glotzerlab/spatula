@@ -6,9 +6,9 @@
 
 namespace pgop { namespace util {
 QlmEval::QlmEval(unsigned int m,
-                 const py::array_t<double> positions,
-                 const py::array_t<double> weights,
-                 const py::array_t<std::complex<double>> ylms)
+                 const nb::ndarray<double> positions,
+                 const nb::ndarray<double> weights,
+                 const nb::ndarray<std::complex<double>> ylms)
     : m_n_lms(ylms.shape(0)), m_max_l(0), m_n_points(ylms.shape(1)), m_positions(),
       m_weighted_ylms()
 {

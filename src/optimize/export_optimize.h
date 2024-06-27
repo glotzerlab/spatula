@@ -1,7 +1,7 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace pgop { namespace optimize {
-void export_optimize(py::module& m);
+void export_optimize(nb::module& m);
 }} // namespace pgop::optimize

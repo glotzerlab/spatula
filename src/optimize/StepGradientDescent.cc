@@ -1,4 +1,5 @@
 #include "StepGradientDescent.h"
+#include <nanobind/stl/shared_ptr.h>
 
 namespace pgop { namespace optimize {
 
@@ -91,11 +92,11 @@ void StepGradientDescent::searchAlongGradient()
     m_point[m_current_dim] -= m_delta;
 }
 
-void export_step_gradient_descent(py::module& m)
+void export_step_gradient_descent(nb::module& m)
 {
-    py::class_<StepGradientDescent, Optimizer, std::shared_ptr<StepGradientDescent>>(
+    nb::class_<StepGradientDescent, Optimizer>(
         m,
         "StepGradientDescent")
-        .def(py::init<const data::Vec3&, unsigned int, double, double, double>());
+        .def(nb::init<const data::Vec3&, unsigned int, double, double, double>());
 }
 }} // namespace pgop::optimize

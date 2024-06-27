@@ -1,5 +1,6 @@
 #include "RandomSearch.h"
 #include "../data/Quaternion.h"
+#include <nanobind/stl/shared_ptr.h>
 
 namespace pgop { namespace optimize {
 
@@ -49,11 +50,11 @@ void RandomSearch::setIterations(unsigned int iter)
     m_iterations = iter;
 }
 
-void export_random_search(py::module& m)
+void export_random_search(nb::module& m)
 {
-    py::class_<RandomSearch, Optimizer, std::shared_ptr<RandomSearch>>(m, "RandomSearch")
-        .def(py::init<unsigned int, unsigned int>())
-        .def_property("max_iter", &RandomSearch::getIterations, &RandomSearch::setIterations)
-        .def_property("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
+    nb::class_<RandomSearch, Optimizer>(m, "RandomSearch")
+        .def(nb::init<unsigned int, unsigned int>())
+        .def_prop_rw("max_iter", &RandomSearch::getIterations, &RandomSearch::setIterations)
+        .def_prop_rw("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
 }
 }} // namespace pgop::optimize

@@ -3,11 +3,11 @@
 #include <utility>
 #include <vector>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 #include "Vec3.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace pgop { namespace data {
 /**
@@ -28,7 +28,7 @@ struct Quaternion {
     double z;
 
     Quaternion();
-    Quaternion(const py::object& obj);
+    Quaternion(const nb::object& obj);
     Quaternion(double w_, double x_, double y_, double z_);
     Quaternion(Vec3 axis, double angle);
     Quaternion(Vec3 axis);
@@ -60,5 +60,5 @@ struct Quaternion {
 Quaternion operator*(const Quaternion& a, const Quaternion& b);
 Quaternion& operator*=(Quaternion& a, const Quaternion& b);
 
-void export_quaternion(py::module& m);
+void export_quaternion(nb::module& m);
 }} // namespace pgop::data

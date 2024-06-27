@@ -91,13 +91,13 @@ void PGOPStore::addNull(size_t i)
     }
 }
 
-py::tuple PGOPStore::getArrays()
+nb::tuple PGOPStore::getArrays()
 {
-    return py::make_tuple(op, rotations);
+    return nb::make_tuple(op, rotations);
 }
 
 template<typename distribution_type>
-PGOP<distribution_type>::PGOP(const py::array_t<std::complex<double>> D_ij,
+PGOP<distribution_type>::PGOP(const nb::ndarray<std::complex<double>> D_ij,
                               std::shared_ptr<optimize::Optimizer>& optimizer,
                               typename distribution_type::param_type distribution_params)
     : m_distribution(distribution_params), m_n_symmetries(D_ij.shape(0)), m_Dij(),
@@ -114,13 +114,13 @@ PGOP<distribution_type>::PGOP(const py::array_t<std::complex<double>> D_ij,
 
 // TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
-py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
-                                           const py::array_t<double> weights,
-                                           const py::array_t<int> num_neighbors,
+nb::tuple PGOP<distribution_type>::compute(const nb::ndarray<double> distances,
+                                           const nb::ndarray<double> weights,
+                                           const nb::ndarray<int> num_neighbors,
                                            const unsigned int m,
-                                           const py::array_t<std::complex<double>> ylms,
-                                           const py::array_t<double> quad_positions,
-                                           const py::array_t<double> quad_weights) const
+                                           const nb::ndarray<std::complex<double>> ylms,
+                                           const nb::ndarray<double> quad_positions,
+                                           const nb::ndarray<double> quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
@@ -147,14 +147,14 @@ py::tuple PGOP<distribution_type>::compute(const py::array_t<double> distances,
 }
 
 template<typename distribution_type>
-py::array_t<double> PGOP<distribution_type>::refine(const py::array_t<double> distances,
-                                                    const py::array_t<double> rotations,
-                                                    const py::array_t<double> weights,
-                                                    const py::array_t<int> num_neighbors,
+nb::ndarray<double> PGOP<distribution_type>::refine(const nb::ndarray<double> distances,
+                                                    const nb::ndarray<double> rotations,
+                                                    const nb::ndarray<double> weights,
+                                                    const nb::ndarray<int> num_neighbors,
                                                     const unsigned int m,
-                                                    const py::array_t<std::complex<double>> ylms,
-                                                    const py::array_t<double> quad_positions,
-                                                    const py::array_t<double> quad_weights) const
+                                                    const nb::ndarray<std::complex<double>> ylms,
+                                                    const nb::ndarray<double> quad_positions,
+                                                    const nb::ndarray<double> quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
@@ -162,7 +162,7 @@ py::array_t<double> PGOP<distribution_type>::refine(const py::array_t<double> di
                                              weights.data(0),
                                              distances.data(0));
     const size_t N_particles = num_neighbors.size();
-    py::array_t<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
+    nb::ndarray<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
     auto u_op_store = op_store.mutable_unchecked<2>();
     auto u_rotations = rotations.unchecked<3>();
     const auto loop_func
@@ -261,17 +261,17 @@ void PGOP<distribution_type>::execute_func(std::function<void(size_t, size_t)> f
 template class PGOP<UniformDistribution>;
 template class PGOP<FisherDistribution>;
 
-template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name)
+template<typename distribution_type> void export_pgop_class(nb::module& m, const std::string& name)
 {
-    py::class_<PGOP<distribution_type>>(m, name.c_str())
-        .def(py::init<const py::array_t<std::complex<double>>,
+    nb::class_<PGOP<distribution_type>>(m, name.c_str())
+        .def(nb::init<const nb::ndarray<std::complex<double>, nb::device::cpu>,
                       std::shared_ptr<optimize::Optimizer>&,
                       typename distribution_type::param_type>())
         .def("compute", &PGOP<distribution_type>::compute)
         .def("refine", &PGOP<distribution_type>::refine);
 }
 
-void export_pgop(py::module& m)
+void export_pgop(nb::module& m)
 {
     export_pgop_class<UniformDistribution>(m, "PGOPUniform");
     export_pgop_class<FisherDistribution>(m, "PGOPFisher");

@@ -6,12 +6,12 @@
 #include <utility>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/nanobind.h>
 
 #include "../data/Vec3.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace pgop { namespace util {
 
@@ -77,7 +77,7 @@ std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation)
  * @brief Returns a vector of Vec3 of normalized distances. Each point in distances is normalized
  * and converted to a Vec3
  *
- * @param distances a NumPy array wrapped by Pybind11 of points in 3D space.
+ * @param distances a NumPy array wrapped by nanobind of points in 3D space.
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
@@ -111,9 +111,9 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     std::vector<std::complex<double>>& sym_qlm_buf,
                     unsigned int max_l);
 
-py::array_t<std::complex<double>>
-wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
-                         const py::array_t<std::complex<double>> D_b);
+nb::ndarray<std::complex<double>>
+wignerDSemidirectProduct(const nb::ndarray<std::complex<double>> D_a,
+                         const nb::ndarray<std::complex<double>> D_b);
 
 template<typename f> f colapse_to_zero(f num, f tol)
 {
@@ -130,5 +130,5 @@ template<typename f> std::complex<f> colapse_to_zero(std::complex<f> num, f tol)
     }
     return num;
 }
-void export_util(py::module& m);
+void export_util(nb::module& m);
 }} // namespace pgop::util

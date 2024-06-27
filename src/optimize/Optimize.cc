@@ -2,7 +2,8 @@
 #include <cmath>
 #include <limits>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/shared_ptr.h>
 
 #include "Optimize.h"
 
@@ -49,16 +50,16 @@ unsigned int Optimizer::getCount() const
 
 void PyOptimizer::internal_next_point()
 {
-    PYBIND11_OVERRIDE_PURE(void, Optimizer, internal_next_point);
+    NB_OVERRIDE_PURE(internal_next_point);
 }
 
 void PyOptimizer::record_objective(double objective)
 {
-    PYBIND11_OVERRIDE(void, Optimizer, record_objective, objective);
+    NB_OVERRIDE(record_objective, objective);
 }
 bool PyOptimizer::terminate() const
 {
-    PYBIND11_OVERRIDE_PURE(bool, Optimizer, terminate);
+    NB_OVERRIDE_PURE(terminate);
 }
 
 std::unique_ptr<Optimizer> PyOptimizer::clone() const
@@ -66,11 +67,11 @@ std::unique_ptr<Optimizer> PyOptimizer::clone() const
     return std::make_unique<PyOptimizer>(*this);
 }
 
-void export_base_optimize(py::module& m)
+void export_base_optimize(nb::module& m)
 {
-    py::class_<Optimizer, PyOptimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
+    nb::class_<Optimizer, PyOptimizer>(m, "Optimizer")
         .def("record_objective", &Optimizer::record_objective)
-        .def_property_readonly("terminate", &Optimizer::terminate)
-        .def_property_readonly("count", &Optimizer::getCount);
+        .def_prop_ro("terminate", &Optimizer::terminate)
+        .def_prop_ro("count", &Optimizer::getCount);
 }
 }} // namespace pgop::optimize

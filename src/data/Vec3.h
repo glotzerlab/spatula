@@ -1,10 +1,10 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 #pragma once
 
 namespace pgop { namespace data {
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 /**
  * @brief Vec3 represents a point in 3d space and provides arithmetic operators for easy
@@ -75,5 +75,5 @@ template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b);
 /// Vec3 equality
 bool operator==(const Vec3& a, const Vec3& b);
 
-void export_Vec3(py::module& m);
+void export_Vec3(nb::module& m);
 }} // namespace pgop::data

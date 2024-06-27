@@ -4,9 +4,8 @@
 #include <vector>
 
 #include <complex>
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/nanobind.h>
 
 #include "data/Quaternion.h"
 #include "optimize/Optimize.h"
@@ -14,7 +13,7 @@
 #include "util/QlmEval.h"
 #include "util/Util.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace pgop {
 
@@ -83,22 +82,22 @@ struct PGOPStore {
     /// Number of point group symmetries to compute
     size_t N_syms;
     /// The optimized value of PGOP for each point group
-    py::array_t<double> op;
+    nb::ndarray<double> op;
     /// The optimal rotations used to obtain the maximum PGOP as quaternions.
-    py::array_t<double> rotations;
+    nb::ndarray<double> rotations;
 
     /// Add a single point's set of PGOP and rotation values
     void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
     /// Store 0's for point i. This is used when no neighbors for a point exist.
     void addNull(size_t i);
     /// Return a tuple of the two arrays op and rotations.
-    py::tuple getArrays();
+    nb::tuple getArrays();
 
     private:
     /// Fast access to op
-    py::detail::unchecked_mutable_reference<double, 2> u_op;
+    nb::detail::unchecked_mutable_reference<double, 2> u_op;
     /// Fast access to rotations
-    py::detail::unchecked_mutable_reference<double, 3> u_rotations;
+    nb::detail::unchecked_mutable_reference<double, 3> u_rotations;
 };
 
 /**
@@ -109,7 +108,7 @@ struct PGOPStore {
  */
 template<typename distribution_type> class PGOP {
     public:
-    PGOP(const py::array_t<std::complex<double>> D_ij,
+    PGOP(const nb::ndarray<std::complex<double>> D_ij,
          std::shared_ptr<optimize::Optimizer>& optimizer,
          typename distribution_type::param_type distribution_params);
 
@@ -129,13 +128,13 @@ template<typename distribution_type> class PGOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
+    nb::tuple compute(const nb::ndarray<double> distances,
+                      const nb::ndarray<double> weights,
+                      const nb::ndarray<int> num_neighbors,
                       const unsigned int m,
-                      const py::array_t<std::complex<double>> ylms,
-                      const py::array_t<double> quad_positions,
-                      const py::array_t<double> quad_weights) const;
+                      const nb::ndarray<std::complex<double>> ylms,
+                      const nb::ndarray<double> quad_positions,
+                      const nb::ndarray<double> quad_weights) const;
 
     /**
      * @brief Compute PGOP at given rotations for each point.
@@ -157,14 +156,14 @@ template<typename distribution_type> class PGOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    py::array_t<double> refine(const py::array_t<double> distances,
-                               const py::array_t<double> rotations,
-                               const py::array_t<double> weights,
-                               const py::array_t<int> num_neighbors,
+    nb::ndarray<double> refine(const nb::ndarray<double> distances,
+                               const nb::ndarray<double> rotations,
+                               const nb::ndarray<double> weights,
+                               const nb::ndarray<int> num_neighbors,
                                const unsigned int m,
-                               const py::array_t<std::complex<double>> ylms,
-                               const py::array_t<double> quad_positions,
-                               const py::array_t<double> quad_weights) const;
+                               const nb::ndarray<std::complex<double>> ylms,
+                               const nb::ndarray<double> quad_positions,
+                               const nb::ndarray<double> quad_weights) const;
 
     private:
     /**
@@ -241,7 +240,7 @@ template<typename distribution_type> class PGOP {
     std::shared_ptr<const optimize::Optimizer> m_optimize;
 };
 
-template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name);
+template<typename distribution_type> void export_pgop_class(nb::module& m, const std::string& name);
 
-void export_pgop(py::module& m);
+void export_pgop(nb::module& m);
 } // End namespace pgop

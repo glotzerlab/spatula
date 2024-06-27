@@ -1,4 +1,4 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 #include "PGOP.h"
 #include "data/Quaternion.h"
@@ -7,7 +7,7 @@
 #include "util/Threads.h"
 #include "util/Util.h"
 
-PYBIND11_MODULE(_pgop, m)
+NB_MODULE(_pgop, m)
 {
     pgop::data::export_Vec3(m);
     pgop::data::export_quaternion(m);

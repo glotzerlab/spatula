@@ -1,4 +1,6 @@
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/shared_ptr.h>
+
 
 #include "StepGradientDescent.h"
 #include "Union.h"
@@ -76,9 +78,9 @@ void Union::createFinalOptimizer()
     m_final_opt = m_instantiate_final(*m_inital_opt.get());
 }
 
-void export_union(py::module& m)
+void export_union(nb::module& m)
 {
-    py::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "Union")
+    nb::class_<Union, Optimizer>(m, "Union")
         .def_static(
             "with_step_gradient_descent",
             [](const std::shared_ptr<const Optimizer> initial_opt,
