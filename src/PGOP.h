@@ -80,8 +80,7 @@ class Neighborhoods {
  * the code.
  */
 struct PGOPStore {
-    //PGOPStore(size_t N_particles, size_t N_symmetries);
-    PGOPStore(size_t N_symmetries);
+    PGOPStore(size_t N_particles, size_t N_symmetries);
     /// Number of point group symmetries to compute
     size_t N_syms;
     /// The optimized value of PGOP for each point group

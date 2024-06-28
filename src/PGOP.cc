@@ -59,18 +59,23 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
-//PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-PGOPStore::PGOPStore(size_t N_symmetries)
-    : N_syms(N_symmetries),
-      op(nb::ndarray<double>()),
-      rotations(nb::ndarray<double>()),
-      u_op(op.data()), u_rotations(rotations.data())
+PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
+    : N_syms(N_symmetries), 
+      op(nullptr, {N_particles, N_symmetries}, nb::handle()),
+      rotations(nullptr, {N_particles, N_symmetries, 4}, nb::handle())
 {
+    // Allocate memory for op and rotations
+    op = nb::ndarray<double>(new double[N_particles * N_symmetries], {N_particles, N_symmetries}, nb::handle());
+    rotations = nb::ndarray<double>(new double[N_particles * N_symmetries * 4], {N_particles, N_symmetries, 4}, nb::handle());
+    // not sure if this is the way to do it. Need help with this....
+    u_op = op.data();
+    u_rotations = rotations.data();
 }
 
 void PGOPStore::addOp(size_t i,
                       const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
 {
+    // this needs to change - not sure how - fast array views?
     const auto& values = std::get<0>(op_);
     const auto& rots = std::get<1>(op_);
     for (size_t j {0}; j < N_syms; ++j) {
@@ -84,6 +89,7 @@ void PGOPStore::addOp(size_t i,
 
 void PGOPStore::addNull(size_t i)
 {
+    // this needs to change - not sure how - fast array views?
     for (size_t j {0}; j < N_syms; ++j) {
         u_op(i, j) = 0;
         u_rotations(i, j, 0) = 1;
