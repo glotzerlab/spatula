@@ -2,29 +2,6 @@
 requires = ["scikit-build-core", "pybind11"]
 build-backend = "scikit_build_core.build"
 
-[tool.black]
-line-length = 80
-include = '\.pyi?$'
-exclude = '''
-
-(
-      \.eggs
-    | \.git
-    | build
-    | _build
-    | dist
-)
-'''
-
-[tool.ruff]
-# Add D when documentation is finished
-line-length = 80
-target-version = "py38"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "B", "SIM", "PTH", "C90", "UP", "N"]
-ignore = ["E741", "B905", "D213", "D211", "UP006"]
-per-file-ignores = {"tests/test_wignerd.py" = ["N802"]}
 
 [project]
 name = "pgop"
@@ -42,6 +19,7 @@ classifiers = [
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ]
 dependencies = [
     "numpy",  # basic numerical Python
@@ -56,3 +34,19 @@ test = [
     "coxeter",
     "h5py",
 ]
+
+
+[tool.ruff]
+# Add D when documentation is finished
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "B","E","F","I","N","S","W","C4","UP","C90","NPY","PTH","SIM","PIE790","PIE794",
+]
+ignore = ["B905","D107","D213","D211","E741","S101","UP006","SIM116"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["D", "B018", "F811"]
+"tests/test_wignerd.py" = ["N802"]
