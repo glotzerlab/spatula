@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/trampoline.h>
 
 #include "../data/Vec3.h"
 
@@ -84,8 +85,6 @@ class Optimizer {
 class PyOptimizer : public Optimizer {
     NB_TRAMPOLINE(Optimizer, 4);
     public:
-    using Optimizer::Optimizer;
-
     ~PyOptimizer() override = default;
 
     /// Get the next point to compute the objective for.

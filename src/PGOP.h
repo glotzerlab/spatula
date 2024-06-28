@@ -2,8 +2,10 @@
 #include <memory>
 #include <tuple>
 #include <vector>
+#include <functional>
 
 #include <complex>
+#include <numeric>
 #include <nanobind/ndarray.h>
 #include <nanobind/nanobind.h>
 
@@ -78,7 +80,7 @@ class Neighborhoods {
  * the code.
  */
 struct PGOPStore {
-    PGOPStore(size_t N_particles, size_t N_symmetries);
+    PGOPStore(const size_t N_particles, const size_t N_symmetries);
     /// Number of point group symmetries to compute
     size_t N_syms;
     /// The optimized value of PGOP for each point group
@@ -95,9 +97,9 @@ struct PGOPStore {
 
     private:
     /// Fast access to op
-    nb::detail::unchecked_mutable_reference<double, 2> u_op;
+    double* u_op;
     /// Fast access to rotations
-    nb::detail::unchecked_mutable_reference<double, 3> u_rotations;
+    double* u_rotations;
 };
 
 /**

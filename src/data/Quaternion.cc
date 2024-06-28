@@ -34,10 +34,14 @@ Quaternion::Quaternion(const nb::object& obj)
         throw std::runtime_error("Quaternion object requires a 4 length sequence like object.");
     }
     nb::tuple t = nb::tuple(obj);
-    w = t[0].cast<double>();
-    x = t[1].cast<double>();
-    y = t[2].cast<double>();
-    z = t[3].cast<double>();
+    //w = t[0].cast<double>();
+    //x = t[1].cast<double>();
+    //y = t[2].cast<double>();
+    //z = t[3].cast<double>();
+    w = nb::cast<double>(t[0]);
+    x = nb::cast<double>(t[1]);
+    y = nb::cast<double>(t[2]);
+    z = nb::cast<double>(t[3]);
 }
 
 Quaternion Quaternion::conjugate() const

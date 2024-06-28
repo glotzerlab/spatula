@@ -59,10 +59,11 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
-PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
+PGOPStore::PGOPStore(const size_t N_particles, const size_t N_symmetries)
+    : N_syms(N_symmetries),
+      op(nb::ndarray<double, nb::shape<N_particles, N_symmetries>>),
+      rotations(nb::ndarray<double, nb::shape<N_particles, N_symmetries, 4>>),
+      u_op(op.data()), u_rotations(rotations.data())
 {
 }
 
@@ -163,8 +164,8 @@ nb::ndarray<double> PGOP<distribution_type>::refine(const nb::ndarray<double> di
                                              distances.data(0));
     const size_t N_particles = num_neighbors.size();
     nb::ndarray<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
-    auto u_op_store = op_store.mutable_unchecked<2>();
-    auto u_rotations = rotations.unchecked<3>();
+    auto u_op_store = op_store.data();
+    auto u_rotations = rotations.data();
     const auto loop_func
         = [&u_op_store, &u_rotations, &neighborhoods, &qlm_eval, this](const size_t start,
                                                                        const size_t stop) {
