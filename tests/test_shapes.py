@@ -113,7 +113,9 @@ def test_no_symmetries(symmetry, shape, vertices):
         symmetry=symmetry, vertices=vertices, threshold=0.8, has_symmetry=False
     )
 
+
 ###################################################
+# TODO: add Dnd
 #The vertices found in this dictionary for all these shapes were taken from http://dmccooey.com/polyhedra/Simplest.html
 shapes_data = {
     "C1": {
@@ -740,10 +742,29 @@ shapes_data = {
     }
 }
 
+
+# For testing shapes in dictionary
+@pytest.mark.parametrize(
+    "shape_name, vertices",
+    (
+        (shape_name, vertices)
+        for shape_name, shape_info in shapes_data.items()
+        for vertices in [shape_info['vertices']]
+    ),
+)
+def test_dict_shapes_symmetry(shape_name, vertices):  
+    symmetry=shape_name
+    conftest.check_symmetry(
+        symmetry=symmetry, vertices=np.array(vertices), threshold=0.98
+    )
+
+
+# Function to see that shapes in dict formed correctly - saving for future shapes
 def select_shape(shape_name):
     if shape_name not in shapes_data:
         raise ValueError(f"Shape '{shape_name}' not found.")
     shape_info = shapes_data[shape_name]
     vertices = shape_info["vertices"]
     polyhedra=coxeter.shapes.ConvexPolyhedron(vertices)
+    polyhedra.plot()
     return polyhedra
