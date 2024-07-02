@@ -314,13 +314,89 @@ and the formula for the even :math:`n` rotoreflection operation is given by:
 Group theory
 ~~~~~~~~~~~~
 
-what groups are what operation
+In group theory, sets with operation under certain constraints (operation must be
+associative, and has identity element, and every element of the set has inverse) are
+called groups. When studying symmetry groups, we usually consider groups under operation
+of composition. The elements of the group are symmetry operations. Elements of the group
+can act on many different objects such as Euclidian space, or physical or other
+geometrical objects built from such an object (for example shapes or points). Euclidian
+(or other types of spaces) can often be described as vector spaces.
+
+Another important aspect of the group is the group action. First, let's consider a
+general action :math:`g` on some function :math:`f`. The action of :math:`g` on
+:math:`f` is just the composition of :math:`g` on :math:`f`. If :math:`G` is a finite
+point group then group action acting on some function :math:`f` can be written as:
+
+.. math::
+    g \cdot f = \sum_{g \in G} f(g^{-1}x////////????????????????)
+
+The interpretation of this is equation is that group action symmetrizes the function
+:math:`f` under all the elements (symmetry operators) of the group. When group action
+acts on a vector space we call this a representation. Notice that choosing a
+representation enables us to actually numerically write out the operator in a matrix
+form. 
+
+combining operations using dot product -> composition
+Direct product
 semidirect product
-combining operations using dot product
+
+subgroup
+
+
+Symmetry point groups
+~~~~~~~~~~~~~~~~~~~~~
+what groups are what operation
+
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Point Group
+     - Symmetry Operations
+   * - :math:`C_1`
+     - :math:`\hat{E}`
+   * - :math:`C_s`
+     - :math:`\hat{E}`, :math:`\hat{\sigma}`
+   * - :math:`C_i`
+     - :math:`\hat{E}`, :math:`\hat{i}`
+   * - :math:`C_n`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`
+   * - :math:`C_{nv}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{\sigma}_v`
+   * - :math:`C_{nh}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+   * - :math:`D_n`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`
+   * - :math:`D_{nh}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+   * - :math:`D_{nd}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`, :math:`n \hat{\sigma}_d`
+   * - :math:`S_{2n}`
+     - :math:`\hat{E}`, :math:`\hat{S}_{2n}`
+   * - :math:`T`
+     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`
+   * - :math:`T_h`
+     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+   * - :math:`T_d`
+     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`, :math:`6 \hat{\sigma}_d`
+   * - :math:`O`
+     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`
+   * - :math:`O_h`
+     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+   * - :math:`I_h`
+     - :math:`\hat{E}`, :math:`6 \hat{C}_5`, :math:`10 \hat{C}_3`, :math:`15 \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+
 
 
 Construction of point groups
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+construction used here
+
+Subgroups of crystallographic point groups and relation to Wyckoff sites
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Also have a table that lists all subgroups of all crystallographic point groups as well
 as a guide how to figure out what subgroup of point group wyckoff site is from
