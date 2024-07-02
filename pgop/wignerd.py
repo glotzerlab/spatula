@@ -839,12 +839,14 @@ def compute_condensed_wignerD_for_D_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    if (modifier == "d" and order % 2 == 1):
+    if ((modifier == "d" or modifier == "v") and order % 2 == 1):
         return semidirect_product(Dn(max_l, order), Ci(max_l))
-    elif  (modifier == "d" and order % 2 == 0):
+    elif  ((modifier == "d" or modifier == "v") and order % 2 == 0):
         return semidirect_product(Dn(max_l, order), Sn(max_l, 2*order))
     elif modifier == "h" and order % 2 == 1:
         return semidirect_product(Dn(max_l, order), Ch(max_l))
+    elif modifier == "h" and order % 2 == 0:
+        return semidirect_product(Dn(max_l, order), Ci(max_l))
     elif modifier is None and order is not None:
         return Dn(max_l, order)
     else:
