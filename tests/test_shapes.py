@@ -3,6 +3,7 @@ import coxeter
 import numpy as np
 import pytest
 
+cutoff=0.99
 
 def get_pyramid(n: int) -> np.ndarray:
     base = coxeter.families.RegularNGonFamily().get_shape(n).vertices
@@ -96,7 +97,7 @@ non_shape_symmetries.update(
     ids=_id_func,
 )
 def test_symmetries(symmetry, shape, vertices):
-    conftest.check_symmetry(symmetry=symmetry, vertices=vertices, threshold=0.98)
+    conftest.check_symmetry(symmetry=symmetry, vertices=vertices, threshold=cutoff)
 
 
 @pytest.mark.parametrize(
@@ -755,7 +756,7 @@ shapes_data = {
 def test_dict_shapes_symmetry(shape_name, vertices):  
     symmetry=shape_name
     conftest.check_symmetry(
-        symmetry=symmetry, vertices=np.array(vertices), threshold=0.98
+        symmetry=symmetry, vertices=np.array(vertices), threshold=cutoff
     )
 
 
