@@ -59,76 +59,31 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
-PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), 
-      op(nullptr, {N_particles, N_symmetries}, nb::handle()),
-      rotations(nullptr, {N_particles, N_symmetries, 4}, nb::handle())
-{
-    // Allocate memory for op and rotations
-    op = nb::ndarray<double>(new double[N_particles * N_symmetries], {N_particles, N_symmetries}, nb::handle());
-    rotations = nb::ndarray<double>(new double[N_particles * N_symmetries * 4], {N_particles, N_symmetries, 4}, nb::handle());
-    // not sure if this is the way to do it. Need help with this....
-    u_op = op.data();
-    u_rotations = rotations.data();
-}
-
-void PGOPStore::addOp(size_t i,
-                      const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
-{
-    // this needs to change - not sure how - fast array views?
-    const auto& values = std::get<0>(op_);
-    const auto& rots = std::get<1>(op_);
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
-    }
-}
-
-void PGOPStore::addNull(size_t i)
-{
-    // this needs to change - not sure how - fast array views?
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = 0;
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
-    }
-}
-
-nb::tuple PGOPStore::getArrays()
-{
-    return nb::make_tuple(op, rotations);
-}
-
 template<typename distribution_type>
-PGOP<distribution_type>::PGOP(const nb::ndarray<std::complex<double>> D_ij,
+PGOP<distribution_type>::PGOP(const nb::ndarray<std::complex<double>, nb::ndim<2>> D_ij,
                               std::shared_ptr<optimize::Optimizer>& optimizer,
                               typename distribution_type::param_type distribution_params)
     : m_distribution(distribution_params), m_n_symmetries(D_ij.shape(0)), m_Dij(),
       m_optimize(optimizer)
 {
     m_Dij.reserve(m_n_symmetries);
-    const auto u_D_ij = D_ij.data();
+    const std::complex<double>* u_D_ij = static_cast<const std::complex<double>*>(D_ij.data());
     const size_t n_mlms = D_ij.shape(1);
     for (size_t i {0}; i < m_n_symmetries; ++i) {
         m_Dij.emplace_back(
-            std::vector<std::complex<double>>(u_D_ij.data()[i, 0], u_D_ij.data()[i, 0] + n_mlms));
+            std::vector<std::complex<double>>(u_D_ij + i * n_mlms, u_D_ij + (i + 1) * n_mlms));
     }
 }
 
 // TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
-nb::tuple PGOP<distribution_type>::compute(const nb::ndarray<double> distances,
-                                           const nb::ndarray<double> weights,
-                                           const nb::ndarray<int> num_neighbors,
-                                           const unsigned int m,
-                                           const nb::ndarray<std::complex<double>> ylms,
-                                           const nb::ndarray<double> quad_positions,
-                                           const nb::ndarray<double> quad_weights) const
+void PGOP<distribution_type>::compute(const nb::ndarray<double> distances,
+                                      const nb::ndarray<double> weights,
+                                      const nb::ndarray<int> num_neighbors,
+                                      const unsigned int m,
+                                      const nb::ndarray<std::complex<double>> ylms,
+                                      const nb::ndarray<double> quad_positions,
+                                      const nb::ndarray<double> quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
@@ -136,34 +91,49 @@ nb::tuple PGOP<distribution_type>::compute(const nb::ndarray<double> distances,
                                              weights.data(),
                                              distances.data());
     const size_t N_particles = num_neighbors.size();
-    //auto op_store = PGOPStore(N_particles, m_n_symmetries);
-    auto op_store = PGOPStore(m_n_symmetries);
-    const auto loop_func = [&op_store, &neighborhoods, &qlm_eval, this](const size_t start,
-                                                                        const size_t stop) {
+    // TODO FIX
+    // reserve N_particles, m_n_symmetries for m_pgop_values
+    m_pgop_values->reserve(N_particles);
+    // reserve N_particles, m_n_symmetries, 4 for m_rotations
+    m_optimal_rotations->reserve(N_particles);
+    const auto loop_func = [&neighborhoods, &qlm_eval, this](const size_t start,
+                                                                    const size_t stop) {
         auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
         for (size_t i = start; i < stop; ++i) {
             if (neighborhoods.getNeighborCount(i) == 0) {
-                op_store.addNull(i);
+                for (size_t j {0}; j < m_n_symmetries; ++j) {
+                    (*m_pgop_values)[i][j] = 0;
+                    (*m_optimal_rotations)[i][j][0] = 1;
+                    (*m_optimal_rotations)[i][j][1] = 0;
+                    (*m_optimal_rotations)[i][j][2] = 0;
+                    (*m_optimal_rotations)[i][j][3] = 0;
+                }
                 continue;
             }
             auto neighborhood = neighborhoods.getNeighborhood(i);
             const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf);
-            op_store.addOp(i, particle_op_rot);
+            const auto& values = std::get<0>(particle_op_rot);
+            const auto& rots = std::get<1>(particle_op_rot);
+            for (size_t j {0}; j < m_n_symmetries; ++j) {
+                (*m_pgop_values)[i][j] = values[j]; 
+                (*m_optimal_rotations)[i][j][0] = rots[j].w;
+                (*m_optimal_rotations)[i][j][1] = rots[j].x;
+                (*m_optimal_rotations)[i][j][2] = rots[j].y;
+                (*m_optimal_rotations)[i][j][3] = rots[j].z;
+            }
         }
     };
     execute_func(loop_func, N_particles);
-    return op_store.getArrays();
 }
 
 template<typename distribution_type>
-nb::ndarray<double> PGOP<distribution_type>::refine(const nb::ndarray<double> distances,
-                                                    const nb::ndarray<double> rotations,
-                                                    const nb::ndarray<double> weights,
-                                                    const nb::ndarray<int> num_neighbors,
-                                                    const unsigned int m,
-                                                    const nb::ndarray<std::complex<double>> ylms,
-                                                    const nb::ndarray<double> quad_positions,
-                                                    const nb::ndarray<double> quad_weights) const
+void PGOP<distribution_type>::refine(const nb::ndarray<double> distances,
+                                     const nb::ndarray<double> weights,
+                                     const nb::ndarray<int> num_neighbors,
+                                     const unsigned int m,
+                                     const nb::ndarray<std::complex<double>> ylms,
+                                     const nb::ndarray<double> quad_positions,
+                                     const nb::ndarray<double> quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
@@ -171,35 +141,28 @@ nb::ndarray<double> PGOP<distribution_type>::refine(const nb::ndarray<double> di
                                              weights.data(),
                                              distances.data());
     const size_t N_particles = num_neighbors.size();
-    nb::ndarray<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
-    auto u_op_store = op_store.data();
-    auto u_rotations = rotations.data();
     const auto loop_func
-        = [&u_op_store, &u_rotations, &neighborhoods, &qlm_eval, this](const size_t start,
+        = [&neighborhoods, &qlm_eval, this](const size_t start,
                                                                        const size_t stop) {
               auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
               for (size_t i = start; i < stop; ++i) {
                   if (neighborhoods.getNeighborCount(i) == 0) {
                       for (size_t j {0}; j < m_n_symmetries; ++j) {
-                          u_op_store(i, j) = 0;
+                          (*m_pgop_values)[i][j] = 0;
                       }
                       continue;
                   }
                   auto neighborhood = neighborhoods.getNeighborhood(i);
                   for (size_t j {0}; j < m_n_symmetries; ++j) {
-                      const auto rot = data::Quaternion(u_rotations(i, j, 0),
-                                                        u_rotations(i, j, 1),
-                                                        u_rotations(i, j, 2),
-                                                        u_rotations(i, j, 3))
-                                           .to_axis_angle_3D();
+                      const auto& rot_array = (*m_optimal_rotations)[i][j];
+                      const auto rot = data::Quaternion(rot_array[0], rot_array[1], rot_array[2], rot_array[3])
+                                 .to_axis_angle_3D();
                       neighborhood.rotate(rot);
-                      u_op_store(i, j)
-                          = this->compute_pgop(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
+                      (*m_pgop_values)[i][j] = this->compute_pgop(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
                   }
               }
           };
     execute_func(loop_func, N_particles);
-    return op_store;
 }
 
 template<typename distribution_type>
@@ -273,11 +236,13 @@ template class PGOP<FisherDistribution>;
 template<typename distribution_type> void export_pgop_class(nb::module_& m, const std::string& name)
 {
     nb::class_<PGOP<distribution_type>>(m, name.c_str())
-        .def(nb::init<const nb::ndarray<std::complex<double>, nb::device::cpu>,
+        .def(nb::init<const nb::ndarray<std::complex<double>, nb::ndim<2>>,
                       std::shared_ptr<optimize::Optimizer>&,
                       typename distribution_type::param_type>())
         .def("compute", &PGOP<distribution_type>::compute)
-        .def("refine", &PGOP<distribution_type>::refine);
+        .def("refine", &PGOP<distribution_type>::refine)
+        .def("get_pgop_values", &PGOP<distribution_type>::get_pgop_values)
+        .def("get_rotations", &PGOP<distribution_type>::get_rotations);
 }
 
 void export_pgop(nb::module_& m)

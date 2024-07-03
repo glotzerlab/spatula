@@ -127,7 +127,7 @@ class PGOP:
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
         )
-        self._pgop, self._rotations = self._cpp.compute(
+        self._cpp.compute(
             dist,
             neighbors.weights,
             neighbors.neighbor_counts,
@@ -140,9 +140,8 @@ class PGOP:
             quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
                 m=refine_m, weights=True, cartesian=True
             )
-            self._pgop = self._cpp.refine(
+            self._cpp.refine(
                 dist,
-                self._rotations,
                 neighbors.weights,
                 neighbors.neighbor_counts,
                 refine_m,
@@ -150,6 +149,8 @@ class PGOP:
                 quad_positions,
                 quad_weights,
             )
+        self._pgop = self._cpp.get_pgop_values()
+        self._rotations = self._cpp.get_rotations()
 
     def _compute_distance_vectors(self, neigh_query, neighbors, query_points):
         """Given a query and neighbors get wrapped distances to neighbors.

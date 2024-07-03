@@ -74,35 +74,6 @@ class Neighborhoods {
 };
 
 /**
- * @brief Store for the optimal PGOP values and rotations
- *
- * This simplifies the setting of the results from the optimization, and the use of numpy arrays in
- * the code.
- */
-struct PGOPStore {
-    PGOPStore(size_t N_particles, size_t N_symmetries);
-    /// Number of point group symmetries to compute
-    size_t N_syms;
-    /// The optimized value of PGOP for each point group
-    nb::ndarray<double> op;
-    /// The optimal rotations used to obtain the maximum PGOP as quaternions.
-    nb::ndarray<double> rotations;
-
-    /// Add a single point's set of PGOP and rotation values
-    void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
-    /// Store 0's for point i. This is used when no neighbors for a point exist.
-    void addNull(size_t i);
-    /// Return a tuple of the two arrays op and rotations.
-    nb::tuple getArrays();
-
-    private:
-    /// Fast access to op
-    double* u_op;
-    /// Fast access to rotations
-    double* u_rotations;
-};
-
-/**
  * @brief Central class, computes PGOP for provided points.
  *
  * Compute uses many levels of functions to compute PGOP these should be inlined for performance.
@@ -110,7 +81,7 @@ struct PGOPStore {
  */
 template<typename distribution_type> class PGOP {
     public:
-    PGOP(const nb::ndarray<std::complex<double>> D_ij,
+    PGOP(const nb::ndarray<std::complex<double>, nb::ndim<2>> D_ij,
          std::shared_ptr<optimize::Optimizer>& optimizer,
          typename distribution_type::param_type distribution_params);
 
@@ -130,13 +101,13 @@ template<typename distribution_type> class PGOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    nb::tuple compute(const nb::ndarray<double> distances,
-                      const nb::ndarray<double> weights,
-                      const nb::ndarray<int> num_neighbors,
-                      const unsigned int m,
-                      const nb::ndarray<std::complex<double>> ylms,
-                      const nb::ndarray<double> quad_positions,
-                      const nb::ndarray<double> quad_weights) const;
+    void compute(const nb::ndarray<double> distances,
+                 const nb::ndarray<double> weights,
+                 const nb::ndarray<int> num_neighbors,
+                 const unsigned int m,
+                 const nb::ndarray<std::complex<double>> ylms,
+                 const nb::ndarray<double> quad_positions,
+                 const nb::ndarray<double> quad_weights) const;
 
     /**
      * @brief Compute PGOP at given rotations for each point.
@@ -145,7 +116,6 @@ template<typename distribution_type> class PGOP {
      * calculation at higher quadrature and spherical harmonic number is desired.
      *
      * @param distances An array of distance vectors for neighbors
-     * @param distances An array of quaternion rotations to use for computing PGOP.
      * @param weights An array of neighbor weights. For unweighted PGOP use an array of 1s.
      * @param num_neighboors An array of the number of neighbor for each point.
      * @param m The degree of Gauss-Legendre quadrature to use when computing Qlms. This is not used
@@ -158,14 +128,24 @@ template<typename distribution_type> class PGOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    nb::ndarray<double> refine(const nb::ndarray<double> distances,
-                               const nb::ndarray<double> rotations,
-                               const nb::ndarray<double> weights,
-                               const nb::ndarray<int> num_neighbors,
-                               const unsigned int m,
-                               const nb::ndarray<std::complex<double>> ylms,
-                               const nb::ndarray<double> quad_positions,
-                               const nb::ndarray<double> quad_weights) const;
+    void refine(const nb::ndarray<double> distances,
+                const nb::ndarray<double> weights,
+                const nb::ndarray<int> num_neighbors,
+                const unsigned int m,
+                const nb::ndarray<std::complex<double>> ylms,
+                const nb::ndarray<double> quad_positions,
+                const nb::ndarray<double> quad_weights) const;
+
+    //! Get the PGOP values for each point and symmetry.
+    std::shared_ptr<std::vector<std::vector<double>>> get_pgop_values() const
+    {
+        return m_pgop_values;
+    }
+    //! Get the optimal rotations for each point and symmetry.
+    std::shared_ptr<std::vector<std::vector<std::array<double, 4>>>> get_rotations() const
+    {
+        return m_optimal_rotations;
+    }
 
     private:
     /**
@@ -240,6 +220,11 @@ template<typename distribution_type> class PGOP {
     std::vector<std::vector<std::complex<double>>> m_Dij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
+    /// Computed PGOP values for each point and symmetry.
+    std::shared_ptr<std::vector<std::vector<double>>> m_pgop_values;
+    /// Computed optimal rotations for each point and symmetry.
+    // TODO FIX THIS SHOULD BE ANOTHER VECTOR/ARRAY SOMETHING
+    std::shared_ptr<std::vector<std::vector<std::array<double, 4>>>> m_optimal_rotations;
 };
 
 template<typename distribution_type> void export_pgop_class(nb::module_& m, const std::string& name);
