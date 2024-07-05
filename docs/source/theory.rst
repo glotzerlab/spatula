@@ -101,7 +101,8 @@ Cartesian representation is given by :math:`\hat{C}_{2\pi/\theta}=\hat{R}(\theta
 
 where :math:`\theta` is the angle of rotation and :math:`\mathbf{u}` is the axis of
 rotation in form of a unit vector. All basic operators are denoted by a hat. We shall,
-moving forward 
+moving forward always consider that the principal axis of symmetry (one with highest
+symmetry order) is along the :math:`z` axis.
 
 Another common representation of rotations is the Euler angles. The Euler angles are a
 set of three angles that describe the orientation of a rigid body in 3D space. The Euler
@@ -126,11 +127,11 @@ can be represented as inversion followed by a rotation of 180 degrees
 :cite:`Altmann_WignerD`:
 
 .. math::
-    \hat{\sigma} = \hat{i} \hat{C}_2
+    \hat{\sigma}_{xy} = \hat{i} \hat{C}_2(z)
 
-where :math:`\hat{i}` is the inversion operator and :math:`\hat{C}_2` is the two fold
-rotation around a given axis. The reflection plane is always perpendicular to the axis
-of rotation
+where :math:`\hat{i}` is the inversion operator and :math:`\hat{C}_2(z)` is the two fold
+rotation around :math:`z` axis. The reflection plane is always perpendicular to the axis
+of rotation obtained by the above formula.
 
 Inversion is a symmetry operation that flips the object across the center of inversion.
 It can be shown that inversion can be represented as application of 3 orthogonal
@@ -141,14 +142,23 @@ reflection :cite:`engel2021point`:
 
 Rotoreflections are a combination of rotations and reflections, sometimes called
 improper rotations. They are a type of symmetry operation that combines rotation and
-reflection. The easiest way to write such operation is to first apply inversion,
-followed by the rotation of given degree depending on the oddity of the rotation
+reflection. Thus, by definition, we can write:
+
+.. math::
+    \hat{S}_n = \hat{\sigma}_h {\hat{C}_n} = \hat{\sigma}_{xy} {\hat{C}_n}
+
+where :math:`\hat{\sigma}_h=\hat{\sigma}_{xy}` is the reflection operator perpendicular
+to the axis of rotation (:math:`z`).
+
+The alternatively, easier way to write such operation is to first apply rotation by an
+angle ???, followed by the inversion
 :cite:`Altmann_WignerD`: 
 
 .. math::
-    \hat{S}_n = \hat{i} \hat{C}_n \quad \text{for } n \text{ even} \\
+    \hat{S}_n = \hat{i} {\hat{C}_n}^{n-1} \quad \text{for } n \text{ even} \\
 
-    \hat{S}_n = \hat{i} \hat{C}_{2n} \quad \text{for } n \text{ odd}
+    \hat{S}_n = \hat{i} {\hat{C}_{2n}}^{n-1} \quad \text{for } n \text{ odd}
+
 
 
 Point groups
@@ -345,9 +355,32 @@ subgroup
 
 Symmetry point groups
 ~~~~~~~~~~~~~~~~~~~~~
-what groups are what operation
 
+With :math:`\hat{\sigma}_h` we label the reflection which is perpendicular (orthogonal)
+to the principal symmetry axis. On the other hand :math:`\hat{\sigma}_v` is the
+reflection which is parallel to the principal symmetry axis. There are multiple choices
+one can make with parallel reflection - it could be in :math:`zx` or :math:`zy` plane.
+With :math:`\hat{\sigma}_d` we usually label reflections parallel to the principal axis
+that are not :math:`zx` or :math:`zy`.
 
+The group operations are taken from the following `link
+<https://web.archive.org/web/20120717074206/http://newton.ex.ac.uk/research/qsystems/people/goss/symmetry/CC_All.html>`_.
+Note that several errors are present, such as operations for :math:`C_{5h}`. Also note
+that :math:`\hat{C}_s` in :cite:`ezra` contains :math:`\hat{\sigma}_{yz} =\hat{\sigma}_v`
+and on the web page it conatins :math:`\hat{\sigma}_h`. We follow the nomenclature found
+in :cite:`ezra` and :cite:`Altmann_semidirect`. In addition to that, we shall adopt a
+nomenclature in which :math:`\hat{\sigma}_h = \hat{\sigma}_{xy}` is the only horizontal
+reflection plane, while :math:`\hat{\sigma}_{v}` can be any reflection plane containing
+principal axis of symmetry in :math:`z` direction. Note that some other sources (such as
+:cite:`ezra`) would for some of these reflection planes use :math:`\hat{\sigma}^{'}`.
+The designation :math:`\hat{\sigma}_d` denotes reflection plane which does not contain
+principal symmetry axis (:math:`z`), and is not perpendicular to it. The definitions for
+specific operations are also given `here 
+<https://web.archive.org/web/20120813130005/http://newton.ex.ac.uk/research/qsystems/people/goss/symmetry/CharacterTables.html>`_. 
+
+Many operations in the table contain a power. The power is to be read as applying the
+same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
+:math:`\hat{C}_2` operation twice.
 
 .. list-table::
    :header-rows: 1
@@ -358,36 +391,43 @@ what groups are what operation
    * - :math:`C_1`
      - :math:`\hat{E}`
    * - :math:`C_s`
-     - :math:`\hat{E}`, :math:`\hat{\sigma}`
+     - :math:`\hat{E}`, :math:`\hat{\sigma}_v`
+   * - :math:`C_h`
+     - :math:`\hat{E}`, :math:`\hat{\sigma}_h`
    * - :math:`C_i`
      - :math:`\hat{E}`, :math:`\hat{i}`
    * - :math:`C_n`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`
-   * - :math:`C_{nv}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{\sigma}_v`
-   * - :math:`C_{nh}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
-   * - :math:`D_n`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`
+   * - :math:`C_{nv}` TODO
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{\sigma}_v`
+   * - :math:`C_{nh}`, :math:`n` is even
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
+   * - :math:`C_{nh}`, :math:`n` is odd
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{n-2}`, :math:`{\hat{S}_n}^{n+2}`, :math:`{\hat{S}_n}^{n+4}`, ... :math:`{\hat{S}_n}^{2n-1}`
+   * - :math:`C_{ni}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
+   * - :math:`D_n` TODO
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`
-   * - :math:`D_{nh}`
+   * - :math:`D_{nh}` TODO
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
-   * - :math:`D_{nd}`
+   * - :math:`D_{nd}` TODO
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`, :math:`n \hat{\sigma}_d`
-   * - :math:`S_{2n}`
-     - :math:`\hat{E}`, :math:`\hat{S}_{2n}`
+   * - :math:`S_{n}`, :math:`n` is even
+     - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`
    * - :math:`T`
-     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`
+     - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3 \hat{C}_2`, see :cite:`Altmann_WignerD` for specific rotations (see Hurwitz quaternions)
    * - :math:`T_h`
-     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+     - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3\hat{C}_2`, :math:`\hat{i}`, :math:`3 \hat{\sigma}_h`, :math:`4 \hat{S}_6`, :math:`4 {\hat{S}_6}^5`, rotations same as in :math:`T`
    * - :math:`T_d`
-     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`, :math:`6 \hat{\sigma}_d`
+     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`2 \hat{C}_2`, :math:`6 \hat{\sigma}_d`, :math:`6\hat{S}_4`
    * - :math:`O`
-     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`
+     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`9 \hat{C}_2`, see Lipshitz and Hurwitz quaternions for specific rotations
    * - :math:`O_h`
-     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`6 \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`9 \hat{C}_2` :math:`3 \hat{\sigma}_h`, :math:`6\hat{\sigma}_d`, :math:`\hat{i}`, :math:`8\hat{S}_6`, :math:`6\hat{S}_4`, rotations same as in :math:`O`
+   * - :math:`I`
+     - :math:`\hat{E}`, :math:`12 \hat{C}_5`, :math:`12 {\hat{C}_5}^2`, :math:`20\hat{C}_3`, :math:`15 \hat{C}_2`, see Hurwitz and icosian quaternions for specific rotations
    * - :math:`I_h`
-     - :math:`\hat{E}`, :math:`6 \hat{C}_5`, :math:`10 \hat{C}_3`, :math:`15 \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
-
+     - :math:`\hat{E}`, :math:`12 \hat{C}_5`, :math:`12 {\hat{C}_5}^2`, :math:`20\hat{C}_3`, :math:`15 \hat{C}_2`, :math:`15\hat{\sigma}_d`, :math:`\hat{i}`, :math:`12\hat{S}_{10}`, :math:`12{\hat{S}_{10}}^3`, :math:`20\hat{S}_6`, rotations same as in :math:`I`
 
 
 Construction of point groups
