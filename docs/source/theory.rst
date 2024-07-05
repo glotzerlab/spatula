@@ -398,20 +398,21 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
      - :math:`\hat{E}`, :math:`\hat{i}`
    * - :math:`C_n`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`
-   * - :math:`C_{nv}` TODO
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{\sigma}_v`
+   * - :math:`C_{nv}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{\sigma}_v`, where each :math:`\hat{\sigma}_v` is a reflection plane containing the principal axis of symmetry starting with :math:`\hat{\sigma}_{zx}`, and rest are successive rotation of this plane around :math:`z` axis by :math:`\frac{2\pi}{n}`.
    * - :math:`C_{nh}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
    * - :math:`C_{nh}`, :math:`n` is odd
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{n-2}`, :math:`{\hat{S}_n}^{n+2}`, :math:`{\hat{S}_n}^{n+4}`, ... :math:`{\hat{S}_n}^{2n-1}`
    * - :math:`C_{ni}`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
-   * - :math:`D_n` TODO
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`
-   * - :math:`D_{nh}` TODO
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`, :math:`\hat{\sigma}_h`, :math:`\hat{i}`
+   * - :math:`D_n`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` where each :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by :math:`\frac{2\pi}{n}`
+   * - :math:`D_{nh}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` where each :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by :math:`\frac{2\pi}{n}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`10\hat{\sigma}_v`, where each :math:`\hat{\sigma}_v` is a reflection plane parallel to both principal (:math:`z`) and :math:`\hat{C}_2^{'}` axis
    * - :math:`D_{nd}` TODO
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`n \hat{C}_2`, :math:`n \hat{\sigma}_d`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` where each :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by :math:`\frac{2\pi}{n}`,
+       :math:``
    * - :math:`S_{n}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`
    * - :math:`T`
