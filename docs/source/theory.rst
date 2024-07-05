@@ -399,7 +399,7 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
    * - :math:`C_n`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`
    * - :math:`C_{nv}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{\sigma}_v`, where each :math:`\hat{\sigma}_v` is a reflection plane containing the principal axis of symmetry starting with :math:`\hat{\sigma}_{zx}`, and rest are successive rotation of this plane around :math:`z` axis by :math:`\frac{2\pi}{n}`.
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{\sigma}_v`
    * - :math:`C_{nh}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
    * - :math:`C_{nh}`, :math:`n` is odd
@@ -407,29 +407,48 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
    * - :math:`C_{ni}`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
    * - :math:`D_n`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` where each :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by :math:`\frac{2\pi}{n}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` 
    * - :math:`D_{nh}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` where each :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by :math:`\frac{2\pi}{n}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`10\hat{\sigma}_v`, where each :math:`\hat{\sigma}_v` is a reflection plane parallel to both principal (:math:`z`) and :math:`\hat{C}_2^{'}` axis
-   * - :math:`D_{nd}` TODO
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` where each :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by :math:`\frac{2\pi}{n}`,
-       :math:``
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`10\hat{\sigma}_v`
+   * - :math:`D_{nd}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`n\hat{\sigma}_d`, :math:`\hat{i}`, :math:`\hat{S}_{2n}`, :math:`{\hat{S}_{2n}}^3`, ... :math:`{\hat{S}_{2n}}^{n-2}`, :math:`{\hat{S}_{2n}}^{n+2}`, :math:`{\hat{S}_{2n}}^{n+4}`, ... :math:`{\hat{S}_{2n}}^{2n-1}`
    * - :math:`S_{n}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`
    * - :math:`T`
-     - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3 \hat{C}_2`, see :cite:`Altmann_WignerD` for specific rotations (see Hurwitz quaternions)
+     - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3 \hat{C}_2`
    * - :math:`T_h`
-     - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3\hat{C}_2`, :math:`\hat{i}`, :math:`3 \hat{\sigma}_h`, :math:`4 \hat{S}_6`, :math:`4 {\hat{S}_6}^5`, rotations same as in :math:`T`
+     - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3\hat{C}_2`, :math:`\hat{i}`, :math:`3 \hat{\sigma}_h`, :math:`4 \hat{S}_6`, :math:`4 {\hat{S}_6}^5`
    * - :math:`T_d`
      - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`2 \hat{C}_2`, :math:`6 \hat{\sigma}_d`, :math:`6\hat{S}_4`
    * - :math:`O`
-     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`9 \hat{C}_2`, see Lipshitz and Hurwitz quaternions for specific rotations
+     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`9 \hat{C}_2`
    * - :math:`O_h`
-     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`9 \hat{C}_2` :math:`3 \hat{\sigma}_h`, :math:`6\hat{\sigma}_d`, :math:`\hat{i}`, :math:`8\hat{S}_6`, :math:`6\hat{S}_4`, rotations same as in :math:`O`
+     - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`9 \hat{C}_2`, :math:`3 \hat{\sigma}_h`, :math:`6\hat{\sigma}_d`, :math:`\hat{i}`, :math:`8\hat{S}_6`, :math:`6\hat{S}_4`
    * - :math:`I`
-     - :math:`\hat{E}`, :math:`12 \hat{C}_5`, :math:`12 {\hat{C}_5}^2`, :math:`20\hat{C}_3`, :math:`15 \hat{C}_2`, see Hurwitz and icosian quaternions for specific rotations
+     - :math:`\hat{E}`, :math:`12 \hat{C}_5`, :math:`12 {\hat{C}_5}^2`, :math:`20\hat{C}_3`, :math:`15 \hat{C}_2`
    * - :math:`I_h`
-     - :math:`\hat{E}`, :math:`12 \hat{C}_5`, :math:`12 {\hat{C}_5}^2`, :math:`20\hat{C}_3`, :math:`15 \hat{C}_2`, :math:`15\hat{\sigma}_d`, :math:`\hat{i}`, :math:`12\hat{S}_{10}`, :math:`12{\hat{S}_{10}}^3`, :math:`20\hat{S}_6`, rotations same as in :math:`I`
+     - :math:`\hat{E}`, :math:`12 \hat{C}_5`, :math:`12 {\hat{C}_5}^2`, :math:`20\hat{C}_3`, :math:`15 \hat{C}_2`, :math:`15\hat{\sigma}_d`, :math:`\hat{i}`, :math:`12\hat{S}_{10}`, :math:`12{\hat{S}_{10}}^3`, :math:`20\hat{S}_6`
 
+Notes on the table:
+
+* :math:`C_{nv}`: each :math:`\hat{\sigma}_v` is a reflection plane containing the
+  principal axis of symmetry starting with :math:`\hat{\sigma}_{zx}`, and rest are
+  successive rotation of this plane around :math:`z` axis by :math:`\frac{2\pi}{n}`.
+* All dihedral groups (:math:`D_n`, :math:`D_{nh}`, :math:`D_{nd}`): each
+  :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with
+  :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by
+  :math:`\frac{2\pi}{n}`. 
+* :math:`D_{nh}`: each :math:`\hat{\sigma}_v` is a reflection plane parallel to
+  both principal (:math:`z`) and each :math:`\hat{C}_2^{'}` axis.
+* :math:`D_{nd}`: each :math:`\hat{\sigma}_d` is a reflection plane parallel to
+  the principal axis of symmetry (:math:`z`) and also contains the vector which
+  bisects two neighboring :math:`\hat{C}_2^{'}` axes of symmetry.
+* All tetrahedral groups (:math:`T`, :math:`T_h`, :math:`T_d`): see
+  :cite:`Altmann_WignerD` for specific proper rotations (see Hurwitz quaternions).
+* All octahedral groups (:math:`O`, :math:`O_h`): see Lipshitz and Hurwitz quaternions
+  for specific proper rotations
+* All icosahedral groups (:math:`I`, :math:`I_h`): see Hurwitz and icosian quaternions
+  for specific proper rotations
 
 Construction of point groups
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
