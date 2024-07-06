@@ -463,15 +463,51 @@ Notes on the table:
 * All icosahedral groups (:math:`I`, :math:`I_h`): see Hurwitz and icosian quaternions
   for specific proper rotations
 
-Group theory formulas and operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Group theory operations: direct and semidirect products
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The more complicated groups can usually be constructed from simpler groups using certain
-operation specific to groups.
-more c
-combining operations using dot product -> composition
-Direct product
-semidirect product
+operation specific to groups. First such operation is called direct product. The direct
+product of two groups :math:`G` and :math:`H` is a group :math:`G \times H` which is 
+constructed by taking all possible pairs of elements from :math:`G` and :math:`H` under
+the common operation of those two groups. In case of symmetry point groups, this
+operation is composition. In terms of Wigner D matrices, the direct product of two
+groups is constructed by taking all possible pairs of Wigner D matrices from the two
+groups and multiplying them together:
+
+.. math::
+    D^{(l)}_{m'm}(G \times H) =\frac{1}{|G|} \frac{1}{|H|} \sum_{g \in G} \sum_{h \in H} D^{(l)}_{m'm}(g h) = \sum_{m''=-l}^l D^{(l)}_{m'm''}(g) D^{(l)}_{m''m}(h).
+
+Not all point groups can be used in direct
+product. The direct product of two point groups is only allowed if the two point groups
+commute under the direct product operation. This is only the case if all possible pairs
+of operations between the two groups commute :cite:`Altmann_semidirect`:
+
+.. math::
+    g_i h_j = h_j g_i,
+
+for all :math:`g_i \in G` and :math:`h_j \in H`. Thus, property of direct product is
+that it is commutative. Groups that commute under direct product are abelian groups.
+Abelian point groups are cyclic groups or direct products of cyclic groups.
+
+We can also partially loosen the constraint of commutativity by using the semidirect
+product if the two groups obey :cite:`Altmann_semidirect`:
+
+.. math::
+    Gh_j=h_jG,
+
+for all :math:`h_j \in H`. If the above is true then necessarily the new set
+:math:`{gh, g \in G, h \in H}` is also a (point) group. Note that not every combination
+of point groups obeys this constraint. The semidirect product of two groups :math:`G`
+and :math:`H` is a group :math:`G \rtimes H` which is constructed by taking all possible
+pairs of elements from :math:`G` and :math:`H` under the common operation of those two
+groups (just like the direct product). The twist is that the operation of :math:`H` on
+:math:`G` is not the same as the operation of :math:`G` on :math:`H`. In terms of Wigner
+D matrices, the semidirect product of two groups is constructed by taking all possible
+pairs of Wigner D matrices from the two groups and multiplying them together:
+
+.. math::
+    D^{(l)}_{m'm}(G \rtimes H) =\frac{1}{|G|} \frac{1}{|H|} \sum_{g \in G} \sum_{h \in H} D^{(l)}_{m'm}(g h) = \sum_{m''=-l}^l D^{(l)}_{m'm''}(g) D^{(l)}_{m''m}(h).
 
 
 Construction of point groups for PgOP
