@@ -127,7 +127,7 @@ can be represented as inversion followed by a rotation of 180 degrees
 :cite:`Altmann_WignerD`:
 
 .. math::
-    \hat{\sigma}_{xy} = \hat{i} \hat{C}_2(z)
+    \hat{\sigma}_{xy} = \hat{i} \hat{C}_{2z}
 
 where :math:`\hat{i}` is the inversion operator and :math:`\hat{C}_2(z)` is the two fold
 rotation around :math:`z` axis. The reflection plane is always perpendicular to the axis
@@ -160,20 +160,37 @@ angle ???, followed by the inversion
     \hat{S}_n = \hat{i} {\hat{C}_{2n}}^{n-1} \quad \text{for } n \text{ odd}
 
 
-
-Point groups
+Group theory
 ------------
 
-Infinitely many point groups exist, but only 32 of them are allowed by `crystallographic
-restriction theorem
-<https://en.wikipedia.org/wiki/Crystallographic_restriction_theorem>`_. Point groups can
-loosely be divided into categories 
-according to the elements they contain: Cyclic groups (starting with Schoenflies symbol
-C) which contain operations related to a rotation of a given degree n, rotoreflection
-groups (S) which contain rotoreflection operations, Dihedral groups (D) which contain
-operations related to rotation of a given degree n and reflection across a plane
-perpendicular to the rotation axis, and Cubic/polyhedral groups (O, T, I) which contain
-symmetry operations related to important polyhedra in 3D space.
+In group theory, sets with operation under certain constraints (operation must be
+associative, and has identity element, and every element of the set has inverse) are
+called groups. When studying symmetry groups, we usually consider groups under operation
+of composition. The elements of the group are symmetry operations. Elements of the group
+can act on many different objects such as Euclidian space, or physical or other
+geometrical objects built from such an object (for example shapes or points). Euclidian
+(or other types of spaces) can often be described as vector spaces.
+
+Another important aspect of the group is the group action. First, let's consider a
+general action of some element of group :math:`G`. Let :math:`G` be a group under
+composition. Consider an action of an element of group :math:`G`, say operator :math:`g`
+on some function :math:`f`. The action of :math:`g` on :math:`f` is just the composition
+of :math:`g` on :math:`f`. If we assume that :math:`G` is a symmetry group, then the
+interpretation of this composition is that action of :math:`g` symmetrizes the function
+:math:`f` according to symmetry operator :math:`g`. Similarly, we can also apply a group
+action of the group :math:`G` onto some function :math:`f`. The group action is
+symmetrization under all the elements (symmetry operators) of the group. If we assume
+that :math:`G` is a finite point group, the group action is given by the following
+formula:
+
+.. math::
+    f_G = \frac{1}{|G|} \sum_{g \in G} g \cdot f,
+
+where :math:`|G|` is the order of the group (number of elements of :math:`G`).
+
+When group action acts on a vector space we call this a representation. Notice that
+choosing a representation enables us to actually numerically write out the operator in a
+matrix form.
 
 Wigner D matrices
 ~~~~~~~~~~~~~~~~~
@@ -199,8 +216,15 @@ square matrix of size :math:`2l+1`. The indices of the matrix are often written 
 are coefficients for a spherical harmonic given by :math:`l` and :math:`m` (each vector element
 is different :math:`m`).
 
+First, we give the formula for composition operation which is just a matrix
+multiplication. Matrix multiplication (composition) formula for two symmetry operations
+is given by:
 
-Lets turn now our attention to Wigner :math:`D` matrices for rotations. The Wigner
+.. math::
+    D^{(l)}_{m'm''}(g_1) \times D^{(l)}_{m''m}(g_2) = D^{(l)}_{m'm}(g_1 g_2) = \sum_{m''=-l}^l D^{(l)}_{m'm''}(g_1) D^{(l)}_{m''m}(g_2)
+
+
+Let's turn now our attention to Wigner :math:`D` matrices for rotations. The Wigner
 :math:`D` matrix for 
 a general rotation from Euler angles in zyz convention is given by the formula
 :cite:`Altmann_WignerD`: 
@@ -305,56 +329,45 @@ The Wigner :math:`D` matrix for reflection across the :math:`yz` plane is given 
 
 Lastly we attempt to derive formulas for rotoreflections. We have already shown that
 rotoreflections can be constructed from inversions and rotations using the formula
-:math:`\hat{S}_n = \hat{i} \hat{C}_n` for even :math:`n` and :math:`\hat{S}_n = \hat{i}
-\hat{C}_{2n}` for odd :math:`n`. The resulting :math:`D` matrix for the odd :math:`n`
+:math:`\hat{S}_n = \hat{\sigma}_{xy} \hat{C}_n`. The resulting :math:`D` matrix for
 rotoreflection operation is given by:
 
 .. math::
-    D^{(l)}_{m'm}(\hat{S}_{n}) = D^{(l)}_{m'm}(\hat{i}) \times D^{(l)}_{m'm}(\hat{C}_n) = 
-    (-1)^l e^{im\frac{2\pi}{n}} \delta_{m',m} =
-    (-1)^l \delta_{m',m} ????? \quad \text{for } n \text{ even}
+    D^{(l)}_{m'm}(\hat{S}_{n}) = D^{(l)}_{m'm}(\hat{\sigma}_{xy}) \times D^{(l)}_{m'm}(\hat{C}_n) = 
+    (-1)^{m+l} e^{im\frac{2\pi}{n}} \delta_{m',m}.
 
-and the formula for the even :math:`n` rotoreflection operation is given by:
+Group action of Wigner D matrices
+*********************************
 
-.. math::
-    D^{(l)}_{m'm}(\hat{S}_{n}) = D^{(l)}_{m'm}(\hat{i}) \times D^{(l)}_{m'm}(\hat{C}_{2n}) = 
-    (-1)^l e^{im\frac{2\pi}{n}} \delta_{m',m} =
-    (-1)^{l+\frac{m}{n}} \delta_{m',m} ???? \quad \text{for } n \text{ odd}
-
-Group theory
-~~~~~~~~~~~~
-
-In group theory, sets with operation under certain constraints (operation must be
-associative, and has identity element, and every element of the set has inverse) are
-called groups. When studying symmetry groups, we usually consider groups under operation
-of composition. The elements of the group are symmetry operations. Elements of the group
-can act on many different objects such as Euclidian space, or physical or other
-geometrical objects built from such an object (for example shapes or points). Euclidian
-(or other types of spaces) can often be described as vector spaces.
-
-Another important aspect of the group is the group action. First, let's consider a
-general action :math:`g` on some function :math:`f`. The action of :math:`g` on
-:math:`f` is just the composition of :math:`g` on :math:`f`. If :math:`G` is a finite
-point group then group action acting on some function :math:`f` can be written as:
+Group action formula can be given in terms of Wigner D matrices. The group action is a
+matrix which can be constructed by summing Wigner D matrices of operations in a group:
 
 .. math::
-    g \cdot f = \sum_{g \in G} f(g^{-1}x////////????????????????)
+    D^{(l)}_{m'm}(G) = \frac{1}{|G|} \sum_{g \in G} D^{(l)}_{m'm}(g),
 
-The interpretation of this is equation is that group action symmetrizes the function
-:math:`f` under all the elements (symmetry operators) of the group. When group action
-acts on a vector space we call this a representation. Notice that choosing a
-representation enables us to actually numerically write out the operator in a matrix
-form. 
+where :math:`G` is a group of symmetry operations, and :math:`|G|` is the order (number
+of elements) of the group :math:`G`. Notice that this formula should be carried out per
+:math:`l`, meaning that for each :math:`l` we should expect to have a different matrix
+for each operation and group action will be the sum of these matrices. Effectively,
+:math:`l` plays the role of the size of the basis sets (of spherical harmonics). So we
+shall have :math:`l` matrices for each operation in the group, and :math:`l` matrices
+for group action.
 
-combining operations using dot product -> composition
-Direct product
-semidirect product
-
-subgroup
-
-
-Symmetry point groups
+Symmetry Point groups
 ~~~~~~~~~~~~~~~~~~~~~
+
+Infinitely many point groups exist, but only 32 of them are allowed by `crystallographic
+restriction theorem
+<https://en.wikipedia.org/wiki/Crystallographic_restriction_theorem>`_. Point groups can
+loosely be divided into categories 
+according to the elements they contain: Cyclic groups (starting with Schoenflies symbol
+C) which contain operations related to a rotation of a given degree n, rotoreflection
+groups (S) which contain rotoreflection operations, Dihedral groups (D) which contain
+operations related to rotation of a given degree n and reflection across a plane
+perpendicular to the rotation axis, and Cubic/polyhedral groups (O, T, I) which contain
+symmetry operations related to important polyhedra in 3D space. We give an overview of
+important point groups for materials science and crystallography below, with some
+remarks on notation and nomenclature.
 
 With :math:`\hat{\sigma}_h` we label the reflection which is perpendicular (orthogonal)
 to the principal symmetry axis. On the other hand :math:`\hat{\sigma}_v` is the
@@ -450,13 +463,26 @@ Notes on the table:
 * All icosahedral groups (:math:`I`, :math:`I_h`): see Hurwitz and icosian quaternions
   for specific proper rotations
 
-Construction of point groups
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Group theory formulas and operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The more complicated groups can usually be constructed from simpler groups using certain
+operation specific to groups.
+more c
+combining operations using dot product -> composition
+Direct product
+semidirect product
+
+
+Construction of point groups for PgOP
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 construction used here
 
 Subgroups of crystallographic point groups and relation to Wyckoff sites
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Notice that some point groups contain operations that are also found in other point
+groups. In that case we formally say that one group is a subgroup of another group.
 
 Also have a table that lists all subgroups of all crystallographic point groups as well
 as a guide how to figure out what subgroup of point group wyckoff site is from
