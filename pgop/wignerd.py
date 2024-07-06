@@ -223,9 +223,9 @@ def rotoreflection(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for rotoreflection up to the given l.
     """
-    inversion_matrices = inversion(max_l)
-    rotation_matrices = n_z(max_l, n) if n % 2 == 0 else n_z(max_l, 2 * n)
-    return dot_product(inversion_matrices, rotation_matrices)
+    reflection_matrices = sigma_xy(max_l)
+    rotation_matrices = n_z(max_l, n)
+    return dot_product(reflection_matrices, rotation_matrices)
 
 
 def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
