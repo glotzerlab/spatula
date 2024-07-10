@@ -49,7 +49,9 @@ Crystalline symmetries
 
 There are several types of symmetries that are often encountered in crystals. Each
 crystal has a point group (of the crystal) as well as a space group associated with it.
-The point group of a crystal is defined with respect to the center of the crystal. Each
+The point group of a crystal is defined with respect to the center of the crystal (also
+called general position). This position has no equivalent positions, and lies in
+position which has full point group symmetry of the crystal. Each
 crystallographic point group is compatible with a set of crystal systems and space
 groups. The symmetry of a point group leaves a set of particles in this crystal
 invariant under the symmetry operations of the point group. Translations are not
@@ -58,18 +60,22 @@ of the crystal gives the space group of the crystal.
 
 Interestingly, the particles in the
 unit cell of the crystal can have different symmetries associated with them. These are
-dependent on the position of the particle in the unit cell and are called wyckoff sites.
-The symmetry of the wyckoff site (called site symmetry) is a subgroup of the point group
-of the crystal. Each 
+dependent on the position of the particle in the unit cell and are called Wyckoff sites.
+The symmetry of the Wyckoff site (called site symmetry) is a subgroup of the point group
+of the crystal. This is so because if Wyckoff site lies on a certain symmetry element,
+it does not transform according to that symmetry element, which reduces the number of
+equivalent positions, such site can generate. Note that this symmetry is NOT the local
+point group symmetry of a point in space associated with Wyckoff site position. Each 
 crystalline unit cell with a given space/point group will have some "special" sites in
-the unit cell. These are usually defined by the elements of the point group of the
-symmetry, such as the symmetry axis or symmetry plane. The point group symmetry of such
-a particle will have a point group symmetry associated with it and this point group will
-be different (in general) from the point group of other special sites in the unit cell.
-The site symmetry of a wyckoff site is the local point group symmetry associated with
-the point in space (unit cell) that this particle occupies and is a measure of the local
-environment of the particle. PgOP enables us to measure continuously how symmetric a
-particle is with respect to some symmetry operation throughout the trajectory.
+the unit cell. 
+
+However, due to high degree of order particles occupying positions other than general
+position (they could be special positions as well) will also often have certain point
+group symmetries. These are not reported in crystallographic tables. The point group
+symmetry of such a point is not necessarily the same or even related to the point group
+of the crystal. The particle in the general position will have the point group symmetry
+of the crystal. PgOP enables us to measure continuously how symmetric a particle is with
+respect to some symmetry operation throughout the trajectory.
 
 Symmetry operations in point groups
 -----------------------------------
