@@ -438,7 +438,7 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
    * - :math:`T_h`
      - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3\hat{C}_2`, :math:`\hat{i}`, :math:`3 \hat{\sigma}_h`, :math:`4 \hat{S}_6`, :math:`4 {\hat{S}_6}^5`
    * - :math:`T_d`
-     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`2 \hat{C}_2`, :math:`6 \hat{\sigma}_d`, :math:`6\hat{S}_4`
+     - :math:`\hat{E}`, :math:`8 \hat{C}_3`, :math:`3 \hat{C}_2`, :math:`6 \hat{\sigma}_d`, :math:`6\hat{S}_4`
    * - :math:`O`
      - :math:`\hat{E}`, :math:`6 \hat{C}_4`, :math:`8 \hat{C}_3`, :math:`9 \hat{C}_2`
    * - :math:`O_h`
