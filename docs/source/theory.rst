@@ -168,13 +168,16 @@ angle :math:`\frac{2\pi}{n}`, followed by the inversion :cite:`Altmann_WignerD`:
 We also often consider subsequent application of the same operation. This is usually
 written in the form :math:`\hat{S}_n^k` where :math:`k` is the number of times the
 operation is applied. Following the above relations we can derive several useful
-relations between pure rotations and rotoreflections:
+relations for powers of rotoreflections:
 
 .. math::
+  (\hat{S}_n)^n &= \hat{E} \quad \text{for } n \text{ even} \\
+  (\hat{S}_n)^{2n} &= \hat{E} \quad \text{for } n \text{ odd} \\
+  (\hat{S}_n)^n &= \hat{\sigma}_h \quad \text{for } n \text{ odd} \\
   (\hat{S}_n)^m &= (\hat{C}_n)^m \quad \text{for } m \text{ even} \\
   (\hat{S}_n)^m &= \hat{\sigma}_h (\hat{C}_n)^{m} \quad \text{for } m \text{ odd} \\
-  \hat{\sigma}_h (\hat{C}_n)^{m} &= \hat{C}_n \hat{\sigma}_h(\hat{C}_n)^{m-1} = \hat{C}_n (\hat{S}_n)^{m-1} = \hat{S}_n (\hat{C}_n)^{m-1}  \quad \text{for } m \text{ even} \\
-
+  (\hat{S}_n)^{m+n} &= \hat{\sigma}_h (\hat{C}_n)^{m} \quad \text{for } m \text{ even and } n \text{ odd}  \\
+  (\hat{S}_n)^m &= \hat{\sigma}_h (\hat{C}_n)^{m-n} \quad \text{for } m \text{ odd and } m>n, n \text{ odd}  \\
 
 
 Group theory
@@ -428,22 +431,22 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
      - :math:`\hat{E}`, :math:`\hat{i}`
    * - :math:`C_n`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`
+   * - :math:`C_{nh}`, :math:`n` is even
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{n-1}`
+   * - :math:`C_{nh}`, :math:`n` is odd
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{2n-1}`
    * - :math:`C_{nv}`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{\sigma}_v`
-   * - :math:`C_{nh}`, :math:`n` is even
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
-   * - :math:`C_{nh}`, :math:`n` is odd
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{2n-1}`
    * - :math:`D_n`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` 
    * - :math:`D_{nh}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`10\hat{\sigma}_v`
-   * - :math:`D_{nd}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`n\hat{\sigma}_v`, :math:`\hat{i}`, :math:`\hat{S}_{2n}`, :math:`{\hat{S}_{2n}}^3`, ... :math:`{\hat{S}_{2n}}^{n-2}`, :math:`{\hat{S}_{2n}}^{n+2}`, :math:`{\hat{S}_{2n}}^{n+4}`, ... :math:`{\hat{S}_{2n}}^{2n-1}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`10\hat{\sigma}_v`
+   * - :math:`D_{nd}` (sometimes called :math:`D_{nv}`)
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`n\hat{\sigma}_v`, :math:`\hat{S}_{2n}`, :math:`{\hat{S}_{2n}}^3`, ... :math:`{\hat{S}_{2n}}^{2n-1}`
    * - :math:`S_{n}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`
    * - :math:`S_{n}`, :math:`n` is odd
-     - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`, :math:`{\hat{S}_{n}}^n`, :math:`{\hat{S}_{n}}^{n+1}`, ... :math:`{\hat{S}_{n}}^{2n-1}`
+     - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{2n-1}`
    * - :math:`T`
      - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3 \hat{C}_2`
    * - :math:`T_h`
@@ -509,18 +512,22 @@ identity operation (:math:`\hat{E}`) by applying :math:`\hat{C}_2` twice.
      - :math:`\langle\hat{i}\rangle`
    * - :math:`C_n`
      - :math:`\langle\hat{C}_n\rangle = \langle\hat{C}_{nz}\rangle`
-   * - :math:`C_{nv}`
-     - :math:`\langle\hat{C}_n, \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{yz}\rangle`
    * - :math:`C_{nh}`
      - :math:`\langle\hat{C}_n, \hat{\sigma}_h\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy}\rangle`
+   * - :math:`C_{nv}`
+     - :math:`\langle\hat{C}_n, \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{yz}\rangle`
    * - :math:`D_n`
      - :math:`\langle\hat{C}_n, \hat{\sigma}_h \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy} \hat{\sigma}_{yz}\rangle`
-   * - :math:`D_{nh}`
+   * - :math:`D_{nh}` (:math:`D_{nv}`)
      - :math:`\langle\hat{C}_n, \hat{\sigma}_h, \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy}, \hat{\sigma}_{yz}\rangle`
    * - :math:`D_{nd}`
      - :math:`\langle\hat{C}_{2n}\hat{\sigma}_h, \hat{\sigma}_v\rangle =  \langle\hat{C}_{2n} \hat{\sigma}_{xy}, \hat{\sigma}_{yz}\rangle`
-   * - :math:`S_{n}`, :math:`n` is even
-     - :math:`\langle\hat{C}_{n}\hat{\sigma}_h\rangle =  \langle\hat{C}_n \hat{\sigma}_{xy}\rangle`
+   * - :math:`S_{n}`
+     - :math:`\langle\hat{S}_{n}\rangle`
+
+
+Note that for even :math:`n` the group :math:`S_n` can also be generated by the
+:math:`S_n = \langle\hat{C}_{n}\hat{\sigma}_h\rangle`. 
 
 In mathematics presentation is used as a way of specifying a group using generators.
 Similar nomenclature is used as above with addition of a set of relations. Relations
