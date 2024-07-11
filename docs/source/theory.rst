@@ -429,7 +429,7 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
    * - :math:`D_{nh}`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`10\hat{\sigma}_v`
    * - :math:`D_{nd}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`n\hat{\sigma}_d`, :math:`\hat{i}`, :math:`\hat{S}_{2n}`, :math:`{\hat{S}_{2n}}^3`, ... :math:`{\hat{S}_{2n}}^{n-2}`, :math:`{\hat{S}_{2n}}^{n+2}`, :math:`{\hat{S}_{2n}}^{n+4}`, ... :math:`{\hat{S}_{2n}}^{2n-1}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`n\hat{\sigma}_v`, :math:`\hat{i}`, :math:`\hat{S}_{2n}`, :math:`{\hat{S}_{2n}}^3`, ... :math:`{\hat{S}_{2n}}^{n-2}`, :math:`{\hat{S}_{2n}}^{n+2}`, :math:`{\hat{S}_{2n}}^{n+4}`, ... :math:`{\hat{S}_{2n}}^{2n-1}`
    * - :math:`S_{n}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`
    * - :math:`S_{n}`, :math:`n` is odd
@@ -469,6 +469,49 @@ Notes on the table:
   for specific proper rotations
 * All icosahedral groups (:math:`I`, :math:`I_h`): see Hurwitz and icosian quaternions
   for specific proper rotations
+
+Group theory: generators
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Instead of providing all the elements, groups can be described in terms of generators
+(generating sets). A generating set is a set of symmetry operations which can recover
+all the elements of the group by applying the group operation to any combination of the 
+generator elements. The standard notation for this approach is to write group elements
+using curly brackets and generating sets as pointy brackets. For example, group
+:math:`C_2 = {\hat{E}, \hat{C}_2} = \langle\hat{C}_2\rangle`. Thus the generator for the :math:`C_2`
+group is just the operation :math:`\hat{C}_2`. This is because we can construct the
+identity operation (:math:`\hat{E}`) by applying :math:`\hat{C}_2` twice.
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 5 10
+
+   * - Point Group
+     - Group generators
+   * - :math:`C_1`
+     - :math:`\langle\rangle`
+   * - :math:`C_s`
+     - :math:`\langle\hat{\sigma}_v\rangle = \langle\hat{\sigma}_{yz}\rangle`
+   * - :math:`C_h`
+     - :math:`\langle\hat{\sigma}_h\rangle = \langle\hat{\sigma}_{xy}\rangle`
+   * - :math:`C_i`
+     - :math:`\langle\hat{i}\rangle`
+   * - :math:`C_n`
+     - :math:`\langle\hat{C}_n\rangle = \langle\hat{C}_{nz}\rangle`
+   * - :math:`C_{nv}`
+     - :math:`\langle\hat{C}_n, \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{yz}\rangle`
+   * - :math:`C_{nh}`
+     - :math:`\langle\hat{C}_n, \hat{\sigma}_h\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy}\rangle`
+   * - :math:`D_n`
+     - :math:`\langle\hat{C}_n, \hat{\sigma}_h \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy} \hat{\sigma}_{yz}\rangle`
+   * - :math:`D_{nh}`
+     - :math:`\langle\hat{C}_n, \hat{\sigma}_h, \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy}, \hat{\sigma}_{yz}\rangle`
+   * - :math:`D_{nd}`
+     - :math:`\langle\hat{C}_{2n}\hat{\sigma}_h, \hat{\sigma}_v\rangle =  \langle\hat{C}_{2n} \hat{\sigma}_{xy}, \hat{\sigma}_{yz}\rangle`
+   * - :math:`S_{n}`, :math:`n` is even
+     - :math:`\langle\hat{C}_{n}\hat{\sigma}_h\rangle =  \langle\hat{C}_n \hat{\sigma}_{xy}\rangle`
+
 
 Group theory operations: direct and semidirect products
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -524,9 +567,13 @@ C1h = Cs=C1v
 Construction of point groups for PgOP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 accordingt t wikipedia (https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions)
+
 Cnh = Cn x Ch (also Ezra)
+
 Cnv = Cn x {E, sigma_v} (also ezra, in ezra Cs contains sigma_yz, which is sigma_v)
+
 Dn = Cn x {E, sigma_v sigma_h} (also ezra, ezra writes C2y which is equivalent to
+
 sigma_v sigma_h if sigma_v is sigma_yz, which matches ezra notation)
 
 construction used here
