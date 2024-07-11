@@ -134,6 +134,7 @@ can be represented as inversion followed by a rotation of 180 degrees
 
 .. math::
     \hat{\sigma}_{xy} = \hat{i} \hat{C}_{2z}
+    \hat{\sigma}_h = \hat{i} \hat{C}_2
 
 where :math:`\hat{i}` is the inversion operator and :math:`\hat{C}_2(z)` is the two fold
 rotation around :math:`z` axis. The reflection plane is always perpendicular to the axis
@@ -422,9 +423,7 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
    * - :math:`C_{nh}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
    * - :math:`C_{nh}`, :math:`n` is odd
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{n-2}`, :math:`{\hat{S}_n}^{n+2}`, :math:`{\hat{S}_n}^{n+4}`, ... :math:`{\hat{S}_n}^{2n-1}`
-   * - :math:`C_{ni}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{n-1}`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^2`, ... :math:`{\hat{S}_n}^{2n-1}`
    * - :math:`D_n`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` 
    * - :math:`D_{nh}`
@@ -433,6 +432,8 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`n\hat{\sigma}_d`, :math:`\hat{i}`, :math:`\hat{S}_{2n}`, :math:`{\hat{S}_{2n}}^3`, ... :math:`{\hat{S}_{2n}}^{n-2}`, :math:`{\hat{S}_{2n}}^{n+2}`, :math:`{\hat{S}_{2n}}^{n+4}`, ... :math:`{\hat{S}_{2n}}^{2n-1}`
    * - :math:`S_{n}`, :math:`n` is even
      - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`
+   * - :math:`S_{n}`, :math:`n` is odd
+     - :math:`\hat{E}`, :math:`\hat{S}_{n}`, :math:`{\hat{S}_{n}}^2`, ... :math:`{\hat{S}_{n}}^{n-1}`, :math:`{\hat{S}_{n}}^n`, :math:`{\hat{S}_{n}}^{n+1}`, ... :math:`{\hat{S}_{n}}^{2n-1}`
    * - :math:`T`
      - :math:`\hat{E}`, :math:`4 \hat{C}_3`, :math:`4 {\hat{C}_3}^2`, :math:`3 \hat{C}_2`
    * - :math:`T_h`
@@ -515,11 +516,36 @@ pairs of Wigner D matrices from the two groups and multiplying them together:
 .. math::
     D^{(l)}_{m'm}(G \rtimes H) =\frac{1}{|G|} \frac{1}{|H|} \sum_{g \in G} \sum_{h \in H} D^{(l)}_{m'm}(g h) = \sum_{m''=-l}^l D^{(l)}_{m'm''}(g) D^{(l)}_{m''m}(h).
 
+Equivalencies
+~~~~~~~~~~~~~
+Cnh = Sn for odd n
+C1h = Cs=C1v
 
 Construction of point groups for PgOP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+accordingt t wikipedia (https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions)
+Cnh = Cn x Ch (also Ezra)
+Cnv = Cn x {E, sigma_v} (also ezra, in ezra Cs contains sigma_yz, which is sigma_v)
+Dn = Cn x {E, sigma_v sigma_h} (also ezra, ezra writes C2y which is equivalent to
+sigma_v sigma_h if sigma_v is sigma_yz, which matches ezra notation)
 
 construction used here
+It seems Dnh = Dn x Ch = Cnv x Ch = Dn x Ci for even n (gott acheck if sigma_h = i
+sometimes?) (this is all from ezra)
+
+(partially agrees with ezra) Cnh = Cn x Ch but only for even n!! !NO because sigma Cn^2 is not Sn^2
+
+for odd n and even m (Sn)^m = E
+sigmah C3^2 is NOT S3^2
+sigmah C6^2 = S3 
+
+Some useful results of some operations:
+
+.. math::
+  (\hat{S}_n)^m &= (\hat{C}_n)^m \quad \text{for } m \text{ even} \\
+  (\hat{S}_n)^m &= \hat{\sigma}_h (\hat{C}_n)^{m} \quad \text{for } m \text{ odd} \\
+  \hat{\sigma}_h (\hat{C}_n)^{m} &= \hat{C}_n \hat{\sigma}_h(\hat{C}_n)^{m-1} = \hat{C}_n (\hat{S}_n)^{m-1} = \hat{S}_n (\hat{C}_n)^{m-1}  \quad \text{for } m \text{ even} \\
+
 
 Subgroups of crystallographic point groups and relation to Wyckoff sites
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
