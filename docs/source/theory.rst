@@ -655,6 +655,8 @@ Talk about PGOP on liquid states.
 
 Talk about PGOP and how it actually works.
 
+Talk about what it actually computes
+
 Bibliography
 -------------
 .. bibliography::
