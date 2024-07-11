@@ -596,10 +596,12 @@ commute. Consider group :math:`C_{nh} = \langle \hat{C}_n, \hat{\sigma}_h | \hat
 The direct product that gives this group can be written as 
 :math:`C_n \times C_s =C_{nh}`.
 
-Equivalencies
-~~~~~~~~~~~~~
-Cnh = Sn for odd n
-C1h = Cs=C1v
+Point group equivalencies
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Based on the group elements, their generators and relations between powers of
+rotoreflections and pure reflections, we can conclude that :math:`C_{nh} = S_n` for
+every odd value of :math:`n`.
 
 Construction of point groups for PgOP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
