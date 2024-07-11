@@ -656,6 +656,6 @@ Talk about PGOP on liquid states.
 Talk about PGOP and how it actually works.
 
 Bibliography
-============
+-------------
 .. bibliography::
    :filter: docname in docnames
