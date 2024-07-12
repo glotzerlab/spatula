@@ -178,7 +178,7 @@ relations for powers of rotoreflections, (see :cite:`drago1992` for more details
   (\hat{S}_n)^m &= \hat{\sigma}_h (\hat{C}_n)^{m} \quad \text{for } m \text{ odd} \\
   (\hat{S}_n)^{m+n} &= \hat{\sigma}_h (\hat{C}_n)^{m} \quad \text{for } m \text{ even and } n \text{ odd}  \\
   (\hat{S}_n)^m &= \hat{\sigma}_h (\hat{C}_n)^{m-n} \quad \text{for } m \text{ odd and } m>n, n \text{ odd}  \\
-  (\hat{S}_{2n})^{n} &= \hat{i}  \text{for } 2n \text{ even}  \\
+  (\hat{S}_{2n})^{n} &= \hat{i} \quad \text{for } 2n \text{ even}  \\
 
 
 Group theory
