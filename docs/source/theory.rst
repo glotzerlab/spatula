@@ -168,7 +168,7 @@ angle :math:`\frac{2\pi}{n}`, followed by the inversion :cite:`Altmann_WignerD`:
 We also often consider subsequent application of the same operation. This is usually
 written in the form :math:`\hat{S}_n^k` where :math:`k` is the number of times the
 operation is applied. Following the above relations we can derive several useful
-relations for powers of rotoreflections:
+relations for powers of rotoreflections, (see :cite:`drago1992` for more details):
 
 .. math::
   (\hat{S}_n)^n &= \hat{E} \quad \text{for } n \text{ even} \\
