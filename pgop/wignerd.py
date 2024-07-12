@@ -128,7 +128,7 @@ def Ci(max_l: int) -> np.ndarray:  # noqa: N802
 
 
 def Cn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Cn up to the given l.
+    """Return the WignerD matrix for Cn (Cyclic group) up to the given l.
 
     Parameters
     ----------
@@ -152,7 +152,7 @@ def Cn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
 
 
 def Dn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Dn up to the given l.
+    """Return the WignerD matrix for Dn (Dihedral group) up to the given l.
 
     Parameters
     ----------
@@ -247,17 +247,20 @@ def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for Sn up to the given l.
     """
-    operations = [identity(max_l)]
-    for i in range(1, n):
-        if i % 2 == 0:
-            new_op = Cn(max_l, n)
+    id_operation = identity(max_l)
+    operations = [id_operation]
+    rr_operation = rotoreflection(max_l, n)
+    if n % 2 == 0:
+        for i in range(1, n):
+            new_op = id_operation
             for _ in range(1, i):
-                new_op = dot_product(new_op, Cn(max_l, n))
-        else:
-            new_op = rotoreflection(max_l, n)
+                new_op = dot_product(rr_operation, new_op)
+        operations.append(new_op)
+    else:
+        for i in range(1, 2*n):
+            new_op = id_operation
             for _ in range(1, i):
                 new_op = dot_product(new_op, rotoreflection(max_l, n))
-        operations.append(new_op)
     return condensed_wignerD_from_operations(operations)
 
 
@@ -523,7 +526,7 @@ def identity(max_l: int) -> np.ndarray:  # noqa: N802
 
 
 def Cs(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Cs up to the given l.
+    """Return the WignerD matrix for Cs group up to the given l.
 
     Cs={E, sigma_yz}
 
@@ -541,7 +544,7 @@ def Cs(max_l: int) -> np.ndarray:  # noqa: N802
 
 
 def Ch(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Ch up to the given l.
+    """Return the WignerD matrix for Ch group up to the given l.
 
     Ch={E, sigma_xy}
 
