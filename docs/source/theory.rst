@@ -406,9 +406,11 @@ nomenclature in which :math:`\hat{\sigma}_h = \hat{\sigma}_{xy}` is the only hor
 reflection plane, while :math:`\hat{\sigma}_{v}` can be any reflection plane containing
 principal axis of symmetry in :math:`z` direction. Note that some other sources (such as
 :cite:`ezra`) would for some of these reflection planes use :math:`\hat{\sigma}^{'}`.
-The designation :math:`\hat{\sigma}_d` denotes reflection plane which does not contain
-principal symmetry axis (:math:`z`), and is not perpendicular to it. The definitions for
-specific operations are also given `here 
+The designation :math:`\hat{\sigma}_d` denotes a subset of reflections
+:math:`\hat{\sigma}^{v}` which also bisect the angle between the twofold axes
+perpendicular to the principal symmetry axis(:math:`z`). We opt not to use the
+designation :math:`\hat{\sigma}_d`. The definitions for specific operations are also
+given `here 
 <https://web.archive.org/web/20120813130005/http://newton.ex.ac.uk/research/qsystems/people/goss/symmetry/CharacterTables.html>`_. 
 
 Many operations in the table contain a power. The power is to be read as applying the
