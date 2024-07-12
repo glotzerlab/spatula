@@ -415,7 +415,8 @@ given `here
 
 Many operations in the table contain a power. The power is to be read as applying the
 same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
-:math:`\hat{C}_2` operation twice.
+:math:`\hat{C}_2` operation twice. The elements of groups :math:`S_n` for odd values of
+:math:`n` are also given in :cite:`drago1992`.
 
 .. list-table::
    :header-rows: 1
