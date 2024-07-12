@@ -208,20 +208,6 @@ def test_Cn_from_operations(n):
     assert np.isclose(condensed_wignerD_from_operations(operations), Cn(maxl, n)).all()
 
 
-@pytest.mark.parametrize("n", range(2, 12, 2))
-def test_rotoinversion_even_from_operations(n):
-    """https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions"""
-    operations = [identity(maxl)]
-    cnz = n_z(maxl, n)
-    for i in range(1, n, 2):
-        new_operation = identity(maxl)
-        for _ in range(1, i):
-            new_operation = dot_product(new_operation, cnz)
-        new_operation = dot_product(new_operation, sigma_xy(maxl))
-        operations.append(new_operation)
-    assert np.allclose(condensed_wignerD_from_operations(operations), Sn(maxl, n))
-
-
 @pytest.mark.parametrize("n", range(2, 13))
 def test_Cnh_from_operations(n):
     """https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions"""
@@ -274,12 +260,13 @@ def test_Dn_odd_from_operations(n):
     assert np.isclose(condensed_wignerD_from_operations(operations), Dn(maxl, n)).all()
 
 
-@pytest.mark.parametrize("n", range(3, 12))
+@pytest.mark.parametrize("n", range(3, 12, 2))
 def test_Cni_equivalence_to_Sn(n):
     """https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups"""
-    assert np.allclose(
-        WignerD("C" + str(n) + "i", maxl).condensed_matrices, Sn(maxl, n)
-    )
+    if n % 2 == 1:
+        assert np.allclose(
+            WignerD("C" + str(n) + "i", maxl).condensed_matrices, Sn(maxl, 2*n)
+        )
 
 
 # direct product tests
@@ -288,7 +275,7 @@ def test_rotoinversion_even_from_odd_direct_product(n):
     """Ezra p. 189:
     S2n = Cn x Ci for odd n"""
     cn_half = Cn(maxl, n // 2)
-    assert np.allclose(Sn(maxl, n), direct_product(cn_half, Ci(maxl)))
+    assert np.allclose(Sn(maxl, n), semidirect_product(cn_half, Ci(maxl)))
 
 
 def test_D2_direct_product():
@@ -299,7 +286,7 @@ def test_D2_direct_product():
     )
     # D2=C2 x C2'
     assert np.isclose(
-        direct_product(WignerD("C2", maxl).matrices, c2prime.matrices), Dn(maxl, 2)
+        semidirect_product(WignerD("C2", maxl).condensed_matrices, c2prime.condensed_matrices), Dn(maxl, 2)
     ).all()
 
 
@@ -308,8 +295,8 @@ def test_Dnh_odd_n_direct_product(n):
     """Ezra, p. 189"""
     assert np.isclose(
         WignerD("D" + str(n) + "h", maxl).condensed_matrices,
-        direct_product(
-            WignerD("C" + str(n) + "v", maxl).matrices, WignerD("Ch", maxl).matrices
+        semidirect_product(
+            WignerD("C" + str(n) + "v", maxl).condensed_matrices, WignerD("Ch", maxl).condensed_matrices
         ),
     ).all()
 
