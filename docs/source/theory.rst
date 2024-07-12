@@ -465,7 +465,7 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
 Notes on the table:
 
 * :math:`C_{nv}`: each :math:`\hat{\sigma}_v` is a reflection plane containing the
-  principal axis of symmetry starting with :math:`\hat{\sigma}_{zx}`, and rest are
+  principal axis of symmetry starting with :math:`\hat{\sigma}_{yz}`, and rest are
   successive rotation of this plane around :math:`z` axis by :math:`\frac{2\pi}{n}`.
 * All dihedral groups (:math:`D_n`, :math:`D_{nh}`, :math:`D_{nd}`): each
   :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with
@@ -517,11 +517,11 @@ identity operation (:math:`\hat{E}`) by applying :math:`\hat{C}_2` twice.
    * - :math:`C_{nv}`
      - :math:`\langle\hat{C}_n, \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{yz}\rangle`
    * - :math:`D_n`
-     - :math:`\langle\hat{C}_n, \hat{\sigma}_h \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy} \hat{\sigma}_{yz}\rangle`
+     - :math:`\langle\hat{C}_n, \hat{\sigma}_h \hat{\sigma}_v\rangle = \langle\hat{C}_n, \hat{\sigma}_{xy} \hat{\sigma}_{yz}\rangle = \langle\hat{C}_n, \hat{C}_{2x}\rangle`
    * - :math:`D_{nh}` (:math:`D_{nv}`)
      - :math:`\langle\hat{C}_n, \hat{\sigma}_h, \hat{\sigma}_v\rangle =  \langle\hat{C}_n, \hat{\sigma}_{xy}, \hat{\sigma}_{yz}\rangle`
    * - :math:`D_{nd}`
-     - :math:`\langle\hat{C}_{2n}\hat{\sigma}_h, \hat{\sigma}_v\rangle =  \langle\hat{C}_{2n} \hat{\sigma}_{xy}, \hat{\sigma}_{yz}\rangle`
+     - :math:`\langle\hat{C}_{2n}\hat{\sigma}_h, \hat{\sigma}_v\rangle =  \langle\hat{C}_{2n} \hat{\sigma}_{xy}, \hat{\sigma}_{yz}\rangle =  \langle\hat{S}_{2n}, \hat{\sigma}_{yz}\rangle`
    * - :math:`S_{n}`
      - :math:`\langle\hat{S}_{n}\rangle`
 
