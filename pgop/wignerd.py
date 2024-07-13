@@ -939,12 +939,9 @@ def compute_condensed_wignerD_for_C_family(  # noqa N802
     if modifier == "i" and order is not None:
         return semidirect_product(Cn(max_l, order), Ci(max_l))
     elif modifier == "h" and order is not None:
-        if order % 2 == 1:
-            return Sn(max_l, order)
-        else:
-            return None
+        return Cnh(max_l, order)
     elif modifier == "v" and order is not None:
-        return semidirect_product(Cn(max_l, order), Cs(max_l))
+        return Cnv(max_l, order)
     elif modifier is None and order is not None:
         return Cn(max_l, order)
     elif modifier == "i" and order is None:
@@ -978,12 +975,9 @@ def compute_condensed_wignerD_for_D_family(  # noqa N802
         The condensed WignerD matrix for the point group.
     """
     if modifier == "d" and order is not None:
-        if order % 2 == 1:
-            return semidirect_product(Dn(max_l, order), Ci(max_l))
-        else:
-            return semidirect_product(Dn(max_l, order), Sn(max_l, 2 * order))
-    elif modifier == "h" and order % 2 == 1:
-        return semidirect_product(Dn(max_l, order), Ch(max_l))
+        return Dnd(max_l, order)
+    elif modifier == "h" and order is not None:
+        return Dnh(max_l, order)
     elif modifier is None and order is not None:
         return Dn(max_l, order)
     else:
@@ -1034,10 +1028,8 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    D2 = Dn(max_l, 2)  # noqa N806
     if modifier == "d":
-        C3v = semidirect_product(Cn(max_l, 3), Cs(max_l))  # noqa N806
-        return semidirect_product(D2, C3v)
+        return semidirect_product(Dn(max_l, 2), Cnv(max_l, 3))
     else:
         operations = []
         for rot in base_rotations:
