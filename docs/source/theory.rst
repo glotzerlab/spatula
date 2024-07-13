@@ -133,7 +133,7 @@ can be represented as inversion followed by a rotation of 180 degrees
 :cite:`Altmann_WignerD`:
 
 .. math::
-    \hat{\sigma}_{xy} = \hat{i} \hat{C}_{2z}
+    \hat{\sigma}_{xy} = \hat{i} \hat{C}_{2z} \\
     \hat{\sigma}_h = \hat{i} \hat{C}_2
 
 where :math:`\hat{i}` is the inversion operator and :math:`\hat{C}_2(z)` is the two fold
@@ -470,7 +470,7 @@ Notes on the table:
 
 * :math:`C_{nv}`: each :math:`\hat{\sigma}_v` is a reflection plane containing the
   principal axis of symmetry starting with :math:`\hat{\sigma}_{yz}`, and rest are
-  successive rotation of this plane around :math:`z` axis by :math:`\frac{2\pi}{n}`.
+  successive rotation of this plane around :math:`z` axis by :math:`\frac{\pi}{n}`.
 * All dihedral groups (:math:`D_n`, :math:`D_{nh}`, :math:`D_{nd}`): each
   :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with
   :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by
