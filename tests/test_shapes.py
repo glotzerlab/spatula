@@ -62,10 +62,14 @@ def check_symmetry(symmetry, vertices):
     has_symmetry: bool, optional
         Whether to test if the shape has or does not have the symmetry.
     """
+    vertices = np.asarray(vertices)
     optimizer = pgop.optimize.Union.with_step_gradient_descent(
         pgop.optimize.Mesh.from_grid(n_angles=20, n_axes=5), max_iter=100
     )
-    op_compute = pgop.PGOP("fisher", [symmetry], optimizer, kappa=20.0)
+    # check if PGOP is already in the dictionary
+    if symmetry not in pgop_dict:
+        pgop_dict[symmetry] = pgop.PGOP("fisher", [symmetry], optimizer, kappa=20.0)
+    op_compute = pgop_dict[symmetry]
 
     system, nlist = get_shape_sys_nlist(vertices)
     op_compute.compute(system, nlist, query_points=np.zeros((1, 3)), m=13, max_l=12)
@@ -354,7 +358,7 @@ shape_symmetries = {
             ],
         )
     ],
-    "D2v": [
+    "D2d": [
         (
             "vertices",
             [
@@ -369,7 +373,7 @@ shape_symmetries = {
             ],
         )
     ],
-    "D3v": [
+    "D3d": [
         (
             "vertices",
             [
@@ -384,9 +388,9 @@ shape_symmetries = {
             ],
         )
     ],
-    "D4v": [
+    "D4d": [
         (
-            "Square Antiprism",
+            "Square Antiprism vertices",
             [
                 [0.7653668647301796, 0.7653668647301796, 0.6435942529055826],
                 [0.7653668647301796, -0.7653668647301796, 0.6435942529055826],
@@ -399,9 +403,9 @@ shape_symmetries = {
             ],
         )
     ],
-    "D5v": [
+    "D5d": [
         (
-            "Pentagonal Antiprism",
+            "Pentagonal Antiprism vertices",
             [
                 [0.6180339887498949, 0.0, 1.0],
                 [0.6180339887498949, 0.0, -1.0],
@@ -416,9 +420,9 @@ shape_symmetries = {
             ],
         )
     ],
-    "D6v": [
+    "D6d": [
         (
-            "Hexagonal Antiprism",
+            "Hexagonal Antiprism vertices",
             [
                 [1.035276180410083, 0.0, 0.4428909828689583],
                 [-1.035276180410083, 0.0, 0.4428909828689583],
