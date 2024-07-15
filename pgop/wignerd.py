@@ -562,6 +562,7 @@ def Cnh(max_l: int, n: int) -> np.ndarray:  # noqa: N802
                 rotation_op = dot_product(rotation_op, rotation_operation)
             operations.append(rotation_op)
             operations.append(rotoref_op)
+        return condensed_wignerD_from_operations(operations)
 
 
 def Cnv(max_l: int, n: int) -> np.ndarray:  # noqa: N802
