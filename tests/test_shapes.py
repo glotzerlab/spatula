@@ -63,8 +63,10 @@ def check_symmetry(symmetry, vertices):
         Whether to test if the shape has or does not have the symmetry.
     """
     vertices = np.asarray(vertices)
+    # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
+    # close to one as well.
     optimizer = pgop.optimize.Union.with_step_gradient_descent(
-        pgop.optimize.Mesh.from_grid(n_angles=20, n_axes=5), max_iter=100
+        pgop.optimize.Mesh.from_grid(n_axes=65)
     )
     # check if PGOP is already in the dictionary
     if symmetry not in pgop_dict:
@@ -72,7 +74,10 @@ def check_symmetry(symmetry, vertices):
     op_compute = pgop_dict[symmetry]
 
     system, nlist = get_shape_sys_nlist(vertices)
-    op_compute.compute(system, nlist, query_points=np.zeros((1, 3)), m=13, max_l=12)
+    # these options are lowest possible that tests pass.
+    op_compute.compute(
+        system, nlist, query_points=np.zeros((1, 3)), m=9, max_l=9
+    )
     return op_compute.pgop[0]
 
 
