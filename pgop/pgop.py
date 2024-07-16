@@ -26,6 +26,7 @@ class PGOP:
         dist: str,
         symmetries: list[str],
         optimizer: pgop.optimize.Optimizer,
+        max_l: int = 9,
         kappa: float = 11.5,
         max_theta: float = 0.61,
     ):
@@ -42,6 +43,9 @@ class PGOP:
         optimizer : pgop.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
+        max_l : `int`, optional
+            The maximum spherical harmonic l to use for computations. Defaults
+            to 9.
         kappa : float
             The concentration parameter for the von-Mises-Fisher distribution.
             Only used when ``dist`` is "fisher". Defaults to 11.5.
@@ -55,6 +59,7 @@ class PGOP:
         self._symmetries = symmetries
         # computing the PGOP
         self._optmizer = optimizer
+        self._max_l = max_l
         if dist == "fisher":
             dist_param = kappa
         elif dist == "uniform":
@@ -63,7 +68,12 @@ class PGOP:
             cls_ = getattr(pgop._pgop, "PGOP" + dist.title())
         except AttributeError as err:
             raise ValueError(f"Distribution {dist} not supported.") from err
-        D_ij = self._stack_wigner_d_matrices()  # noqa N806
+        matrices = []
+        for point_group in self._symmetries:
+            matrices.append(
+                wignerd.WignerD(point_group, self._max_l).condensed_matrices
+            )
+        D_ij = np.stack(matrices, axis=0)  # noqa N806
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
         self._pgop = None
         self._ylm_cache = util._Cache(5)
@@ -73,8 +83,7 @@ class PGOP:
         system: tuple[freud.box.Box, np.ndarray],
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
         query_points: np.ndarray = None,
-        max_l: int = 6,
-        m: int = 5,
+        m: int = 9,
         refine: bool = True,
         refine_l: int = 9,
         refine_m: int = 10,
@@ -105,12 +114,9 @@ class PGOP:
             The points to compute the PGOP for. Defaults to ``None`` which
             computes the PGOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.
-        max_l : `int`, optional
-            The maximum spherical harmonic l to use for computations. Defaults
-            to 6. Can go up to 12.
         m : `int`, optional
             The number of points to use in the longitudinal direction for
-            spherical Gauss-Legrende quadrature. Defaults to 5. More
+            spherical Gauss-Legrende quadrature. Defaults to 9. More
             concentrated distributions require larger ``m`` to properly evaluate
             bond order functions. The number of points to evaluate scales as
             :math:`4 m^2`.
@@ -120,10 +126,10 @@ class PGOP:
             after a lower fidelity optimization.
         refine_l : `int`, optional
             The maximum spherical harmonic l to use for refining. Defaults
-            to 9. Can go up to 12.
+            to 9.
         refine_m : `int`, optional
             The number of points to use in the longitudinal direction for
-            spherical Gauss-Legrende quadrature in refining. Defaults to 9. More
+            spherical Gauss-Legrende quadrature in refining. Defaults to 10. More
             concentrated distributions require larger ``m`` to properly evaluate
             bond order functions. The number of points to evaluate scales as
             :math:`4 m^2`.
@@ -138,7 +144,7 @@ class PGOP:
             neighbors.weights,
             neighbors.neighbor_counts,
             m,
-            np.conj(self._ylms(max_l, m)),
+            np.conj(self._ylms(self._max_l, m)),
             quad_positions,
             quad_weights,
         )
@@ -213,9 +219,12 @@ class PGOP:
         """
         return self._rotations
 
-    def _stack_wigner_d_matrices(self) -> np.ndarray:
-        """Return a NumPy array of WignerD matrices for given symmetries."""
-        matrices = []
-        for point_group in self._symmetries:
-            matrices.append(wignerd.WignerD(point_group, 12).condensed_matrices)
-        return np.stack(matrices, axis=0)
+    @property
+    def max_l(self) -> int:
+        """The maximum spherical harmonic l used in computations."""
+        return self._max_l
+
+    @property
+    def symmetries(self) -> list[str]:
+        """The point group symmetries tested."""
+        return self._symmetries
