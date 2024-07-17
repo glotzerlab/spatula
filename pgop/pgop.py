@@ -32,6 +32,11 @@ class PGOP:
     ):
         """Create a PGOP object.
 
+        Note
+        ----
+            A ``max_l`` of at least 9 is needed to capture several higher order groups
+            such as Cnh, Cnv and some D groups.
+        
         Parameters
         ----------
         dist : str
@@ -89,11 +94,6 @@ class PGOP:
         refine_m: int = 10,
     ):
         """Compute the point group symmetry for a given system and neighbor.
-
-        Note
-        ----
-            A ``max_l`` of at least 6 is needed to caputure icosahedral ordering
-            and a max of 4 is needed for octahedral.
 
         Note
         ----
