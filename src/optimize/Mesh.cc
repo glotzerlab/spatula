@@ -5,6 +5,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/vector.h>
 
 #include "Mesh.h"
 
@@ -34,7 +35,6 @@ std::unique_ptr<Optimizer> Mesh::clone() const
 
 void export_mesh(nb::module_& m)
 {
-    nb::class_<Mesh, Optimizer>(m, "Mesh").def(
-        nb::init<const std::vector<data::Quaternion>&>());
+    nb::class_<Mesh, Optimizer>(m, "Mesh").def(nb::init<const std::vector<data::Quaternion>&>());
 }
 }} // end namespace pgop::optimize

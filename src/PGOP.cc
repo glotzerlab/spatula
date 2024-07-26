@@ -5,6 +5,7 @@
 #include "BondOrder.h"
 #include "PGOP.h"
 #include "util/Threads.h"
+#include <nanobind/stl/shared_ptr.h>
 
 namespace pgop {
 
@@ -97,7 +98,7 @@ void PGOP<distribution_type>::compute(const nb::ndarray<double> distances,
     // reserve N_particles, m_n_symmetries, 4 for m_rotations
     m_optimal_rotations->reserve(N_particles);
     const auto loop_func = [&neighborhoods, &qlm_eval, this](const size_t start,
-                                                                    const size_t stop) {
+                                                             const size_t stop) {
         auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
         for (size_t i = start; i < stop; ++i) {
             if (neighborhoods.getNeighborCount(i) == 0) {
@@ -115,7 +116,7 @@ void PGOP<distribution_type>::compute(const nb::ndarray<double> distances,
             const auto& values = std::get<0>(particle_op_rot);
             const auto& rots = std::get<1>(particle_op_rot);
             for (size_t j {0}; j < m_n_symmetries; ++j) {
-                (*m_pgop_values)[i][j] = values[j]; 
+                (*m_pgop_values)[i][j] = values[j];
                 (*m_optimal_rotations)[i][j][0] = rots[j].w;
                 (*m_optimal_rotations)[i][j][1] = rots[j].x;
                 (*m_optimal_rotations)[i][j][2] = rots[j].y;
@@ -142,8 +143,7 @@ void PGOP<distribution_type>::refine(const nb::ndarray<double> distances,
                                              distances.data());
     const size_t N_particles = num_neighbors.size();
     const auto loop_func
-        = [&neighborhoods, &qlm_eval, this](const size_t start,
-                                                                       const size_t stop) {
+        = [&neighborhoods, &qlm_eval, this](const size_t start, const size_t stop) {
               auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
               for (size_t i = start; i < stop; ++i) {
                   if (neighborhoods.getNeighborCount(i) == 0) {
@@ -155,10 +155,12 @@ void PGOP<distribution_type>::refine(const nb::ndarray<double> distances,
                   auto neighborhood = neighborhoods.getNeighborhood(i);
                   for (size_t j {0}; j < m_n_symmetries; ++j) {
                       const auto& rot_array = (*m_optimal_rotations)[i][j];
-                      const auto rot = data::Quaternion(rot_array[0], rot_array[1], rot_array[2], rot_array[3])
-                                 .to_axis_angle_3D();
+                      const auto rot
+                          = data::Quaternion(rot_array[0], rot_array[1], rot_array[2], rot_array[3])
+                                .to_axis_angle_3D();
                       neighborhood.rotate(rot);
-                      (*m_pgop_values)[i][j] = this->compute_pgop(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
+                      (*m_pgop_values)[i][j]
+                          = this->compute_pgop(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
                   }
               }
           };
