@@ -6,8 +6,8 @@
 #include <utility>
 #include <vector>
 
-#include <nanobind/ndarray.h>
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 
 #include "../data/Vec3.h"
 

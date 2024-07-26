@@ -1,8 +1,8 @@
 #include <cmath>
 #include <iterator>
-#include <numeric>
-#include <nanobind/ndarray.h>
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+#include <numeric>
 
 #include "Util.h"
 
@@ -180,7 +180,8 @@ wignerDSemidirectProduct(const nb::ndarray<std::complex<double>> D_a,
             for (size_t m {0}; m < max_m; ++m) {
                 std::complex<double> sum {0, 0};
                 for (size_t m_prime_2 {0}; m_prime_2 < max_m; ++m_prime_2) {
-                    sum += u_D_a[start_lmprime_i + m_prime_2]* u_D_b[l_skip + m_prime_2 * max_m + m];
+                    sum += u_D_a[start_lmprime_i + m_prime_2]
+                           * u_D_b[l_skip + m_prime_2 * max_m + m];
                 }
                 u_D_ab[start_lmprime_i + m] = colapse_to_zero(sum, 1e-7);
             }

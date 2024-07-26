@@ -1,7 +1,6 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
 
-
 #include "StepGradientDescent.h"
 #include "Union.h"
 

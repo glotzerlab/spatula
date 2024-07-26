@@ -2,8 +2,8 @@
 #include <sstream>
 #include <string>
 
-#include <nanobind/operators.h>
 #include <nanobind/nanobind.h>
+#include <nanobind/operators.h>
 
 #include "Quaternion.h"
 

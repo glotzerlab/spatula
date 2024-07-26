@@ -2,8 +2,8 @@
 #include <complex>
 #include <vector>
 
-#include <nanobind/ndarray.h>
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 
 #include "../BondOrder.h"
 #include "Util.h"

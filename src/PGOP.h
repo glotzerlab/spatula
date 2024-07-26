@@ -1,13 +1,13 @@
 #pragma once
+#include <functional>
 #include <memory>
 #include <tuple>
 #include <vector>
-#include <functional>
 
 #include <complex>
-#include <numeric>
-#include <nanobind/ndarray.h>
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+#include <numeric>
 
 #include "data/Quaternion.h"
 #include "optimize/Optimize.h"
@@ -227,7 +227,8 @@ template<typename distribution_type> class PGOP {
     std::shared_ptr<std::vector<std::vector<std::array<double, 4>>>> m_optimal_rotations;
 };
 
-template<typename distribution_type> void export_pgop_class(nb::module_& m, const std::string& name);
+template<typename distribution_type>
+void export_pgop_class(nb::module_& m, const std::string& name);
 
 void export_pgop(nb::module_& m);
 } // End namespace pgop

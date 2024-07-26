@@ -94,9 +94,7 @@ void StepGradientDescent::searchAlongGradient()
 
 void export_step_gradient_descent(nb::module_& m)
 {
-    nb::class_<StepGradientDescent, Optimizer>(
-        m,
-        "StepGradientDescent")
+    nb::class_<StepGradientDescent, Optimizer>(m, "StepGradientDescent")
         .def(nb::init<const data::Vec3&, unsigned int, double, double, double>());
 }
 }} // namespace pgop::optimize

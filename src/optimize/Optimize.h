@@ -84,6 +84,7 @@ class Optimizer {
  */
 class PyOptimizer : public Optimizer {
     NB_TRAMPOLINE(Optimizer, 4);
+
     public:
     ~PyOptimizer() override = default;
 
