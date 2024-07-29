@@ -46,10 +46,10 @@ def check_symmetry(symmetry, vertices, threshold, has_symmetry=True):
     optimizer = pgop.optimize.Union.with_step_gradient_descent(
         pgop.optimize.Mesh.from_grid(n_angles=20, n_axes=5), max_iter=100
     )
-    op_compute = pgop.PGOP("fisher", [symmetry], optimizer, kappa=20.0)
+    op_compute = pgop.PGOP("fisher", [symmetry], optimizer, max_l=12, kappa=20.0)
     system, nlist = get_shape_sys_nlist(vertices)
     print(f"{vertices=}, {nlist.distances=}")
-    op_compute.compute(system, nlist, query_points=np.zeros((1, 3)), m=13, max_l=12)
+    op_compute.compute(system, nlist, query_points=np.zeros((1, 3)), m=13)
     if has_symmetry:
         assert op_compute.pgop[0] >= threshold
         return
