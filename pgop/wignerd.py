@@ -104,84 +104,6 @@ icosahedral_rotations = (
 )
 
 
-def Ci(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Ci up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for Ci up to the given l.
-    """
-
-    return np.array(
-        [
-            delta(mprime, m) * delta(l % 2, 0)
-            for l, mprime, m in iter_sph_indices(max_l)
-        ],
-        dtype=complex,
-    )
-
-
-def Cn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Cn up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    n : int
-        The order of the cyclic group.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for Cn up to the given l.
-    """
-    return np.array(
-        [
-            delta(mprime, m) * delta(m % n, 0)
-            for _, mprime, m in iter_sph_indices(max_l)
-        ],
-        dtype=complex,
-    )
-
-
-def Dn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Dn up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    n : int
-        The order of the dihedral group.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for Dn up to the given l.
-    """
-    # return semidirect_product(
-    #    Cn(max_l, n),
-    #    condensed_wignerD_from_operations([identity(max_l), two_y(max_l)]),
-    # )
-    return (
-        np.array(
-            [
-                (delta(mprime, m) + delta(mprime, -m) * (-1) ** l) * delta(m % n, 0)
-                for l, mprime, m in iter_sph_indices(max_l)
-            ],
-            dtype=complex,
-        )
-        / 2
-    )
-
-
 def inversion(max_l: int) -> np.ndarray:  # noqa: N802
     """Return the WignerD matrix for inversion up to the given l.
 
@@ -226,39 +148,6 @@ def rotoreflection(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     reflection_matrices = sigma_xy(max_l)
     rotation_matrices = n_z(max_l, n)
     return dot_product(reflection_matrices, rotation_matrices)
-
-
-def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Sn (rotoreflection group) up to the given l.
-
-    Elements of Sn are given by Sn = {I, Sn, Cn**2, Sn**3, Cn**4, Sn**5, ... until n-1
-    (last can be C or S depending if n is odd or even)} according to
-    https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions and character tables.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    n : int
-        The order of the rotation group.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for Sn up to the given l.
-    """
-    operations = [identity(max_l)]
-    for i in range(1, n):
-        if i % 2 == 0:
-            new_op = Cn(max_l, n)
-            for _ in range(1, i):
-                new_op = dot_product(new_op, Cn(max_l, n))
-        else:
-            new_op = rotoreflection(max_l, n)
-            for _ in range(1, i):
-                new_op = dot_product(new_op, rotoreflection(max_l, n))
-        operations.append(new_op)
-    return condensed_wignerD_from_operations(operations)
 
 
 def generalized_rotation(
@@ -523,7 +412,7 @@ def identity(max_l: int) -> np.ndarray:  # noqa: N802
 
 
 def Cs(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Cs up to the given l.
+    """Return the WignerD matrix for Cs group up to the given l.
 
     Cs={E, sigma_yz}
 
@@ -541,7 +430,7 @@ def Cs(max_l: int) -> np.ndarray:  # noqa: N802
 
 
 def Ch(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for Ch up to the given l.
+    """Return the WignerD matrix for Ch group up to the given l.
 
     Ch={E, sigma_xy}
 
@@ -556,6 +445,274 @@ def Ch(max_l: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for Ch up to the given l.
     """
     return condensed_wignerD_from_operations([identity(max_l), sigma_xy(max_l)])
+
+
+def Ci(max_l: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Ci up to the given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Ci up to the given l.
+    """
+
+    return np.array(
+        [
+            delta(mprime, m) * delta(l % 2, 0)
+            for l, mprime, m in iter_sph_indices(max_l)
+        ],
+        dtype=complex,
+    )
+
+
+def Cn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Cn (Cyclic group) up to the given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the cyclic group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Cn up to the given l.
+    """
+    return np.array(
+        [
+            delta(mprime, m) * delta(m % n, 0)
+            for _, mprime, m in iter_sph_indices(max_l)
+        ],
+        dtype=complex,
+    )
+
+
+def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Sn (rotoreflection group) up to the given l.
+
+    Elements of Sn are given by Sn = {I, Sn, Cn**2, Sn**3, Cn**4, Sn**5, ... until n-1
+    (last can be C or S depending if n is odd or even)} according to
+    https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions and character tables.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the rotation group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Sn up to the given l.
+    """
+    id_operation = identity(max_l)
+    operations = [id_operation]
+    rr_operation = rotoreflection(max_l, n)
+    if n % 2 == 0:
+        for i in range(1, n):
+            new_op = id_operation
+            for _ in range(1, i):
+                new_op = dot_product(rr_operation, new_op)
+        operations.append(new_op)
+    else:
+        for i in range(1, 2 * n):
+            new_op = id_operation
+            for _ in range(1, i):
+                new_op = dot_product(new_op, rotoreflection(max_l, n))
+    return condensed_wignerD_from_operations(operations)
+
+
+def Cnh(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Cnh (Cyclic group with reflection) up to the given
+    l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the cyclic group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Cnh up to the given l.
+    """
+    if n % 2 == 1:
+        return Sn(max_l, n)
+    else:
+        id_operation = identity(max_l)
+        sigma_h_operation = sigma_xy(max_l)
+        operations = [id_operation, sigma_h_operation]
+        rr_operation = rotoreflection(max_l, n)
+        rotation_operation = n_z(max_l, n)
+        for i in range(1, n):
+            rotation_op = id_operation
+            rotoref_op = id_operation
+            for _ in range(1, i):
+                rotoref_op = dot_product(rotoref_op, rr_operation)
+                rotation_op = dot_product(rotation_op, rotation_operation)
+            operations.append(rotation_op)
+            operations.append(rotoref_op)
+        return condensed_wignerD_from_operations(operations)
+
+
+def Cnv(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Cnv (Cyclic group with reflection) up to the given
+    l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the cyclic group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Cnv up to the given l.
+    """
+    id_operation = identity(max_l)
+    sigma_v_operation = sigma_yz(max_l)
+    rotation_operation = n_z(max_l, n)
+    operations = [id_operation, sigma_v_operation]
+    for i in range(1, n):
+        rotation_op = id_operation
+        for _ in range(1, i):
+            rotation_op = dot_product(rotation_op, rotation_operation)
+        operations.append(dot_product(sigma_v_operation, rotation_op))
+        operations.append(rotation_op)
+    return condensed_wignerD_from_operations(operations)
+
+
+def Dn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Dn (Dihedral group) up to the given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the dihedral group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Dn up to the given l.
+    """
+    id_operation = identity(max_l)
+    c2x_operation = two_x(max_l)
+    rotation_operation = n_z(max_l, n)
+    operations = [id_operation, c2x_operation]
+    for i in range(1, n):
+        rotation_op = id_operation
+        for _ in range(1, i):
+            rotation_op = dot_product(rotation_op, rotation_operation)
+        operations.append(rotation_op)
+        operations.append(dot_product(c2x_operation, rotation_op))
+    return condensed_wignerD_from_operations(operations)
+    # TODO check if equivalent
+    # return (
+    #    np.array(
+    #        [
+    #            (delta(mprime, m) + delta(mprime, -m) * (-1) ** l) * delta(m % n, 0)
+    #            for l, mprime, m in iter_sph_indices(max_l)
+    #        ],
+    #        dtype=complex,
+    #    )
+    #    / 2
+    # )
+
+
+def Dnh(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Dnh (Dihedral group with reflection) up to the
+    given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the dihedral group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Dnh up to the given l.
+    """
+    id_operation = identity(max_l)
+    c2x_operation = two_x(max_l)
+    sigma_h_operation = sigma_xy(max_l)
+    rotation_operation = n_z(max_l, n)
+    rr_operation = rotoreflection(max_l, n)
+    operations = [id_operation, c2x_operation, sigma_h_operation]
+    for i in range(1, n):
+        rotation_op = id_operation
+        for _ in range(1, i):
+            rotation_op = dot_product(rotation_op, rotation_operation)
+        # Cn
+        operations.append(rotation_op)
+        # C2'
+        c2prime_op = dot_product(c2x_operation, rotation_op)
+        operations.append(c2prime_op)
+        # sigma_h x C2 x Cn
+        operations.append(dot_product(sigma_h_operation, c2prime_op))
+    for i in range(1, n, 2):
+        rotoref_op = id_operation
+        for _ in range(1, i):
+            rotoref_op = dot_product(rotoref_op, rr_operation)
+        operations.append(rotoref_op)
+    return condensed_wignerD_from_operations(operations)
+
+
+def Dnd(max_l: int, n: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for Dnd (Dihedral group with n-fold rotation) up to
+    the given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    n : int
+        The order of the dihedral group.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for Dnd up to the given l.
+    """
+    id_operation = identity(max_l)
+    inv_operation = inversion(max_l)
+    c2x_operation = two_x(max_l)
+    rotation_operation = n_z(max_l, n)
+    rr_operation = rotoreflection(max_l, n)
+    operations = [id_operation, c2x_operation]
+    for i in range(1, n):
+        rotation_op = id_operation
+        for _ in range(1, i):
+            rotation_op = dot_product(rotation_op, rotation_operation)
+        # Cn
+        operations.append(rotation_op)
+        # C2'
+        c2prime_op = dot_product(c2x_operation, rotation_op)
+        operations.append(c2prime_op)
+        # sigma_h x C2 x Cn
+        operations.append(dot_product(inv_operation, c2prime_op))
+    for i in range(1, 2 * n, 2):
+        rotoref_op = id_operation
+        for _ in range(1, i):
+            rotoref_op = dot_product(rotoref_op, rr_operation)
+        operations.append(rotoref_op)
+    return condensed_wignerD_from_operations(operations)
 
 
 def iter_sph_indices(max_l: int) -> Generator[int, int, int]:
@@ -715,27 +872,6 @@ def dot_product(
     return np.concatenate(result)
 
 
-def direct_product(matrices_a: np.ndarray, matrices_b: np.ndarray) -> np.ndarray:  # noqa N802
-    """Direct product of two sets of WignerD matrices.
-
-    Parameters
-    ----------
-    matrices_a : np.ndarray
-        The first set of WignerD matrices.
-    matrices_b : np.ndarray
-        The second set of WignerD matrices.
-
-    Returns
-    -------
-    np.ndarray
-        The direct product of the two sets of WignerD matrices.
-    """
-    result = []
-    for matrix1, matrix2 in zip(matrices_a, matrices_b):
-        result.append(np.dot(matrix1, matrix2).flatten())
-    return np.concatenate(result)
-
-
 def _parse_point_group(schonflies_symbol):
     """Parse a Schönflies symbol into its component parts.
 
@@ -804,9 +940,9 @@ def compute_condensed_wignerD_for_C_family(  # noqa N802
     if modifier == "i" and order is not None:
         return semidirect_product(Cn(max_l, order), Ci(max_l))
     elif modifier == "h" and order is not None:
-        return semidirect_product(Cn(max_l, order), Ch(max_l))
+        return Cnh(max_l, order)
     elif modifier == "v" and order is not None:
-        return semidirect_product(Cn(max_l, order), Cs(max_l))
+        return Cnv(max_l, order)
     elif modifier is None and order is not None:
         return Cn(max_l, order)
     elif modifier == "i" and order is None:
@@ -839,14 +975,10 @@ def compute_condensed_wignerD_for_D_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    if (modifier == "d" or modifier == "v") and order % 2 == 1:
-        return semidirect_product(Dn(max_l, order), Ci(max_l))
-    elif (modifier == "d" or modifier == "v") and order % 2 == 0:
-        return semidirect_product(Dn(max_l, order), Sn(max_l, 2 * order))
-    elif modifier == "h" and order % 2 == 1:
-        return semidirect_product(Dn(max_l, order), Ch(max_l))
-    elif modifier == "h" and order % 2 == 0:
-        return semidirect_product(Dn(max_l, order), Ci(max_l))
+    if modifier == "d" and order is not None:
+        return Dnd(max_l, order)
+    elif modifier == "h" and order is not None:
+        return Dnh(max_l, order)
     elif modifier is None and order is not None:
         return Dn(max_l, order)
     else:
@@ -897,10 +1029,8 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    D2 = Dn(max_l, 2)  # noqa N806
     if modifier == "d":
-        C3v = semidirect_product(Cn(max_l, 3), Cs(max_l))  # noqa N806
-        return semidirect_product(D2, C3v)
+        return semidirect_product(Dn(max_l, 2), Cnv(max_l, 3))
     else:
         operations = []
         for rot in base_rotations:
