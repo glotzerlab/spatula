@@ -127,7 +127,7 @@ def inversion(max_l: int) -> np.ndarray:  # noqa: N802
 
 
 def rotoreflection(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for rotoreflection up to the given l.
+    """Return the WignerD matrix for rotoreflection, around z up to the given l.
 
     Implementation according to Altman, Mathematical Proceedings of the Cambridge
     Philosophical Society , Volume 53 , Issue 2 , April 1957
@@ -1030,7 +1030,12 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
         The condensed WignerD matrix for the point group.
     """
     if modifier == "d":
-        return semidirect_product(Dn(max_l, 2), Cnv(max_l, 3))
+        operations = []
+        C2x = two_x(max_l)
+        C2y = two_y(max_l)
+        C2z = n_z(max_l, 2)
+        # need 8 C3
+        # return semidirect_product(Dn(max_l, 2), Cnv(max_l, 3))
     else:
         operations = []
         for rot in base_rotations:
