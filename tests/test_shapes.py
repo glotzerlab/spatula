@@ -1470,9 +1470,6 @@ non_shape_symmetries.update(
     {f"C{i}": [f"RegularNGonFamily.{cyclic_non_symmetry[i]}"] for i in range(3, 13)}
 )
 non_shape_symmetries.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
-non_shape_symmetries.update(
-    {f"D{i}": [get_bipyramid(cyclic_non_symmetry[i])] for i in range(3, 13)}
-)
 
 
 @pytest.mark.parametrize(
