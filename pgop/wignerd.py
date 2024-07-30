@@ -127,7 +127,7 @@ def inversion(max_l: int) -> np.ndarray:  # noqa: N802
 
 
 def rotoreflection(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for rotoreflection up to the given l.
+    """Return the WignerD matrix for rotoreflection, around z up to the given l.
 
     Implementation according to Altman, Mathematical Proceedings of the Cambridge
     Philosophical Society , Volume 53 , Issue 2 , April 1957

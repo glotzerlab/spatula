@@ -36,7 +36,7 @@ class PGOP:
         ----
             A ``max_l`` of at least 9 is needed to capture several higher order groups
             such as Cnh, Cnv and some D groups.
-        
+
         Parameters
         ----------
         dist : str
