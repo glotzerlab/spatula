@@ -24,7 +24,7 @@ from pgop.wignerd import (
     inversion,
     iter_sph_indices,
     n_z,
-    rotoreflection,
+    rotoreflection_z,
     semidirect_product,
     sigma_xy,
     sigma_xz,
@@ -172,11 +172,11 @@ def test_inversion_as_reflections():
 
 
 @pytest.mark.parametrize("n", range(2, 12, 2))
-def test_rotoreflection(n):
+def test_rotoreflection_z(n):
     """According to https://en.wikipedia.org/wiki/Point_groups_in_three_dimensions a
     rotoreflection is equivalent to Cn followed by sigma h for even n"""
     assert np.allclose(
-        rotoreflection(maxl, n), dot_product(n_z(maxl, n), sigma_xy(maxl))
+        rotoreflection_z(maxl, n), dot_product(n_z(maxl, n), sigma_xy(maxl))
     )
 
 
