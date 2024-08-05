@@ -776,17 +776,6 @@ def Dn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
         operations.append(rotation_op)
         operations.append(dot_product(c2x_operation, rotation_op))
     return condensed_wignerD_from_operations(operations)
-    # TODO check if equivalent
-    # return (
-    #    np.array(
-    #        [
-    #            (delta(mprime, m) + delta(mprime, -m) * (-1) ** l) * delta(m % n, 0)
-    #            for l, mprime, m in iter_sph_indices(max_l)
-    #        ],
-    #        dtype=complex,
-    #    )
-    #    / 2
-    # )
 
 
 def Dnh(max_l: int, n: int) -> np.ndarray:  # noqa: N802
@@ -961,6 +950,9 @@ def collapse_to_zero(num, tol=1e-7):
 def semidirect_product(D_a: np.ndarray, D_b: np.ndarray) -> np.ndarray:  # noqa N802
     """Compute the semidirect product of two WignerD matrices.
 
+    Note: This version doesn't take into account that duplicate operations produced by
+    the procedures shouldn't be double counted!
+
     Parameters
     ----------
     D_a : np.ndarray
@@ -1038,8 +1030,6 @@ def _parse_point_group(schonflies_symbol):
     # once we figure out how to do Sn systematically stop hard coding.
     if schonflies_symbol == "S2":
         schonflies_symbol = "Ci"
-    elif schonflies_symbol == "S6":
-        schonflies_symbol = "C3i"
     elif schonflies_symbol == "V":
         schonflies_symbol = "D2"
     family = schonflies_symbol[0]
@@ -1093,9 +1083,7 @@ def compute_condensed_wignerD_for_C_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
-    if modifier == "i" and order is not None:
-        return semidirect_product(Cn(max_l, order), Ci(max_l))
-    elif modifier == "h" and order is not None:
+    if modifier == "h" and order is not None:
         return Cnh(max_l, order)
     elif modifier == "v" and order is not None:
         return Cnv(max_l, order)
@@ -1185,29 +1173,10 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
     np.ndarray
         The condensed WignerD matrix for the point group.
     """
+    operations = []
+    for rot in base_rotations:
+        operations.append(generalized_rotation(max_l, *rot))
     if modifier == "d":
-        operations = [identity(max_l)]
-        # add 3 C2
-        operations.append(two_x(max_l))
-        operations.append(two_y(max_l))
-        operations.append(n_z(max_l, 2))
-        # add 8 C3
-        # 120 degrees around 0.5774, 0.5774, 0.5774
-        operations.append(generalized_rotation(max_l, 0, np.pi / 2, np.pi / 2))
-        # 120 degrees around -0.5774, -0.5774, 0.5774
-        operations.append(generalized_rotation(max_l, 1, np.pi / 2, -np.pi / 2))
-        # 120 degrees around -0.5774, 0.5774, -0.5774
-        operations.append(generalized_rotation(max_l, 0, np.pi / 2, -np.pi / 2))
-        # 120 degrees around 0.5774, -0.5774, -0.5774
-        operations.append(generalized_rotation(max_l, -1, np.pi / 2, np.pi / 2))
-        # 240 degrees around 0.5774, 0.5774, 0.5774
-        operations.append(generalized_rotation(max_l, np.pi / 2, np.pi / 2, 1))
-        # 240 degrees around -0.5774, -0.5774, 0.5774
-        operations.append(generalized_rotation(max_l, -np.pi / 2, np.pi, 0))
-        # 240 degrees around -0.5774, 0.5774, -0.5774
-        operations.append(generalized_rotation(max_l, -np.pi / 2, np.pi / 2, -1))
-        # 240 degrees around 0.5774, -0.5774, -0.5774
-        operations.append(generalized_rotation(max_l, np.pi / 2, np.pi / 2, 0))
         # 6 S4
         # 90 degrees around 1, 0, 0
         first_S4 = generalized_rotoreflection_from_axis_order(max_l, [0, 0, 1], 4)  # noqa N806
@@ -1251,17 +1220,16 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
             generalized_sigma(max_l, [np.sqrt(2) / 2, -np.sqrt(2) / 2, 0])
         )
         return condensed_wignerD_from_operations(operations)
+    elif modifier == "h":
+        inversion_operation = inversion(max_l)
+        new_operations = operations.copy()
+        for op in operations:
+            new_operations.append(dot_product(op, inversion_operation))
+        return condensed_wignerD_from_operations(new_operations)
+    elif modifier is None:
+        return condensed_wignerD_from_operations(operations)
     else:
-        operations = []
-        for rot in base_rotations:
-            operations.append(generalized_rotation(max_l, *rot))
-        T = condensed_wignerD_from_operations(operations)  # noqa N806
-        if modifier == "h":
-            return semidirect_product(T, Ci(max_l))
-        elif modifier is None:
-            return T
-        else:
-            return None
+        return None
 
 
 def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
@@ -1285,11 +1253,14 @@ def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
     operations = []
     for rot in np.concatenate((base_rotations, octahedral_rotations)):
         operations.append(generalized_rotation(max_l, *rot))
-    O = condensed_wignerD_from_operations(operations)  # noqa N806
     if modifier == "h":
-        return semidirect_product(O, Ci(max_l))
+        inversion_operation = inversion(max_l)
+        new_operations = operations.copy()
+        for op in operations:
+            new_operations.append(dot_product(op, inversion_operation))
+        return condensed_wignerD_from_operations(new_operations)
     elif modifier is None:
-        return O
+        return condensed_wignerD_from_operations(operations)
     else:
         return None
 
@@ -1315,11 +1286,14 @@ def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
     operations = []
     for rot in np.concatenate((base_rotations, icosahedral_rotations)):
         operations.append(generalized_rotation(max_l, *rot))
-    I = condensed_wignerD_from_operations(operations)  # noqa N806
     if modifier == "h":
-        return semidirect_product(I, Ci(max_l))
+        inversion_operation = inversion(max_l)
+        new_operations = operations.copy()
+        for op in operations:
+            new_operations.append(dot_product(op, inversion_operation))
+        return condensed_wignerD_from_operations(new_operations)
     elif modifier is None:
-        return I
+        return condensed_wignerD_from_operations(operations)
     else:
         return None
 
