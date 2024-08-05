@@ -43,43 +43,20 @@ point group symmetry we shall focus only on point group symmetry.
 Symmetry operations in point groups
 -----------------------------------
 
-Rotations are defined by the axis of rotation and the angle of rotation. Many
-representations of rotations exist and here we give several common ones. The most common
-representation of rotations is the rotation matrix. The rotation matrix is a 3x3 matrix
-that rotates a vector in 3D space by a given angle around a given axis. The formula in
-Cartesian representation is given by :math:`\hat{C}_{2\pi/\theta}=\hat{R}(\theta,
-\mathbf{u})`: 
-
-.. math::
-    \begin{pmatrix}
-    \cos \theta + u_x^2 (1 - \cos \theta) & u_x u_y (1 - \cos \theta) - u_z 
-    \sin \theta & u_x u_z (1 - \cos \theta) + u_y \sin \theta \\
-    u_y u_x (1 - \cos \theta) + u_z \sin \theta & \cos \theta + u_y^2 (1 - \cos \theta)
-     & u_y u_z (1 - \cos \theta) - u_x \sin \theta \\
-    u_z u_x (1 - \cos \theta) - u_y \sin \theta & u_z u_y (1 - \cos \theta) + u_x 
-    \sin \theta & \cos \theta + u_z^2 (1 - \cos \theta)
-    \end{pmatrix}
-
-where :math:`\theta` is the angle of rotation and :math:`\mathbf{u}` is the axis of
-rotation in form of a unit vector. All basic operators are denoted by a hat. We shall,
-moving forward always consider that the principal axis of symmetry (one with highest
-symmetry order) is along the :math:`z` axis.
-
-Another common representation of rotations is the Euler angles. The Euler angles are a
-set of three angles that describe the orientation of a rigid body in 3D space. The Euler
-angles can also be used to construct the rotation matrix, but the formula depends on the
-convention chosen. The Euler angles are not unique, meaning that there are many sets of
-Euler angles that describe the same rotation. The Euler angles also suffer from the
-so-called `gimbal lock problem <https://en.wikipedia.org/wiki/Gimbal_lock>`_. `The
-formula <https://en.wikipedia.org/wiki/Rotation_matrix>`_ for rotation matrix from Euler
-angles can be obtained in a given convention by performing 3 successive matrix
-multiplications of the rotation matrices for each angle.
-
-Another common and useful representation are `quaternions
-<https://en.wikipedia.org/wiki/Quaternion>`_. Quaternions can be used to represent
-rotations in 3D space and live on the unit hypersphere in 4D space. Quaternions are
-useful because they do not suffer from the gimbal lock problem and are more
-computationally efficient than the rotation matrix.
+Rotations are defined by the axis of rotation and the angle of rotation.  Various
+representations of rotations exist, each with distinct advantages and disadvantages. In
+PgOP, we primarily use the Euler angle representation in the zyz convention because the
+relevant literature often adopts it :cite:`Altmann_WignerD`. A rotation operation is
+written as :math:`\hat{C}_{nz}`, where :math:`n` represents the order of rotation and
+the second letter indicates the rotation axis. Other axes besides :math:`x`, :math:`y`,
+or :math:`z` can be used. If the operation is written without an explicit rotation axis,
+such as :math:`\hat{C}_n`, it denotes the main rotation axis (aligned with the rotation
+axis of the highest rotation order), typically taken to be the :math:`z` axis. The angle
+of rotation (:math:`\theta`) can be computed from the order :math:`n` using the formula:
+:math:`\theta = 2\pi/n = 360^\circ / n`. Multiple consecutive rotations are often
+applied in group theory and are written using power notation: :math:`\hat{C}_n^m`. This
+notation means that the operation :math:`\hat{C}_n` is applied :math:`m` times in
+succession.
 
 Reflections are defined by the plane of reflection. Reflections are a type of symmetry
 operation that flips the object across the plane of reflection. Reflections cannot be
@@ -104,7 +81,7 @@ reflection :cite:`engel2021point`:
 
 Rotoreflections are a combination of rotations and reflections, sometimes called
 improper rotations. They are a type of symmetry operation that combines rotation and
-reflection. Thus, by definition, we can write:
+reflection. Thus, by definition, we can write :cite:`Altmann_WignerD`: 
 
 .. math::
     \hat{S}_n = \hat{\sigma}_h {\hat{C}_n} = \hat{\sigma}_{xy} {\hat{C}_n}
@@ -112,29 +89,7 @@ reflection. Thus, by definition, we can write:
 where :math:`\hat{\sigma}_h=\hat{\sigma}_{xy}` is the reflection operator perpendicular
 to the axis of rotation (:math:`z`).
 
-The alternatively, easier way to write such operation is to first apply rotation by an
-angle :math:`\frac{2\pi}{n}`, followed by the inversion :cite:`Altmann_WignerD`: 
-
-.. math::
-    \hat{S}_n = \hat{i} {\hat{C}_n}^{n-1} \quad \text{for } n \text{ even} \\
-
-    \hat{S}_n = \hat{i} {\hat{C}_{2n}}^{n-1} \quad \text{for } n \text{ odd}
-
-We also often consider subsequent application of the same operation. This is usually
-written in the form :math:`\hat{S}_n^k` where :math:`k` is the number of times the
-operation is applied. Following the above relations we can derive several useful
-relations for powers of rotoreflections, (see :cite:`drago1992` for more details):
-
-.. math::
-  (\hat{S}_n)^n &= \hat{E} \quad \text{for } n \text{ even} \\
-  (\hat{S}_n)^{2n} &= \hat{E} \quad \text{for } n \text{ odd} \\
-  (\hat{S}_n)^n &= \hat{\sigma}_h \quad \text{for } n \text{ odd} \\
-  (\hat{S}_n)^m &= (\hat{C}_n)^m \quad \text{for } m \text{ even} \\
-  (\hat{S}_n)^m &= \hat{\sigma}_h (\hat{C}_n)^{m} \quad \text{for } m \text{ odd} \\
-  (\hat{S}_n)^{m+n} &= \hat{\sigma}_h (\hat{C}_n)^{m} \quad \text{for } m \text{ even and } n \text{ odd}  \\
-  (\hat{S}_n)^m &= \hat{\sigma}_h (\hat{C}_n)^{m-n} \quad \text{for } m \text{ odd and } m>n, n \text{ odd}  \\
-  (\hat{S}_{2n})^{n} &= \hat{i} \quad \text{for } 2n \text{ even}  \\
-
+Some useful equivalency relations for rotoreflections and their powers used in PgOP code can be found in work by Drago :cite:`drago1992`.
 
 Group theory
 ------------
@@ -200,117 +155,10 @@ is given by:
     D^{(l)}_{m'm''}(g_1) \times D^{(l)}_{m''m}(g_2) = D^{(l)}_{m'm}(g_1 g_2) = \sum_{m''=-l}^l D^{(l)}_{m'm''}(g_1) D^{(l)}_{m''m}(g_2)
 
 
-Let's turn now our attention to Wigner :math:`D` matrices for rotations. The Wigner
-:math:`D` matrix for 
-a general rotation from Euler angles in zyz convention is given by the formula
-:cite:`Altmann_WignerD`: 
+In PgOP code we use Wigner :math:`D` matrices to represent symmetry operations. We use
+the zyz convention to generate the matrices and follow the work of Altmann
+:cite:`Altmann_WignerD`. 
 
-.. math::
-    D^{(l)}_{m'm}(\hat{R}\left(\alpha, \beta, \gamma\right)) = 
-    C_{m'm} e^{im\alpha} e^{im'\gamma} \sqrt{\left(l+m\right)! \left(l-m\right)! 
-    \left(l+m'\right)! \left(l-m'\right)! } S^{(l)}_{m'm}(\beta)
-
-where :math:`C_{m'm}` is:
-
-.. math::
-    C_{m'm}=i^{\left|m'\right|+m'} i^{\left|m\right|+m}
-
-and where :math:`S^{(l)}_{m'm}(\beta)` is:
-
-.. math::
-    S^{(l)}_{m'm}(\beta) = \sum_{k=\max(0,m-m')}^{\min(l-m',l+m)}
-    \frac{(-1)^k \cos^{2l+m-m'-2k} \left(\frac{\beta}{2}\right) \sin^{2k+m'-m} 
-    \left(\frac{\beta}{2}\right)}{(l-m'-k)! (l+m-k)! k! (k-m+m')!} 
-
-This expression can be simplified for values of :math:`\beta` equal to :math:`0`,
-:math:`\frac{\pi}{2}`, and :math:`\pi`, which are all the rotations relevant for
-crystallographic point groups. 
-
-For :math:`\beta=0`, the Wigner :math:`D` matrix is given by :cite:`Altmann_WignerD`:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{R}\left(\alpha, 0, \gamma\right)) = 
-    e^{im\alpha} e^{im'\gamma} \delta_{m',m}
-
-where :math:`\delta_{m',m}` is the Kronecker delta.
-
-For :math:`\beta=\frac{\pi}{2}`, the Wigner :math:`D` matrix is given by the general
-expression with simplified :math:`S^{(l)}_{m'm}(\beta)` :cite:`Altmann_WignerD` :
-
-.. math::
-    S^{(l)}_{m'm}\left(\frac{\pi}{2}\right) = 
-    2^{-l} \sum_{k=\max(0, m - m')}^{\min(l - m', l + m)} 
-    \frac{(-1)^k}{(l - m' - k)! (l + m - k)! k! (k - m + m')!}
-
-For :math:`\beta=\pi`, the Wigner :math:`D` matrix is given by :cite:`Altmann_WignerD` :
-
-.. math::
-    D^{(l)}_{m'm}(\hat{R}\left(\alpha, \pi, \gamma\right)) = 
-    (-1)^l e^{im\alpha} e^{im'\gamma} \delta_{m',-m}
-
-From here we can derive Wigner :math:`D` matrices for useful rotations such as a general
-:math:`\hat{C}_n` rotation around the :math:`z` axis by evaluating
-:math:`D^{(l)}_{m'm}(\hat{R}(\frac{2\pi}{n}, 0, 0))`:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{C}_n) = e^{im\frac{2\pi}{n}} \delta_{m',m}.
-
-Two fold rotation around the :math:`y` axis is given by :math:`D^{(l)}_{m'm}(\hat{R}(0,
-\pi, 0))`:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{C}_{2y}) = (-1)^l \delta_{m',-m}
-
-while two fold rotation around the :math:`x` axis is given by
-:math:`D^{(l)}_{m'm}(\hat{R}(\pi,\pi,0))`:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{C}_{2x}) = (-1)^{(l+m)} \delta_{m',-m}
-
-Inversion operation is given by the formula :cite:`Altmann_WignerD, engel2021point`:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{i}) = (-1)^l \delta_{m',m} 
-
-Another important operation is the identity operation, which is given by the formula:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{E}) = \delta_{m',m}
-
-From these elementary formulas we can construct several Wigner :math:`D` matrices for
-other useful operations such as reflections and rotoreflections. We have already shown
-that reflections can be constructed from inversions and rotations using the formula
-:math:`\hat{\sigma} = \hat{i} \hat{C}_2`. To compute the resulting :math:`D` matrix for
-the reflection operation we simply perform matrix multiplication to obtain the matrix
-representation of the new operator. Let's consider formulas for several useful
-situations, when the reflection plane lies in the :math:`xy`, :math:`xz`, and :math:`yz`
-plane. The Wigner :math:`D` matrix for reflection across the :math:`xy` plane is given
-by :cite:`Altmann_WignerD`:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{\sigma}_{xy}) = D^{(l)}_{m'm}(\hat{i}) \times 
-    D^{(l)}_{m'm}(\hat{C}_{2z}) = (-1)^{m+l} \delta_{m',m}
-
-The Wigner :math:`D` matrix for reflection across the :math:`xz` plane is given by:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{\sigma}_{xz}) = D^{(l)}_{m'm}(\hat{i}) \times 
-    D^{(l)}_{m'm}(\hat{C}_{2y}) =  \delta_{m',-m}
-
-The Wigner :math:`D` matrix for reflection across the :math:`yz` plane is given by:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{\sigma}_{yz}) = D^{(l)}_{m'm}(\hat{i}) \times 
-    D^{(l)}_{m'm}(\hat{C}_{2x}) = (-1)^m \delta_{m',-m}
-
-Lastly we attempt to derive formulas for rotoreflections. We have already shown that
-rotoreflections can be constructed from inversions and rotations using the formula
-:math:`\hat{S}_n = \hat{\sigma}_{xy} \hat{C}_n`. The resulting :math:`D` matrix for
-rotoreflection operation is given by:
-
-.. math::
-    D^{(l)}_{m'm}(\hat{S}_{n}) = D^{(l)}_{m'm}(\hat{\sigma}_{xy}) \times D^{(l)}_{m'm}(\hat{C}_n) = 
-    (-1)^{m+l} e^{im\frac{2\pi}{n}} \delta_{m',m}.
 
 Group action of Wigner D matrices
 *********************************
@@ -430,7 +278,8 @@ Notes on the table:
   the principal axis of symmetry (:math:`z`) and also contains the vector which
   bisects two neighboring :math:`\hat{C}_2^{'}` axes of symmetry.
 * All tetrahedral groups (:math:`T`, :math:`T_h`, :math:`T_d`): see
-  :cite:`Altmann_WignerD` for specific proper rotations (see Hurwitz quaternions).
+  :cite:`Altmann_WignerD` for specific proper rotations and also see Hurwitz
+  quaternions.
 * All octahedral groups (:math:`O`, :math:`O_h`): see Lipshitz and Hurwitz quaternions
   for specific proper rotations
 * All icosahedral groups (:math:`I`, :math:`I_h`): see Hurwitz and icosian quaternions
