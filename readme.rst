@@ -9,11 +9,7 @@ Overview
 In general, this is to compute the local ordering of particles (molecules) in simulations or experiments over time.
 The package serves as an extension of `freud <https://github.com/glotzerlab/freud>`__ with a new order parameter.
 
-``pgop`` currently supports the following point groups:
-
-- Cyclical groups :math:`C_2` through :math:`C_12`
-- Dihedral groups :math:`D_2` through :math:`D_12`
-- Polyhedral groups :math:`T, T_h, O, O_h, I, I_h`
+``pgop`` currently supports all point groups of finite order.
 
 Installation
 ------------
