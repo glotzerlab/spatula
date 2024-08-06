@@ -33,7 +33,6 @@ dependencies = [
     "numpy",  # basic numerical Python
     "freud-analysis>=3.0.0",  # for neighbor finding
     "scipy",
-    "rowan",
 ]
 
 [project.optional-dependencies]
