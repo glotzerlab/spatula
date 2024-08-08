@@ -5,108 +5,32 @@ import numpy as np
 import scipy.spatial
 import scipy.special
 
-golden_mean = (1 + np.sqrt(5)) / 2
 
-base_rotations = (
-    np.array(
-        [
-            [0.0, 0.0, 0.0],
-            [1.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [0.0, 0.5, 0.5],
-            [1.0, 0.5, -0.5],
-            [1.0, 0.5, 0.5],
-            [0.0, 0.5, -0.5],
-            [0.5, 0.5, 1.0],
-            [-0.5, 0.5, 0.0],
-            [0.5, 0.5, 0.0],
-            [-0.5, 0.5, 1.0],
-        ]
-    )
-    * np.pi
-)
+def identity(max_l: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for E (identity) up to the given l.
 
-octahedral_rotations = (
-    np.array(
-        [
-            [0.5, 0.5, -0.5],
-            [-0.5, 0.5, 0.5],
-            [0.5, 1.0, 0.0],
-            [-0.5, 1.0, 0.0],
-            [1.0, 0.5, 0.0],
-            [0.0, 0.5, 1.0],
-            [0.0, 0.5, 0.0],
-            [1.0, 0.5, 1.0],
-            [0.5, 0.0, 0.0],
-            [-0.5, 0.0, 0.0],
-            [0.5, 0.5, 0.5],
-            [-0.5, 0.5, -0.5],
-        ]
-    )
-    * np.pi
-)
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
 
-icosahedral_rotations = (
-    np.array(
-        [  # note to self np.arctan2(1/2,-golden_mean/2)/np.pi = 0.8237918088252166
-            # note to self np.arctan2(1/2,golden_mean/2)/np.pi = 0.17620819117478337
-            [0.82379181, 0.4, 0.17620819],
-            [0.17620819, 0.4, 0.82379181],
-            [-0.82379181, 0.4, -0.17620819],
-            [-0.17620819, 0.4, -0.82379181],
-            [0.82379181, 0.2, -0.17620819],
-            [-0.82379181, 0.2, 0.17620819],
-            [-0.17620819, 0.2, 0.82379181],
-            [0.17620819, 0.2, -0.82379181],
-            [1 - 1 / golden_mean, 2 / 3, 1 / golden_mean - 1],
-            [-1 / golden_mean, 2 / 3, 1 / golden_mean],
-            [1 / golden_mean - 1, 2 / 3, 1 - 1 / golden_mean],
-            [1 / golden_mean, 2 / 3, -1 / golden_mean],
-            [1 - 1 / golden_mean, 1 / 3, 1 - 1 / golden_mean],
-            [1 / golden_mean, 1 / 3, 1 / golden_mean],
-            [-1 / golden_mean, 1 / 3, -1 / golden_mean],
-            [1 / golden_mean - 1, 1 / 3, 1 / golden_mean - 1],
-            [0.82379181, 0.6, -0.17620819],
-            [-0.82379181, 0.6, 0.17620819],
-            [-0.17620819, 0.6, 0.82379181],
-            [0.17620819, 0.6, -0.82379181],
-            [0.17620819, 0.4, -0.17620819],
-            [-0.82379181, 0.4, 0.82379181],
-            [-0.17620819, 0.4, 0.17620819],
-            [0.82379181, 0.4, -0.82379181],
-            [0.17620819, 0.2, 0.17620819],
-            [0.82379181, 0.2, 0.82379181],
-            [-0.82379181, 0.2, -0.82379181],
-            [-0.17620819, 0.2, -0.17620819],
-            [0.17620819, 0.6, 0.17620819],
-            [0.82379181, 0.6, 0.82379181],
-            [-0.82379181, 0.6, -0.82379181],
-            [-0.17620819, 0.6, -0.17620819],
-            [0.17620819, 0.8, -0.17620819],
-            [-0.82379181, 0.8, 0.82379181],
-            [-0.17620819, 0.8, 0.17620819],
-            [0.82379181, 0.8, -0.82379181],
-            [1 / golden_mean, 1 / 3, 1 / golden_mean - 1],
-            [-1 / golden_mean, 1 / 3, 1 - 1 / golden_mean],
-            [1 / golden_mean - 1, 1 / 3, 1 / golden_mean],
-            [1 - 1 / golden_mean, 1 / 3, -1 / golden_mean],
-            [1 / golden_mean, 2 / 3, 1 - 1 / golden_mean],
-            [1 - 1 / golden_mean, 2 / 3, 1 / golden_mean],
-            [-1 / golden_mean, 2 / 3, 1 / golden_mean - 1],
-            [1 / golden_mean - 1, 2 / 3, -1 / golden_mean],
-            [0.82379181, 0.8, 0.17620819],
-            [0.17620819, 0.8, 0.82379181],
-            [-0.82379181, 0.8, -0.17620819],
-            [-0.17620819, 0.8, -0.82379181],
-        ]
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for E up to the given l.
+    """
+    return np.array(
+        [delta(mprime, m) for _, mprime, m in iter_sph_indices(max_l)],
+        dtype=complex,
     )
-    * np.pi
-)
 
 
 def inversion(max_l: int) -> np.ndarray:  # noqa: N802
     """Return the WignerD matrix for inversion up to the given l.
+
+    Implementation according to Altman, Mathematical Proceedings of the Cambridge
+    Philosophical Society , Volume 53 , Issue 2 , April 1957
+    (https://doi.org/10.1017/S0305004100032370), p.347 (bottom of the page).
 
     Parameters
     ----------
@@ -127,189 +51,12 @@ def inversion(max_l: int) -> np.ndarray:  # noqa: N802
     )
 
 
-def rotoreflection_z(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for rotoreflection, around z up to the given l.
-
-    Implementation according to Altman, Mathematical Proceedings of the Cambridge
-    Philosophical Society , Volume 53 , Issue 2 , April 1957
-    (https://doi.org/10.1017/S0305004100032370), p.347 (bottom of the page).
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    n : int
-        The order of the rotation group.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for rotoreflection up to the given l.
-    """
-    reflection_matrices = sigma_xy(max_l)
-    rotation_matrices = n_z(max_l, n)
-    return dot_product(reflection_matrices, rotation_matrices)
-
-
-def generalized_rotation_from_axis_angle(
-    max_l: int, axis: np.ndarray, angle: float
-) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for a generalized rotation up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    axis : np.ndarray
-        The axis of rotation.
-    angle : float
-        The angle of rotation.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for the generalized rotation up to the given l.
-    """
-    # normalize the axis of rotation
-    rotation_axis = axis / np.linalg.norm(axis)
-    rotation_euler = scipy.spatial.transform.Rotation.from_rotvec(
-        rotation_axis * angle
-    ).as_euler("zyz")
-    # find the rotation matrix
-    return generalized_rotation(max_l, *rotation_euler)
-
-
-def generalized_rotation_from_axis_order(
-    max_l: int, axis: np.ndarray, order: int
-) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for a generalized rotation up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    axis : np.ndarray
-        The axis of rotation.
-    order : int
-        The order of the rotation.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for the generalized rotation up to the given l.
-    """
-    return generalized_rotation_from_axis_angle(max_l, axis, 2 * np.pi / order)
-
-
-def generalized_rotoreflection(
-    max_l: int, alpha: float, beta: float, gamma: float
-) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for a generalized rotoreflection up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    alpha : float
-        The angle of rotation around the z-axis. Must be between 0 and 2*pi.
-    beta : float
-        The angle of rotation around the y-axis. Must be between 0 and pi.
-    gamma : float
-        The angle of rotation around the z-axis. Must be between 0 and 2*pi.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for the generalized rotoreflection up to the given l.
-    """
-    rotation_operator = generalized_rotation(max_l, alpha, beta, gamma)
-    # find axis of rotation
-    rotation_axis = scipy.spatial.transform.Rotation.from_euler(
-        "zyz", [alpha, beta, gamma]
-    ).as_rotvec()
-    # normalize rotation axis
-    rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
-    rotoreflection_operator = generalized_sigma(max_l, rotation_axis)
-    return dot_product(rotoreflection_operator, rotation_operator)
-
-
-def generalized_rotoreflection_from_axis_angle(
-    max_l: int, axis: np.ndarray, angle: float
-) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for a generalized rotoreflection up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    axis : np.ndarray
-        The axis of rotation.
-    angle : float
-        The angle of rotation.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for the generalized rotoreflection up to the given l.
-    """
-    # normalize the axis of rotation
-    rotation_axis = axis / np.linalg.norm(axis)
-    rotoreflection_euler = scipy.spatial.transform.Rotation.from_rotvec(
-        rotation_axis * angle
-    ).as_euler("zyz")
-    # find the rotoreflection matrix
-    return generalized_rotoreflection(max_l, *rotoreflection_euler)
-
-
-def generalized_rotoreflection_from_axis_order(
-    max_l: int, axis: np.ndarray, order: int
-) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for a generalized rotoreflection up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    axis : np.ndarray
-        The axis of rotation.
-    order : int
-        The order of the rotation.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for the generalized rotoreflection up to the given l.
-    """
-    return generalized_rotoreflection_from_axis_angle(max_l, axis, 2 * np.pi / order)
-
-
-def generalized_sigma(max_l: int, normal: np.ndarray):
-    """Return the WignerD matrix for a generalized reflection up to the given l.
-
-    A general reflection can be represented as a rotation by 180 degrees around a given
-    axis, followed by an inversion.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    normal : np.ndarray
-        The normal vector of the plane of reflection.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for the generalized sigma up to the given l.
-    """
-    inversion_operator = inversion(max_l)
-    rotation_operator = generalized_rotation_from_axis_angle(max_l, normal, np.pi)
-    return dot_product(inversion_operator, rotation_operator)
-
-
-def generalized_rotation(
+def rotation_from_euler_angles(
     max_l: int, alpha: float, beta: float, gamma: float
 ) -> np.ndarray:  # noqa: N802
     """Return the WignerD matrix for a generalized rotation up to the given l.
+
+    Implementation according to altmann. It uses zyz extrinsic standard.
 
     Parameters
     ----------
@@ -420,151 +167,160 @@ def generalized_rotation(
         )
 
 
-def sigma_yz(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for sigma_xy up to the given l.
+def rotation_from_axis_angle(max_l: int, axis: np.ndarray, angle: float) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for a generalized rotation up to the given l.
 
     Parameters
     ----------
     max_l : int
         The maximum l value to include.
+    axis : np.ndarray
+        The axis of rotation.
+    angle : float
+        The angle of rotation in radians.
 
     Returns
     -------
     np.ndarray
-        The WignerD matrix for sigma_xy up to the given l.
+        The WignerD matrix for the generalized rotation up to the given l.
     """
-    return np.array(
-        [delta(mprime, -m) * ((-1) ** m) for _, mprime, m in iter_sph_indices(max_l)],
-        dtype=complex,
-    )
+    # normalize the axis of rotation
+    rotation_axis = axis / np.linalg.norm(axis)
+    rotation_euler = scipy.spatial.transform.Rotation.from_rotvec(
+        rotation_axis * angle
+    ).as_euler("zyz")
+    # compute wigner D matrix
+    return rotation_from_euler_angles(max_l, *rotation_euler)
 
 
-def sigma_xz(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for sigma_xz up to the given l.
+def rotation_from_axis_order(max_l: int, axis: np.ndarray, order: int) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for a generalized rotation up to the given l.
 
     Parameters
     ----------
     max_l : int
         The maximum l value to include.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for sigma_xz up to the given l.
-    """
-    return np.array(
-        [delta(mprime, -m) for _, mprime, m in iter_sph_indices(max_l)],
-        dtype=complex,
-    )
-
-
-def sigma_xy(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for sigma_xy up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for sigma_xy up to the given l.
-    """
-    return np.array(
-        [
-            delta(mprime, m) * ((-1) ** (m + l))
-            for l, mprime, m in iter_sph_indices(max_l)
-        ],
-        dtype=complex,
-    )
-
-
-def two_x(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for rotation for 180 around x up to the given l.
-
-    Note: Michaels paper has values for 2x and 2y swapped!
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for rotation for 180 around x up to the given l.
-    """
-    return np.array(
-        [
-            delta(mprime, -m) * ((-1) ** (l + m))
-            for l, mprime, m in iter_sph_indices(max_l)
-        ],
-        dtype=complex,
-    )
-
-
-def two_y(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for rotation for 180 around y up to the given l.
-
-    Note: Michaels paper has values for 2x and 2y swapped!
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-
-    Returns
-    -------
-    np.ndarray
-        The WignerD matrix for rotation for 180 around y up to the given l.
-    """
-    return np.array(
-        [delta(mprime, -m) * ((-1) ** (l)) for l, mprime, m in iter_sph_indices(max_l)],
-        dtype=complex,
-    )
-
-
-def n_z(max_l: int, n: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for n-fold rotation around z up to the given l.
-
-    Parameters
-    ----------
-    max_l : int
-        The maximum l value to include.
-    n : int
+    axis : np.ndarray
+        The axis of rotation.
+    order : int
         The order of the rotation.
+
     Returns
     -------
     np.ndarray
-        The WignerD matrix for n-fold rotation around z up to the given l.
+        The WignerD matrix for the generalized rotation up to the given l.
     """
-    return np.array(
-        [
-            delta(mprime, m) * np.exp(-2 * np.pi * m * 1j / n)
-            for _, mprime, m in iter_sph_indices(max_l)
-        ],
-        dtype=complex,
-    )
+    return rotation_from_axis_angle(max_l, axis, 2 * np.pi / order)
 
 
-def identity(max_l: int) -> np.ndarray:  # noqa: N802
-    """Return the WignerD matrix for E (identity) up to the given l.
+def rotoreflection_from_euler_angles(
+    max_l: int, alpha: float, beta: float, gamma: float
+) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for a generalized rotoreflection up to the given l.
+
+    Implementation according to Altman, Mathematical Proceedings of the Cambridge
+    Philosophical Society , Volume 53 , Issue 2 , April 1957
+    (https://doi.org/10.1017/S0305004100032370), p.347 (bottom of the page).
+    Implementation according to altmann. It uses zyz extrinsic standard.
 
     Parameters
     ----------
     max_l : int
         The maximum l value to include.
+    alpha : float
+        The angle of rotation around the z-axis. Must be between 0 and 2*pi.
+    beta : float
+        The angle of rotation around the y-axis. Must be between 0 and pi.
+    gamma : float
+        The angle of rotation around the z-axis. Must be between 0 and 2*pi.
 
     Returns
     -------
     np.ndarray
-        The WignerD matrix for E up to the given l.
+        The WignerD matrix for the generalized rotoreflection up to the given l.
     """
-    return np.array(
-        [delta(mprime, m) for _, mprime, m in iter_sph_indices(max_l)],
-        dtype=complex,
-    )
+    rotation_operator = rotation_from_euler_angles(max_l, alpha, beta, gamma)
+    # find axis of rotation
+    rotation_axis = scipy.spatial.transform.Rotation.from_euler(
+        "zyz", [alpha, beta, gamma]
+    ).as_rotvec()
+    # normalize rotation axis
+    rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+    rotoreflection_operator = reflection_from_normal(max_l, rotation_axis)
+    return dot_product(rotoreflection_operator, rotation_operator)
+
+
+def rotoreflection_from_axis_angle(
+    max_l: int, axis: np.ndarray, angle: float
+) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for a generalized rotoreflection up to the given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    axis : np.ndarray
+        The axis of rotation.
+    angle : float
+        The angle of rotation.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for the generalized rotoreflection up to the given l.
+    """
+    # normalize the axis of rotation
+    rotation_axis = axis / np.linalg.norm(axis)
+    rotoreflection_euler = scipy.spatial.transform.Rotation.from_rotvec(
+        rotation_axis * angle
+    ).as_euler("zyz")
+    # find the rotoreflection matrix
+    return rotoreflection_from_euler_angles(max_l, *rotoreflection_euler)
+
+
+def rotoreflection_from_axis_order(
+    max_l: int, axis: np.ndarray, order: int
+) -> np.ndarray:  # noqa: N802
+    """Return the WignerD matrix for a generalized rotoreflection up to the given l.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    axis : np.ndarray
+        The axis of rotation.
+    order : int
+        The order of the rotation.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for the generalized rotoreflection up to the given l.
+    """
+    return rotoreflection_from_axis_angle(max_l, axis, 2 * np.pi / order)
+
+
+def reflection_from_normal(max_l: int, normal: np.ndarray):
+    """Return the WignerD matrix for a generalized reflection up to the given l.
+
+    A general reflection can be represented as a rotation by 180 degrees around a given
+    axis, followed by an inversion. Implementation according to altmann.
+
+    Parameters
+    ----------
+    max_l : int
+        The maximum l value to include.
+    normal : np.ndarray
+        The normal vector of the plane of reflection.
+
+    Returns
+    -------
+    np.ndarray
+        The WignerD matrix for the generalized sigma up to the given l.
+    """
+    inversion_operator = inversion(max_l)
+    rotation_operator = rotation_from_axis_angle(max_l, normal, np.pi)
+    return dot_product(inversion_operator, rotation_operator)
 
 
 def Cs(max_l: int) -> np.ndarray:  # noqa: N802
@@ -582,7 +338,9 @@ def Cs(max_l: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for Cs up to the given l.
     """
-    return condensed_wignerD_from_operations([identity(max_l), sigma_yz(max_l)])
+    return condensed_wignerD_from_operations(
+        [identity(max_l), reflection_from_normal(max_l, [1, 0, 0])]
+    )
 
 
 def Ch(max_l: int) -> np.ndarray:  # noqa: N802
@@ -600,11 +358,15 @@ def Ch(max_l: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for Ch up to the given l.
     """
-    return condensed_wignerD_from_operations([identity(max_l), sigma_xy(max_l)])
+    return condensed_wignerD_from_operations(
+        [identity(max_l), reflection_from_normal(max_l, [0, 0, 1])]
+    )
 
 
 def Ci(max_l: int) -> np.ndarray:  # noqa: N802
     """Return the WignerD matrix for Ci up to the given l.
+
+    Ci={E, i}
 
     Parameters
     ----------
@@ -616,14 +378,7 @@ def Ci(max_l: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for Ci up to the given l.
     """
-
-    return np.array(
-        [
-            delta(mprime, m) * delta(l % 2, 0)
-            for l, mprime, m in iter_sph_indices(max_l)
-        ],
-        dtype=complex,
-    )
+    return condensed_wignerD_from_operations([identity(max_l), inversion(max_l)])
 
 
 def Cn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
@@ -641,13 +396,12 @@ def Cn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     np.ndarray
         The WignerD matrix for Cn up to the given l.
     """
-    return np.array(
-        [
-            delta(mprime, m) * delta(m % n, 0)
-            for _, mprime, m in iter_sph_indices(max_l)
-        ],
-        dtype=complex,
-    )
+    identity_operation = identity(max_l)
+    operations = [identity_operation]
+    rotation_operation = rotation_from_euler_angles(max_l, 2 * np.pi / n, 0, 0)
+    for _ in range(1, n):
+        operations.append(dot_product(operations[-1], rotation_operation))
+    return condensed_wignerD_from_operations(operations)
 
 
 def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
@@ -671,7 +425,7 @@ def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     """
     id_operation = identity(max_l)
     operations = [id_operation]
-    rr_operation = rotoreflection_z(max_l, n)
+    rr_operation = rotoreflection_from_euler_angles(max_l, 0, 0, 2 * np.pi / n)
     if n % 2 == 0:
         for i in range(1, n):
             new_op = id_operation
@@ -682,7 +436,7 @@ def Sn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
         for i in range(1, 2 * n):
             new_op = id_operation
             for _ in range(1, i):
-                new_op = dot_product(new_op, rotoreflection_z(max_l, n))
+                new_op = dot_product(new_op, rr_operation)
     return condensed_wignerD_from_operations(operations)
 
 
@@ -706,10 +460,10 @@ def Cnh(max_l: int, n: int) -> np.ndarray:  # noqa: N802
         return Sn(max_l, n)
     else:
         id_operation = identity(max_l)
-        sigma_h_operation = sigma_xy(max_l)
+        sigma_h_operation = reflection_from_normal(max_l, [0, 0, 1])
         operations = [id_operation, sigma_h_operation]
-        rr_operation = rotoreflection_z(max_l, n)
-        rotation_operation = n_z(max_l, n)
+        rr_operation = rotoreflection_from_euler_angles(max_l, 0, 0, 2 * np.pi / n)
+        rotation_operation = rotation_from_euler_angles(max_l, 2 * np.pi / n, 0, 0)
         for i in range(1, n):
             rotation_op = id_operation
             rotoref_op = id_operation
@@ -738,8 +492,8 @@ def Cnv(max_l: int, n: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for Cnv up to the given l.
     """
     id_operation = identity(max_l)
-    sigma_v_operation = sigma_yz(max_l)
-    rotation_operation = n_z(max_l, n)
+    sigma_v_operation = reflection_from_normal(max_l, [1, 0, 0])
+    rotation_operation = rotation_from_euler_angles(max_l, 2 * np.pi / n, 0, 0)
     operations = [id_operation, sigma_v_operation]
     for i in range(1, n):
         rotation_op = id_operation
@@ -766,15 +520,17 @@ def Dn(max_l: int, n: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for Dn up to the given l.
     """
     id_operation = identity(max_l)
-    c2x_operation = two_x(max_l)
-    rotation_operation = n_z(max_l, n)
+    c2x_operation = rotation_from_axis_order(max_l, np.array([1, 0, 0]), 2)
+    rotation_operation = rotation_from_euler_angles(max_l, 2 * np.pi / n, 0, 0)
     operations = [id_operation, c2x_operation]
     for i in range(1, n):
         rotation_op = id_operation
         for _ in range(1, i):
             rotation_op = dot_product(rotation_op, rotation_operation)
         operations.append(rotation_op)
+        #operations.append(rotation_from_euler_angles(max_l, 2 * np.pi / i, np.pi, 0))
         operations.append(dot_product(c2x_operation, rotation_op))
+    print(len(operations))
     return condensed_wignerD_from_operations(operations)
 
 
@@ -795,10 +551,10 @@ def Dnh(max_l: int, n: int) -> np.ndarray:  # noqa: N802
         The WignerD matrix for Dnh up to the given l.
     """
     id_operation = identity(max_l)
-    c2x_operation = two_x(max_l)
-    sigma_h_operation = sigma_xy(max_l)
-    rotation_operation = n_z(max_l, n)
-    rr_operation = rotoreflection_z(max_l, n)
+    c2x_operation = rotation_from_axis_order(max_l, np.array([1, 0, 0]), 2)
+    sigma_h_operation = reflection_from_normal(max_l, [0, 0, 1])
+    rotation_operation = rotation_from_euler_angles(max_l, 2 * np.pi / n, 0, 0)
+    rr_operation = rotoreflection_from_euler_angles(max_l, 0, 0, 2 * np.pi / n)
     operations = [id_operation, c2x_operation, sigma_h_operation]
     for i in range(1, n):
         rotation_op = id_operation
@@ -837,9 +593,9 @@ def Dnd(max_l: int, n: int) -> np.ndarray:  # noqa: N802
     """
     id_operation = identity(max_l)
     inv_operation = inversion(max_l)
-    c2x_operation = two_x(max_l)
-    rotation_operation = n_z(max_l, n)
-    rr_operation = rotoreflection_z(max_l, n)
+    c2x_operation = rotation_from_axis_order(max_l, np.array([1, 0, 0]), 2)
+    rotation_operation = rotation_from_euler_angles(max_l, 2 * np.pi / n, 0, 0)
+    rr_operation = rotoreflection_from_euler_angles(max_l, 0, 0, 2 * np.pi / n)
     operations = [id_operation, c2x_operation]
     for i in range(1, n):
         rotation_op = id_operation
@@ -925,73 +681,6 @@ def convert_to_list_of_matrices(D: np.ndarray) -> list[np.ndarray]:  # noqa N802
         matrices.append(matrix.reshape(dimz, dimz))
         i += 1
     return matrices
-
-
-def collapse_to_zero(num, tol=1e-7):
-    """Collapse a number to zero if it is less than a tolerance.
-
-    Parameters
-    ----------
-    num : float
-        The number to collapse to zero.
-    tol : float
-        The tolerance to collapse to zero.
-
-    Returns
-    -------
-    float
-        The number or zero if it is less than the tolerance.
-    """
-    if np.abs(num) < tol:
-        return 0
-    return num
-
-
-def semidirect_product(D_a: np.ndarray, D_b: np.ndarray) -> np.ndarray:  # noqa N802
-    """Compute the semidirect product of two WignerD matrices.
-
-    Note: This version doesn't take into account that duplicate operations produced by
-    the procedures shouldn't be double counted!
-
-    Parameters
-    ----------
-    D_a : np.ndarray
-        The first WignerD matrix.
-    D_b : np.ndarray
-        The second WignerD matrix.
-
-    Returns
-    -------
-    np.ndarray
-        The semidirect product of the two WignerD matrices.
-    """
-    u_D_a = np.asarray(D_a).flatten()  # noqa N806
-    u_D_b = np.asarray(D_b).flatten()  # noqa N806
-
-    max_l = 0
-    cnt = 0
-    while cnt < u_D_a.size:
-        max_l += 1
-        cnt += (2 * max_l + 1) * (2 * max_l + 1)
-
-    l_skip = 0
-    D_ab = np.zeros_like(u_D_a, dtype=np.complex128)  # noqa N806
-
-    for l in range(max_l):
-        max_m = 2 * l + 1
-        for m_prime in range(max_m):
-            start_lmprime_i = l_skip + m_prime * max_m
-            for m in range(max_m):
-                sum_val = 0 + 0j
-                for m_prime_2 in range(max_m):
-                    sum_val += (
-                        u_D_a[start_lmprime_i + m_prime_2]
-                        * u_D_b[l_skip + m_prime_2 * max_m + m]
-                    )
-                D_ab[start_lmprime_i + m] = collapse_to_zero(sum_val, 1e-7)
-        l_skip += max_m * max_m
-
-    return D_ab.reshape(D_a.shape)
 
 
 def dot_product(
@@ -1174,16 +863,17 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
         The condensed WignerD matrix for the point group.
     """
     operations = []
-    for rot in base_rotations:
-        operations.append(generalized_rotation(max_l, *rot))
+    for i in scipy.spatial.transform.Rotation.create_group("T"):
+        rot = i.as_euler("zyz")
+        operations.append(rotation_from_euler_angles(max_l, *rot))
     if modifier == "d":
         # 6 S4
         # 90 degrees around 1, 0, 0
-        first_S4 = generalized_rotoreflection_from_axis_order(max_l, [0, 0, 1], 4)  # noqa N806
+        first_S4 = rotoreflection_from_axis_order(max_l, [0, 0, 1], 4)  # noqa N806
         # 90 degrees around 0, 1, 0
-        second_S4 = generalized_rotoreflection_from_axis_order(max_l, [0, 1, 0], 4)  # noqa N806
+        second_S4 = rotoreflection_from_axis_order(max_l, [0, 1, 0], 4)  # noqa N806
         # 90 degrees around 0, 0, 1
-        third_S4 = generalized_rotoreflection_from_axis_order(max_l, [1, 0, 0], 4)  # noqa N806
+        third_S4 = rotoreflection_from_axis_order(max_l, [1, 0, 0], 4)  # noqa N806
         # 270 degrees around 1, 0, 0
         # 270 degrees around 0, 1, 0
         # 270 degrees around 0, 0, 1
@@ -1202,22 +892,22 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
         operations.append(sixth_S4)
         # 6 sigma v
         operations.append(
-            generalized_sigma(max_l, [0, -np.sqrt(2) / 2, -np.sqrt(2) / 2])
+            reflection_from_normal(max_l, [0, -np.sqrt(2) / 2, -np.sqrt(2) / 2])
         )
         operations.append(
-            generalized_sigma(max_l, [0, np.sqrt(2) / 2, -np.sqrt(2) / 2])
+            reflection_from_normal(max_l, [0, np.sqrt(2) / 2, -np.sqrt(2) / 2])
         )
         operations.append(
-            generalized_sigma(max_l, [-np.sqrt(2) / 2, 0, -np.sqrt(2) / 2])
+            reflection_from_normal(max_l, [-np.sqrt(2) / 2, 0, -np.sqrt(2) / 2])
         )
         operations.append(
-            generalized_sigma(max_l, [np.sqrt(2) / 2, 0, -np.sqrt(2) / 2])
+            reflection_from_normal(max_l, [np.sqrt(2) / 2, 0, -np.sqrt(2) / 2])
         )
         operations.append(
-            generalized_sigma(max_l, [-np.sqrt(2) / 2, -np.sqrt(2) / 2, 0])
+            reflection_from_normal(max_l, [-np.sqrt(2) / 2, -np.sqrt(2) / 2, 0])
         )
         operations.append(
-            generalized_sigma(max_l, [np.sqrt(2) / 2, -np.sqrt(2) / 2, 0])
+            reflection_from_normal(max_l, [np.sqrt(2) / 2, -np.sqrt(2) / 2, 0])
         )
         return condensed_wignerD_from_operations(operations)
     elif modifier == "h":
@@ -1251,8 +941,9 @@ def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
         The condensed WignerD matrix for the point group.
     """
     operations = []
-    for rot in np.concatenate((base_rotations, octahedral_rotations)):
-        operations.append(generalized_rotation(max_l, *rot))
+    for i in scipy.spatial.transform.Rotation.create_group("O"):
+        rot = i.as_euler("zyz")
+        operations.append(rotation_from_euler_angles(max_l, *rot))
     if modifier == "h":
         inversion_operation = inversion(max_l)
         new_operations = operations.copy()
@@ -1284,8 +975,9 @@ def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
         The condensed WignerD matrix for the point group.
     """
     operations = []
-    for rot in np.concatenate((base_rotations, icosahedral_rotations)):
-        operations.append(generalized_rotation(max_l, *rot))
+    for i in scipy.spatial.transform.Rotation.create_group("I"):
+        rot = i.as_euler("zyz")
+        operations.append(rotation_from_euler_angles(max_l, *rot))
     if modifier == "h":
         inversion_operation = inversion(max_l)
         new_operations = operations.copy()
