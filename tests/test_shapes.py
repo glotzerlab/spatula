@@ -119,14 +119,9 @@ def _id_func(value):
     return ""
 
 
-# TODO later:
-# T : Propello Tetrahedron
-# O : Propello Cube, Propello Octahedron
-# I : Propello Dodecahedron, Propello Icosahedron
-# Dnd : Trapezohedron
-###################################################
-# TODO: add other options for shapes of interest
-# The vertices found in this dictionary for all these shapes were taken from http://dmccooey.com/polyhedra/Simplest.html
+# The vertices found in this dictionary for all these shapes were taken from
+# http://dmccooey.com/polyhedra/Simplest.html
+# molecules are taken from https://symotter.org/gallery
 shape_symmetries = {
     "C1": [
         (
