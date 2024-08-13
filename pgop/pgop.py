@@ -128,9 +128,9 @@ class PGOP:
             m=m, weights=True, cartesian=True
         )
         self._cpp.compute(
-            dist,
-            neighbors.weights,
-            neighbors.neighbor_counts,
+            dist.astype(np.float64),
+            neighbors.weights.astype(np.float64),
+            neighbors.neighbor_counts.astype(np.int32),
             m,
             np.conj(self._ylms(max_l, m)),
             quad_positions,
