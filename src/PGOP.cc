@@ -92,11 +92,14 @@ void PGOP<distribution_type>::compute(const nb::ndarray<double> distances,
                                              weights.data(),
                                              distances.data());
     const size_t N_particles = num_neighbors.size();
-    // TODO FIX
-    // reserve N_particles, m_n_symmetries for m_pgop_values
-    m_pgop_values->reserve(N_particles);
-    // reserve N_particles, m_n_symmetries, 4 for m_rotations
-    m_optimal_rotations->reserve(N_particles);
+    m_pgop_values->resize(N_particles);
+    for (size_t i = 0; i < N_particles; ++i) {
+        (*m_pgop_values)[i].resize(m_n_symmetries);
+    }
+    m_optimal_rotations->resize(N_particles);
+    for (size_t i = 0; i < N_particles; ++i) {
+        (*m_optimal_rotations)[i].resize(m_n_symmetries);
+    }
     const auto loop_func = [&neighborhoods, &qlm_eval, this](const size_t start,
                                                              const size_t stop) {
         auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
