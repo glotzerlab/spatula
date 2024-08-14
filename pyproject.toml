@@ -39,5 +39,4 @@ dependencies = [
 test = [
     "pytest",
     "coxeter",
-    "h5py"
 ]
