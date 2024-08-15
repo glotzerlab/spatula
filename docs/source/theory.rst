@@ -7,20 +7,127 @@ divided into several subsections, each of which will contain a brief
 introduction to the topic, followed by a more detailed explanation of the
 relevant concepts.
 
-Introduction
-------------
+Introduction to Point Group Order Parameter (PGOP)
+--------------------------------------------------
 
-PgOP's main use case is to determine if a point in space (which can belong to a particle
-location, or not) has a bond orientation order diagram symmetry of a given point group.
-It is important to point out that PgOP does NOT calculate the Wyckoff site symmetry or
-crystalline point group symmetry for a particle in crystalline environment (unless this
-particle sits at the general position).
-Symmetry is defined as a binary relation between two objects that are the same under
-some transformation. Some objects or points in space or systems can either have some
-symmetry or not. PgOP removes this binary distinction and instead gives a continuous
-measure of how symmetric the object or set of points is with respect to some symmetry.
-Such approach can be incredibly useful when studying for example the local structure of
-a crystal as it is formed.
+PGOP is used to determine how well a chosen point in space matches a given point 
+group. The chosen point can belong to a particle location, but does not have to. 
+This comparison is accomplished by comparing the Bond Orientational Order Diagram 
+(BOOD) of the chosen point in space to the symmetrized BOOD of a point group. It is
+important to note that PGOP is not a measurement of Wyckoff site symmetry or 
+crystalline point group symmetry; this is because it does not account for the 
+general position, which is a point in a crystal that does not transform with any 
+symmetry operations and must be known in order to make this determination. 
+Understanding this, a big strength of PGOP comes from its ability to interpret 
+symmetry on a continuous scale, instead of a binary property. Symmetry is typically 
+defined as a binary relation between two objects that are the same under some 
+transformation. 
+
+PGOP results are given on a scale from 0 to 1, with 1 meaning perfect symmetry of 
+the given point group, and 0 meaning no match for that symmetry. In real systems, 
+we do not expect to see values of 0 and 1. By approaching symmetry measurements in
+this way, we can use PGOP in cases in which we want to study changes in the local 
+structure of a crystal as it is formed.
+
+
+The calculation of PGOP can be broken down into 4 main parts: 
+#. The construction of a Bond Orientational Order Diagram (BOOD)
+#. The spherical harmonics expansion of the BOOD
+#. The construction of a symmetrized BOOD with respect to the point group of interest
+#. The comparison of the two BOODS
+
+Step 1: Constructing the BOOD of the System
+To understand PGOP, it is important to first consider a Bond Orientational Order 
+Diagram (BOOD). A BOOD can be thought of as a map of a particle and its neighbors.
+This is useful as it provides a way to examine the local environment that a particle 
+is experiencing. For constructing a BOOD, the determination of nearest neighbors is 
+important, as this can change the results. This will also affect the results of PGOP
+calculations. While the distance between particles may be important for determining 
+if they are neighbors, it is not part of the BOOD. The BOOD gives the information on
+how the particles are arranged in relation to each other in the system, and can be 
+thought of as a projection of the bonds onto a unit sphere. 
+
+Step 2: Spherical Harmonics Expansion
+Now that we understand BOODs, let’s talk about spherical harmonics. In the case of  
+PGOP, Spherical Harmonics are particularly useful as they provide a complete basis  
+in the space of functions on the sphere, thereby allowing spherical functions to be 
+written as linear combinations of these basis functions. In PGOP, we construct a 
+Spherical Harmonics expansion of the BOOD of our system. In order to do this, we 
+first identify the particle positions relative to a central point. We then convert 
+these into spherical harmonics,compute these for each bond, and then sum these 
+spherical harmonics.
+
+Steps 3 and 4: Construction of the symmetrized BOOD and BOOD Comparison
+Just as we were able to create a BOOD for our system, we are able to form a BOOD for
+the chosen symmetry point group as well. With this construction, we are able to  
+compare the two BOODS through a normalized functional inner product. For this 
+comparison, there is an optimization to find where the BOODS best match. If we take  
+the BOOD of our system, we want to find where it best matches the symmetrized one.  
+This is done using a brute force plus gradient descent. The search is done over all 
+the rotations in 3D space, as described by the 3D rotation group, SO(3). 
+
+At this point, it is important to note how the actions of symmetry are represented. 
+For this, we use Wigner D matrices. These matrices provide a way to mathematically  
+express these operations with finite-dimensional matrices. These are built from each
+of the small d-matrices that contain the elements for a specific operation. An 
+explanation for Wigner D matrices can be found below.
+
+Wigner D matrices
+~~~~~~~~~~~~~~~~~
+Symmetry operations can be represented as matrices acting on a vector space. One approach for
+this is to use Wigner D matrices, which represent symmetry operations in the space spanned by
+spherical harmonics.
+
+A single Wigner :math:`D` matrix is defined for a given symmetry operation and a given :math:`l`, which
+is the degree of the spherical harmonic. The Wigner :math:`D` matrix is a square matrix of size
+:math:`2l+1`. The indices of the matrix are often written as :math:`m` and :math:`m'`
+and they range from :math:`-l` to :math:`l`. The vectors which these matrices operate on
+are coefficients for a spherical harmonic given by :math:`l` and :math:`m` (each vector
+element is different :math:`m`).
+
+A single Wigner :math:`D` matrix is defined for a given symmetry operation and a given
+:math:`l`, which is the degree of the spherical harmonic. The Wigner :math:`D` matrix is a
+square matrix of size :math:`2l+1`. The indices of the matrix are often written as :math:`m` and
+:math:`m'` and they range from :math:`-l` to :math:`l`. The vectors which these matrices operate on
+are coefficients for a spherical harmonic given by :math:`l` and :math:`m` (each vector element
+is different :math:`m`).
+
+First, we give the formula for composition operation which is just a matrix
+multiplication. Matrix multiplication (composition) formula for two symmetry operations
+is given by:
+
+.. math::
+    D^{(l)}_{m'm''}(g_1) \times D^{(l)}_{m''m}(g_2) = D^{(l)}_{m'm}(g_1 g_2) = \sum_{m''=-l}^l D^{(l)}_{m'm''}(g_1) D^{(l)}_{m''m}(g_2)
+
+
+In PgOP code we use Wigner :math:`D` matrices to represent symmetry operations. We use
+the zyz convention to generate the matrices and follow the work of Altmann
+:cite:`Altmann_WignerD`. 
+
+
+Group action of Wigner D matrices
+*********************************
+
+The group action formula can be given in terms of Wigner D matrices. The group action is a
+matrix which can be constructed by summing Wigner D matrices of operations in a group:
+
+.. math::
+    D^{(l)}_{m'm}(G) = \frac{1}{|G|} \sum_{g \in G} D^{(l)}_{m'm}(g),
+
+where :math:`G` is a group of symmetry operations, and :math:`|G|` is the order (number
+of elements) of the group :math:`G`. Notice that this formula should be carried out per
+:math:`l`, meaning that for each :math:`l` we should expect to have a different matrix
+for each operation and group action will be the sum of these matrices. Effectively,
+:math:`l` plays the role of the size of the basis sets (of spherical harmonics). So we
+shall have :math:`l` matrices for each operation in the group, and :math:`l` matrices
+for group action.
+
+
+
+
+
+Older Text
+---------------
 
 Symmetry is a fundamental concept in physics and mathematics. It is a property of an
 object that remains unchanged under some transformation. For example, a square has
@@ -123,59 +230,6 @@ When group action acts on a vector space we call this a representation. Notice t
 choosing a representation enables us to actually numerically write out the operator in a
 matrix form.
 
-Wigner D matrices
-~~~~~~~~~~~~~~~~~
-Symmetry operations can be represented as matrices acting on a vector space. These will
-be different based on the representation we chose. One such choice is the Wigner D
-matrix, which are matrices representing symmetry operations in the space spanned by
-spherical harmonics. Spherical harmonics are a set of functions which make a complete
-basis in the space of functions on the sphere. This is exactly what we will need for
-PgOP and choice for it will become apparent later. For now, we focus our attention on
-how to construct these matrices for basic operations.
-
-A single Wigner :math:`D` matrix is defined for a given symmetry operation and a given :math:`l`, which
-is the degree of the spherical harmonic. The Wigner :math:`D` matrix is a square matrix of size
-:math:`2l+1`. The indices of the matrix are often written as :math:`m` and :math:`m'`
-and they range from :math:`-l` to :math:`l`. The vectors which these matrices operate on
-are coefficients for a spherical harmonic given by :math:`l` and :math:`m` (each vector
-element is different :math:`m`).
-
-A single Wigner :math:`D` matrix is defined for a given symmetry operation and a given
-:math:`l`, which is the degree of the spherical harmonic. The Wigner :math:`D` matrix is a
-square matrix of size :math:`2l+1`. The indices of the matrix are often written as :math:`m` and
-:math:`m'` and they range from :math:`-l` to :math:`l`. The vectors which these matrices operate on
-are coefficients for a spherical harmonic given by :math:`l` and :math:`m` (each vector element
-is different :math:`m`).
-
-First, we give the formula for composition operation which is just a matrix
-multiplication. Matrix multiplication (composition) formula for two symmetry operations
-is given by:
-
-.. math::
-    D^{(l)}_{m'm''}(g_1) \times D^{(l)}_{m''m}(g_2) = D^{(l)}_{m'm}(g_1 g_2) = \sum_{m''=-l}^l D^{(l)}_{m'm''}(g_1) D^{(l)}_{m''m}(g_2)
-
-
-In PgOP code we use Wigner :math:`D` matrices to represent symmetry operations. We use
-the zyz convention to generate the matrices and follow the work of Altmann
-:cite:`Altmann_WignerD`. 
-
-
-Group action of Wigner D matrices
-*********************************
-
-Group action formula can be given in terms of Wigner D matrices. The group action is a
-matrix which can be constructed by summing Wigner D matrices of operations in a group:
-
-.. math::
-    D^{(l)}_{m'm}(G) = \frac{1}{|G|} \sum_{g \in G} D^{(l)}_{m'm}(g),
-
-where :math:`G` is a group of symmetry operations, and :math:`|G|` is the order (number
-of elements) of the group :math:`G`. Notice that this formula should be carried out per
-:math:`l`, meaning that for each :math:`l` we should expect to have a different matrix
-for each operation and group action will be the sum of these matrices. Effectively,
-:math:`l` plays the role of the size of the basis sets (of spherical harmonics). So we
-shall have :math:`l` matrices for each operation in the group, and :math:`l` matrices
-for group action.
 
 Symmetry Point groups
 ~~~~~~~~~~~~~~~~~~~~~
@@ -289,20 +343,7 @@ Several point groups from the table above are equivalent. For more information s
 link <https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups>`_. In PgOP all
 point groups were constructed from their operations given in the above table.
 
-Point group Order Parameter (PgOP)
-----------------------------------
 
-Bond order diagrams (BOD)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-show it on a concrete example for computation.
-
-Talk about PGOP on liquid states.
-
-Talk about PGOP and how it actually works.
-
-Talk about what it actually computes
 
 Bibliography
 -------------
