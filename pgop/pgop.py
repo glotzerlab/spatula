@@ -92,7 +92,7 @@ class PGOP:
         system: tuple[freud.box.Box, np.ndarray],
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
         query_points: np.ndarray = None,
-        l:int = 10,
+        l: int = 10,
         m: int = 10,
         refine: bool = False,
         refine_l: int = 20,
