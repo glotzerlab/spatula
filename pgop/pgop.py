@@ -32,6 +32,8 @@ class PGOP:
     ):
         """Create a PGOP object.
 
+        All point groups of finite order are supported.
+
         Note
         ----
             A ``max_l`` of at least 9 is needed to capture several higher order groups
@@ -44,7 +46,9 @@ class PGOP:
             distribution or "uniform" for a uniform distribution.
         symmetries : list[str]
             A list of point groups to test each particles' neighborhood. Uses
-            Schoenflies notation and is case sensitive.
+            Schoenflies notation and is case sensitive. Options are Ci, Cs, Cn, Cnh,
+            Cnv, Sn, Dn, Dnh, Dnd, T, Th, Td, O, Oh, I, Ih where n should be replaced
+            with group order (an integer) and passed as a list of strings. 
         optimizer : pgop.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
