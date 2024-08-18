@@ -90,6 +90,10 @@ def semidirect_product(D_a: np.ndarray, D_b: np.ndarray) -> np.ndarray:  # noqa 
     return D_ab.reshape(D_a.shape)
 
 
+order_range_to_test = range(2, 13)
+order_range_to_test_odd = range(3, 13, 2)
+
+
 def test_parse_point_group():
     assert _parse_point_group("T") == ("T", None, None)
     assert _parse_point_group("Th") == ("T", "h", None)
@@ -224,7 +228,7 @@ def test_C2x_rotation_from_euler_angles():
     )
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Cz_rotation_from_euler_angles(n):
     """According to Engel's paper (https://arxiv.org/pdf/2106.14846).
     Note: Engel's paper has a minus in the exponent which is not present in altmann.
@@ -241,7 +245,7 @@ def test_Cz_rotation_from_euler_angles(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 12))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_generalized_rotation_self_correct(n):
     assert np.allclose(
         rotation_from_euler_angles(maxl, 2 * np.pi / n, 0, 0),
@@ -249,7 +253,7 @@ def test_generalized_rotation_self_correct(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 12))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_generalized_rotation_against_axis_angle(n):
     assert np.allclose(
         rotation_from_euler_angles(maxl, 2 * np.pi / n, 0, 0),
@@ -257,7 +261,7 @@ def test_generalized_rotation_against_axis_angle(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 12))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_generalized_rotation_against_axis_order(n):
     assert np.allclose(
         rotation_from_euler_angles(maxl, 2 * np.pi / n, 0, 0),
@@ -329,7 +333,7 @@ def test_sigmayz():
     )
 
 
-@pytest.mark.parametrize("n", range(2, 12))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_general_rotoreflection_self_correct(n):
     assert np.allclose(
         rotoreflection_from_euler_angles(maxl, 2 * np.pi / n, 0, 0),
@@ -337,7 +341,7 @@ def test_general_rotoreflection_self_correct(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 12))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_general_rotoreflection_against_from_axis_angle(n):
     assert np.allclose(
         rotoreflection_from_euler_angles(maxl, 2 * np.pi / n, 0, 0),
@@ -345,7 +349,7 @@ def test_general_rotoreflection_against_from_axis_angle(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 12))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_general_rotoreflection_against_axis_order(n):
     assert np.allclose(
         rotoreflection_from_euler_angles(maxl, 2 * np.pi / n, 0, 0),
@@ -367,7 +371,7 @@ def test_Ci():
     ).all()
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Cn(n):
     """According to Engel's paper (https://arxiv.org/pdf/2106.14846) :"""
     w = np.array(
@@ -379,7 +383,7 @@ def test_Cn(n):
     ).all()
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Cn_against_scipy_rotations_euler(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
@@ -390,7 +394,7 @@ def test_Cn_against_scipy_rotations_euler(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Cn_against_scipy_rotations_rotvec(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
@@ -408,7 +412,7 @@ def test_Cn_against_scipy_rotations_rotvec(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Dn_against_scipy_rotations_euler(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
@@ -423,7 +427,7 @@ def test_Dn_against_scipy_rotations_euler(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Dn_against_scipy_rotations_rotvec(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
@@ -449,7 +453,7 @@ def test_Dn_against_scipy_rotations_rotvec(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Dn(n):
     """According to Engel's paper (https://arxiv.org/pdf/2106.14846)"""
     assert np.allclose(
@@ -465,7 +469,7 @@ def test_Dn(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 13))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Cnv_from_product(n):
     """Ezra p. 189:
     Cnv = Cn x Cs for odd n"""
@@ -482,7 +486,7 @@ def test_Cnv_from_product(n):
     )
 
 
-@pytest.mark.parametrize("n", range(3, 13, 2))
+@pytest.mark.parametrize("n", order_range_to_test_odd)
 def test_Cnh_from_product(n):
     """Ezra p. 189:
     Cnv = Cn x Cs for all n.
@@ -503,7 +507,7 @@ def test_Cnh_from_product(n):
     )
 
 
-@pytest.mark.parametrize("n", range(3, 13, 2))
+@pytest.mark.parametrize("n", order_range_to_test_odd)
 def test_Sn_odd_equivalent_to_Cnh(n):
     """https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups"""
     assert np.allclose(
@@ -514,7 +518,7 @@ def test_Sn_odd_equivalent_to_Cnh(n):
     )
 
 
-@pytest.mark.parametrize("n", range(2, 12))
+@pytest.mark.parametrize("n", order_range_to_test)
 def test_Dn_from_product(n):
     """According to Altman Dn=Cn x| C2' Table 2 (p. 222)
     It can be either C2' = {E, 2_x} or C2''= {E, 2_y}. The group action matrix will be
@@ -535,7 +539,7 @@ def test_Dn_from_product(n):
     ).all()
 
 
-@pytest.mark.parametrize("n", range(3, 13, 2))
+@pytest.mark.parametrize("n", order_range_to_test_odd)
 def test_Dnd_from_product_odd_n(n):
     """Ezra p. 189:
     Dnd = Dn x Ci for odd n"""
@@ -552,7 +556,7 @@ def test_Dnd_from_product_odd_n(n):
     )
 
 
-@pytest.mark.parametrize("n", range(3, 12, 2))
+@pytest.mark.parametrize("n", order_range_to_test_odd)
 def test_Cni_equivalence_to_Sn(n):
     """https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups"""
     cn_group = compute_condensed_wignerD_matrix_for_a_given_point_group(
