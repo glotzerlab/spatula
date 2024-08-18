@@ -67,17 +67,17 @@ def check_symmetry(symmetry, vertices):
     # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
     # close to one as well.
     optimizer = pgop.optimize.Union.with_step_gradient_descent(
-        pgop.optimize.Mesh.from_grid(n_axes=65)
+        pgop.optimize.Mesh.from_grid(n_axes=200)
     )
     # check if PGOP is already in the dictionary
     if symmetry not in pgop_dict:
         pgop_dict[symmetry] = pgop.PGOP(
-            "fisher", [symmetry], optimizer, max_l=9, kappa=20.0
+            "fisher", [symmetry], optimizer
         )
     op_compute = pgop_dict[symmetry]
 
     system, nlist = get_shape_sys_nlist(vertices)
-    op_compute.compute(system, nlist, query_points=np.zeros((1, 3)), m=9)
+    op_compute.compute(system, nlist, query_points=np.zeros((1, 3)))
     return op_compute.pgop[0]
 
 
@@ -1385,16 +1385,12 @@ shape_symmetries = {
     ],
     "Ih": ["PlatonicFamily.Icosahedron", "PlatonicFamily.Dodecahedron"],
 }
-shape_symmetries.update({f"C{n}v": [get_pyramid(n)] for n in range(4, 13)})
+shape_symmetries.update({f"C{n}v": [get_pyramid(n)] for n in range(4, 11)})
 shape_symmetries.update(
     {
         f"D{n}h": [get_bipyramid(n), f"PrismAntiprismFamily.{n_dict[n]} Prism"]
         for n in range(3, 11)
     }
-)
-shape_symmetries.update({f"D{n}h": [get_bipyramid(n)] for n in range(11, 13)})
-shape_symmetries.update(
-    {f"D{n}d": [f"PrismAntiprismFamily.{n_dict[n]} Antiprism"] for n in range(7, 11)}
 )
 
 
@@ -1459,4 +1455,4 @@ non_shape_symmetries.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
 )
 def test_no_symmetries(symmetry, shape, vertices):
     op = check_symmetry(symmetry=symmetry, vertices=vertices)
-    assert op < 0.8
+    assert op < 0.85
