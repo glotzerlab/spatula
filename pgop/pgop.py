@@ -48,14 +48,14 @@ class PGOP:
             A list of point groups to test each particles' neighborhood. Uses
             Schoenflies notation and is case sensitive. Options are Ci, Cs, Cn, Cnh,
             Cnv, Sn, Dn, Dnh, Dnd, T, Th, Td, O, Oh, I, Ih where n should be replaced
-            with group order (an integer) and passed as a list of strings. 
+            with group order (an integer) and passed as a list of strings.
         optimizer : pgop.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
         max_l : `int`, optional
             The maximum spherical harmonic l to use for computations. This number should
             be larger than the ``l`` and ``refine_l`` used in ``compute``. Defaults to
-            10. 
+            10.
         kappa : float
             The concentration parameter for the von-Mises-Fisher distribution.
             Only used when ``dist`` is "fisher". This number should be roughly equal to
@@ -157,7 +157,7 @@ class PGOP:
         if refine:
             if refine_l > self._max_l:
                 raise ValueError("refine_l must be less than or equal to max_l.")
-            if refine_l <l or refine_m < m or (refine_l == l and refine_m == m):
+            if refine_l < l or refine_m < m or (refine_l == l and refine_m == m):
                 raise ValueError("refine_l and refine_m must be larger than l and m.")
         neigh_query, neighbors = self._get_neighbors(system, neighbors)
         dist = self._compute_distance_vectors(neigh_query, neighbors, query_points)
