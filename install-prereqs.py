@@ -26,9 +26,7 @@ class CMakePackage:
     cmake_options: list[str]
 
 
-def find_cmake_package(
-    name, version, location_variable=None, ignore_system=False
-):
+def find_cmake_package(name, version, location_variable=None, ignore_system=False):
     """Find a package with cmake.
 
     Return True if the package is found

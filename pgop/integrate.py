@@ -1,4 +1,5 @@
 """Methods to help perform a Gauss Legendre quatrature."""
+
 import functools
 
 import numpy as np
