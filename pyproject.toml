@@ -2,23 +2,9 @@
 requires = ["scikit-build-core", "pybind11"]
 build-backend = "scikit_build_core.build"
 
-[tool.black]
-line-length = 80
-include = '\.pyi?$'
-exclude = '''
-
-(
-      \.eggs
-    | \.git
-    | build
-    | _build
-    | dist
-)
-'''
-
 [tool.ruff]
 # Add D when documentation is finished
-line-length = 80
+line-length = 88
 target-version = "py38"
 
 [tool.ruff.lint]
@@ -47,12 +33,10 @@ dependencies = [
     "numpy",  # basic numerical Python
     "freud-analysis>=3.0.0",  # for neighbor finding
     "scipy",
-    "rowan",
 ]
 
 [project.optional-dependencies]
 test = [
     "pytest",
     "coxeter",
-    "h5py",
 ]

@@ -9,19 +9,19 @@ Overview
 In general, this is to compute the local ordering of particles (molecules) in simulations or experiments over time.
 The package serves as an extension of `freud <https://github.com/glotzerlab/freud>`__ with a new order parameter.
 
-``pgop`` currently supports the following point groups:
+``pgop`` currently supports all point groups of finite order:
 
 - All crystallographic point groups
 - Cyclical groups :math:`C_n`
-- Cyclical groups with inversion :math:`C_{ni}`
 - Cyclical groups with vertical reflection :math:`C_{nv}`
 - Cyclical groups with horizontal reflection :math:`C_{nh}`
 - Dihedral groups :math:`D_n`
 - Dihedral groups with horizontal reflection :math:`D_{nh}`
 - Dihedral groups with diagonal reflections :math:`D_{nd}`
-- Polyhedral groups :math:`T, T_h, O, O_h, I, I_h`
+- Polyhedral groups :math:`T, T_h, T_d, O, O_h, I, I_h`
 - Rotoreflection groups :math:`S_n`
 - Inversion group: :math:`C_i`
+- Reflection group: :math:`C_s`
 
 Resources
 =========
