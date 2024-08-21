@@ -12,9 +12,16 @@ dependencies:
   - freud==3.0
   - h5py==3.11.0
   - sphinx==7.3.7
-  - pybind11
+  - pybind11==2.13.4
   - gxx==12.3.0
   - gcc==12.3.0
   - sphinxcontrib-bibtex==2.6.2 
-  - h5py
+  - h5py==3.11.0
   - furo==2022.12.7
+  - sphinxcontrib-applehelp==1.0.8
+  - sphinxcontrib-bibtex==2.6.2
+  - sphinxcontrib-devhelp==1.0.6
+  - sphinxcontrib-htmlhelp==2.0.5
+  - sphinxcontrib-jsmath==1.0.1
+  - sphinxcontrib-qthelp==1.0.7
+  - sphinxcontrib-serializinghtml==1.1.10
