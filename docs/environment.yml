@@ -16,7 +16,7 @@ dependencies:
   - gcc==12.3.0
   - sphinxcontrib-bibtex==2.6.2 
   - h5py==3.11.0
-  - furo==2022.12.7
+  - furo==2024.04.27
   - sphinxcontrib-applehelp==1.0.8
   - sphinxcontrib-bibtex==2.6.2
   - sphinxcontrib-devhelp==1.0.6
