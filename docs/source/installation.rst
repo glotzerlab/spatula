@@ -4,26 +4,6 @@
 Installation
 ============
 
-From PyPI
----------
-
-The easiest way to install **PgOP** is from **PyPI** with `pip <https://pip.pypa.io/en/stable/>`__:
-
-.. code-block:: console
-
-    $ python -m pip install PgOP
-
-
-From conda-forge
-----------------
-
-PgOP is also available on **conda-forge**:
-
-.. code-block:: console
-
-    $ conda install -c conda-forge pgop
-
-
 Compile from source
 -------------------
 
