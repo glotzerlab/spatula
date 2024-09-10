@@ -11,7 +11,7 @@ Introduction to Point Group Order Parameter (PGOP)
 --------------------------------------------------
 
 PGOP is used to determine how well a chosen point in space matches a given point 
-group. The chosen point can belong to a particle location, but does not have to. 
+group symmetry. The chosen point can belong to a particle location, but does not have to. 
 This comparison is accomplished by comparing the Bond Orientational Order Diagram 
 (BOOD) of the chosen point in space to the symmetrized BOOD of a point group. It is
 important to note that PGOP is not a measurement of Wyckoff site symmetry or 
@@ -127,7 +127,7 @@ for group action.
 
 
 Older Text
----------------
+----------
 
 Symmetry is a fundamental concept in physics and mathematics. It is a property of an
 object that remains unchanged under some transformation. For example, a square has
