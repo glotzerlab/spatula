@@ -1,11 +1,11 @@
 # Architecture
 ## Build System
-`pgop` uses CMake for building its C++ code, and `scikit-build-core` as a build back end (for installation via Python tools like `pip` and `build`).
+`PGOP` uses CMake for building its C++ code, and `scikit-build-core` as a build back end (for installation via Python tools like `pip` and `build`).
 We use install's `DIRECTORY` and `FILES_MATCHING PATTERN` features to automatically install all python files in the `pgop` directory.
 Any non-Python files would need to be installed in a separate command.
 
 ## Platform Support
-Currently `pgop` only supports Unix-like platforms, but nothing in the code should prevent extending to Windows.
+Currently `PGOP` only supports Unix-like platforms, but nothing in the code should prevent extending to Windows.
 
 ## Python Code
 The Python is located in the `pgop` directory.

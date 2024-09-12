@@ -7,7 +7,7 @@ Installation
 Compile from source
 -------------------
 
-The following are **required** for building and installing **PgOP** from source:
+The following are **required** for building and installing **PGOP** from source:
 
 - A C++17-compliant compiler
 - `Python <https://www.python.org/>`__ 
@@ -28,7 +28,7 @@ All requirements other than the compiler can also be installed via the `Python P
 
     uv pip install numpy scipy freud-analysis pybind11 scikit-build-core cmake
 
-The code that follows builds **PgOP**:
+The code that follows builds **PGOP**:
 
 .. code-block:: bash
 

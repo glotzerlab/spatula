@@ -1,5 +1,5 @@
 =============================
-Welcome to PgOP documentation
+Welcome to PGOP documentation
 =============================
 
 .. include:: ../../readme.rst

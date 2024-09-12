@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# pgop documentation build configuration file, created by
+# PGOP documentation build configuration file, created by
 # sphinx-quickstart on Fri Jun  9 13:47:02 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -72,7 +72,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "pgop"
+project = "PGOP"
 copyright = "The Regents of the University of Michigan"  # noqa: A001
 author = "Brandon Butler"
 
@@ -137,7 +137,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "pgopdoc"
+htmlhelp_basename = "PGOPdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------
@@ -178,7 +178,7 @@ latex_documents = [
 man_pages = [
     (
         master_doc,
-        "pgop",
+        "PGOP",
         "event-detection Documentation",
         [author],
         1,
@@ -196,10 +196,10 @@ bibtex_bibfiles = ['ref.bib']
 texinfo_documents = [
     (
         master_doc,
-        "pgop",
+        "PGOP",
         "event-detection Documentation",
         author,
-        "pgop",
+        "PGOP",
         "One line description of project.",
         "Miscellaneous",
     ),

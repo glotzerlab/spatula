@@ -5,11 +5,11 @@ PGOP
 Overview
 --------
 
-``pgop`` is a Python package for computing the continuous point group ordering of the neighbors of a point in space.
+``PGOP`` is a Python package for computing the continuous point group ordering of the neighbors of a point in space.
 In general, this is to compute the local ordering of particles (molecules) in simulations or experiments over time.
 The package serves as an extension of `freud <https://github.com/glotzerlab/freud>`__ with a new order parameter.
 
-``pgop`` currently supports all point groups of finite order:
+``PGOP`` currently supports all point groups of finite order:
 
 - All crystallographic point groups
 - Cyclical groups :math:`C_n`
@@ -27,46 +27,29 @@ Resources
 =========
 
 - `Reference Documentation <https://pgop.readthedocs.io/>`__: Examples, tutorials, and package Python APIs.
-- `Installation Guide <https://pgop.readthedocs.io/en/stable/gettingstarted/installation.html>`__: Instructions for installing and compiling **PgOP**.
-- `GitHub repository <https://github.com/glotzerlab/pgop>`__: Download the **PgOP** source code.
+- `Installation Guide <https://pgop.readthedocs.io/en/stable/gettingstarted/installation.html>`__: Instructions for installing and compiling **PGOP**.
+- `GitHub repository <https://github.com/glotzerlab/pgop>`__: Download the **PGOP** source code.
 - `Issue tracker <https://github.com/glotzerlab/pgop/issues>`__: Report issues or request features.
 
 Related Tools
 =============
 
 - `HOOMD-blue <https://hoomd-blue.readthedocs.io/>`__: Perform MD / MC simulations that
-  can be analyzed with **PgOP**.
+  can be analyzed with **PGOP**.
 - `freud <https://freud.readthedocs.io/>`__: Analyze particle simulations.
 - `signac <https://signac.io/>`__: Manage your workflow with **signac**.
 
 Citation
 ========
 
-When using **PgOP** to process data for publication, please `use this citation - CHANGE
-THIS LATER
+When using **PGOP** to process data for publication, please `cite the github repository
 <https://github.com/glotzerlab/pgop>`__.
 
 
 Installation
 ============
-
-**PgOP** is available on conda-forge_. Install with:
-
-.. code:: bash
-
-   mamba install -c conda-forge PgOP
-
-**freud** is also available on PyPI_:
-
-.. code:: bash
-
-   python -m pip install PgOP
-
-.. _conda-forge: https://conda-forge.org/
-.. _PyPI: https://pypi.org/
-
-If you need more detailed information or wish to install **PgOP** from source, please refer to the
-Installation Guide to compile **PgOP** from source.
+Currently, **PGOP** is only available as a source package.
+See the Installation Guide to compile **PGOP** from source.
 
 Example
 -------

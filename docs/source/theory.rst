@@ -25,7 +25,7 @@ rotoreflections can be constructed using combination of rotations and inversions
 space groups in addition to the above-mentioned symmetry elements we also have
 translational symmetry. This symmetry can be combined with elements of point group
 symmetry to obtain new unique type of symmetry operations such as screw axes (rotation +
-translation) and glide planes (reflections + translations). Since PgOP computes only
+translation) and glide planes (reflections + translations). Since PGOP computes only
 point group symmetry we shall focus only on point group symmetry.
 
 
@@ -113,7 +113,7 @@ Symmetry operations in point groups
 
 Rotations are defined by the axis of rotation and the angle of rotation.  Various
 representations of rotations exist, each with distinct advantages and disadvantages. In
-PgOP, we primarily use the Euler angle representation in the zyz convention because the
+PGOP, we primarily use the Euler angle representation in the zyz convention because the
 relevant literature often adopts it :cite:`Altmann_WignerD`. A rotation operation is
 written as :math:`\hat{C}_{nz}`, where :math:`n` represents the order of rotation and
 the second letter indicates the rotation axis. Other axes besides :math:`x`, :math:`y`,
@@ -157,7 +157,7 @@ reflection. Thus, by definition, we can write :cite:`Altmann_WignerD`:
 where :math:`\hat{\sigma}_h=\hat{\sigma}_{xy}` is the reflection operator perpendicular
 to the axis of rotation (:math:`z`).
 
-Some useful equivalency relations for rotoreflections and their powers used in PgOP code
+Some useful equivalency relations for rotoreflections and their powers used in PGOP code
 can be found in work by Drago :cite:`drago1992`.
 
 Matrix representation of symmetry operations
@@ -338,7 +338,7 @@ Notes on the table:
   for specific proper rotations
 
 Several point groups from the table above are equivalent. For more information see `this
-link <https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups>`_. In PgOP all
+link <https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups>`_. In PGOP all
 point groups were constructed from their operations given in the above table.
 
 
