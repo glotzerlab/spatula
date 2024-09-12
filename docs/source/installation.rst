@@ -26,46 +26,28 @@ All requirements other than the compiler can also be installed via the `Python P
 
 .. code-block:: bash
 
-    uv pip install numpy scipy freud-analysis pybind11 scikit-build cmake
+    uv pip install numpy scipy freud-analysis pybind11 scikit-build-core cmake
 
-The code that follows builds **PgOP** and installs it for all users (append ``--user`` if you wish to install it to your user site directory):
+The code that follows builds **PgOP**:
 
 .. code-block:: bash
 
-    git clone --recurse-submodules https://github.com/glotzerlab/freud.git
-    cd freud
-    uv pip install .
-
-
-The sources for PgOP can be downloaded from the `Github repo`_.
-
-You can either clone the public repository:
-
-.. code-block:: console
-
-    $ git clone git://github.com/glotzerlab/pgop
-
-
-Once you have a copy of the source, you can install it with:
-
-.. code-block:: console
-
-    $ python -m pip install /path/to/clone
-
-
-.. _Github repo: https://github.com/glotzerlab/pgop
-.. _tarball: https://github.com/glotzerlab/pgop/tarball/main
+    git clone https://github.com/glotzerlab/pgop.git
+    cd pgop
+    python -m pip install .
 
 
 Building Documentation
 ----------------------
 
-Currently the documentation is not available online, but can be built locally.
+The documentation can also be built locally.
 The required packages are
 
 + furo
 + sphinx
++ sphinxcontrib-bibtex
 
-These can be installed with ``python3 -m pip install sphinx furo``.
-To build documentation in the project base directory run ``python3 -m sphinx ./docs ./docs/_build``.
-To view the built documentation open the ``index.html`` file in ``./docs/_build`` with your preferred browser.
+These can be installed with ``python -m pip install sphinx furo``.
+Navigate to docs folder ``cd docs``.
+To build documentation in ``html`` form run ``make html``.
+To view the built documentation open the ``index.html`` file in ``./docs/build`` with your preferred browser.
