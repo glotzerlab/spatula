@@ -236,7 +236,7 @@ Infinitely many point groups exist. Point groups are divided into categories acc
 to the elements they contain and include the following: 
 
 - Cyclic groups (starting with Schoenflies symbol C), which contain operations 
-  related to a rotation of a given degree n
+  related to a rotation of a given degree :math:`n`
 - Rotoreflection groups (S), which contain rotoreflection operations
 - Dihedral groups (D), which contain operations related to rotation of a given degree 
   n and reflection across a plane perpendicular to the rotation axis
