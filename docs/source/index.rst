@@ -1,4 +1,8 @@
-.. include:: ../readme.rst
+=============================
+Welcome to PGOP documentation
+=============================
+
+.. include:: ../../readme.rst
 
 Table of Contents
 =================
@@ -8,9 +12,10 @@ Table of Contents
    :caption: Contents:
 
    installation
+   theory
    api
    contributing
-   authors
+   credits
    changelog
    citing
 
