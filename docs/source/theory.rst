@@ -141,8 +141,8 @@ rotation around :math:`z` axis. The reflection plane is always perpendicular to 
 of rotation obtained by the above formula.
 
 Inversion is a symmetry operation that flips the object across the center of inversion.
-It can be shown that inversion can be represented as application of 3 orthogonal
-reflection :cite:`engel2021point`:
+It can be shown that inversion can be represented by an application of 3 orthogonal
+reflections :cite:`engel2021point`:
 
 .. math::
     \hat{i} = \hat{\sigma}_{yz} \hat{\sigma}_{xz} \hat{\sigma}_{xy}
@@ -176,7 +176,7 @@ square matrix of size :math:`2l+1`. The indices of the matrix are often written 
 are coefficients for a spherical harmonic given by :math:`l` and :math:`m` (each vector element
 is different :math:`m`).
 
-First, we give the formula for composition operation which is just a matrix
+First, we give the formula for the composition operation which is just a matrix
 multiplication. Matrix multiplication (composition) formula for two symmetry operations
 is given by:
 
@@ -187,7 +187,7 @@ is given by:
 Group theory
 ------------
 
-In group theory, sets with operation under certain constraints (operation must be
+In group theory, sets with an operation under certain constraints (operation must be
 associative, and have an identity element, and every element of the set must have an inverse) are
 called groups. When studying symmetry groups, we usually consider groups under operation
 of composition. The elements of the group are symmetry operations. Elements of the group
@@ -233,19 +233,23 @@ Symmetry Point groups
 ~~~~~~~~~~~~~~~~~~~~~
 
 Infinitely many point groups exist. Point groups are divided into categories according
-to the elements they contain: Cyclic groups (starting with Schoenflies symbol C) which
-contain operations related to a rotation of a given degree n, rotoreflection groups (S)
-which contain rotoreflection operations, Dihedral groups (D) which contain operations
-related to rotation of a given degree n and reflection across a plane perpendicular to
-the rotation axis, and Cubic/polyhedral groups (O, T, I) which contain symmetry
-operations related to important polyhedra in 3D space. We give an overview of important
-point groups for materials science and crystallography below, with some
-remarks on notation and nomenclature.
+to the elements they contain and include the following: 
+
+- Cyclic groups (starting with Schoenflies symbol C), which contain operations 
+  related to a rotation of a given degree n
+- Rotoreflection groups (S), which contain rotoreflection operations
+- Dihedral groups (D), which contain operations related to rotation of a given degree 
+  n and reflection across a plane perpendicular to the rotation axis
+- Cubic/polyhedral groups (O, T, I), which contain symmetry operations related to 
+  important polyhedra in 3D space
+
+We give an overview of important point groups for materials science and 
+crystallography below, with some remarks on notation and nomenclature.
 
 With :math:`\hat{\sigma}_h` we label the reflection which is perpendicular (orthogonal)
 to the principal symmetry axis. On the other hand :math:`\hat{\sigma}_v` is the
-reflection which is parallel to the principal symmetry axis. There are multiple choices
-one can make with parallel reflection - it could be in :math:`zx` or :math:`zy` plane.
+reflection parallel to the principal symmetry axis. There are multiple choices
+one can make with parallel reflection, such as in the :math:`zx` or :math:`zy` plane.
 With :math:`\hat{\sigma}_d` we usually label reflections parallel to the principal axis
 that are not :math:`zx` or :math:`zy`.
 
@@ -258,7 +262,7 @@ plane containing principal axis of symmetry in :math:`z` direction. Note that so
 sources (such as :cite:`ezra`) would for some of these reflection planes use
 :math:`\hat{\sigma}^{'}`. The designation :math:`\hat{\sigma}_d` denotes a subset of
 reflections :math:`\hat{\sigma}_{v}` which also bisect the angle between the twofold
-axes perpendicular to the principal symmetry axis(:math:`z`). We opt not to use the
+axes perpendicular to the principal symmetry axis(:math:`z`). We opt to not use the
 designation :math:`\hat{\sigma}_d`. The definitions for specific operations are also
 given `here 
 <https://web.archive.org/web/20120813130005/http://newton.ex.ac.uk/research/qsystems/people/goss/symmetry/CharacterTables.html>`_. 
@@ -318,8 +322,8 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
 Notes on the table:
 
 * :math:`C_{nv}`: each :math:`\hat{\sigma}_v` is a reflection plane containing the
-  principal axis of symmetry starting with :math:`\hat{\sigma}_{yz}`, and rest are
-  successive rotation of this plane around :math:`z` axis by :math:`\frac{\pi}{n}`.
+  principal axis of symmetry starting with :math:`\hat{\sigma}_{yz}`, and the rest
+  are successive rotations of the plane around :math:`z` axis by :math:`\frac{\pi}{n}`.
 * All dihedral groups (:math:`D_n`, :math:`D_{nh}`, :math:`D_{nd}`): each
   :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with
   :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by
