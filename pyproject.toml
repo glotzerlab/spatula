@@ -13,7 +13,7 @@ ignore = ["E741", "B905", "D213", "D211", "UP006"]
 per-file-ignores = {"tests/test_wignerd.py" = ["N802"]}
 
 [project]
-name = "PGOP"
+name = "pgop"
 version = "0.0.1"
 requires-python = ">=3.8"
 description = "Local environment point group analysis for point cloud data."
