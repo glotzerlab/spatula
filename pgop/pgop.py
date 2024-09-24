@@ -4,12 +4,11 @@ Provides the `PGOP` class which computes the point group symmetry for a
 particle's neighborhood.
 """
 
-import freud
 import numpy as np
 
 import pgop._pgop
 
-from . import integrate, sph_harm, util, wignerd
+from . import freud, integrate, sph_harm, util, wignerd
 
 
 class PGOP:
