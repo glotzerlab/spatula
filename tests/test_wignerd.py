@@ -112,7 +112,7 @@ def test_WignerD_valid_point_group():
 
 
 def test_WignerD_invalid_point_group():
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         _ = WignerD("J", 10)
 
 
