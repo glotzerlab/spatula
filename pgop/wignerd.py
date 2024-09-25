@@ -1233,7 +1233,7 @@ class WignerD:
             The highest spherical harmonic to include in the WignerD matrices.
         """
         self._max_l = max_l
-        if not (
+        if (
             "C" in point_group
             or "D" in point_group
             or "S" in point_group
@@ -1241,7 +1241,11 @@ class WignerD:
             or "O" in point_group
             or "I" in point_group
         ):
+            pass
+        elif any(char.isdigit() or char in {'m', '-', '/'} for char in point_group):
             point_group = convert_hermann_mauguin_to_schonflies(point_group)
+        else:
+            raise ValueError(f"Unknown point group {point_group}.")
 
         self._point_group = point_group
         self._matrix = compute_condensed_wignerD_matrix_for_a_given_point_group(
