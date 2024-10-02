@@ -186,7 +186,7 @@ man_pages = [
 ]
 
 # Specify the path to your bibliography file
-bibtex_bibfiles = ['ref.bib']
+bibtex_bibfiles = ["ref.bib"]
 
 # -- Options for Texinfo output ----------------------------------------
 

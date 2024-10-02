@@ -10,13 +10,13 @@ Compile from source
 The following are **required** for building and installing **PGOP** from source:
 
 - A C++17-compliant compiler
-- `Python <https://www.python.org/>`__ 
-- `NumPy <https://www.numpy.org/>`__ 
-- `Scipy <https://scipy.org/>`__ 
-- `freud <https://freud.readthedocs.io/en/latest/>`__ 
-- `pybind11 <https://pybind11.readthedocs.io/en/stable/index.html>`__ 
-- `scikit-build-core <https://scikit-build-core.readthedocs.io/en/latest/index.html>`__ 
-- `CMake <https://cmake.org/>`__ 
+- `Python <https://www.python.org/>`__
+- `NumPy <https://www.numpy.org/>`__
+- `Scipy <https://scipy.org/>`__
+- `freud <https://freud.readthedocs.io/en/latest/>`__
+- `pybind11 <https://pybind11.readthedocs.io/en/stable/index.html>`__
+- `scikit-build-core <https://scikit-build-core.readthedocs.io/en/latest/index.html>`__
+- `CMake <https://cmake.org/>`__
 
 .. code-block:: bash
 
