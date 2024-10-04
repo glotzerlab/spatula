@@ -111,24 +111,5 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     std::vector<std::complex<double>>& sym_qlm_buf,
                     unsigned int max_l);
 
-py::array_t<std::complex<double>>
-wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
-                         const py::array_t<std::complex<double>> D_b);
-
-template<typename f> f colapse_to_zero(f num, f tol)
-{
-    if (std::abs(num) < tol) {
-        return 0;
-    }
-    return num;
-}
-
-template<typename f> std::complex<f> colapse_to_zero(std::complex<f> num, f tol)
-{
-    if (std::abs(std::real(num)) < tol && std::abs(std::imag(num)) < tol) {
-        return std::complex<f>(0);
-    }
-    return num;
-}
 void export_util(py::module& m);
 }} // namespace pgop::util

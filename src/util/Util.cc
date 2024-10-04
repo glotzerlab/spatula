@@ -148,51 +148,8 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
     }
 }
 
-/**
- * @brief Compute the semidirect product for two Wigner D matrices.
- *
- * This operation results in a Wigner D matrix that has the symmetries of both matrices and all
- * combinations of rotations.
- *
- * @param D_a One of the two Wigner D matrix.
- * @param D_b One of the two Wigner D matrix.
- */
-py::array_t<std::complex<double>>
-wignerDSemidirectProduct(const py::array_t<std::complex<double>> D_a,
-                         const py::array_t<std::complex<double>> D_b)
-{
-    auto u_D_a = D_a.unchecked<1>();
-    auto u_D_b = D_b.unchecked<1>();
-    size_t max_l = 0;
-    size_t cnt = 0;
-    while (cnt < static_cast<size_t>(u_D_a.size())) {
-        max_l += 1;
-        cnt += (2 * max_l + 1) * (2 * max_l + 1);
-    }
-    size_t l_skip = 0;
-    py::array_t<std::complex<double>> D_ab(u_D_a.size());
-    auto u_D_ab = D_ab.mutable_unchecked<1>();
-    for (size_t l {0}; l < max_l; ++l) {
-        const size_t max_m = 2 * l + 1;
-        for (size_t m_prime {0}; m_prime < max_m; ++m_prime) {
-            const size_t start_lmprime_i = l_skip + m_prime * max_m;
-            for (size_t m {0}; m < max_m; ++m) {
-                std::complex<double> sum {0, 0};
-                for (size_t m_prime_2 {0}; m_prime_2 < max_m; ++m_prime_2) {
-                    sum += u_D_a(start_lmprime_i + m_prime_2)
-                           * u_D_b(l_skip + m_prime_2 * max_m + m);
-                }
-                u_D_ab(start_lmprime_i + m) = colapse_to_zero(sum, 1e-7);
-            }
-        }
-        l_skip += max_m * max_m;
-    }
-    return D_ab;
-}
-
 void export_util(py::module& m)
 {
-    m.def("wignerD_semidirect_prod", &wignerDSemidirectProduct);
     m.def("to_rotation_matrix", &to_rotation_matrix);
     m.def("single_rotate", &single_rotate);
 }
