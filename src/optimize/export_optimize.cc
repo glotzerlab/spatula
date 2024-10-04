@@ -5,6 +5,7 @@
 #include "RandomSearch.h"
 #include "StepGradientDescent.h"
 #include "Union.h"
+#include "NoOptimization.h"
 #include "export_optimize.h"
 
 namespace pgop { namespace optimize {
@@ -15,5 +16,6 @@ void export_optimize(py::module& m)
     export_mesh(m);
     export_random_search(m);
     export_union(m);
+    export_no_optimization(m);
 }
 }} // namespace pgop::optimize
