@@ -5,20 +5,20 @@ import scipy.spatial
 import pgop
 from pgop.representations import (
     CartesianRepMatrix,
-    identity_cart,
-    rotation_from_euler_angles_cart,
     WignerD,
     _parse_point_group,
     compute_condensed_wignerD_matrix_for_a_given_point_group,
     condensed_wignerD_from_operations,
     delta,
     dot_product,
+    identity_cart,
     identity_sph,
     inversion_sph,
     iter_sph_indices,
     reflection_from_normal_sph,
     rotation_from_axis_angle_sph,
     rotation_from_axis_order_sph,
+    rotation_from_euler_angles_cart,
     rotation_from_euler_angles_sph,
     rotoreflection_from_axis_angle_sph,
     rotoreflection_from_axis_order_sph,
@@ -103,22 +103,22 @@ def test_parse_point_group():
     assert _parse_point_group("C4") == ("C", None, 4)
 
 
-def test_WignerD_init():
+def test_wignerd_init():
     wig = WignerD("C2", 10)
     assert wig.max_l == 10
 
 
-def test_WignerD_valid_point_group():
+def test_wignerd_valid_point_group():
     wig = WignerD("C2", 10)
     assert isinstance(wig.condensed_matrices, np.ndarray)
 
 
-def test_WignerD_invalid_point_group():
+def test_wignerd_invalid_point_group():
     with pytest.raises(KeyError):
         _ = WignerD("J", 10)
 
 
-def test_WignerD_iter_sph_indices():
+def test_wignerd_iter_sph_indices():
     indices = list(pgop.representations.iter_sph_indices(2))
     expected_indices = [
         (0, 0, 0),
@@ -164,10 +164,12 @@ maxl = 12
 
 
 def test_identity_sph():
-    assert np.allclose(identity_sph(maxl), rotation_from_euler_angles_sph(maxl, 0, 0, 0))
+    assert np.allclose(
+        identity_sph(maxl), rotation_from_euler_angles_sph(maxl, 0, 0, 0)
+    )
 
 
-def test_C2x_from_operations():
+def test_c2x_from_operations():
     """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
     Note: Engel's paper has values for 2x and 2y swapped!
     """
@@ -183,7 +185,7 @@ def test_C2x_from_operations():
     )
 
 
-def test_C2y_from_operations():
+def test_c2y_from_operations():
     """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
     Note: Engel's paper has values for 2x and 2y swapped!
     """
@@ -199,7 +201,7 @@ def test_C2y_from_operations():
     )
 
 
-def test_C2y_rotation_from_euler_angles_sph():
+def test_c2y_rotation_from_euler_angles_sph():
     """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
     Note: Engel's paper has values for 2x and 2y swapped!
     """
@@ -215,7 +217,7 @@ def test_C2y_rotation_from_euler_angles_sph():
     )
 
 
-def test_C2x_rotation_from_euler_angles_sph():
+def test_c2x_rotation_from_euler_angles_sph():
     """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
     Note: Engel's paper has values for 2x and 2y swapped!
     """
@@ -232,7 +234,7 @@ def test_C2x_rotation_from_euler_angles_sph():
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Cz_rotation_from_euler_angles_sph(n):
+def test_cz_rotation_from_euler_angles_sph(n):
     """According to Engel's paper (https://arxiv.org/pdf/2106.14846).
     Note: Engel's paper has a minus in the exponent which is not present in altmann.
     """
@@ -360,7 +362,7 @@ def test_general_rotoreflection_against_axis_order(n):
     )
 
 
-def test_Ci():
+def test_ci():
     """According to Engel's paper (https://arxiv.org/pdf/2106.14846) :"""
     assert np.isclose(
         np.array(
@@ -375,7 +377,7 @@ def test_Ci():
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Cn(n):
+def test_cn(n):
     """According to Engel's paper (https://arxiv.org/pdf/2106.14846) :"""
     w = np.array(
         [delta(mprime, m) * delta(m % n, 0) for _, mprime, m in iter_sph_indices(maxl)],
@@ -387,7 +389,7 @@ def test_Cn(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Cn_against_scipy_rotations_euler(n):
+def test_cn_against_scipy_rotations_euler(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
         operations.append(rotation_from_euler_angles_sph(maxl, *i.as_euler("zyz")))
@@ -398,7 +400,7 @@ def test_Cn_against_scipy_rotations_euler(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Cn_against_scipy_rotations_rotvec(n):
+def test_cn_against_scipy_rotations_rotvec(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
         # identity has no axis, so we have to check for it otherwise errors
@@ -416,7 +418,7 @@ def test_Cn_against_scipy_rotations_rotvec(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Dn_against_scipy_rotations_euler(n):
+def test_dn_against_scipy_rotations_euler(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
         euler_angles = np.asarray(i.as_euler("zyz"))
@@ -431,7 +433,7 @@ def test_Dn_against_scipy_rotations_euler(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Dn_against_scipy_rotations_rotvec(n):
+def test_dn_against_scipy_rotations_rotvec(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
         # identity has no axis, so we have to check for it otherwise errors
@@ -457,7 +459,7 @@ def test_Dn_against_scipy_rotations_rotvec(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Dn(n):
+def test_dn(n):
     """According to Engel's paper (https://arxiv.org/pdf/2106.14846)"""
     assert np.allclose(
         np.array(
@@ -473,7 +475,7 @@ def test_Dn(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Cnv_from_product(n):
+def test_cnv_from_product(n):
     """Ezra p. 189:
     Cnv = Cn x Cs for odd n"""
     assert np.allclose(
@@ -490,7 +492,7 @@ def test_Cnv_from_product(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test_odd)
-def test_Cnh_from_product(n):
+def test_cnh_from_product(n):
     """Ezra p. 189:
     Cnv = Cn x Cs for all n.
     We cannot use this for even n's here because the
@@ -511,7 +513,7 @@ def test_Cnh_from_product(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test_odd)
-def test_Sn_odd_equivalent_to_Cnh(n):
+def test_sn_odd_equivalent_to_cnh(n):
     """https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups"""
     assert np.allclose(
         compute_condensed_wignerD_matrix_for_a_given_point_group("S" + str(n), maxl),
@@ -522,7 +524,7 @@ def test_Sn_odd_equivalent_to_Cnh(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
-def test_Dn_from_product(n):
+def test_dn_from_product(n):
     """According to Altman Dn=Cn x| C2' Table 2 (p. 222)
     It can be either C2' = {E, 2_x} or C2''= {E, 2_y}. The group action matrix will be
     slightly different. But for PgOP this doesn't matter because we have to optimize
@@ -543,7 +545,7 @@ def test_Dn_from_product(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test_odd)
-def test_Dnd_from_product_odd_n(n):
+def test_dnd_from_product_odd_n(n):
     """Ezra p. 189:
     Dnd = Dn x Ci for odd n"""
     assert np.allclose(
@@ -560,7 +562,7 @@ def test_Dnd_from_product_odd_n(n):
 
 
 @pytest.mark.parametrize("n", order_range_to_test_odd)
-def test_Cni_equivalence_to_Sn(n):
+def test_cni_equivalence_to_sn(n):
     """https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups"""
     cn_group = compute_condensed_wignerD_matrix_for_a_given_point_group(
         "C" + str(n), maxl
@@ -578,7 +580,7 @@ def test_Cni_equivalence_to_Sn(n):
 
 
 @pytest.mark.parametrize("n", range(2, 12, 4))
-def test_Sn_even_from_odd_direct_product(n):
+def test_sn_even_from_odd_direct_product(n):
     """Ezra p. 189:
     S2n = Cn x Ci for odd n"""
     cn_half = compute_condensed_wignerD_matrix_for_a_given_point_group(
@@ -593,7 +595,7 @@ def test_Sn_even_from_odd_direct_product(n):
     )
 
 
-def test_Th_from_product():
+def test_th_from_product():
     assert np.allclose(
         semidirect_product(
             compute_condensed_wignerD_matrix_for_a_given_point_group("T", maxl),
@@ -603,7 +605,7 @@ def test_Th_from_product():
     )
 
 
-def test_Oh_from_product():
+def test_oh_from_product():
     assert np.allclose(
         semidirect_product(
             compute_condensed_wignerD_matrix_for_a_given_point_group("O", maxl),
@@ -613,7 +615,7 @@ def test_Oh_from_product():
     )
 
 
-def test_Ih_from_product():
+def test_ih_from_product():
     assert np.allclose(
         semidirect_product(
             compute_condensed_wignerD_matrix_for_a_given_point_group("I", maxl),
@@ -621,7 +623,6 @@ def test_Ih_from_product():
         ),
         compute_condensed_wignerD_matrix_for_a_given_point_group("Ih", maxl),
     )
-
 
 
 def test_cartesian_init():
@@ -651,7 +652,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test_odd)
-# def test_Sn_odd_equivalent_to_Cnh(n):
+# def test_sn_odd_equivalent_to_cnh(n):
 #    """https://en.wikipedia.org/wiki/Schoenflies_notation#Point_groups"""
 #    assert np.allclose(
 #        compute_condensed_wignerD_matrix_for_a_given_point_group("S" + str(n), maxl),
@@ -661,7 +662,7 @@ def test_identity_cart():
 #    )
 
 
-# def test_C2x_from_operations():
+# def test_c2x_from_operations():
 #    """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
 #    Note: Engel's paper has values for 2x and 2y swapped!
 #    """
@@ -673,11 +674,11 @@ def test_identity_cart():
 #            ],
 #            dtype=complex,
 #        ),
-#        dot_product(inversion_cart(maxl), reflection_from_normal_cart(maxl, [1, 0, 0])),
+#       dot_product(inversion_cart(maxl), reflection_from_normal_cart(maxl, [1, 0, 0])),
 #    )
 #
 #
-# def test_C2y_from_operations():
+# def test_c2y_from_operations():
 #    """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
 #    Note: Engel's paper has values for 2x and 2y swapped!
 #    """
@@ -689,11 +690,11 @@ def test_identity_cart():
 #            ],
 #            dtype=complex,
 #        ),
-#        dot_product(inversion_cart(maxl), reflection_from_normal_cart(maxl, [0, 1, 0])),
+#       dot_product(inversion_cart(maxl), reflection_from_normal_cart(maxl, [0, 1, 0])),
 #    )
 #
 #
-# def test_C2y_rotation_from_euler_angles_cart():
+# def test_c2y_rotation_from_euler_angles_cart():
 #    """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
 #    Note: Engel's paper has values for 2x and 2y swapped!
 #    """
@@ -709,7 +710,7 @@ def test_identity_cart():
 #    )
 #
 #
-# def test_C2x_rotation_from_euler_angles_cart():
+# def test_c2x_rotation_from_euler_angles_cart():
 #    """According to paper by Engel (https://arxiv.org/pdf/2106.14846)
 #    Note: Engel's paper has values for 2x and 2y swapped!
 #    """
@@ -726,7 +727,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test)
-# def test_Cz_rotation_from_euler_angles_cart(n):
+# def test_cz_rotation_from_euler_angles_cart(n):
 #    """According to Engel's paper (https://arxiv.org/pdf/2106.14846).
 #    Note: Engel's paper has a minus in the exponent which is not present in altmann.
 #    """
@@ -854,7 +855,7 @@ def test_identity_cart():
 #    )
 #
 #
-# def test_Ci():
+# def test_ci():
 #    """According to Engel's paper (https://arxiv.org/pdf/2106.14846) :"""
 #    assert np.isclose(
 #        np.array(
@@ -869,7 +870,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test)
-# def test_Cn(n):
+# def test_cn(n):
 #    """According to Engel's paper (https://arxiv.org/pdf/2106.14846) :"""
 #    w = np.array(
 #       [delta(mprime, m) * delta(m % n, 0) for _, mprime, m in iter_sph_indices(maxl)],
@@ -881,7 +882,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test)
-# def test_Cn_against_scipy_rotations_euler(n):
+# def test_cn_against_scipy_rotations_euler(n):
 #    operations = []
 #    for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
 #        operations.append(rotation_from_euler_angles_cart(maxl, *i.as_euler("zyz")))
@@ -892,7 +893,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test)
-# def test_Cn_against_scipy_rotations_rotvec(n):
+# def test_cn_against_scipy_rotations_rotvec(n):
 #    operations = []
 #    for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
 #        # identity has no axis, so we have to check for it otherwise errors
@@ -910,7 +911,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test)
-# def test_Dn_against_scipy_rotations_euler(n):
+# def test_dn_against_scipy_rotations_euler(n):
 #    operations = []
 #    for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
 #        euler_angles = np.asarray(i.as_euler("zyz"))
@@ -925,7 +926,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test)
-# def test_Dn_against_scipy_rotations_rotvec(n):
+# def test_dn_against_scipy_rotations_rotvec(n):
 #    operations = []
 #    for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
 #        # identity has no axis, so we have to check for it otherwise errors
@@ -951,7 +952,7 @@ def test_identity_cart():
 #
 #
 # @pytest.mark.parametrize("n", order_range_to_test)
-# def test_Dn(n):
+# def test_dn(n):
 #    """According to Engel's paper (https://arxiv.org/pdf/2106.14846)"""
 #    assert np.allclose(
 #        np.array(
