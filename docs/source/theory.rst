@@ -16,7 +16,7 @@ rotational symmetry of order 4, because it looks the same after a 90 degree rota
 Symmetry can be described in terms of a group of transformations that leave the object
 invariant. This group is called the symmetry group of the object. There are several
 types of symmetry operations that are often encountered in physics, such as rotations,
-reflections, and translations. These operations can be combined to form more complex 
+reflections, and translations. These operations can be combined to form more complex
 symmetry operations.
 
 There are two main types of symmetry operations associated with point groups: rotations
@@ -42,22 +42,22 @@ to be computed with respect to some reference in space. This point in space can 
 to a particle location (which is usually the case), but doesn't have to. Thus, PGOP does
 not measure the point group symmetry of this chosen point in space, but rather the point
 group symmetry of projections of these points to a unit sphere (the BOOD). It is
-important to note that PGOP is not a measurement of Wyckoff site symmetry or  
+important to note that PGOP is not a measurement of Wyckoff site symmetry or
 crystalline point group symmetry. To compute a crystalline point group symmetry, PGOP
 should be measured at the location of the general position. General position which is a
 point in a crystal that does not transform with any symmetry operations.
-Understanding this, a big strength of PGOP comes from its ability to interpret 
-symmetry on a continuous scale, instead of a binary property. Symmetry is typically 
-defined as a binary relation between two objects that are the same under some 
-transformation. 
+Understanding this, a big strength of PGOP comes from its ability to interpret
+symmetry on a continuous scale, instead of a binary property. Symmetry is typically
+defined as a binary relation between two objects that are the same under some
+transformation.
 
-PGOP results are given on a scale from 0 to 1, with 1 meaning perfect symmetry of 
-the given point group, and 0 meaning no match for that symmetry. In real systems, 
+PGOP results are given on a scale from 0 to 1, with 1 meaning perfect symmetry of
+the given point group, and 0 meaning no match for that symmetry. In real systems,
 we do not expect to see values of 0 and 1. By approaching symmetry measurements in
-this way, we can use PGOP in cases in which we want to study changes in the local 
+this way, we can use PGOP in cases in which we want to study changes in the local
 structure of a crystal as it is formed.
 
-The calculation of PGOP can be broken down into 4 main parts: 
+The calculation of PGOP can be broken down into 4 main parts:
 
 1. The construction of a Bond Orientational Order Diagram (BOOD)
 2. The spherical harmonics expansion of the BOOD
@@ -66,24 +66,24 @@ The calculation of PGOP can be broken down into 4 main parts:
 
 Step 1: Constructing the BOOD of the System
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To understand PGOP, it is important to first consider a Bond Orientational Order 
+To understand PGOP, it is important to first consider a Bond Orientational Order
 Diagram (BOOD). A BOOD can be thought of as a projection of the relative positions of
 particle neighbors projected onto a unit sphere.
-This is useful as it provides a way to examine the local environment that a particle 
-is experiencing. For constructing a BOOD, the determination of nearest neighbors is 
+This is useful as it provides a way to examine the local environment that a particle
+is experiencing. For constructing a BOOD, the determination of nearest neighbors is
 important, as this can change the results. This will also affect the results of PGOP
-calculations. While the distance between particles may be important for determining 
-if they are neighbors, it is not part of the BOOD. 
+calculations. While the distance between particles may be important for determining
+if they are neighbors, it is not part of the BOOD.
 
 Step 2: Spherical Harmonics Expansion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Now that we understand BOODs, let's talk about spherical harmonics. In the case of  
-PGOP, Spherical Harmonics are particularly useful as they provide a complete basis  
-in the space of functions on the sphere, thereby allowing spherical functions to be 
-written as linear combinations of these basis functions. In PGOP, we construct a 
-Spherical Harmonics expansion of the BOOD of our system. In order to do this, we 
-first identify the particle positions relative to a central point. We then convert 
-these into spherical harmonics, compute these for each bond, and then sum these 
+Now that we understand BOODs, let's talk about spherical harmonics. In the case of
+PGOP, Spherical Harmonics are particularly useful as they provide a complete basis
+in the space of functions on the sphere, thereby allowing spherical functions to be
+written as linear combinations of these basis functions. In PGOP, we construct a
+Spherical Harmonics expansion of the BOOD of our system. In order to do this, we
+first identify the particle positions relative to a central point. We then convert
+these into spherical harmonics, compute these for each bond, and then sum these
 spherical harmonics.
 
 Steps 3 and 4: Construction of the symmetrized BOOD and BOOD Comparison
@@ -96,10 +96,10 @@ expansion that are defined by the initial and symmetrized BOOD. Before computing
 final value of PGOP, we have to find the rotation which minimizes this inner product.
 If we take the BOOD of our system, we want to find where it best matches the symmetrized
 one. This is done using a brute force optimization plus gradient descent. The search is
-done over all the rotations in 3D space, as described by the 3D rotation group, SO(3). 
+done over all the rotations in 3D space, as described by the 3D rotation group, SO(3).
 
-At this point, it is important to note how the actions of symmetry are represented. 
-For this, we use Wigner D matrices. These matrices provide a way to mathematically 
+At this point, it is important to note how the actions of symmetry are represented.
+For this, we use Wigner D matrices. These matrices provide a way to mathematically
 express these operations with finite-dimensional matrices.
 
 Wigner D matrices
@@ -149,7 +149,7 @@ reflections :cite:`engel2021point`:
 
 Rotoreflections are a combination of rotations and reflections, sometimes called
 improper rotations. They are a type of symmetry operation that combines rotation and
-reflection. Thus, by definition, we can write :cite:`Altmann_WignerD`: 
+reflection. Thus, by definition, we can write :cite:`Altmann_WignerD`:
 
 .. math::
     \hat{S}_n = \hat{\sigma}_h {\hat{C}_n} = \hat{\sigma}_{xy} {\hat{C}_n}
@@ -233,17 +233,17 @@ Symmetry Point groups
 ~~~~~~~~~~~~~~~~~~~~~
 
 Infinitely many point groups exist. Point groups are divided into categories according
-to the elements they contain and include the following: 
+to the elements they contain and include the following:
 
-- Cyclic groups (starting with Schoenflies symbol C), which contain operations 
+- Cyclic groups (starting with Schoenflies symbol C), which contain operations
   related to a rotation of a given degree :math:`n`
 - Rotoreflection groups (S), which contain rotoreflection operations
-- Dihedral groups (D), which contain operations related to rotation of a given degree 
+- Dihedral groups (D), which contain operations related to rotation of a given degree
   n and reflection across a plane perpendicular to the rotation axis
-- Cubic/polyhedral groups (O, T, I), which contain symmetry operations related to 
+- Cubic/polyhedral groups (O, T, I), which contain symmetry operations related to
   important polyhedra in 3D space
 
-We give an overview of important point groups for materials science and 
+We give an overview of important point groups for materials science and
 crystallography below, with some remarks on notation and nomenclature.
 
 With :math:`\hat{\sigma}_h` we label the reflection which is perpendicular (orthogonal)
@@ -264,8 +264,8 @@ sources (such as :cite:`ezra`) would for some of these reflection planes use
 reflections :math:`\hat{\sigma}_{v}` which also bisect the angle between the twofold
 axes perpendicular to the principal symmetry axis(:math:`z`). We opt to not use the
 designation :math:`\hat{\sigma}_d`. The definitions for specific operations are also
-given `here 
-<https://web.archive.org/web/20120813130005/http://newton.ex.ac.uk/research/qsystems/people/goss/symmetry/CharacterTables.html>`_. 
+given `here
+<https://web.archive.org/web/20120813130005/http://newton.ex.ac.uk/research/qsystems/people/goss/symmetry/CharacterTables.html>`_.
 
 Many operations in the table contain a power. The power is to be read as applying the
 same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
@@ -295,7 +295,7 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
    * - :math:`C_{nv}`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{\sigma}_v`
    * - :math:`D_n`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}` 
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`
    * - :math:`D_{nh}`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`n\hat{\sigma}_v`
    * - :math:`D_{nd}` (sometimes called :math:`D_{nv}`)
@@ -327,7 +327,7 @@ Notes on the table:
 * All dihedral groups (:math:`D_n`, :math:`D_{nh}`, :math:`D_{nd}`): each
   :math:`\hat{C}_2^{'}` is perpendicular to the principal axis of symmetry starting with
   :math:`\hat{C}_{2x}` and rest are successive rotation of this plane by
-  :math:`\frac{2\pi}{n}`. 
+  :math:`\frac{2\pi}{n}`.
 * :math:`D_{nh}`: each :math:`\hat{\sigma}_v` is a reflection plane parallel to
   both principal (:math:`z`) and each :math:`\hat{C}_2^{'}` axis.
 * :math:`D_{nd}`: each :math:`\hat{\sigma}_d` is a reflection plane parallel to
