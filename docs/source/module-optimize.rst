@@ -11,6 +11,7 @@ pgop.optimize
     RandomSearch
     StepGradientDescent
     Union
+    NoOptimization
 
 .. rubric:: Details
 
@@ -21,3 +22,4 @@ pgop.optimize
     RandomSearch,
     StepGradientDescent,
     Union
+    NoOptimization
