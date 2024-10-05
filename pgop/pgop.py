@@ -8,7 +8,7 @@ import numpy as np
 
 import pgop._pgop
 
-from . import cartrep, freud, integrate, sph_harm, util, wignerd
+from . import freud, integrate, representations, sph_harm, util
 
 
 def _compute_distance_vectors(neigh_query, neighbors, query_points):
@@ -110,7 +110,7 @@ class BOOSOP:
         matrices = []
         for point_group in self._symmetries:
             matrices.append(
-                wignerd.WignerD(point_group, self._max_l).condensed_matrices
+                representations.WignerD(point_group, self._max_l).condensed_matrices
             )
         D_ij = np.stack(matrices, axis=0)  # noqa N806
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
@@ -293,7 +293,7 @@ class PGOP:
         self._optmizer = optimizer
         matrices = []
         for point_group in self._symmetries:
-            pg = cartrep.CartesianRepMatrix(point_group)
+            pg = representations.CartesianRepMatrix(point_group)
             matrices.append(pg.condensed_matrices)
         R_ij = np.stack(matrices, axis=0)  # noqa N806
         self._cpp = pgop._pgop.PGOP(R_ij, optimizer._cpp)

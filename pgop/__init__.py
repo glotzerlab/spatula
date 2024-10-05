@@ -1,6 +1,6 @@
 import freud
 
-from . import bond_order, cartrep, integrate, optimize, sph_harm, util, wignerd
+from . import bond_order, integrate, optimize, representations, sph_harm, util
 from .pgop import BOOSOP, PGOP
 
 __all__ = [
@@ -11,7 +11,6 @@ __all__ = [
     "PGOP",
     "BOOSOP",
     "util",
-    "wignerd",
+    "representations",
     "freud",
-    "cartrep",
 ]
