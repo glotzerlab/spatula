@@ -4,7 +4,6 @@
 
 #include "PGOP.h"
 #include "util/Threads.h"
-#include <iostream> // TODO not needed
 
 namespace pgop {
 
@@ -189,20 +188,13 @@ std::tuple<double, data::Quaternion> PGOP::compute_symmetry(LocalNeighborhood& n
 double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<double>& R_ij) const
 {
     const auto positions = neighborhood.rotated_positions;
-    const auto unrotated_positions = neighborhood.positions; // TODO NOT NEEDED
     const auto sigmas = neighborhood.sigmas;
-    double overlap = positions.size();
     // First operator is always E so it can be skipped. Make sure to add  N_part to
-    // overlap for it. Now, loop over the R_ij. Each 3x3 segment is a symmetry operation
+    // overlap for it. 
+    double overlap = positions.size();
+    // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
-    //std::cout << "R_ij.size(): " << R_ij.size() << std::endl;
     for (size_t i {9}; i < R_ij.size(); i += 9) {
-        // print out the operator
-        //std::cout << "############ OPERATOR ################" << std::endl;
-        //std::cout << R_ij[i] << " " << R_ij[i + 1] << " " << R_ij[i + 2] << std::endl;
-        //std::cout << R_ij[i + 3] << " " << R_ij[i + 4] << " " << R_ij[i + 5] << std::endl;
-        //std::cout << R_ij[i + 6] << " " << R_ij[i + 7] << " " << R_ij[i + 8] << std::endl;
-        //std::cout << "############    END   ################" << std::endl;
         // loop over positions
         for (size_t j {0}; j < positions.size(); ++j) {
             // symmetrized position is obtained by multiplying the operator with the position
@@ -213,31 +205,33 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
                     symmetrized_position[k] += R_ij[i + k * 3 + l] * positions[j][l];
                 }
             }
-            //std::cout <<"unrotated pos[j] " << unrotated_positions[j].x <<" " << unrotated_positions[j].y << " " << unrotated_positions[j].z << " positions[j]: " << positions[j].x <<" " << positions[j].y << " " << positions[j].z << " "<< " symmetrized_position: " << symmetrized_position.x <<" " << symmetrized_position.y << " " << symmetrized_position.z << std::endl;
             // compute overlap with every point in the positions
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
                 // 1. compute the distance between the two vectors (symmetrized_position
                 //    and positions[m])
-                //std::cout << "position[m] " << positions[m].x << " " << positions[m].y << " " << positions[m].z << std::endl;
-                //std::cout << "symposition: " << symmetrized_position.x <<" " << symmetrized_position.y << " " << symmetrized_position.z << std::endl;
                 auto r_pos = symmetrized_position - positions[m];
                 auto distancesq = r_pos.dot(r_pos);
                 auto sigmas_squared_summed = sigmas[m] * sigmas[m] + sigmas[j] * sigmas[j];
-                //std::cout << "relposition: " << r_pos.x << " " << r_pos.y << " " << r_pos.z << " norm/distance sq " << distancesq << "sigmas sq summed " << sigmas_squared_summed << std::endl;
                 // 2. compute the gaussian overlap between the two points
+                //    Alternatively Bhattacharyya coefficient could be used. It is
+                //    computed in this way:
+                //  diffmu = mu1 - mu2
+                //  var1 = sigma1**2
+                //  var2 = sigma2**2
+                //  average_var = (var1 + var2)/2
+                //  mahalanobis_term = np.exp(-1/8*np.dot(diffmu.T, 1/average_var*diffmu)) 
+                //  otherterm = ((var1*var2)**(3/4))/(average_var**(3/2))
+                //  bc = mahalanobis_term * otherterm
                 auto res = std::pow((2 * sigmas[m] * sigmas[j] / sigmas_squared_summed), 3 / 2)
                            * std::exp(-distancesq / (2 * sigmas_squared_summed));
                 if (res > max_res) max_res=res;
-                //std::cout << " overlap: " << res << " maxres : " << max_res << std::endl;
             }
             overlap += max_res;
-            //std::cout << "overlap: " << overlap << std::endl;
         }
     }
     // cast to double to avoid integer division
     const auto normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
-    // std::cout << "normalization: " << normalization << std::endl;
     return overlap / normalization;
 }
 
