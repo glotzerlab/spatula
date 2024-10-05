@@ -1339,15 +1339,12 @@ cutoff = 0.99
 
 methods_dict = dict()
 
+random_number = int(time.time())
+
 # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
 # close to one as well.
-optimizer = pgop.optimize.StepGradientDescent()
-random_number = int(time.time())
 optimizer = pgop.optimize.Union.with_step_gradient_descent(
-    pgop.optimize.RandomSearch(max_iter=5000, seed=random_number)
-)
-optimizer = pgop.optimize.Union.with_step_gradient_descent(
-    pgop.optimize.Mesh.from_grid(n_axes=100, n_angles=25)
+    pgop.optimize.Mesh.from_grid(n_axes=200, n_angles=25)
 )
 
 
