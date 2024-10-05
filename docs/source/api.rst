@@ -9,6 +9,7 @@ API
     :nosignatures:
 
     PGOP
+    BOOSOP
 
 .. rubric:: Details
 
