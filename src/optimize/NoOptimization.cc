@@ -2,8 +2,7 @@
 
 namespace pgop { namespace optimize {
 
-NoOptimization::NoOptimization(const data::Vec3& initial_point)
-    : Optimizer()
+NoOptimization::NoOptimization(const data::Vec3& initial_point) : Optimizer()
 {
     // Set the initial point
     m_point = initial_point;
@@ -29,9 +28,7 @@ std::unique_ptr<Optimizer> NoOptimization::clone() const
 
 void export_no_optimization(py::module& m)
 {
-    py::class_<NoOptimization, Optimizer, std::shared_ptr<NoOptimization>>(
-        m,
-        "NoOptimization")
+    py::class_<NoOptimization, Optimizer, std::shared_ptr<NoOptimization>>(m, "NoOptimization")
         .def(py::init<const data::Vec3&>());
 }
 }} // namespace pgop::optimize

@@ -5,9 +5,9 @@
 namespace pgop { namespace optimize {
 
 class NoOptimization : public Optimizer {
-public:
+    public:
     NoOptimization(const data::Vec3& initial_point);
-    
+
     // Implements internal_next_point but does nothing
     void internal_next_point() override;
 
@@ -17,7 +17,7 @@ public:
     // Clone function for Pybind11
     std::unique_ptr<Optimizer> clone() const override;
 
-private:
+    private:
     // Flag to terminate the optimization
     bool m_terminate;
 };

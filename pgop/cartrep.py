@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.spatial
 import scipy.special
+
 from .wignerd import _parse_point_group
 
 

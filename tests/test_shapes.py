@@ -1,9 +1,10 @@
+import time
+
 import coxeter
 import freud
 import numpy as np
 import pytest
 import scipy.spatial
-import time
 
 import pgop
 
@@ -1350,7 +1351,6 @@ optimizer = pgop.optimize.Union.with_step_gradient_descent(
 )
 
 
-
 def get_shape_sys_nlist(vertices):
     """Get a neighbor list of a shape.
 
@@ -1482,9 +1482,9 @@ def test_radially_imperfect_symmetry(symmetry, shape, vertices, quaternion):
     # randomly scale the distance of a random set of vertices for a number between 1.01
     # and 2
     scale = np.random.uniform(0.5, 2, len(vertices))
-    new_vertices =[]
-    for point, sc in zip(vertices,scale):
-        new_vertices.append(point*sc)
+    new_vertices = []
+    for point, sc in zip(vertices, scale):
+        new_vertices.append(point * sc)
     new_vertices = np.asarray(new_vertices)
 
     # check if BOOSOP or PGOP is already in the dictionary

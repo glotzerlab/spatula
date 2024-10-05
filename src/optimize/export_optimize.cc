@@ -1,11 +1,11 @@
 #include <pybind11/stl.h>
 
 #include "Mesh.h"
+#include "NoOptimization.h"
 #include "Optimize.h"
 #include "RandomSearch.h"
 #include "StepGradientDescent.h"
 #include "Union.h"
-#include "NoOptimization.h"
 #include "export_optimize.h"
 
 namespace pgop { namespace optimize {

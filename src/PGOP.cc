@@ -25,23 +25,22 @@ Neighborhoods::Neighborhoods(size_t N,
 LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    
+
     // Create a vector of Vec3 to store the positions (3 coordinates for each Vec3)
     std::vector<data::Vec3> neighborhood_positions;
     neighborhood_positions.reserve(end - start);
-    
+
     for (size_t j = start; j < end; ++j) {
         // Each Vec3 contains 3 consecutive elements from m_distances
         neighborhood_positions.emplace_back(
-            data::Vec3{m_distances[3 * j], m_distances[3 * j + 1], m_distances[3 * j + 2]});
+            data::Vec3 {m_distances[3 * j], m_distances[3 * j + 1], m_distances[3 * j + 2]});
     }
 
-    return LocalNeighborhood(
-        std::move(neighborhood_positions),
-        std::vector(m_weights + start, m_weights + end),
-        // TODO check if this is correct - sigmas are indexed differently then points
-        // and weights
-        std::vector(m_sigmas + start, m_sigmas + end));
+    return LocalNeighborhood(std::move(neighborhood_positions),
+                             std::vector(m_weights + start, m_weights + end),
+                             // TODO check if this is correct - sigmas are indexed differently then
+                             // points and weights
+                             std::vector(m_sigmas + start, m_sigmas + end));
 }
 
 std::vector<double> Neighborhoods::getWeights(size_t i) const
@@ -120,8 +119,7 @@ PGOP::PGOP(const py::array_t<double> R_ij, std::shared_ptr<optimize::Optimizer>&
     const auto u_R_ij = R_ij.unchecked<2>();
     const size_t n_mlms = R_ij.shape(1);
     for (size_t i {0}; i < m_n_symmetries; ++i) {
-        m_Rij.emplace_back(
-            std::vector<double>(u_R_ij.data(i, 0), u_R_ij.data(i, 0) + n_mlms));
+        m_Rij.emplace_back(std::vector<double>(u_R_ij.data(i, 0), u_R_ij.data(i, 0) + n_mlms));
     }
 }
 
@@ -190,7 +188,7 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
     const auto positions = neighborhood.rotated_positions;
     const auto sigmas = neighborhood.sigmas;
     // First operator is always E so it can be skipped. Make sure to add  N_part to
-    // overlap for it. 
+    // overlap for it.
     double overlap = positions.size();
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
@@ -220,12 +218,13 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
                 //  var1 = sigma1**2
                 //  var2 = sigma2**2
                 //  average_var = (var1 + var2)/2
-                //  mahalanobis_term = np.exp(-1/8*np.dot(diffmu.T, 1/average_var*diffmu)) 
+                //  mahalanobis_term = np.exp(-1/8*np.dot(diffmu.T, 1/average_var*diffmu))
                 //  otherterm = ((var1*var2)**(3/4))/(average_var**(3/2))
                 //  bc = mahalanobis_term * otherterm
                 auto res = std::pow((2 * sigmas[m] * sigmas[j] / sigmas_squared_summed), 3 / 2)
                            * std::exp(-distancesq / (2 * sigmas_squared_summed));
-                if (res > max_res) max_res=res;
+                if (res > max_res)
+                    max_res = res;
             }
             overlap += max_res;
         }

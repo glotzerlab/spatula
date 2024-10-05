@@ -46,9 +46,9 @@ struct LocalNeighborhoodBOOBOO {
 class NeighborhoodBOOs {
     public:
     NeighborhoodBOOs(size_t N,
-                  const int* neighbor_counts,
-                  const double* weights,
-                  const double* distance);
+                     const int* neighbor_counts,
+                     const double* weights,
+                     const double* distance);
 
     /// Get the neighbors for point i.
     LocalNeighborhoodBOOBOO getNeighborhoodBOO(size_t i) const;
@@ -110,8 +110,8 @@ struct BOOSOPStore {
 template<typename distribution_type> class BOOSOP {
     public:
     BOOSOP(const py::array_t<std::complex<double>> D_ij,
-         std::shared_ptr<optimize::Optimizer>& optimizer,
-         typename distribution_type::param_type distribution_params);
+           std::shared_ptr<optimize::Optimizer>& optimizer,
+           typename distribution_type::param_type distribution_params);
 
     /**
      * @brief Root function for computing BOOSOP for a set of points.
@@ -140,8 +140,8 @@ template<typename distribution_type> class BOOSOP {
     /**
      * @brief Compute BOOSOP at given rotations for each point.
      *
-     * This method is primarily for computing BOOSOP after an initial optimization was performed and a
-     * calculation at higher quadrature and spherical harmonic number is desired.
+     * This method is primarily for computing BOOSOP after an initial optimization was performed and
+     * a calculation at higher quadrature and spherical harmonic number is desired.
      *
      * @param distances An array of distance vectors for neighbors
      * @param distances An array of quaternion rotations to use for computing BOOSOP.
@@ -220,9 +220,9 @@ template<typename distribution_type> class BOOSOP {
      * @returns The BOOSOP value.
      */
     double compute_BOOSOP(LocalNeighborhoodBOOBOO& neighborhood,
-                        const std::vector<std::complex<double>>& D_ij,
-                        const util::QlmEval& qlm_eval,
-                        util::QlmBuf& qlm_buf) const;
+                          const std::vector<std::complex<double>>& D_ij,
+                          const util::QlmEval& qlm_eval,
+                          util::QlmBuf& qlm_buf) const;
 
     /**
      * Helper function to better handle both single threaded and multithreaded behavior. In single
@@ -241,7 +241,8 @@ template<typename distribution_type> class BOOSOP {
     std::shared_ptr<const optimize::Optimizer> m_optimize;
 };
 
-template<typename distribution_type> void export_BOOSOP_class(py::module& m, const std::string& name);
+template<typename distribution_type>
+void export_BOOSOP_class(py::module& m, const std::string& name);
 
 void export_BOOSOP(py::module& m);
 } // End namespace pgop

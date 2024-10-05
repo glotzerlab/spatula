@@ -2,16 +2,16 @@
 #include <iterator>
 #include <string>
 
-#include "BondOrder.h"
 #include "BOOSOP.h"
+#include "BondOrder.h"
 #include "util/Threads.h"
 
 namespace pgop {
 
 NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
-                             const int* neighbor_counts,
-                             const double* weights,
-                             const double* distance)
+                                   const int* neighbor_counts,
+                                   const double* weights,
+                                   const double* distance)
     : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
       m_neighbor_offsets()
 {
@@ -48,7 +48,7 @@ int NeighborhoodBOOs::getNeighborCount(size_t i) const
 }
 
 LocalNeighborhoodBOOBOO::LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_,
-                                     std::vector<double>&& weights_)
+                                                 std::vector<double>&& weights_)
     : positions(positions_), weights(weights_), rotated_positions(positions)
 {
 }
@@ -67,7 +67,7 @@ BOOSOPStore::BOOSOPStore(size_t N_particles, size_t N_symmetries)
 }
 
 void BOOSOPStore::addOp(size_t i,
-                      const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
+                        const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
 {
     const auto& values = std::get<0>(op_);
     const auto& rots = std::get<1>(op_);
@@ -98,8 +98,8 @@ py::tuple BOOSOPStore::getArrays()
 
 template<typename distribution_type>
 BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
-                              std::shared_ptr<optimize::Optimizer>& optimizer,
-                              typename distribution_type::param_type distribution_params)
+                                  std::shared_ptr<optimize::Optimizer>& optimizer,
+                                  typename distribution_type::param_type distribution_params)
     : m_distribution(distribution_params), m_n_symmetries(D_ij.shape(0)), m_Dij(),
       m_optimize(optimizer)
 {
@@ -115,18 +115,18 @@ BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
 // TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
 py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances,
-                                           const py::array_t<double> weights,
-                                           const py::array_t<int> num_neighbors,
-                                           const unsigned int m,
-                                           const py::array_t<std::complex<double>> ylms,
-                                           const py::array_t<double> quad_positions,
-                                           const py::array_t<double> quad_weights) const
+                                             const py::array_t<double> weights,
+                                             const py::array_t<int> num_neighbors,
+                                             const unsigned int m,
+                                             const py::array_t<std::complex<double>> ylms,
+                                             const py::array_t<double> quad_positions,
+                                             const py::array_t<double> quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
-                                             num_neighbors.data(0),
-                                             weights.data(0),
-                                             distances.data(0));
+                                                num_neighbors.data(0),
+                                                weights.data(0),
+                                                distances.data(0));
     const size_t N_particles = num_neighbors.size();
     auto op_store = BOOSOPStore(N_particles, m_n_symmetries);
     const auto loop_func = [&op_store, &neighborhoods, &qlm_eval, this](const size_t start,
@@ -148,19 +148,19 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
 
 template<typename distribution_type>
 py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> distances,
-                                                    const py::array_t<double> rotations,
-                                                    const py::array_t<double> weights,
-                                                    const py::array_t<int> num_neighbors,
-                                                    const unsigned int m,
-                                                    const py::array_t<std::complex<double>> ylms,
-                                                    const py::array_t<double> quad_positions,
-                                                    const py::array_t<double> quad_weights) const
+                                                      const py::array_t<double> rotations,
+                                                      const py::array_t<double> weights,
+                                                      const py::array_t<int> num_neighbors,
+                                                      const unsigned int m,
+                                                      const py::array_t<std::complex<double>> ylms,
+                                                      const py::array_t<double> quad_positions,
+                                                      const py::array_t<double> quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
     const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
-                                             num_neighbors.data(0),
-                                             weights.data(0),
-                                             distances.data(0));
+                                                num_neighbors.data(0),
+                                                weights.data(0),
+                                                distances.data(0));
     const size_t N_particles = num_neighbors.size();
     py::array_t<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
     auto u_op_store = op_store.mutable_unchecked<2>();
@@ -196,8 +196,8 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodBOOBOO& neighborhood,
-                                          const util::QlmEval& qlm_eval,
-                                          util::QlmBuf& qlm_buf) const
+                                            const util::QlmEval& qlm_eval,
+                                            util::QlmBuf& qlm_buf) const
 {
     auto BOOSOP = std::vector<double>();
     auto rotations = std::vector<data::Quaternion>();
@@ -214,9 +214,9 @@ BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodBOOBOO& neighborhoo
 template<typename distribution_type>
 std::tuple<double, data::Quaternion>
 BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodBOOBOO& neighborhood,
-                                          const std::vector<std::complex<double>>& D_ij,
-                                          const util::QlmEval& qlm_eval,
-                                          util::QlmBuf& qlm_buf) const
+                                            const std::vector<std::complex<double>>& D_ij,
+                                            const util::QlmEval& qlm_eval,
+                                            util::QlmBuf& qlm_buf) const
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
@@ -232,9 +232,9 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodBOOBOO& neighborhoo
 
 template<typename distribution_type>
 double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodBOOBOO& neighborhood,
-                                             const std::vector<std::complex<double>>& D_ij,
-                                             const util::QlmEval& qlm_eval,
-                                             util::QlmBuf& qlm_buf) const
+                                                 const std::vector<std::complex<double>>& D_ij,
+                                                 const util::QlmEval& qlm_eval,
+                                                 util::QlmBuf& qlm_buf) const
 {
     const auto bond_order = BondOrder<distribution_type>(m_distribution,
                                                          neighborhood.rotated_positions,
@@ -246,7 +246,8 @@ double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodBOOBOO& neighb
 }
 
 template<typename distribution_type>
-void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)> func, size_t N) const
+void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)> func,
+                                             size_t N) const
 {
     // Enable py-spy profiling through serial mode.
     if (util::ThreadPool::get().get_num_threads() == 1) {
@@ -261,7 +262,8 @@ void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)>
 template class BOOSOP<UniformDistribution>;
 template class BOOSOP<FisherDistribution>;
 
-template<typename distribution_type> void export_BOOSOP_class(py::module& m, const std::string& name)
+template<typename distribution_type>
+void export_BOOSOP_class(py::module& m, const std::string& name)
 {
     py::class_<BOOSOP<distribution_type>>(m, name.c_str())
         .def(py::init<const py::array_t<std::complex<double>>,
@@ -276,4 +278,4 @@ void export_BOOSOP(py::module& m)
     export_BOOSOP_class<UniformDistribution>(m, "BOOSOPUniform");
     export_BOOSOP_class<FisherDistribution>(m, "BOOSOPFisher");
 }
-} // End namespace BOOSOP
+} // namespace pgop

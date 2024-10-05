@@ -1,14 +1,11 @@
 import numpy as np
 import pytest
-import scipy.spatial
 
-import pgop
 from pgop.cartrep import (
     CartesianRepMatrix,
     identity,
     rotation_from_euler_angles,
 )
-
 
 order_range_to_test = range(2, 13)
 order_range_to_test_odd = range(3, 13, 2)
@@ -36,6 +33,7 @@ def test_cartesian_invalid_point_group():
 
 def test_identity():
     assert np.allclose(identity(), rotation_from_euler_angles(0, 0, 0))
+
 
 #
 #
@@ -261,7 +259,7 @@ def test_identity():
 # def test_Cn(n):
 #    """According to Engel's paper (https://arxiv.org/pdf/2106.14846) :"""
 #    w = np.array(
-#        [delta(mprime, m) * delta(m % n, 0) for _, mprime, m in iter_sph_indices(maxl)],
+#       [delta(mprime, m) * delta(m % n, 0) for _, mprime, m in iter_sph_indices(maxl)],
 #        dtype=complex,
 #    )
 #    assert np.isclose(
@@ -303,7 +301,7 @@ def test_identity():
 #    operations = []
 #    for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
 #        euler_angles = np.asarray(i.as_euler("zyz"))
-#        # Fix for scipy starting from C2' that aligns with x axis, while I start with y.
+#       # Fix for scipy starting from C2' that aligns with x axis, while I start with y.
 #        if n % 2 == 1 and np.isclose(euler_angles[1], np.pi):
 #            euler_angles[0] = euler_angles[0] + np.pi
 #        operations.append(rotation_from_euler_angles(maxl, *euler_angles))

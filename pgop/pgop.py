@@ -302,7 +302,7 @@ class PGOP:
     def compute(
         self,
         system: tuple[freud.box.Box, np.ndarray],
-        sigmas: np.ndarray | float |None,
+        sigmas: np.ndarray | float | None,
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
         query_points: np.ndarray = None,
     ):
@@ -347,11 +347,7 @@ class PGOP:
             # find gaussian width sigma at which the value of the gaussian function at
             # half of the smallest bond distance has 1% height of max gaussian height
             # for the same sigma
-            sigma = (
-                np.min(dists)
-                * 0.5
-                / (np.sqrt(-2 * np.log(0.01)))
-            )
+            sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.01)))
             sigmas = np.full(neighbors.num_points, sigma)
         else:
             raise ValueError(
