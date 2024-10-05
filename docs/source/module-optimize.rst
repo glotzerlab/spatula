@@ -7,11 +7,11 @@ pgop.optimize
 
 .. autosummary::
     Mesh
+    NoOptimization
     Optimizer
     RandomSearch
     StepGradientDescent
     Union
-    NoOptimization
 
 .. rubric:: Details
 
@@ -21,5 +21,5 @@ pgop.optimize
     Optimizer,
     RandomSearch,
     StepGradientDescent,
-    Union
+    Union,
     NoOptimization

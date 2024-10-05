@@ -39,7 +39,7 @@ def _get_neighbors(system, neighbors):
 
 
 class BOOSOP:
-    """Compute the degree of point group symmetry for specified point groups.
+    """Compute the point group symmetry order for bond orientational order diagram.
 
     This class detects the point group symmetry of the modified bond order
     diagram of a particles. Rather than treating the neighbor vectors as delta
@@ -229,7 +229,7 @@ class BOOSOP:
 
     @property
     def boosop(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter.
+        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter is [0,1].
 
         The symmetry order is consistent with the order passed to
         `BOOSOP.compute`.
@@ -257,7 +257,7 @@ class BOOSOP:
 
 
 class PGOP:
-    """Compute the degree of point group symmetry for specified point groups.
+    """Compute the point group symmetry order for a given point cloud.
 
     This class detects the point group symmetry of a point in space based on the
     surrounding points. Rather than treating the neighbor vectors as delta
@@ -360,7 +360,7 @@ class PGOP:
 
     @property
     def pgop(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter.
+        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter is [0,1].
 
         The symmetry order is consistent with the order passed to
         `PGOP.compute`.
