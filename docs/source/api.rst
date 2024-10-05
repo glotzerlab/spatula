@@ -23,3 +23,5 @@ API
 
    module-optimize
    module-util
+   module-wignerd
+   module-cartrep
