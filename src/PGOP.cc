@@ -187,12 +187,10 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
 {
     const auto positions = neighborhood.rotated_positions;
     const auto sigmas = neighborhood.sigmas;
-    // First operator is always E so it can be skipped. Make sure to add  N_part to
-    // overlap for it.
-    double overlap = positions.size();
+    double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
-    for (size_t i {9}; i < R_ij.size(); i += 9) {
+    for (size_t i {0}; i < R_ij.size(); i += 9) {
         // loop over positions
         for (size_t j {0}; j < positions.size(); ++j) {
             // symmetrized position is obtained by multiplying the operator with the position
