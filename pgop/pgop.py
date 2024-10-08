@@ -53,7 +53,7 @@ class BOOSOP:
         symmetries: list[str],
         optimizer: pgop.optimize.Optimizer,
         max_l: int = 10,
-        kappa: float = 11.5,
+        kappa: float = 10,
         max_theta: float = 0.61,
     ):
         """Create a BOOSOP object.
@@ -294,7 +294,11 @@ class PGOP:
         matrices = []
         for point_group in self._symmetries:
             pg = representations.CartesianRepMatrix(point_group)
-            matrices.append(pg.condensed_matrices)
+            # skips E operator if group is not C1
+            if point_group == "C1":
+                matrices.append(pg.condensed_matrices)
+            else:
+                matrices.append(pg.condensed_matrices[9:])
         R_ij = np.stack(matrices, axis=0)  # noqa N806
         self._cpp = pgop._pgop.PGOP(R_ij, optimizer._cpp)
         self._pgop = None
@@ -318,7 +322,7 @@ class PGOP:
             The standard deviation of the Gaussian distribution for each particle.
             If a float is passed, the same value is used for all particles. If `None` is
             passed, sigma is determined as the value at which the gaussian function
-            value evaluated at half of the smallest bond distance has 1% height of max
+            value evaluated at half of the smallest bond distance has 25% height of max
             gaussian height for the same sigma. This is the preferred method to
             determine sigma.
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery
@@ -345,9 +349,9 @@ class PGOP:
             # of max distance as threshold
             dists = dists[dists > 0.001 * np.max(dists)]
             # find gaussian width sigma at which the value of the gaussian function at
-            # half of the smallest bond distance has 1% height of max gaussian height
+            # half of the smallest bond distance has 25% height of max gaussian height
             # for the same sigma
-            sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.01)))
+            sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
             sigmas = np.full(neighbors.num_points, sigma)
         else:
             raise ValueError(

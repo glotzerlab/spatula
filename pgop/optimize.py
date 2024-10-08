@@ -122,7 +122,7 @@ class Mesh(Optimizer):
         self._cpp = _pgop.Mesh([_pgop.Quaternion(p) for p in points])
 
     @classmethod
-    def from_grid(cls, n_axes=65, n_angles=5):
+    def from_grid(cls, n_axes=75, n_angles=10):
         """Create a Mesh optimizer that tests rotations on a uniform grid.
 
         The axes are chosen by the numerical solutions to the Tammes problem and
