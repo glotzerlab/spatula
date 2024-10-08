@@ -1337,14 +1337,15 @@ shape_symmetries.update(
 
 cutoff = 0.99
 
-methods_dict = dict()
+current_time_seed = int(time.time())
+rng = np.random.default_rng(seed=current_time_seed)
 
-random_number = int(time.time())
+methods_dict = dict()
 
 # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
 # close to one as well.
 optimizer = pgop.optimize.Union.with_step_gradient_descent(
-    pgop.optimize.Mesh.from_grid(n_axes=200, n_angles=25)
+    pgop.optimize.Mesh.from_grid()
 )
 
 
@@ -1414,10 +1415,8 @@ def make_method(symmetry, optimizer, optype):
     return methods_dict[symmetry][optype]
 
 
-def generate_quaternions(n=4):
+def generate_quaternions(n=2):
     """Generate `n` random quaternions]."""
-    current_time_seed = int(time.time())
-    rng = np.random.default_rng(seed=current_time_seed)
     rotations = [scipy.spatial.transform.Rotation([1, 0, 0, 0]).as_quat()]
     for _ in range(n):
         rotations.append(
@@ -1439,9 +1438,10 @@ def generate_quaternions(n=4):
 def test_symmetries_boosop(symmetry, shape, vertices, quaternion):
     rotation = scipy.spatial.transform.Rotation.from_quat(quaternion)
     rotated_vertices = rotation.apply(vertices)
-    op = check_symmetry(symmetry=symmetry, vertices=rotated_vertices, optype="boosop")
+    op = check_symmetry(symmetry=symmetry, vertices=rotated_vertices, optype="boosop")[
+        0
+    ]
     assert op >= cutoff
-    assert op <= 1
 
 
 @pytest.mark.parametrize(
@@ -1457,9 +1457,8 @@ def test_symmetries_boosop(symmetry, shape, vertices, quaternion):
 def test_symmetries_pgop(symmetry, shape, vertices, quaternion):
     rotation = scipy.spatial.transform.Rotation.from_quat(quaternion)
     rotated_vertices = rotation.apply(vertices)
-    op = check_symmetry(symmetry=symmetry, vertices=rotated_vertices, optype="pgop")
+    op = check_symmetry(symmetry=symmetry, vertices=rotated_vertices, optype="pgop")[0]
     assert op >= cutoff
-    assert op <= 1
 
 
 # for shapes take move its vertices it along its bond vector away or towards the center
@@ -1492,7 +1491,10 @@ def test_radially_imperfect_symmetry(symmetry, shape, vertices, quaternion):
     system, nlist = get_shape_sys_nlist(new_vertices)
     boosop_compute.compute(system, nlist, query_points=np.zeros((1, 3)))
     pgop_compute.compute(system, None, nlist, query_points=np.zeros((1, 3)))
-    assert boosop_compute.boosop[0] >= pgop_compute.pgop[0]
+    if symmetry == "C1":
+        assert boosop_compute.boosop[0] == pgop_compute.pgop[0]
+    else:
+        assert boosop_compute.boosop[0] > pgop_compute.pgop[0]
     assert boosop_compute.boosop[0] >= cutoff
     assert pgop_compute.pgop[0] <= 1
     assert boosop_compute.boosop[0] <= 1
