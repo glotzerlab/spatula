@@ -38,8 +38,6 @@ LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
 
     return LocalNeighborhood(std::move(neighborhood_positions),
                              std::vector(m_weights + start, m_weights + end),
-                             // TODO check if this is correct - sigmas are indexed differently then
-                             // points and weights
                              std::vector(m_sigmas + start, m_sigmas + end));
 }
 
@@ -52,8 +50,6 @@ std::vector<double> Neighborhoods::getWeights(size_t i) const
 std::vector<double> Neighborhoods::getSigmas(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    // TODO check if this is correct - sigmas are indexed differently then points
-    // and weights
     return std::vector(m_sigmas + start, m_sigmas + end);
 }
 
@@ -135,7 +131,6 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
                         const py::array_t<int> num_neighbors,
                         const py::array_t<double> sigmas) const
 {
-    // TODO Check if I used sigmas correctly
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
                                              num_neighbors.data(0),
                                              weights.data(0),
