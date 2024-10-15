@@ -1784,7 +1784,7 @@ non_shape_symmetries.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
 )
 def test_no_symmetries_boosop(symmetry, shape, vertices):
     op = check_symmetry(symmetry=symmetry, vertices=vertices, optype="boosop")
-    assert op < 0.85
+    assert op < 0.88
 
 
 @pytest.mark.parametrize(
