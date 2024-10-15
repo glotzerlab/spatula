@@ -210,7 +210,8 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
                 auto r_pos = symmetrized_position - positions[m];
                 auto distancesq = r_pos.dot(r_pos);
                 auto sigmas_squared_summed = sigmas[m] * sigmas[m] + sigmas[j] * sigmas[j];
-                // 2. compute the gaussian overlap between the two points
+                // 2. compute the gaussian overlap between the two points. Custom
+                //    formula is used currently.
                 //    Alternatively Bhattacharyya coefficient could be used. It is
                 //    computed in this way:
                 //  diffmu = mu1 - mu2
