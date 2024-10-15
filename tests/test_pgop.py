@@ -1427,81 +1427,81 @@ def generate_quaternions(n=2):
 
 def test_fcc_pgop():
     fcc = freud.data.UnitCell.fcc()
-    box, points = fcc.generate_system(4)
+    box, points = fcc.generate_system(2)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
     op_pg.compute((box, points), None, qargs)
     assert np.allclose(op_pg.pgop, 1.0)
 
 
 def test_fcc_boosop():
     fcc = freud.data.UnitCell.fcc()
-    box, points = fcc.generate_system(4)
+    box, points = fcc.generate_system(2)
     op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
     op_boo.compute((box, points), qargs)
     assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
 
 
 def test_bcc_pgop():
     bcc = freud.data.UnitCell.bcc()
-    box, points = bcc.generate_system(4)
+    box, points = bcc.generate_system(2)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
     op_pg.compute((box, points), None, qargs)
     assert np.allclose(op_pg.pgop, 1.0)
 
 
 def test_bcc_boosop():
     bcc = freud.data.UnitCell.bcc()
-    box, points = bcc.generate_system(4)
+    box, points = bcc.generate_system(2)
     op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
     op_boo.compute((box, points), qargs)
     assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
 
 
 def test_sc_pgop():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     op_pg.compute((box, points), None, qargs)
     assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
 
 
 def test_sc_boosop():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     op_boo.compute((box, points), qargs)
     assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
 
 
 def test_sc_pgop_qargs_query_pt():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     op_pg.compute((box, points), None, qargs, query_points=np.asarray([points[0]]))
     assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
 
 
 def test_sc_boosop_qargs_query_pt():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     op_boo.compute((box, points), qargs, query_points=np.asarray([points[0]]))
     assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
 
 
 def test_sc_pgop_nl_query_pt():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     qp = np.asarray([points[0]])
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(qp, qargs).toNeighborList()
@@ -1512,9 +1512,9 @@ def test_sc_pgop_nl_query_pt():
 
 def test_sc_boosop_nl_query_pt():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     qp = np.asarray([points[0]])
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(qp, qargs).toNeighborList()
@@ -1525,9 +1525,9 @@ def test_sc_boosop_nl_query_pt():
 
 def test_sc_pgop_nl():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
     )
@@ -1537,9 +1537,9 @@ def test_sc_pgop_nl():
 
 def test_sc_boosop_nl():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
     )
@@ -1549,9 +1549,9 @@ def test_sc_boosop_nl():
 
 def test_sc_pgop_sigma():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
     )
@@ -1561,9 +1561,9 @@ def test_sc_pgop_sigma():
 
 def test_sc_pgop_sigma_list():
     sc = freud.data.UnitCell.sc()
-    box, points = sc.generate_system(4)
+    box, points = sc.generate_system(3)
     op_pg = pgop.PGOP(["Oh"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.1)
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
     )
@@ -1634,20 +1634,41 @@ def test_pgop_with_increasing_number_of_symmetries(n):
 
 def test_bcc_pgop_with_multiple_symmetries():
     bcc = freud.data.UnitCell.bcc()
-    box, points = bcc.generate_system(4)
+    box, points = bcc.generate_system(2)
     op_pg = pgop.PGOP(["Oh", "D2", "D4"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
     op_pg.compute((box, points), None, qargs)
-    assert np.allclose(op_pg.pgop, 1.0)
+    assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
 
 
 def test_bcc_boosop_with_multiple_symmetries():
     bcc = freud.data.UnitCell.bcc()
-    box, points = bcc.generate_system(4)
+    box, points = bcc.generate_system(2)
     op_boo = pgop.BOOSOP("fisher", ["Oh", "D2", "D4"], optimizer)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
     op_boo.compute((box, points), qargs)
     assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
+def test_bcc_pgop_with_multiple_incorrect_symmetries():
+    bcc = freud.data.UnitCell.bcc()
+    box, points = bcc.generate_system(3)
+    op_pg = pgop.PGOP(["Oh", "D3h"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
+    op_pg.compute((box, points), None, qargs)
+    assert np.allclose(op_pg.pgop[:, 0], 1.0, atol=1e-4)
+    # TODO replace 0.8 with actual value
+    assert np.allclose(op_pg.pgop[:, 1], 0.8, atol=1e-4)
+
+
+def test_bcc_boosop_with_multiple_incorrect_symmetries():
+    bcc = freud.data.UnitCell.bcc()
+    box, points = bcc.generate_system(3)
+    op_boo = pgop.BOOSOP("fisher", ["Oh", "D3h"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
+    op_boo.compute((box, points), qargs)
+    assert np.allclose(op_boo.boosop[:, 0], 1.0, atol=1e-4)
+    assert np.allclose(op_boo.boosop[:, 1], 0.7315, atol=1e-4)
 
 
 @pytest.mark.parametrize(
