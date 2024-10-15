@@ -1632,6 +1632,24 @@ def test_pgop_with_increasing_number_of_symmetries(n):
     assert np.allclose(op.pgop, 1.0, atol=1e-4)
 
 
+def test_bcc_pgop_with_multiple_symmetries():
+    bcc = freud.data.UnitCell.bcc()
+    box, points = bcc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh", "D2", "D4"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    op_pg.compute((box, points), None, qargs)
+    assert np.allclose(op_pg.pgop, 1.0)
+
+
+def test_bcc_boosop_with_multiple_symmetries():
+    bcc = freud.data.UnitCell.bcc()
+    box, points = bcc.generate_system(4)
+    op_boo = pgop.BOOSOP("fisher", ["Oh", "D2", "D4"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    op_boo.compute((box, points), qargs)
+    assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
 @pytest.mark.parametrize(
     "symmetry, shape, vertices, quaternion",
     (
