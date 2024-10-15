@@ -338,13 +338,14 @@ class PGOP:
         neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
         dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
         if isinstance(sigmas, float):
-            sigmas = np.full(neighbors.num_points, sigmas)
+            sigmas = np.full(neighbors.num_points * neighbors.num_query_points, sigmas)
         elif isinstance(sigmas, (np.ndarray, list)):
             if len(sigmas) != neighbors.num_points:
                 raise ValueError(
                     "sigmas must be a float, a list of floats or an array of floats "
                     "with the same length as the number of points in the system."
                 )
+            sigmas = np.array([sigmas[i] for i in neighbors.point_indices])
         elif sigmas is None:
             dists = np.linalg.norm(dist, axis=1)
             # remove all the zeros normalized distances, use np.isclose, use 0.1%
@@ -354,7 +355,7 @@ class PGOP:
             # half of the smallest bond distance has 25% height of max gaussian height
             # for the same sigma
             sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
-            sigmas = np.full(neighbors.num_points, sigma)
+            sigmas = np.full(neighbors.num_points * neighbors.num_query_points, sigma)
         else:
             raise ValueError(
                 "sigmas must be a float, a list of floats or an array of floats "

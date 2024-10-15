@@ -1657,8 +1657,7 @@ def test_bcc_pgop_with_multiple_incorrect_symmetries():
     qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
     op_pg.compute((box, points), None, qargs)
     assert np.allclose(op_pg.pgop[:, 0], 1.0, atol=1e-4)
-    # TODO replace 0.8 with actual value
-    assert np.allclose(op_pg.pgop[:, 1], 0.8, atol=1e-4)
+    assert np.allclose(op_pg.pgop[:, 1], 0.73435, atol=1e-4)
 
 
 def test_bcc_boosop_with_multiple_incorrect_symmetries():
