@@ -113,7 +113,7 @@ struct PGOPStore {
  */
 class PGOP {
     public:
-    PGOP(const py::array_t<double> R_ij, std::shared_ptr<optimize::Optimizer>& optimizer);
+    PGOP(const py::list& R_ij, std::shared_ptr<optimize::Optimizer>& optimizer);
 
     /**
      * @brief Root function for computing PGOP for a set of points.

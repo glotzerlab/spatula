@@ -112,14 +112,20 @@ py::tuple PGOPStore::getArrays()
     return py::make_tuple(op, rotations);
 }
 
-PGOP::PGOP(const py::array_t<double> R_ij, std::shared_ptr<optimize::Optimizer>& optimizer)
-    : m_n_symmetries(R_ij.shape(0)), m_Rij(), m_optimize(optimizer)
+PGOP::PGOP(const py::list& R_ij, std::shared_ptr<optimize::Optimizer>& optimizer)
+    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer)
 {
     m_Rij.reserve(m_n_symmetries);
-    const auto u_R_ij = R_ij.unchecked<2>();
-    const size_t n_mlms = R_ij.shape(1);
-    for (size_t i {0}; i < m_n_symmetries; ++i) {
-        m_Rij.emplace_back(std::vector<double>(u_R_ij.data(i, 0), u_R_ij.data(i, 0) + n_mlms));
+    for (size_t i = 0; i < m_n_symmetries; ++i) {
+        py::list inner_list = R_ij[i].cast<py::list>();
+        std::vector<double> vec;
+        vec.reserve(inner_list.size());
+
+        for (size_t j = 0; j < inner_list.size(); ++j) {
+            vec.push_back(inner_list[j].cast<double>());
+        }
+
+        m_Rij.emplace_back(std::move(vec));
     }
 }
 
@@ -247,7 +253,7 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
 void export_pgop(py::module& m)
 {
     py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::array_t<double>, std::shared_ptr<optimize::Optimizer>&>())
+        .def(py::init<const py::list&, std::shared_ptr<optimize::Optimizer>&>())
         .def("compute", &PGOP::compute);
 }
 

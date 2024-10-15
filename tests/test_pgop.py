@@ -1425,6 +1425,64 @@ def generate_quaternions(n=2):
     return rotations
 
 
+@pytest.mark.parametrize("N", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+def test_boosop_with_increasing_number_of_symmetries(N):
+    symmetries_to_compute = []
+    for sym in list(shape_symmetries.keys())[:N]:
+        symmetries_to_compute.append(sym)
+    maxl = 10
+    op = pgop.BOOSOP("fisher", symmetries_to_compute, optimizer, maxl)
+    assert len(op.symmetries) == N
+    assert op.max_l == maxl
+    vertices = np.asarray(
+        [
+            [0.6180339887498949, 0.0, 1.0],
+            [0.6180339887498949, 0.0, -1.0],
+            [-0.6180339887498949, 0.0, 1.0],
+            [-0.6180339887498949, 0.0, -1.0],
+            [0.0, 1.0, 0.6180339887498949],
+            [0.0, 1.0, -0.6180339887498949],
+            [0.0, -1.0, 0.6180339887498949],
+            [0.0, -1.0, -0.6180339887498949],
+            [1.0, 0.6180339887498949, 0.0],
+            [-1.0, -0.6180339887498949, 0.0],
+        ]
+    )
+    system, nlist = get_shape_sys_nlist(vertices)
+    op.compute(system, nlist, query_points=np.zeros((1, 3)))
+    assert len(op.boosop[0]) == N
+    assert len(op.rotations[0]) == N
+    assert op.boosop[0][0] >0.99
+
+
+@pytest.mark.parametrize("N", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+def test_pgop_with_increasing_number_of_symmetries(N):
+    symmetries_to_compute = []
+    for sym in list(shape_symmetries.keys())[:N]:
+        symmetries_to_compute.append(sym)
+    op = pgop.PGOP(symmetries_to_compute, optimizer)
+    assert len(op.symmetries) == N
+    vertices = np.asarray(
+        [
+            [0.6180339887498949, 0.0, 1.0],
+            [0.6180339887498949, 0.0, -1.0],
+            [-0.6180339887498949, 0.0, 1.0],
+            [-0.6180339887498949, 0.0, -1.0],
+            [0.0, 1.0, 0.6180339887498949],
+            [0.0, 1.0, -0.6180339887498949],
+            [0.0, -1.0, 0.6180339887498949],
+            [0.0, -1.0, -0.6180339887498949],
+            [1.0, 0.6180339887498949, 0.0],
+            [-1.0, -0.6180339887498949, 0.0],
+        ]
+    )
+    system, nlist = get_shape_sys_nlist(vertices)
+    op.compute(system, None, nlist, query_points=np.zeros((1, 3)))
+    assert len(op.pgop[0]) == N
+    assert len(op.rotations[0]) == N
+    assert op.pgop[0][0] >0.99
+
+
 @pytest.mark.parametrize(
     "symmetry, shape, vertices, quaternion",
     (

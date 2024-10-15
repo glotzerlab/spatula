@@ -1694,7 +1694,7 @@ class CartesianRepMatrix:
         np.ndarray
             The condensed Cartesian Representation matrices for the point group .
         """
-        return np.concatenate([matrix.flatten() for matrix in self._matrices])
+        return np.asarray([matrix.flatten() for matrix in self._matrices]).flatten()
 
 
 class WignerD:

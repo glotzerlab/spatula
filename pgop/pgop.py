@@ -299,8 +299,7 @@ class PGOP:
                 matrices.append(pg.condensed_matrices)
             else:
                 matrices.append(pg.condensed_matrices[9:])
-        R_ij = np.stack(matrices, axis=0)  # noqa N806
-        self._cpp = pgop._pgop.PGOP(R_ij, optimizer._cpp)
+        self._cpp = pgop._pgop.PGOP(matrices, optimizer._cpp)
         self._pgop = None
 
     def compute(
