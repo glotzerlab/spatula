@@ -1425,10 +1425,159 @@ def generate_quaternions(n=2):
     return rotations
 
 
-@pytest.mark.parametrize("n", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+def test_fcc_pgop():
+    fcc = freud.data.UnitCell.fcc()
+    box, points = fcc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    op_pg.compute((box, points), None, qargs)
+    assert np.allclose(op_pg.pgop, 1.0)
+
+
+def test_fcc_boosop():
+    fcc = freud.data.UnitCell.fcc()
+    box, points = fcc.generate_system(4)
+    op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    op_boo.compute((box, points), qargs)
+    assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
+def test_bcc_pgop():
+    bcc = freud.data.UnitCell.bcc()
+    box, points = bcc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    op_pg.compute((box, points), None, qargs)
+    assert np.allclose(op_pg.pgop, 1.0)
+
+
+def test_bcc_boosop():
+    bcc = freud.data.UnitCell.bcc()
+    box, points = bcc.generate_system(4)
+    op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.0)
+    op_boo.compute((box, points), qargs)
+    assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
+def test_sc_pgop():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    op_pg.compute((box, points), None, qargs)
+    assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
+
+
+def test_sc_boosop():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    op_boo.compute((box, points), qargs)
+    assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
+def test_sc_pgop_qargs_query_pt():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    op_pg.compute((box, points), None, qargs, query_points=np.asarray([points[0]]))
+    assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
+
+
+def test_sc_boosop_qargs_query_pt():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    op_boo.compute((box, points), qargs, query_points=np.asarray([points[0]]))
+    assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
+def test_sc_pgop_nl_query_pt():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qp = np.asarray([points[0]])
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(qp, qargs).toNeighborList()
+    )
+    op_pg.compute((box, points), None, neighborlist, query_points=qp)
+    assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
+
+
+def test_sc_boosop_nl_query_pt():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    qp = np.asarray([points[0]])
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(qp, qargs).toNeighborList()
+    )
+    op_boo.compute((box, points), neighborlist, query_points=qp)
+    assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
+def test_sc_pgop_nl():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    )
+    op_pg.compute((box, points), None, neighborlist)
+    assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
+
+
+def test_sc_boosop_nl():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_boo = pgop.BOOSOP("fisher", ["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    )
+    op_boo.compute((box, points), neighborlist)
+    assert np.allclose(op_boo.boosop, 1.0, atol=1e-4)
+
+
+def test_sc_pgop_sigma():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    )
+    op_pg.compute((box, points), 0.2, neighborlist)
+    assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
+
+
+def test_sc_pgop_sigma_list():
+    sc = freud.data.UnitCell.sc()
+    box, points = sc.generate_system(4)
+    op_pg = pgop.PGOP(["Oh"], optimizer)
+    qargs = dict(exclude_ii=True, mode="ball", r_max=1.75)
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    )
+    op_pg.compute((box, points), [0.2] * len(points), neighborlist)
+    assert np.allclose(op_pg.pgop, 1.0, atol=1e-4)
+
+
+symmetries_subgroup_d5d = ["D5d", "S10", "C2h", "C5v", "D5", "C5", "C2", "Ci", "Cs"]
+
+
+@pytest.mark.parametrize("n", [1, 2, 3, 4, 5, 6, 7, 8, 9])
 def test_boosop_with_increasing_number_of_symmetries(n):
     symmetries_to_compute = []
-    for sym in list(shape_symmetries.keys())[:n]:
+    for sym in symmetries_subgroup_d5d[:n]:
         symmetries_to_compute.append(sym)
     maxl = 10
     op = pgop.BOOSOP("fisher", symmetries_to_compute, optimizer, maxl)
@@ -1452,13 +1601,13 @@ def test_boosop_with_increasing_number_of_symmetries(n):
     op.compute(system, nlist, query_points=np.zeros((1, 3)))
     assert len(op.boosop[0]) == n
     assert len(op.rotations[0]) == n
-    assert op.boosop[0][0] > 0.99
+    assert np.allclose(op.boosop, 1.0, atol=1e-4)
 
 
-@pytest.mark.parametrize("n", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+@pytest.mark.parametrize("n", [1, 2, 3, 4, 5, 6, 7, 8, 9])
 def test_pgop_with_increasing_number_of_symmetries(n):
     symmetries_to_compute = []
-    for sym in list(shape_symmetries.keys())[:n]:
+    for sym in symmetries_subgroup_d5d[:n]:
         symmetries_to_compute.append(sym)
     op = pgop.PGOP(symmetries_to_compute, optimizer)
     assert len(op.symmetries) == n
@@ -1480,7 +1629,7 @@ def test_pgop_with_increasing_number_of_symmetries(n):
     op.compute(system, None, nlist, query_points=np.zeros((1, 3)))
     assert len(op.pgop[0]) == n
     assert len(op.rotations[0]) == n
-    assert op.pgop[0][0] > 0.99
+    assert np.allclose(op.pgop, 1.0, atol=1e-4)
 
 
 @pytest.mark.parametrize(

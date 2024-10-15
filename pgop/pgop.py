@@ -26,7 +26,7 @@ def _compute_distance_vectors(neigh_query, neighbors, query_points):
     )
 
 
-def _get_neighbors(system, neighbors):
+def _get_neighbors(system, neighbors, query_points):
     """Get a NeighborQuery and NeighborList object.
 
     Returns the query and neighbor list consistent with the system and
@@ -35,7 +35,10 @@ def _get_neighbors(system, neighbors):
     query = freud.locality.AABBQuery.from_system(system)
     if isinstance(neighbors, freud.locality.NeighborList):
         return query, neighbors
-    return query, query.query(query.points, neighbors).toNeighborList()
+    elif query_points is None:
+        return query, query.query(query.points, neighbors).toNeighborList()
+    else:
+        return query, query.query(query_points, neighbors).toNeighborList()
 
 
 class BOOSOP:
@@ -185,7 +188,7 @@ class BOOSOP:
                 raise ValueError("refine_l must be less than or equal to max_l.")
             if refine_l < l or refine_m < m or (refine_l == l and refine_m == m):
                 raise ValueError("refine_l and refine_m must be larger than l and m.")
-        neigh_query, neighbors = _get_neighbors(system, neighbors)
+        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
         dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
@@ -332,7 +335,7 @@ class PGOP:
             computes the PGOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.
         """
-        neigh_query, neighbors = _get_neighbors(system, neighbors)
+        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
         dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
         if isinstance(sigmas, float):
             sigmas = np.full(neighbors.num_points, sigmas)
