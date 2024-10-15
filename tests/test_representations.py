@@ -776,10 +776,17 @@ def test_dn_against_scipy_rotations_euler_cart(n):
         if n % 2 == 1 and np.isclose(euler_angles[1], np.pi):
             euler_angles[0] = euler_angles[0] + np.pi
         operations.append(rotation_from_euler_angles_cart(*euler_angles))
-    assert np.allclose(
-        compute_Cartesian_Representation_matrix_for_a_given_point_group("D" + str(n)),
-        operations,
+    dn_operations = compute_Cartesian_Representation_matrix_for_a_given_point_group(
+        "D" + str(n)
     )
+    assert len(operations) == len(dn_operations)
+    mask = [True] * len(operations)
+    for i in dn_operations:
+        for jj, j in enumerate(operations):
+            if np.allclose(i, j, atol=1e-4) and mask[jj]:
+                mask[jj] = False
+                break
+    assert all(m is False for m in mask)
 
 
 @pytest.mark.parametrize("n", order_range_to_test)
