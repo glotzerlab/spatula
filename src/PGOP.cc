@@ -210,19 +210,9 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
                 auto r_pos = symmetrized_position - positions[m];
                 auto distancesq = r_pos.dot(r_pos);
                 auto sigmas_squared_summed = sigmas[m] * sigmas[m] + sigmas[j] * sigmas[j];
-                // 2. compute the gaussian overlap between the two points. Custom
-                //    formula is used currently.
-                //    Alternatively Bhattacharyya coefficient could be used. It is
-                //    computed in this way:
-                //  diffmu = mu1 - mu2
-                //  var1 = sigma1**2
-                //  var2 = sigma2**2
-                //  average_var = (var1 + var2)/2
-                //  mahalanobis_term = np.exp(-1/8*np.dot(diffmu.T, 1/average_var*diffmu))
-                //  otherterm = ((var1*var2)**(3/4))/(average_var**(3/2))
-                //  bc = mahalanobis_term * otherterm
+                // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient is used.
                 auto res = std::pow((2 * sigmas[m] * sigmas[j] / sigmas_squared_summed), 3 / 2)
-                           * std::exp(-distancesq / (2 * sigmas_squared_summed));
+                           * std::exp(-distancesq / (4 * sigmas_squared_summed));
                 if (res > max_res)
                     max_res = res;
             }
