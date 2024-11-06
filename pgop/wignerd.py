@@ -1005,9 +1005,7 @@ def extract_first_element_of_hermann_mauguin_notation(s: str) -> str:  # noqa N8
     str
         Returns the first extracted element from the input string.
     """
-    print(f"extracting first element of {s}")
     if s[0] == "m":
-        print("end element ", s[0])
         return s[0]
 
     def extract_number_from_bracket(s: str, starting_pos: int) -> str:
@@ -1026,14 +1024,10 @@ def extract_first_element_of_hermann_mauguin_notation(s: str) -> str:  # noqa N8
         string_to_return += s[0] + extract_number_from_bracket(s, 2)
     else:
         raise ValueError(f"Invalid HM input {s}, {string_to_return}")
-    print(len(string_to_return), len(s))
     if len(s) > len(string_to_return): # noqa SIM102
-        print(s[len(string_to_return)])
         if s[len(string_to_return)] == "/": # noqa SIM102
-            print(s[len(string_to_return) + 1])
             if s[len(string_to_return) + 1] == "m":
                 string_to_return += "/m"
-    print("end element ", string_to_return)
     return string_to_return
 
 
@@ -1055,7 +1049,6 @@ def extract_elements_from_of_hermann_mauguin_notation(
         The extracted three elements from the point group string in
         Hermann-Mauguin notation.
     """
-    print(f"translating {point_group}")
     first = extract_first_element_of_hermann_mauguin_notation(point_group)
     second = None
     third = None
@@ -1067,8 +1060,6 @@ def extract_elements_from_of_hermann_mauguin_notation(
             third = extract_first_element_of_hermann_mauguin_notation(
                 point_group[len(first) + len(second) :]
             )
-    print(f"element 1 {first}, element 2 {second}, element 3 {third}")
-    print(" done computing elements")
     return first, second, third
 
 
