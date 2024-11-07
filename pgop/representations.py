@@ -8,6 +8,228 @@ import scipy.spatial
 import scipy.special
 
 
+def extract_first_element_of_hermann_mauguin_notation(s: str) -> str:  # noqa N802
+    """Extract the first element of a Hermann-Mauguin notation string.
+
+    Both short and full symbols are supported.
+    First character can be a number, letter m, string - or bracket. If it's
+    a number, the number should be extracted. If it's the letter m, the
+    letter m should be extracted. If it's a -, the number following it
+    should be extracted. If it's a bracket, the number inside the bracket
+    should be extracted. If the first character wasn't the letter m, check
+    if there is a string /m after the number or a bracket. Add the /m after
+    the previously extracted number.
+
+    Parameters
+    ----------
+    s : str
+        The Hermann-Mauguin notation string.
+
+    Returns
+    -------
+    str
+        Returns the first extracted element from the input string.
+    """
+    if s[0] == "m":
+        return s[0]
+
+    def extract_number_from_bracket(s: str, starting_pos: int) -> str:
+        for i in range(starting_pos, len(s)):
+            if s[i] == ")":
+                return s[starting_pos:i]
+
+    string_to_return = ""
+    if s[0].isdigit():
+        string_to_return += s[0]
+    elif s[0] == "(":
+        string_to_return += extract_number_from_bracket(s, 1)
+    elif s[0] == "-" and s[1].isdigit():
+        string_to_return += s[0] + s[1]
+    elif s[0] == "-" and s[1] == "(":
+        string_to_return += s[0] + extract_number_from_bracket(s, 2)
+    else:
+        raise ValueError(f"Invalid HM input {s}, {string_to_return}")
+    if len(s) > len(string_to_return):  # noqa SIM102
+        if s[len(string_to_return)] == "/":  # noqa SIM102
+            if s[len(string_to_return) + 1] == "m":
+                string_to_return += "/m"
+    return string_to_return
+
+
+def extract_elements_from_of_hermann_mauguin_notation(
+    point_group: str,
+) -> list[str, str | None, str | None]:
+    """Extract the elements of a Hermann-Mauguin notation string.
+
+    Short and full symbols are supported.
+
+    Parameters
+    ----------
+    point_group : str
+        The Hermann-Mauguin notation string.
+
+    Returns
+    -------
+    list[str, str|None, str|None]
+        The extracted three elements from the point group string in
+        Hermann-Mauguin notation.
+    """
+    first = extract_first_element_of_hermann_mauguin_notation(point_group)
+    second = None
+    third = None
+    if len(point_group) > len(first):
+        second = extract_first_element_of_hermann_mauguin_notation(
+            point_group[len(first) :]
+        )
+        if len(point_group) > len(first) + len(second):
+            third = extract_first_element_of_hermann_mauguin_notation(
+                point_group[len(first) + len(second) :]
+            )
+    return first, second, third
+
+
+def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
+    """Convert a Hermann-Mauguin notation to a Schönflies notation.
+
+    Both short and full Hermann-Mauguin notation is supported. Supported point
+    groups are of finite order, including polyhedral groups.
+
+    Parameters
+    ----------
+    point_group : str
+        The point group in Hermann-Mauguin notation.
+
+    Returns
+    -------
+    str
+        The point group in Schönflies notation.
+    """
+    # convert from Hermann-Mauguin notation to schonflies
+    # remove dots and spaces:
+    point_group = point_group.replace(".", "")
+    point_group = point_group.replace(" ", "")
+
+    first, second, third = extract_elements_from_of_hermann_mauguin_notation(
+        point_group
+    )
+    # Cn is if second and third are none and first does not contain m, and first
+    # is a positive number larger than zero
+    if second is None and third is None:
+        if first.isnumeric():
+            if int(first) > 0:
+                point_group = "C" + first
+        elif first[0] == "-" and first[1:].isnumeric():
+            if int(first[1:]) > 2:
+                if int(first[1:]) % 4 == 2:
+                    point_group = f"C{int(first[1:])//2}h"
+                elif int(first[1:]) % 2 == 1:
+                    point_group = f"S{2*int(first[1:])}"
+                elif int(first[1:]) % 2 == 0:
+                    point_group = "S" + first[1:]
+            elif int(first[1:]) == 1:
+                point_group = "Ci"
+            else:
+                raise ValueError(f"Invalid HM input {point_group}; {first}")
+        elif first.endswith("/m"):
+            if int(first[:-2]) > 1:
+                point_group = "C" + first[:-2] + "h"
+            elif int(first[:-2]) == 1:
+                point_group = "Cs"
+            else:
+                raise ValueError(f"Invalid HM input {point_group}; {first}")
+        elif first == "m":
+            point_group = "Cs"
+        else:
+            raise ValueError(f"Invalid HM input {point_group}; {first}")
+
+    # if first element is a positive number followed by a m or mm its Cnv
+    elif first.isnumeric() and second == "m" and (third is None or third == "m"):
+        if int(first) > 1:
+            point_group = "C" + first + "v"
+        else:
+            raise ValueError(f"Invalid HM input {point_group}; {first}")
+    # Dn is nmm
+    elif first.isnumeric() and second == "2" and (third is None or third == "2"):
+        if int(first) > 1:
+            point_group = "D" + first
+        else:
+            raise ValueError(f"Invalid HM input {point_group}; {first}")
+    # D2 is also mm2
+    elif first == "m" and second == "m" and third == "2":
+        point_group = "C2v"
+    # Dn/2h is -nm2 for n=6,10,14.. this is Dnh for odd n
+    elif second == "m" and third == "2" and first[0] == "-" and first[1:].isnumeric():
+        if int(first[1:]) > 2 and int(first[1:]) % 4 == 2:
+            point_group = f"D{int(first[1:])//2}h"
+        else:
+            raise ValueError(f"Invalid HM input {point_group}; {first}")
+    # Dnh n/m2/m2/m which is eq to n/mmm
+    elif (
+        first.endswith("/m")
+        and first[0].isdigit()
+        and ((second == "m" or second == "2/m") and (third == "m" or third == "2/m"))
+    ):
+        if int(first[:-2]) > 1:
+            point_group = "D" + first[:-2] + "h"
+        else:
+            raise ValueError(f"Invalid HM input {point_group}; {first}")
+    # D2h is mmm also
+    elif first == "m" and second == "m" and third == "m":
+        point_group = "D2h"
+    # Dn/2d is -n2m for n=4,8,12,...
+    elif second == "2" and third == "m" and first[0] == "-" and int(first[1:]) % 4 == 0:
+        if int(first[1:]) > 2:
+            point_group = f"D{int(first[1:])//2}d"
+        else:
+            raise ValueError(f"Invalid HM input {point_group}; {first}")
+    # Dnd is -n2/m or -nm for n = 3,5,7,9
+    elif (
+        (second == "2/m" or second == "m") and first[0] == "-" and first[1:].isnumeric()
+    ):
+        if int(first[1:]) > 1 and int(first[1:]) % 2 == 1:
+            point_group = "D" + first[1:] + "d"
+        else:
+            raise ValueError(f"Invalid HM input {point_group}; {first}")
+    # group T 23
+    elif first == "2" and second == "3" and third is None:
+        point_group = "T"
+    # group Td -43m
+    elif first == "-4" and second == "3" and third == "m":
+        point_group = "Td"
+    # group Th 2/m-3 or m-3
+    elif second == "-3" and (first == "m" or first == "2/m") and third is None:
+        point_group = "Th"
+    # group O 432
+    elif first == "4" and second == "3" and third == "2":
+        point_group = "O"
+    # group Oh 4/m-32/m or m-3m
+    elif (
+        second == "-3"
+        and (first == "m" or first == "4/m")
+        and (third == "m" or third == "2/m")
+    ):
+        point_group = "Oh"
+    # group I  is 235 or 25 or 532 or 53
+    elif (
+        first == "2"
+        and ((second == "3" and third == "5") or (second == "5" and third is None))
+        or (first == "5" and second == "3" and (third is None or third == "2"))
+    ):
+        point_group = "I"
+    # group Ih is m-3-5 or m -5 or m-5m or -5-3m
+    elif (
+        first == "m"
+        and (
+            (second == "-5" and (third == "m" or third is None))
+            or (second == "-3" and third == "-5")
+        )
+    ) or (first == "-5" and second == "-3" and third == "m"):
+        point_group = "Ih"
+    else:
+        raise ValueError(f"Invalid HM input {point_group}, {first}, {second}, {third}")
+    return point_group
+
+
 def identity_cart() -> np.ndarray:  # noqa: N802
     """Return the Cartesian Representation matrix for E (identity).
 
@@ -1656,6 +1878,19 @@ class CartesianRepMatrix:
         point_group : str
             The point group in Schoenflies notation.
         """
+        if (
+            "C" in point_group
+            or "D" in point_group
+            or "S" in point_group
+            or "T" in point_group
+            or "O" in point_group
+            or "I" in point_group
+        ):
+            pass
+        elif any(char.isdigit() or char in {"m", "-", "/"} for char in point_group):
+            point_group = convert_hermann_mauguin_to_schonflies(point_group)
+        else:
+            raise KeyError(f"Unknown point group {point_group}.")
         self._point_group = point_group
         self._matrices = (
             compute_Cartesian_Representation_matrix_for_a_given_point_group(point_group)
@@ -1704,11 +1939,28 @@ class WignerD:
         Parameters
         ----------
         point_group : str
-            The point group in Schoenflies notation.
+            The point group in Schoenflies notation or Hermann-Mauguin notation
+            (both short and full symbols are supported). Strings are case sensitive.
+            Schonflies must be uppercase for C, D, S, T, O, I, and lowercase for h, d
+            and i. Hermann-Mauguin notation must be all lowercase.
         max_l : int
             The highest spherical harmonic to include in the WignerD matrices.
         """
         self._max_l = max_l
+        if (
+            "C" in point_group
+            or "D" in point_group
+            or "S" in point_group
+            or "T" in point_group
+            or "O" in point_group
+            or "I" in point_group
+        ):
+            pass
+        elif any(char.isdigit() or char in {"m", "-", "/"} for char in point_group):
+            point_group = convert_hermann_mauguin_to_schonflies(point_group)
+        else:
+            raise KeyError(f"Unknown point group {point_group}.")
+
         self._point_group = point_group
         self._matrix = compute_condensed_wignerD_matrix_for_a_given_point_group(
             point_group, max_l
