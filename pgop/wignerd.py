@@ -1218,8 +1218,10 @@ class WignerD:
         point_group : str
             The point group in Schoenflies notation or Hermann-Mauguin notation
             (both short and full symbols are supported). Strings are case sensitive.
-            Schonflies must be uppercase for C, D, S, T, O, I, and lowercase for h, d
-            and i. Hermann-Mauguin notation must be all lowercase.
+            Schoenflies notation must contain an uppercase letter (C, D, S, T, O, I); 
+            any subsequent letters must be lowercase (h, d, i). Hermann-Mauguin 
+            notation must be entirely lowercase.
+
         max_l : int
             The highest spherical harmonic to include in the WignerD matrices.
         """
