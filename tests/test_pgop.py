@@ -1655,9 +1655,9 @@ def test_bcc_pgop_with_multiple_incorrect_symmetries():
     box, points = bcc.generate_system(3)
     op_pg = pgop.PGOP(["Oh", "D3h"], optimizer)
     qargs = dict(exclude_ii=True, mode="ball", r_max=0.9)
-    op_pg.compute((box, points), None, qargs)
+    op_pg.compute((box, points), 0.2, qargs)
     assert np.allclose(op_pg.pgop[:, 0], 1.0, atol=1e-4)
-    assert np.allclose(op_pg.pgop[:, 1], 0.73435, atol=1e-4)
+    assert np.allclose(op_pg.pgop[:, 1], 0.76054, atol=1e-4)
 
 
 def test_bcc_boosop_with_multiple_incorrect_symmetries():
