@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# pgop documentation build configuration file, created by
+# PGOP documentation build configuration file, created by
 # sphinx-quickstart on Fri Jun  9 13:47:02 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -17,6 +17,7 @@
 # relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
 #
+
 import pathlib
 import sys
 
@@ -37,6 +38,8 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
+    "sphinx.ext.mathjax",
+    "sphinxcontrib.bibtex",
 ]
 
 napoleon_numpy_docstring = True
@@ -69,7 +72,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "pgop"
+project = "PGOP"
 copyright = "The Regents of the University of Michigan"  # noqa: A001
 author = "Brandon Butler"
 
@@ -114,6 +117,10 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = "furo"
+html_theme_options = {
+    "sidebar_hide_name": True,
+}
+
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -130,7 +137,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "pgopdoc"
+htmlhelp_basename = "PGOPdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------
@@ -171,13 +178,15 @@ latex_documents = [
 man_pages = [
     (
         master_doc,
-        "pgop",
+        "PGOP",
         "event-detection Documentation",
         [author],
         1,
     )
 ]
 
+# Specify the path to your bibliography file
+bibtex_bibfiles = ["ref.bib"]
 
 # -- Options for Texinfo output ----------------------------------------
 
@@ -187,10 +196,10 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "pgop",
+        "PGOP",
         "event-detection Documentation",
         author,
-        "pgop",
+        "PGOP",
         "One line description of project.",
         "Miscellaneous",
     ),

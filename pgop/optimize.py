@@ -1,9 +1,10 @@
 """Classes to optimize over SO(3) for `pgop.PGOP`."""
+
 from pathlib import Path
 
 import numpy as np
-import rowan
 import scipy as sp
+from scipy.spatial.transform import Rotation
 
 from . import _pgop
 
@@ -37,7 +38,7 @@ class StepGradientDescent(Optimizer):
     :math:`SO(3)`. The conversion to the axis-angle representation for
     :math:`\nu` is
 
-    .. eq::
+    .. math::
 
         \alpha = \frac{\nu}{||\nu||} \\
         \theta = ||\nu||.
@@ -121,7 +122,7 @@ class Mesh(Optimizer):
         self._cpp = _pgop.Mesh([_pgop.Quaternion(p) for p in points])
 
     @classmethod
-    def from_grid(cls, n_axes=40, n_angles=5):
+    def from_grid(cls, n_axes=65, n_angles=5):
         """Create a Mesh optimizer that tests rotations on a uniform grid.
 
         The axes are chosen by the numerical solutions to the Tammes problem and
@@ -130,7 +131,7 @@ class Mesh(Optimizer):
         Parameters
         ----------
         n_axes : `int`, optional
-            The number of axes to rotate about. Defaults to 40.
+            The number of axes to rotate about. Defaults to 65.
         n_angles : `int`, optional
             The number of angles to rotate per axes. Defaults to 5.
 
@@ -146,9 +147,13 @@ class Mesh(Optimizer):
         points = np.empty((n_angles * n_axes + 1, 4), dtype=float)
         points[0] = np.array([1.0, 0.0, 0.0, 0.0])
         angles = cls._sample_angles(n_angles).reshape((1, -1, 1))
-        points[1:] = rowan.from_axis_angle(
-            axes[:, None, :], angles[None, :, None]
-        ).reshape((-1, 4))
+        # Flatten axes and angles for creating the rotation objects
+        axes = axes.repeat(n_angles, axis=1).reshape(-1, 3)
+        angles = angles.repeat(n_axes, axis=0).reshape(-1)
+        # Generate quaternions from axis-angle
+        quaternions = Rotation.from_rotvec(axes * angles[:, None]).as_quat()
+        quaternions = quaternions.reshape((n_axes * n_angles, 4))
+        points[1:] = np.hstack((quaternions[:, -1].reshape(-1, 1), quaternions[:, :-1]))
         return cls(points)
 
     @staticmethod
