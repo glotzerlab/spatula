@@ -637,6 +637,7 @@ point_group_mapping = {
     "422": "D4",
     "4mm": "C4v",
     "-42m": "D2d",
+    "-4m2": "D2d",
     "4/mmm": "D4h",
     "4/m2/m2/m": "D4h",
     "3": "C3",
