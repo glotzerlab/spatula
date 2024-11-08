@@ -65,6 +65,7 @@ class PGOP:
             The maximum angle (in radians) that the uniform distribution
             extends. Only used when ``dist`` is uniform. Defauts to 0.61
             (roughly 35 degrees).
+
         """
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
@@ -150,6 +151,7 @@ class PGOP:
             concentrated distributions require larger ``m`` to properly evaluate
             bond order functions. The number of points to evaluate scales as
             :math:`4 m^2`.
+
         """
         if l > self._max_l:
             raise ValueError("l must be less than or equal to max_l.")

@@ -1,3 +1,5 @@
+"""Package contains methods for computing symmetry order parameters."""
+
 import freud
 
 from . import bond_order, integrate, optimize, sph_harm, util, wignerd

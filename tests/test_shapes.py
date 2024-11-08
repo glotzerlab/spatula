@@ -20,7 +20,7 @@ n_dict = {
 }
 
 
-pgop_dict = dict()
+pgop_dict = {}
 
 
 pgop.util.set_num_threads(1)

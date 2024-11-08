@@ -35,6 +35,7 @@ def gauss_legendre_quad_points(m, weights=False, cartesian=False):
     weights : :math:`(N,)` numpy.ndarray of float
         If the argument ``weights is True``, then the weights for the quadrature
         are returned.
+
     """
     coordinates, legrende_weights = _gauss_legendre_quad_points(m)
     if cartesian:
@@ -69,6 +70,7 @@ def gauss_legendre_quad(func, m):
     -------
     float
         The integral of ``func`` over the sphere.
+
     """
     (theta, phi), weights = gauss_legendre_quad_points(m, True)
     return np.pi / m * np.sum(weights * func(theta.ravel(), phi.ravel()))
