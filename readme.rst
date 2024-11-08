@@ -61,9 +61,11 @@ Example
 
     system = freud.data.UnitCell.fcc().generate_system(5)
     optimizer = pgop.optimize.Union.with_step_gradient_descent(
-        optimizer=pgop.optimize.Mesh.with_grid())
+        optimizer=pgop.optimize.Mesh.from_grid()
+    )
     compute = pgop.PGOP(
-        dist="fisher", symmetries=("Oh",), optimizer=optimizer)
+        dist="fisher", symmetries=("Oh",), optimizer=optimizer
+    )
     compute.compute(system, {"num_neighbors": 12, "exclude_ii": True})
     # Print the optimizer fractional point group ordering for full
     # octahedral ordering Oh.
