@@ -1104,31 +1104,44 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
             elif int(first[1:]) == 1:
                 point_group = "Ci"
             else:
-                raise ValueError(f"Invalid HM input {point_group}; {first}")
+                raise ValueError(
+                    f"Invalid HM input {point_group}; {first} {second} {third}"
+                )
         elif first.endswith("/m"):
             if int(first[:-2]) > 1:
                 point_group = "C" + first[:-2] + "h"
             elif int(first[:-2]) == 1:
                 point_group = "Cs"
             else:
-                raise ValueError(f"Invalid HM input {point_group}; {first}")
+                raise ValueError(
+                    f"Invalid HM input {point_group}; {first} {second} {third}"
+                )
         elif first == "m":
             point_group = "Cs"
         else:
-            raise ValueError(f"Invalid HM input {point_group}; {first}")
+            raise ValueError(
+                f"Invalid HM input {point_group}; {first} {second} {third}"
+            )
 
     # if first element is a positive number followed by a m or mm its Cnv
     elif first.isnumeric() and second == "m" and (third is None or third == "m"):
         if int(first) > 1:
             point_group = "C" + first + "v"
         else:
-            raise ValueError(f"Invalid HM input {point_group}; {first}")
+            raise ValueError(
+                f"Invalid HM input {point_group}; {first} {second} {third}"
+            )
     # Dn is nmm
     elif first.isnumeric() and second == "2" and (third is None or third == "2"):
         if int(first) > 1:
             point_group = "D" + first
         else:
-            raise ValueError(f"Invalid HM input {point_group}; {first}")
+            raise ValueError(
+                f"Invalid HM input {point_group}; {first} {second} {third}"
+            )
+    # D2d is also -4m2
+    elif first == "-4" and second == "m" and third == "2":
+        point_group = "D2d"
     # D2 is also mm2
     elif first == "m" and second == "m" and third == "2":
         point_group = "C2v"
@@ -1137,7 +1150,9 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
         if int(first[1:]) > 2 and int(first[1:]) % 4 == 2:
             point_group = f"D{int(first[1:])//2}h"
         else:
-            raise ValueError(f"Invalid HM input {point_group}; {first}")
+            raise ValueError(
+                f"Invalid HM input {point_group}; {first} {second} {third}"
+            )
     # Dnh n/m2/m2/m which is eq to n/mmm
     elif (
         first.endswith("/m")
@@ -1147,19 +1162,30 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
         if int(first[:-2]) > 1:
             point_group = "D" + first[:-2] + "h"
         else:
-            raise ValueError(f"Invalid HM input {point_group}; {first}")
+            raise ValueError(
+                f"Invalid HM input {point_group}; {first} {second} {third}"
+            )
     # D2h is mmm also
     elif first == "m" and second == "m" and third == "m":
         point_group = "D2h"
     # D3h is also -62m or -6m2
-    elif first == "-6" and second == "m" and third == "2":
+    elif (
+        first == "-6"
+        and second == "m"
+        and third == "2"
+        or first == "-6"
+        and second == "2"
+        and third == "m"
+    ):
         point_group = "D3h"
     # Dn/2d is -n2m for n=4,8,12,...
     elif second == "2" and third == "m" and first[0] == "-" and int(first[1:]) % 4 == 0:
         if int(first[1:]) > 2:
             point_group = f"D{int(first[1:])//2}d"
         else:
-            raise ValueError(f"Invalid HM input {point_group}; {first}")
+            raise ValueError(
+                f"Invalid HM input {point_group}; {first} {second} {third}"
+            )
     # Dnd is -n2/m or -nm for n = 3,5,7,9
     elif (
         (second == "2/m" or second == "m") and first[0] == "-" and first[1:].isnumeric()
@@ -1167,10 +1193,9 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
         if int(first[1:]) > 1 and int(first[1:]) % 2 == 1:
             point_group = "D" + first[1:] + "d"
         else:
-            raise ValueError(f"Invalid HM input {point_group}; {first}")
-    # D2d is also -4m2
-    elif first == "-4" and second == "m" and third == "2":
-        point_group = "D2d"
+            raise ValueError(
+                f"Invalid HM input {point_group}; {first} {second} {third}"
+            )
     # group T 23
     elif first == "2" and second == "3" and third is None:
         point_group = "T"
