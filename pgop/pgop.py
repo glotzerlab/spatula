@@ -117,7 +117,7 @@ class BOOSOP:
             )
         D_ij = np.stack(matrices, axis=0)  # noqa N806
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
-        self._boosop = None
+        self._order = None
         self._ylm_cache = util._Cache(5)
 
     def compute(
@@ -193,7 +193,7 @@ class BOOSOP:
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
         )
-        self._boosop, self._rotations = self._cpp.compute(
+        self._order, self._rotations = self._cpp.compute(
             dist,
             neighbors.weights,
             neighbors.neighbor_counts,
@@ -206,7 +206,7 @@ class BOOSOP:
             quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
                 m=refine_m, weights=True, cartesian=True
             )
-            self._boosop = self._cpp.refine(
+            self._order = self._cpp.refine(
                 dist,
                 self._rotations,
                 neighbors.weights,
@@ -231,13 +231,13 @@ class BOOSOP:
         return self._ylm_cache[key]
 
     @property
-    def boosop(self) -> np.ndarray:
+    def order(self) -> np.ndarray:
         """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter is [0,1].
 
         The symmetry order is consistent with the order passed to
         `BOOSOP.compute`.
         """
-        return self._boosop
+        return self._order
 
     @property
     def rotations(self) -> np.ndarray:
@@ -272,6 +272,7 @@ class PGOP:
         self,
         symmetries: list[str],
         optimizer: pgop.optimize.Optimizer,
+        mode: str = "full",
     ):
         """Create a PGOP object.
 
@@ -288,6 +289,10 @@ class PGOP:
         optimizer : pgop.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
+        mode : str, optional
+            The mode to use for the computation. Either "full" or "boo". Defaults to
+            "full". "full" computes the full point group symmetry and "boo" uses the
+            bond orientational order (diagram) symmetry.
         """
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
@@ -302,8 +307,13 @@ class PGOP:
                 matrices.append(pg.condensed_matrices)
             else:
                 matrices.append(pg.condensed_matrices[9:])
-        self._cpp = pgop._pgop.PGOP(matrices, optimizer._cpp)
-        self._pgop = None
+        if mode == "full":
+            m_mode = 0
+        elif mode == "boo":
+            m_mode = 1
+        self._mode = mode
+        self._cpp = pgop._pgop.PGOP(matrices, optimizer._cpp, m_mode)
+        self._order = None
 
     def compute(
         self,
@@ -321,7 +331,12 @@ class PGOP:
              a `freud.box.Box` and a `numpy.ndarray` of positions and a
              `gsd.hoomd.Frame`.
         sigmas: np.ndarray | float
-            The standard deviation of the Gaussian distribution for each particle.
+            The standard deviation of the Gaussian distribution for each particle for
+            mode "full". If mode is "boo", the kappa parameter for the von-Mises-Fisher.
+            Note that for gaussian distribution, smaller sigma values are more
+            concentrated and larger sigma values are more spread out. For von-Mises-
+            Fisher distribution, smaller kappa values are more spread out and larger
+            kappa values are more concentrated.
             If a float is passed, the same value is used for all particles. If `None` is
             passed, sigma is determined as the value at which the gaussian function
             value evaluated at half of the smallest bond distance has 25% height of max
@@ -361,18 +376,18 @@ class PGOP:
                 "sigmas must be a float, a list of floats or an array of floats "
                 "with the same length as the number of points in the system."
             )
-        self._pgop, self._rotations = self._cpp.compute(
-            dist, neighbors.weights, neighbors.neighbor_counts, sigmas
+        self._order, self._rotations = self._cpp.compute(
+            dist, neighbors.weights, neighbors.neighbor_counts, float(sigmas)
         )
 
     @property
-    def pgop(self) -> np.ndarray:
+    def order(self) -> np.ndarray:
         """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter is [0,1].
 
         The symmetry order is consistent with the order passed to
         `PGOP.compute`.
         """
-        return self._pgop
+        return self._order
 
     @property
     def rotations(self) -> np.ndarray:
@@ -387,3 +402,8 @@ class PGOP:
     def symmetries(self) -> list[str]:
         """The point group symmetries tested."""
         return self._symmetries
+
+    @property
+    def mode(self) -> str:
+        """The mode used for the computation."""
+        return self._mode

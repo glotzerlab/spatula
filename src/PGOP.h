@@ -113,7 +113,9 @@ struct PGOPStore {
  */
 class PGOP {
     public:
-    PGOP(const py::list& R_ij, std::shared_ptr<optimize::Optimizer>& optimizer);
+    PGOP(const py::list& R_ij,
+         std::shared_ptr<optimize::Optimizer>& optimizer,
+         const unsigned int mode);
 
     /**
      * @brief Root function for computing PGOP for a set of points.
@@ -179,6 +181,8 @@ class PGOP {
     std::vector<std::vector<double>> m_Rij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
+    /// The mode of the PGOP computation.
+    unsigned int m_mode;
 };
 
 void export_pgop_class(py::module& m, const std::string& name);

@@ -108,8 +108,10 @@ py::tuple PGOPStore::getArrays()
     return py::make_tuple(op, rotations);
 }
 
-PGOP::PGOP(const py::list& R_ij, std::shared_ptr<optimize::Optimizer>& optimizer)
-    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer)
+PGOP::PGOP(const py::list& R_ij,
+           std::shared_ptr<optimize::Optimizer>& optimizer,
+           const unsigned int mode)
+    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode)
 {
     m_Rij.reserve(m_n_symmetries);
     for (size_t i = 0; i < m_n_symmetries; ++i) {
@@ -184,6 +186,37 @@ std::tuple<double, data::Quaternion> PGOP::compute_symmetry(LocalNeighborhood& n
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
+inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                                         const data::Vec3& symmetrized_position,
+                                                         double sigma,
+                                                         double sigma_symmetrized)
+{
+    // 1. compute the distance between the two vectors (symmetrized_position
+    //    and positions[m])
+    auto r_pos = symmetrized_position - position;
+    auto sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
+    // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient
+    //    is used.
+    return std::pow((2 * sigma * sigma_symmetrized / sigmas_squared_summed), 3 / 2)
+           * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
+}
+
+inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
+                                                       const data::Vec3& symmetrized_position,
+                                                       double kappa,
+                                                       double kappa_symmetrized)
+{
+    auto position_norm = std::sqrt(position.dot(position));
+    auto symmetrized_position_norm = std::sqrt(symmetrized_position.dot(symmetrized_position));
+    auto k1_sq = kappa * kappa;
+    auto k2_sq = kappa_symmetrized * kappa_symmetrized;
+    auto k1k2 = kappa * kappa_symmetrized;
+    auto proj = position.dot(symmetrized_position) / (position_norm * symmetrized_position_norm);
+    return 2 * std::sqrt(k1k2 / (std::sinh(kappa) * std::sinh(kappa_symmetrized)))
+           * std::sinh((std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj)) / 2)
+           / std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj);
+}
+
 double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<double>& R_ij) const
 {
     const auto positions = neighborhood.rotated_positions;
@@ -205,16 +238,20 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
             // compute overlap with every point in the positions
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
-                // 1. compute the distance between the two vectors (symmetrized_position
-                //    and positions[m])
-                auto r_pos = symmetrized_position - positions[m];
-                auto distancesq = r_pos.dot(r_pos);
-                auto sigmas_squared_summed = sigmas[m] * sigmas[m] + sigmas[j] * sigmas[j];
-                // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient is used.
-                auto res = std::pow((2 * sigmas[m] * sigmas[j] / sigmas_squared_summed), 3 / 2)
-                           * std::exp(-distancesq / (4 * sigmas_squared_summed));
-                if (res > max_res)
-                    max_res = res;
+                double BC = 0;
+                if (m_mode == 0) {
+                    BC = compute_Bhattacharyya_coefficient_gaussian(positions[m],
+                                                                    symmetrized_position,
+                                                                    sigmas[j],
+                                                                    sigmas[m]);
+                } else {
+                    BC = compute_Bhattacharyya_coefficient_fisher(positions[m],
+                                                                  symmetrized_position,
+                                                                  sigmas[j],
+                                                                  sigmas[m]);
+                }
+                if (BC > max_res)
+                    max_res = BC;
             }
             overlap += max_res;
         }
@@ -239,7 +276,7 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
 void export_pgop(py::module& m)
 {
     py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::list&, std::shared_ptr<optimize::Optimizer>&>())
+        .def(py::init<const py::list&, std::shared_ptr<optimize::Optimizer>&, const unsigned int>())
         .def("compute", &PGOP::compute);
 }
 
