@@ -651,6 +651,7 @@ point_group_mapping = {
     "622": "D6",
     "6mm": "C6v",
     "-6m2": "D3h",
+    "-62m": "D3h",
     "6/mmm": "D6h",
     "6/m2/m2/m": "D6h",
     "23": "T",
