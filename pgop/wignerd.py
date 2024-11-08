@@ -1024,8 +1024,8 @@ def extract_first_element_of_hermann_mauguin_notation(s: str) -> str:  # noqa N8
         string_to_return += s[0] + extract_number_from_bracket(s, 2)
     else:
         raise ValueError(f"Invalid HM input {s}, {string_to_return}")
-    if len(s) > len(string_to_return): # noqa SIM102
-        if s[len(string_to_return)] == "/": # noqa SIM102
+    if len(s) > len(string_to_return):  # noqa SIM102
+        if s[len(string_to_return)] == "/":  # noqa SIM102
             if s[len(string_to_return) + 1] == "m":
                 string_to_return += "/m"
     return string_to_return
@@ -1124,11 +1124,7 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
         else:
             raise ValueError(f"Invalid HM input {point_group}; {first}")
     # Dn is nmm
-    elif (
-        first.isnumeric()
-        and second == "2"
-        and (third is None or third == "2")
-    ):
+    elif first.isnumeric() and second == "2" and (third is None or third == "2"):
         if int(first) > 1:
             point_group = "D" + first
         else:
@@ -1155,6 +1151,9 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
     # D2h is mmm also
     elif first == "m" and second == "m" and third == "m":
         point_group = "D2h"
+    # D3h is also -62m or -6m2
+    elif first == "-6" and second == "m" and third == "2":
+        point_group = "D3h"
     # Dn/2d is -n2m for n=4,8,12,...
     elif second == "2" and third == "m" and first[0] == "-" and int(first[1:]) % 4 == 0:
         if int(first[1:]) > 2:
@@ -1169,23 +1168,38 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
             point_group = "D" + first[1:] + "d"
         else:
             raise ValueError(f"Invalid HM input {point_group}; {first}")
+    # D2d is also -4m2
+    elif first == "-4" and second == "m" and third == "2":
+        point_group = "D2d"
     # group T 23
     elif first == "2" and second == "3" and third is None:
         point_group = "T"
     # group Td -43m
     elif first == "-4" and second == "3" and third == "m":
         point_group = "Td"
-    # group Th 2/m-3 or m-3
-    elif second == "-3" and (first == "m" or first == "2/m") and third is None:
+    # group Th 2/m-3 or m-3 or m3
+    elif (
+        second == "-3"
+        and (first == "m" or first == "2/m")
+        and third is None
+        or first == "m"
+        and second == "3"
+        and third is None
+    ):
         point_group = "Th"
     # group O 432
     elif first == "4" and second == "3" and third == "2":
         point_group = "O"
-    # group Oh 4/m-32/m or m-3m
+    # group Oh 4/m-32/m or m-3m or m3m
     elif (
-        second == "-3"
-        and (first == "m" or first == "4/m")
-        and (third == "m" or third == "2/m")
+        (
+            second == "-3"
+            and (first == "m" or first == "4/m")
+            and (third == "m" or third == "2/m")
+        )
+        or first == "m"
+        and second == "3"
+        and third == "m"
     ):
         point_group = "Oh"
     # group I  is 235 or 25 or 532 or 53
@@ -1218,8 +1232,8 @@ class WignerD:
         point_group : str
             The point group in Schoenflies notation or Hermann-Mauguin notation
             (both short and full symbols are supported). Strings are case sensitive.
-            Schoenflies notation must contain an uppercase letter (C, D, S, T, O, I); 
-            any subsequent letters must be lowercase (h, d, i). Hermann-Mauguin 
+            Schoenflies notation must contain an uppercase letter (C, D, S, T, O, I);
+            any subsequent letters must be lowercase (h, d, i). Hermann-Mauguin
             notation must be entirely lowercase.
 
         max_l : int
@@ -1235,7 +1249,7 @@ class WignerD:
             or "I" in point_group
         ):
             pass
-        elif any(char.isdigit() or char in {'m', '-', '/'} for char in point_group):
+        elif any(char.isdigit() or char in {"m", "-", "/"} for char in point_group):
             point_group = convert_hermann_mauguin_to_schonflies(point_group)
         else:
             raise ValueError(f"Unknown point group {point_group}.")
