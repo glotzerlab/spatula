@@ -340,8 +340,8 @@ class PGOP:
             If a float is passed, the same value is used for all particles. If `None` is
             passed, sigma is determined as the value at which the gaussian function
             value evaluated at half of the smallest bond distance has 25% height of max
-            gaussian height for the same sigma. This is the preferred method to
-            determine sigma.
+            gaussian height for the same sigma for the "full" mode. In the "boo" mode,
+            the default value is 15.0.
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery
             A ``freud`` neighbor query object. Defines neighbors for the system.
             Weights provided by a neighbor list are currently unused.
@@ -362,15 +362,24 @@ class PGOP:
                 )
             sigmas = np.array([sigmas[i] for i in neighbors.point_indices])
         elif sigmas is None:
-            dists = np.linalg.norm(dist, axis=1)
-            # remove all the zeros normalized distances, use np.isclose, use 0.1%
-            # of max distance as threshold
-            dists = dists[dists > 0.001 * np.max(dists)]
-            # find gaussian width sigma at which the value of the gaussian function at
-            # half of the smallest bond distance has 25% height of max gaussian height
-            # for the same sigma
-            sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
-            sigmas = np.full(neighbors.num_points * neighbors.num_query_points, sigma)
+            if self.mode == "full":
+                dists = np.linalg.norm(dist, axis=1)
+                # remove all the zeros normalized distances, use np.isclose, use 0.1%
+                # of max distance as threshold
+                dists = dists[dists > 0.001 * np.max(dists)]
+                # find gaussian width sigma at which the value of the gaussian function at
+                # half of the smallest bond distance has 25% height of max gaussian height
+                # for the same sigma
+                sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
+                sigmas = np.full(
+                    neighbors.num_points * neighbors.num_query_points, sigma
+                )
+            elif self.mode == "boo":
+                # TODO for kappa the formula has to change, also distances here should
+                # be on a sphere!
+                sigmas = np.full(
+                    neighbors.num_points * neighbors.num_query_points, 15.0
+                )
         else:
             raise ValueError(
                 "sigmas must be a float, a list of floats or an array of floats "
