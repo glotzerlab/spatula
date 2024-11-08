@@ -41,7 +41,7 @@ line-length = 88
 select = [
     "B","D","E","F","I","N","S","W","C4","UP","C90","NPY","PTH","SIM","PIE790","PIE794",
 ]
-ignore = ["B905","D107","D213","D211","E741","S101","UP006","SIM116"]
+ignore = ["B905","D107","D213","D211","E741","S101","UP006","SIM116","D203"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
