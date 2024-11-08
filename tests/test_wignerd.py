@@ -8,6 +8,7 @@ from pgop.wignerd import (
     _parse_point_group,
     compute_condensed_wignerD_matrix_for_a_given_point_group,
     condensed_wignerD_from_operations,
+    convert_hermann_mauguin_to_schonflies,
     delta,
     dot_product,
     identity,
@@ -111,7 +112,7 @@ def test_WignerD_valid_point_group():
 
 
 def test_WignerD_invalid_point_group():
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         _ = WignerD("J", 10)
 
 
@@ -617,4 +618,57 @@ def test_Ih_from_product():
             compute_condensed_wignerD_matrix_for_a_given_point_group("Ci", maxl),
         ),
         compute_condensed_wignerD_matrix_for_a_given_point_group("Ih", maxl),
+    )
+
+
+point_group_mapping = {
+    "1": "C1",
+    "-1": "Ci",
+    "2": "C2",
+    "m": "Cs",
+    "2/m": "C2h",
+    "222": "D2",
+    "mm2": "C2v",
+    "mmm": "D2h",
+    "2/m2/m2/m": "D2h",
+    "4": "C4",
+    "-4": "S4",
+    "4/m": "C4h",
+    "422": "D4",
+    "4mm": "C4v",
+    "-42m": "D2d",
+    "-4m2": "D2d",
+    "4/mmm": "D4h",
+    "4/m2/m2/m": "D4h",
+    "3": "C3",
+    "-3": "S6",
+    "32": "D3",
+    "3m": "C3v",
+    "-3m": "D3d",
+    "-32/m": "D3d",
+    "6": "C6",
+    "-6": "C3h",
+    "6/m": "C6h",
+    "622": "D6",
+    "6mm": "C6v",
+    "-6m2": "D3h",
+    "-62m": "D3h",
+    "6/mmm": "D6h",
+    "6/m2/m2/m": "D6h",
+    "23": "T",
+    "m-3": "Th",
+    "2/m-3": "Th",
+    "432": "O",
+    "-43m": "Td",
+    "m-3m": "Oh",
+    "4/m-32/m": "Oh",
+}
+
+
+# use point group mapping to test all point groups
+@pytest.mark.parametrize("point_group", point_group_mapping.keys())
+def test_notations(point_group):
+    assert (
+        convert_hermann_mauguin_to_schonflies(point_group)
+        == point_group_mapping[point_group]
     )
