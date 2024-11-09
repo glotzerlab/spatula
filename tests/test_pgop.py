@@ -1340,7 +1340,7 @@ cutoff = 0.99
 current_time_seed = int(time.time())
 rng = np.random.default_rng(seed=current_time_seed)
 
-methods_dict = dict()
+methods_dict = {}
 
 # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
 # close to one as well.
@@ -1397,7 +1397,7 @@ def check_symmetry(symmetry, vertices, optype):
 def make_method(symmetry, optimizer, optype):
     # check if BOOSOP or PGOP is already in the dictionary
     if symmetry not in methods_dict:
-        methods_dict[symmetry] = dict()
+        methods_dict[symmetry] = {}
         if optype == "boosop":
             methods_dict[symmetry][optype] = pgop.BOOSOP(
                 "fisher", [symmetry], optimizer
