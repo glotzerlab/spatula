@@ -396,7 +396,7 @@ class PGOP:
                 "with the same length as the number of points in the system."
             )
         self._order, self._rotations = self._cpp.compute(
-            dist, neighbors.weights, neighbors.neighbor_counts, float(sigmas)
+            dist, neighbors.weights, neighbors.neighbor_counts, sigmas
         )
 
     @property
