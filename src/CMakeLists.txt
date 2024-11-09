@@ -16,7 +16,11 @@ list(APPEND pgop_sources
     "util/Threads.h" "util/Threads.cc"
 )
 
-pybind11_add_module(_pgop ${pgop_sources})
+# this optimizes for size
+nanobind_add_module(_pgop ${pgop_sources})
+# following should be used to optimize for speed. This should only be needed if we call
+# the C++ code a lot
+#nanobind_add_module(_pgop NOMINSIZE ${pgop_sources})
 
 set_target_properties(_pgop PROPERTIES
     CXX_STANDARD 17

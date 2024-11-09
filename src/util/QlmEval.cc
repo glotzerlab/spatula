@@ -6,9 +6,9 @@
 
 namespace pgop { namespace util {
 QlmEval::QlmEval(unsigned int m,
-                 const py::array_t<double> positions,
-                 const py::array_t<double> weights,
-                 const py::array_t<std::complex<double>> ylms)
+                 const nb::ndarray<double> positions,
+                 const nb::ndarray<double> weights,
+                 const nb::ndarray<std::complex<double>> ylms)
     : m_n_lms(ylms.shape(0)), m_max_l(0), m_n_points(ylms.shape(1)), m_positions(),
       m_weighted_ylms()
 {
@@ -18,21 +18,23 @@ QlmEval::QlmEval(unsigned int m,
         count += 2 * m_max_l + 1;
     }
     m_weighted_ylms.reserve(m_n_lms);
-    const auto unchecked_ylms = ylms.unchecked<2>();
-    const auto u_weights = static_cast<const double*>(weights.data());
+    const std::complex<double>* ylms_data = ylms.data();
+    const double* weights_data = weights.data();
     const double normalization = 1.0 / (4.0 * static_cast<double>(m));
     for (size_t lm {0}; lm < m_n_lms; ++lm) {
         auto ylm = std::vector<std::complex<double>>();
         ylm.reserve(m_n_points);
         for (size_t i {0}; i < m_n_points; ++i) {
-            ylm.emplace_back(normalization * u_weights[i] * unchecked_ylms(lm, i));
+            ylm.emplace_back(normalization * weights_data[i] * ylms_data[lm * m_n_points + i]);
         }
         m_weighted_ylms.emplace_back(ylm);
     }
-    const auto u_positions = positions.unchecked<2>();
+    const double* positions_data = positions.data();
     m_positions.reserve(positions.shape(0));
     for (size_t i {0}; i < static_cast<size_t>(positions.shape(0)); ++i) {
-        m_positions.emplace_back(u_positions.data(i, 0));
+        m_positions.emplace_back(positions_data[i * 3],
+                                 positions_data[i * 3 + 1],
+                                 positions_data[i * 3 + 2]);
     }
 }
 

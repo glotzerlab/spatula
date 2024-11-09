@@ -4,11 +4,12 @@
 #include <utility>
 #include <vector>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/trampoline.h>
 
 #include "../data/Vec3.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace pgop { namespace optimize {
 /**
@@ -82,9 +83,9 @@ class Optimizer {
  * from Python.
  */
 class PyOptimizer : public Optimizer {
-    public:
-    using Optimizer::Optimizer;
+    NB_TRAMPOLINE(Optimizer, 4);
 
+    public:
     ~PyOptimizer() override = default;
 
     /// Get the next point to compute the objective for.
@@ -98,6 +99,6 @@ class PyOptimizer : public Optimizer {
     virtual std::unique_ptr<Optimizer> clone() const override;
 };
 
-void export_base_optimize(py::module& m);
+void export_base_optimize(nb::module_& m);
 
 }} // namespace pgop::optimize
