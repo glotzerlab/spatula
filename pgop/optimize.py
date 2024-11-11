@@ -27,6 +27,7 @@ class RandomSearch(Optimizer):
         seed : `int`, optional
             The random number seed to use for generating random rotations.
             Defaults to 42.
+
         """
         self._cpp = _pgop.RandomSearch(max_iter, seed)
 
@@ -66,6 +67,9 @@ class StepGradientDescent(Optimizer):
         optimizer : Optimizer
             The initial optimizer. The best/final point of this optimizer will
             be sent to the `StepGradientDescent` as the initial point.
+        initial_point : :math:`(4,)` numpy.ndarray of float, optional
+            The initial point to start the optimization. Defaults to the
+            identity quaternion.
         max_iter : `int`, optional
             The maximum number of iterations before stopping optimization.
             Defaults to 150.
@@ -81,6 +85,7 @@ class StepGradientDescent(Optimizer):
             current optimization stops. The entire optimization stops when the
             objective from the last round of 1 dimensional optimizations is
             below ``tol``. Defaults to 1e-6.
+
         """
         self._cpp = _pgop.StepGradientDescent(
             _pgop.Quaternion(initial_point).to_axis_angle_3D(),
@@ -100,10 +105,11 @@ def _load_sphere_codes():
     -------
     sphere_codes : list[numpy.ndarray]
         The list of sphere codes from 1 to 249 points.
+
     """
     fn = Path(__file__).parent / "sphere-codes.npz"
     with np.load(str(fn)) as data:
-        return [arr for arr in data.values()]
+        return list(data.values())
 
 
 class Mesh(Optimizer):
@@ -118,12 +124,13 @@ class Mesh(Optimizer):
         ----------
         points : :math:`(N, 4)` numpy.ndarray of float
             The rotaional quaternions to test.
+
         """
         self._cpp = _pgop.Mesh([_pgop.Quaternion(p) for p in points])
 
     @classmethod
     def from_grid(cls, n_axes=65, n_angles=5):
-        """Create a Mesh optimizer that tests rotations on a uniform grid.
+        r"""Create a Mesh optimizer that tests rotations on a uniform grid.
 
         The axes are chosen by the numerical solutions to the Tammes problem and
         angles by equadistant rotations according to the Haar measure.
@@ -140,6 +147,7 @@ class Mesh(Optimizer):
         mesh : Mesh
             The optimizer which will test :math:`N_{axes} \cdot N_{angles}`
             points.
+
         """
         if n_axes < 1 or n_axes > 250:
             raise ValueError("Can only chose [1, 250] for n_axes.")
@@ -226,6 +234,7 @@ class Union(Optimizer):
             current optimization stops. The entire optimization stops when the
             objective from the last round of 1 dimensional optimizations is
             below ``tol``. Defaults to 1e-6.
+
         """
         instance = cls()
         instance._cpp = _pgop.Union.with_step_gradient_descent(

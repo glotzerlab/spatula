@@ -17,6 +17,7 @@ class BondOrder:
         ----------
         positions : :math:`(N, 3)` numpy.ndarray of float
             The positions to compute the BOD for in Cartesian coordinates.
+
         """
         return self._cpp(positions)
 
@@ -33,6 +34,7 @@ class BondOrderFisher(BondOrder):
             The neighbor positions for the BOD.
         kappa : float
             The concentration parameter for the von-Mises Fisher distribution.
+
         """
         self._cpp = pgop._pgop.FisherBondOrder(
             pgop._pgop.FisherDistribution(kappa), positions
@@ -52,6 +54,7 @@ class BondOrderUniform(BondOrder):
         max_theta : float
             The distance from the distribution center where the density is
             non-zero for the uniform distribution.
+
         """
         self._cpp = pgop._pgop.UniformBondOrder(
             pgop._pgop.UniformDistribution(max_theta), positions

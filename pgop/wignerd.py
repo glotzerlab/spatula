@@ -1,3 +1,5 @@
+"""Computing symmetry operations for given representations."""
+
 import itertools
 from typing import Generator
 
@@ -18,6 +20,7 @@ def identity(max_l: int) -> np.ndarray:  # noqa: N802
     -------
     np.ndarray
         The WignerD matrix for E up to the given l.
+
     """
     return np.array(
         [delta(mprime, m) for _, mprime, m in iter_sph_indices(max_l)],
@@ -41,6 +44,7 @@ def inversion(max_l: int) -> np.ndarray:  # noqa: N802
     -------
     np.ndarray
         The WignerD matrix for inversion up to the given l.
+
     """
     return np.concatenate(
         [
@@ -73,6 +77,7 @@ def rotation_from_euler_angles(
     -------
     np.ndarray
         The WignerD matrix for the generalized rotation up to the given l.
+
     """
 
     def S_sum(l, m, mprime):  # noqa: N802
@@ -183,6 +188,7 @@ def rotation_from_axis_angle(max_l: int, axis: np.ndarray, angle: float) -> np.n
     -------
     np.ndarray
         The WignerD matrix for the generalized rotation up to the given l.
+
     """
     # normalize the axis of rotation
     rotation_axis = axis / np.linalg.norm(axis)
@@ -209,6 +215,7 @@ def rotation_from_axis_order(max_l: int, axis: np.ndarray, order: int) -> np.nda
     -------
     np.ndarray
         The WignerD matrix for the generalized rotation up to the given l.
+
     """
     return rotation_from_axis_angle(max_l, axis, 2 * np.pi / order)
 
@@ -238,6 +245,7 @@ def rotoreflection_from_euler_angles(
     -------
     np.ndarray
         The WignerD matrix for the generalized rotoreflection up to the given l.
+
     """
     rotation_operator = rotation_from_euler_angles(max_l, alpha, beta, gamma)
     # find axis of rotation
@@ -268,6 +276,7 @@ def rotoreflection_from_axis_angle(
     -------
     np.ndarray
         The WignerD matrix for the generalized rotoreflection up to the given l.
+
     """
     # normalize the axis of rotation
     rotation_axis = axis / np.linalg.norm(axis)
@@ -296,6 +305,7 @@ def rotoreflection_from_axis_order(
     -------
     np.ndarray
         The WignerD matrix for the generalized rotoreflection up to the given l.
+
     """
     return rotoreflection_from_axis_angle(max_l, axis, 2 * np.pi / order)
 
@@ -317,6 +327,7 @@ def reflection_from_normal(max_l: int, normal: np.ndarray):
     -------
     np.ndarray
         The WignerD matrix for the generalized sigma up to the given l.
+
     """
     inversion_operator = inversion(max_l)
     rotation_operator = rotation_from_axis_angle(max_l, normal, np.pi)
@@ -337,6 +348,7 @@ def _cs_operations(max_l: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Cs up to the given l.
+
     """
     return [identity(max_l), reflection_from_normal(max_l, [1, 0, 0])]
 
@@ -355,6 +367,7 @@ def _ch_operations(max_l: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Ch up to the given l.
+
     """
     return [identity(max_l), reflection_from_normal(max_l, [0, 0, 1])]
 
@@ -373,6 +386,7 @@ def _ci_operations(max_l: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Ci up to the given l.
+
     """
     return [identity(max_l), inversion(max_l)]
 
@@ -393,6 +407,7 @@ def _cn_operations(max_l: int, n: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Cn up to the given l.
+
     """
     operations = [identity(max_l)]
     rotation_operation = rotation_from_euler_angles(max_l, 2 * np.pi / n, 0, 0)
@@ -419,6 +434,7 @@ def _sn_operations(max_l: int, n: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Sn up to the given l.
+
     """
     identity_operation = identity(max_l)
     operations = [identity_operation]
@@ -448,6 +464,7 @@ def _cnh_operations(max_l: int, n: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Cnh up to the given l.
+
     """
     operations = _cn_operations(max_l, n)
     sigma_h_operation = reflection_from_normal(max_l, [0, 0, 1])
@@ -470,6 +487,7 @@ def _cnv_operations(max_l: int, n: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Cnv up to the given l.
+
     """
     operations = _cn_operations(max_l, n)
     sigma_v_operation = reflection_from_normal(max_l, [1, 0, 0])
@@ -492,6 +510,7 @@ def _dn_operations(max_l: int, n: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Dn up to the given l.
+
     """
     operations = _cn_operations(max_l, n)
     xy_rotation = dot_product(
@@ -517,6 +536,7 @@ def _dnh_operations(max_l: int, n: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Dnh up to the given l.
+
     """
     operations = _dn_operations(max_l, n)
     identity_operation = identity(max_l)
@@ -550,6 +570,7 @@ def _dnd_operations(max_l: int, n: int) -> np.ndarray:
     -------
     list[np.ndarray]
         The operations list for Dnd up to the given l.
+
     """
     operations = _sn_operations(max_l, 2 * n)
     vertical_reflection = reflection_from_normal(max_l, [0, 1, 0])
@@ -574,6 +595,7 @@ def _rotation_operations_for_polyhedral_point_groups(
     -------
     list[np.ndarray]
         The operations list for the given polyhedral point group up to the given l.
+
     """
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group(point_group):
@@ -598,6 +620,7 @@ def iter_sph_indices(max_l: int) -> Generator[int, int, int]:
         The mprime value.
     int
         The m value.
+
     """
     for l in range(max_l + 1):
         ms = range(-l, l + 1)
@@ -618,7 +641,9 @@ def delta(a: int, b: int) -> int:
     Returns
     -------
     int
-        1 if a == b, 0 otherwise."""
+    1 if a == b, 0 otherwise.
+
+    """
     return int(a == b)
 
 
@@ -636,6 +661,7 @@ def convert_to_list_of_matrices(D: np.ndarray) -> list[np.ndarray]:  # noqa N802
     -------
     list[np.ndarray]
         A list of matrices per l.
+
     """
     matrices = []
     current = 0
@@ -665,6 +691,7 @@ def dot_product(
     -------
     np.ndarray
         The direct product of the two sets of WignerD matrices.
+
     """
     result = []
     for matrix1, matrix2 in zip(
@@ -714,6 +741,7 @@ def condensed_wignerD_from_operations(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     return np.sum(operations, axis=0) / len(operations)
 
@@ -721,8 +749,7 @@ def condensed_wignerD_from_operations(  # noqa N802
 def compute_condensed_wignerD_for_C_family(  # noqa N802
     max_l: int, modifier: str, order: int
 ) -> np.ndarray:
-    """
-    Compute the condensed WignerD matrix for a given C family.
+    """Compute the condensed WignerD matrix for a given C family.
 
     Parameters
     ----------
@@ -737,6 +764,7 @@ def compute_condensed_wignerD_for_C_family(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     if modifier == "h" and order is not None:
         return condensed_wignerD_from_operations(_cnh_operations(max_l, order))
@@ -757,8 +785,7 @@ def compute_condensed_wignerD_for_C_family(  # noqa N802
 def compute_condensed_wignerD_for_D_family(  # noqa N802
     max_l: int, modifier: str, order: int
 ) -> np.ndarray:
-    """
-    Compute the condensed WignerD matrix for a given D family.
+    """Compute the condensed WignerD matrix for a given D family.
 
     Parameters
     ----------
@@ -773,6 +800,7 @@ def compute_condensed_wignerD_for_D_family(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     if modifier == "d" and order is not None:
         return condensed_wignerD_from_operations(_dnd_operations(max_l, order))
@@ -787,8 +815,7 @@ def compute_condensed_wignerD_for_D_family(  # noqa N802
 def compute_condensed_wignerD_for_S_family(  # noqa N802
     max_l: int, modifier: str, order: int
 ) -> np.ndarray:
-    """
-    Compute the condensed WignerD matrix for a given S family.
+    """Compute the condensed WignerD matrix for a given S family.
 
     Parameters
     ----------
@@ -803,6 +830,7 @@ def compute_condensed_wignerD_for_S_family(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     if modifier is None and order is not None:
         return condensed_wignerD_from_operations(_sn_operations(max_l, order))
@@ -813,8 +841,7 @@ def compute_condensed_wignerD_for_S_family(  # noqa N802
 def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
     max_l: int, modifier: str
 ) -> np.ndarray:
-    """
-    Compute the condensed WignerD matrix for a given terahedral family.
+    """Compute the condensed WignerD matrix for a given terahedral family.
 
     Parameters
     ----------
@@ -827,6 +854,7 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     operations = _rotation_operations_for_polyhedral_point_groups("T", max_l)
     if modifier == "d":
@@ -887,8 +915,7 @@ def compute_condensed_wignerD_for_tetrahedral_family(  # noqa N802
 def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
     max_l: int, modifier: str
 ) -> np.ndarray:
-    """
-    Compute the condensed WignerD matrix for a given octahedral family.
+    """Compute the condensed WignerD matrix for a given octahedral family.
 
     Parameters
     ----------
@@ -901,6 +928,7 @@ def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     operations = _rotation_operations_for_polyhedral_point_groups("O", max_l)
     if modifier == "h":
@@ -917,8 +945,7 @@ def compute_condensed_wignerD_for_octahedral_family(  # noqa N802
 def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
     max_l: int, modifier: str
 ) -> np.ndarray:
-    """
-    Compute the condensed WignerD matrix for a given icosahedral family.
+    """Compute the condensed WignerD matrix for a given icosahedral family.
 
     Parameters
     ----------
@@ -931,6 +958,7 @@ def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     operations = _rotation_operations_for_polyhedral_point_groups("I", max_l)
     if modifier == "h":
@@ -947,8 +975,7 @@ def compute_condensed_wignerD_for_icosahedral_family(  # noqa N802
 def compute_condensed_wignerD_matrix_for_a_given_point_group(  # noqa N802
     point_group: str, max_l: int
 ) -> np.ndarray:
-    """
-    Compute the condensed WignerD matrix for a given point group.
+    """Compute the condensed WignerD matrix for a given point group.
 
     Parameters
     ----------
@@ -961,6 +988,7 @@ def compute_condensed_wignerD_matrix_for_a_given_point_group(  # noqa N802
     -------
     np.ndarray
         The condensed WignerD matrix for the point group.
+
     """
     family, modifier, order = _parse_point_group(point_group)
     if family == "T":
@@ -1249,6 +1277,11 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
 
 
 class WignerD:
+    """A class to represent a WignerD matrix for a given point group.
+
+    WignerD matrices are repsentations of symmetry groups in spherical harmonics.
+    """
+
     def __init__(self, point_group: str, max_l: int) -> None:
         """Create a WignerD object.
 
@@ -1263,6 +1296,7 @@ class WignerD:
 
         max_l : int
             The highest spherical harmonic to include in the WignerD matrices.
+
         """
         self._max_l = max_l
         if (
@@ -1286,12 +1320,14 @@ class WignerD:
 
     @property
     def max_l(self) -> int:
-        """The maximum l value used for constructing the matrix
+        """The maximum l value used for constructing the matrix.
 
         Returns
         -------
         int
-            The maximum l value."""
+        The maximum l value.
+
+        """
         return self._max_l
 
     @property
@@ -1302,6 +1338,7 @@ class WignerD:
         -------
         str
             The point group in Schoenflies notation.
+
         """
         return self._point_group
 
@@ -1313,6 +1350,7 @@ class WignerD:
         -------
         list[np.ndarray]
             The WignerD matrices for the point group up to the given l.
+
         """
         return convert_to_list_of_matrices(self._matrix)
 
@@ -1326,6 +1364,7 @@ class WignerD:
         -------
         np.ndarray
             The condensed WignerD matrices for the point group up to the given l.
+
         """
         return self._matrix
 
@@ -1342,6 +1381,7 @@ class WignerD:
         -------
         np.ndarray
             The WignerD matrix for the point group for a given l.
+
         """
         return self.matrices[l]
 
@@ -1364,6 +1404,7 @@ class WignerD:
         -------
         WignerDmatrix
             The WignerD object.
+
         """
         wigner = cls.__new__(cls)
         wigner._matrix = matrix
