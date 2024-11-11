@@ -20,6 +20,9 @@ n_dict = {
 }
 
 
+pgop_dict = {}
+
+
 pgop.util.set_num_threads(1)
 
 
@@ -1452,7 +1455,7 @@ def test_simple_crystals(crystal_type, mode):
     cutoff = crystal_cutoffs[crystal_type]
     # Create PGOP object and compute with the given parameters
     op_pg = make_method("Oh", optimizer, mode)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=cutoff)
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": cutoff}
     if mode == "boosop":
         op_pg.compute((box, points), qargs)
         assert np.allclose(op_pg.order, 1.0, rtol=1e-4)
@@ -1465,7 +1468,7 @@ def test_simple_crystals(crystal_type, mode):
 def test_qargs_query_pt(mode):
     box, points = crystals_dict["sc"]
     op_pg = make_method("Oh", optimizer, mode)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=crystal_cutoffs["sc"])
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
     if mode == "boosop":
         op_pg.compute((box, points), qargs, query_points=np.asarray([points[0]]))
         assert np.allclose(op_pg.order, 1.0, rtol=1e-4)
@@ -1478,7 +1481,7 @@ def test_qargs_query_pt(mode):
 def test_neighbor_list_query_pt(mode):
     box, points = crystals_dict["sc"]
     op_pg = make_method("Oh", optimizer, mode)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=crystal_cutoffs["sc"])
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
     qp = np.asarray([points[0]])
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(qp, qargs).toNeighborList()
@@ -1495,7 +1498,7 @@ def test_neighbor_list_query_pt(mode):
 def test_neighbor_list_only(mode):
     box, points = crystals_dict["sc"]
     op_pg = make_method("Oh", optimizer, mode)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=crystal_cutoffs["sc"])
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
     )
@@ -1512,7 +1515,7 @@ def test_neighbor_list_only(mode):
 def test_sigma_inputs(mode, sigma):
     box, points = crystals_dict["sc"]
     op_pg = make_method("Oh", optimizer, mode)
-    qargs = dict(exclude_ii=True, mode="ball", r_max=crystal_cutoffs["sc"])
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
     neighborlist = (
         freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
     )
@@ -1530,7 +1533,7 @@ sigma_values = {
 @pytest.mark.parametrize("mode", modes)
 def test_bcc_with_multiple_correct_symmetries(mode):
     box, points = crystals_dict["bcc"]
-    qargs = dict(exclude_ii=True, mode="ball", r_max=crystal_cutoffs["bcc"])
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
     correct_symmetries = ["Oh", "D2", "D4"]
     if mode == "boosop":
         op_pg = pgop.BOOSOP("fisher", correct_symmetries, optimizer)
@@ -1544,7 +1547,7 @@ def test_bcc_with_multiple_correct_symmetries(mode):
 @pytest.mark.parametrize("mode", modes)
 def test_bcc_with_multiple_incorrect_symmetries(mode):
     box, points = crystals_dict["bcc"]
-    qargs = dict(exclude_ii=True, mode="ball", r_max=crystal_cutoffs["bcc"])
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
     incorrect_symmetries = ["Oh", "D3h"]
     if mode == "boosop":
         op_pg = pgop.BOOSOP("fisher", incorrect_symmetries, optimizer)
@@ -1647,7 +1650,7 @@ def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
     vertices = np.asarray(vertices)
     # randomly scale the distance of a random set of vertices for a number between 1.01
     # and 2
-    scale = np.random.uniform(0.5, 2, len(vertices))
+    scale = rng.uniform(0.5, 2, len(vertices))
     new_vertices = []
     for point, sc in zip(vertices, scale):
         new_vertices.append(point * sc)

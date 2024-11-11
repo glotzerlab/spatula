@@ -12,8 +12,8 @@ Neighborhoods::Neighborhoods(size_t N,
                              const double* weights,
                              const double* distance,
                              const double* sigmas)
-    : m_N {N}, m_neighbor_counts {neighbor_counts},
-      m_distances {distance}, m_weights {weights}, m_sigmas {sigmas}, m_neighbor_offsets()
+    : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
+      m_sigmas {sigmas}, m_neighbor_offsets()
 {
     m_neighbor_offsets.reserve(m_N + 1);
     m_neighbor_offsets.emplace_back(0);

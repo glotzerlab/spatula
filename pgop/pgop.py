@@ -95,6 +95,7 @@ class BOOSOP:
             The maximum angle (in radians) that the uniform distribution
             extends. Only used when ``dist`` is uniform. Defauts to 0.61
             (roughly 35 degrees).
+
         """
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
@@ -180,6 +181,7 @@ class BOOSOP:
             concentrated distributions require larger ``m`` to properly evaluate
             bond order functions. The number of points to evaluate scales as
             :math:`4 m^2`.
+
         """
         if l > self._max_l:
             raise ValueError("l must be less than or equal to max_l.")
@@ -293,6 +295,7 @@ class PGOP:
             The mode to use for the computation. Either "full" or "boo". Defaults to
             "full". "full" computes the full point group symmetry and "boo" uses the
             bond orientational order (diagram) symmetry.
+
         """
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
@@ -349,6 +352,7 @@ class PGOP:
             The points to compute the PGOP for. Defaults to ``None`` which
             computes the PGOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.
+
         """
         neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
         dist = _compute_distance_vectors(neigh_query, neighbors, query_points)

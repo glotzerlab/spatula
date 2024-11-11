@@ -6,7 +6,7 @@ import scipy.special
 
 
 class SphHarm:
-    """Compute spherical harmonics up to a given spherical harmonic number.
+    r"""Compute spherical harmonics up to a given spherical harmonic number.
 
     The class always computes all values of the spherical harmonics (all
     :math:`m` and :math:`\ell`) upto the maximum :math:`\ell`.
@@ -20,12 +20,13 @@ class SphHarm:
         max_l : int
             The highest order spherical harmonics to calculate. Class does not
             support values higher than 12.
+
         """
         self._max_l = max_l
         self._l, self._m = self.harmonic_indices
 
     def __call__(self, theta, phi):
-        """Compute all spherical harmonics for given polar and azimuthal angles.
+        r"""Compute all spherical harmonics for given polar and azimuthal angles.
 
         Note
         ----
@@ -48,6 +49,7 @@ class SphHarm:
             :math:`\ell` and :math:`m`, and the second in the order of pased
             angles. Use `~.harmonic_indices` to examine the order of the first
             dimension further.
+
         """
         # Note the different convention in theta and phi between scipy and this
         sph_ind, angle_ind = np.mgrid[0 : len(self._m), 0 : len(theta)]
@@ -57,8 +59,13 @@ class SphHarm:
 
     @property
     def harmonic_indices(self):
-        """tuple[numpy.ndarray, numpy.ndarray]: indices for the values \
-           returned by this class.
+        """Returns harmonic indices.
+
+        Returns
+        -------
+        tuple[numpy.ndarray, numpy.ndarray]: indices for the values returned by this
+        class.
+
         """
         l = []
         m = []

@@ -25,6 +25,7 @@ def sph_to_cart(theta, phi):
     -------
     coords : :math:`(N, 3)` numpy.ndarray of float
         The Cartesian coordinates of the points.
+
     """
     x = np.empty(theta.shape + (3,))
     sin_theta = np.sin(theta)
@@ -41,6 +42,7 @@ def set_num_threads(num_threads):
     ----------
     num_threads : int
         The number of threads.
+
     """
     if num_threads < 1:
         raise ValueError("Must set to a positive number of threads.")
@@ -59,6 +61,7 @@ def get_num_threads():
     -------
     num_threads : int
         The number of threads.
+
     """
     return _pgop.get_num_threads()
 
@@ -82,6 +85,7 @@ class _Cache:
         keep_n_most_recent : int, optional
             The number of recent examples to not allow for removal regardless of
             popularity. Defaults to 1 key.
+
         """
         self._data = {}
         self._key_counts = collections.Counter()
