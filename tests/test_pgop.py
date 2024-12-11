@@ -1560,6 +1560,25 @@ def test_bcc_with_multiple_incorrect_symmetries(mode):
     assert np.allclose(op_pg.order[:, 0], 1.0, rtol=1e-4)
 
 
+def test_bcc_with_multiple_incorrect_symmetries_operator_calc():
+    box, points = crystals_dict["bcc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
+    correct_symmetries = ["Oh", "D3h"]
+    lenohsym = len(pgop.representations.CartesianRepMatrix("Oh").matrices)
+    lend3hsym = len(pgop.representations.CartesianRepMatrix("D3h").matrices)
+    op_pg = pgop.PGOP(
+        correct_symmetries,
+        optimizer,
+        mode="full",
+        compute_per_operator_values_for_final_orientation=True,
+    )
+    op_pg.compute((box, points), None, qargs)
+    assert np.asarray(op_pg.order).shape == (len(points), lenohsym + lend3hsym)
+    assert np.allclose(op_pg.order[:, 0:lenohsym], 1.0, atol=1e-4)
+    assert not np.allclose(op_pg.order[:, lenohsym:], 1.0, atol=1e-4)
+    assert np.asarray(op_pg.rotations).shape == (len(points), lenohsym + lend3hsym, 4)
+
+
 symmetries_subgroup_d5d = ["D5d", "S10", "C2h", "C5v", "D5", "C5", "C2", "Ci", "Cs"]
 n_values = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 vertices_multisim = np.asarray(
