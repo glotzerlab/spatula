@@ -110,8 +110,9 @@ py::tuple PGOPStore::getArrays()
 
 PGOP::PGOP(const py::list& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
-           const unsigned int mode)
-    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode)
+           const unsigned int mode,
+           bool compute_per_operator)
+    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
 {
     m_Rij.reserve(m_n_symmetries);
     for (size_t i = 0; i < m_n_symmetries; ++i) {
@@ -139,7 +140,13 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
                                              distances.data(0),
                                              sigmas.data(0));
     const size_t N_particles = num_neighbors.size();
-    auto op_store = PGOPStore(N_particles, m_n_symmetries);
+    auto total_number_of_op_to_store = m_n_symmetries;
+    if (m_compute_per_operator) {
+        for (const auto& R_ij : m_Rij) {
+            total_number_of_op_to_store += R_ij.size() / 9;
+        }
+    }
+    auto op_store = PGOPStore(N_particles, total_number_of_op_to_store);
     const auto loop_func
         = [&op_store, &neighborhoods, this](const size_t start, const size_t stop) {
               for (size_t i = start; i < stop; ++i) {
@@ -166,12 +173,22 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood) const
     for (const auto& R_ij : m_Rij) {
         const auto result = compute_symmetry(neighborhood, R_ij);
         pgop.emplace_back(std::get<0>(result));
-        rotations.emplace_back(std::get<1>(result));
+        const auto quat = data::Quaternion(std::get<1>(result));
+        rotations.emplace_back(quat);
+        if (m_compute_per_operator) {
+            neighborhood.rotate(std::get<1>(result));
+            // loop over every operator; each operator is a 3x3 matrix so size 9
+            for (size_t i = 0; i < R_ij.size(); i += 9) {
+                const auto particle_operator_op = compute_pgop(neighborhood, std::vector(R_ij.begin() + i, R_ij.begin() + i + 9));
+                pgop.emplace_back(particle_operator_op);
+                rotations.emplace_back(quat);
+            }
+        }
     }
     return std::make_tuple(std::move(pgop), std::move(rotations));
 }
 
-std::tuple<double, data::Quaternion> PGOP::compute_symmetry(LocalNeighborhood& neighborhood,
+std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighborhood,
                                                             const std::vector<double>& R_ij) const
 {
     auto opt = m_optimize->clone();
@@ -276,7 +293,7 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
 void export_pgop(py::module& m)
 {
     py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::list&, std::shared_ptr<optimize::Optimizer>&, const unsigned int>())
+        .def(py::init<const py::list&, std::shared_ptr<optimize::Optimizer>&, const unsigned int, bool>())
         .def("compute", &PGOP::compute);
 }
 

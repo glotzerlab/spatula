@@ -275,6 +275,7 @@ class PGOP:
         symmetries: list[str],
         optimizer: pgop.optimize.Optimizer,
         mode: str = "full",
+        compute_per_operator_values_for_final_orientation: bool = False,
     ):
         """Create a PGOP object.
 
@@ -295,6 +296,10 @@ class PGOP:
             The mode to use for the computation. Either "full" or "boo". Defaults to
             "full". "full" computes the full point group symmetry and "boo" uses the
             bond orientational order (diagram) symmetry.
+        compute_per_operator_values_for_final_orientation : bool, optional
+            Whether to compute the PGOP values for all subgroups of point group
+            symmetries of interest, at same orientation as the point group of interest
+            PGOP value. Defaults to False.
 
         """
         if isinstance(symmetries, str):
@@ -315,7 +320,12 @@ class PGOP:
         elif mode == "boo":
             m_mode = 1
         self._mode = mode
-        self._cpp = pgop._pgop.PGOP(matrices, optimizer._cpp, m_mode)
+        self._cpp = pgop._pgop.PGOP(
+            matrices,
+            optimizer._cpp,
+            m_mode,
+            compute_per_operator_values_for_final_orientation,
+        )
         self._order = None
 
     def compute(
