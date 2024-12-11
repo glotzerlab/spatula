@@ -299,7 +299,9 @@ class PGOP:
         compute_per_operator_values_for_final_orientation : bool, optional
             Whether to compute the PGOP values for all subgroups of point group
             symmetries of interest, at same orientation as the point group of interest
-            PGOP value. Defaults to False.
+            PGOP value. Defaults to False. `order` values are in order point group
+            symmetry, order for symmetry operators of this point group in order given by
+            the representations.matrices, order for second point group symmetry, etc. 
 
         """
         if isinstance(symmetries, str):
