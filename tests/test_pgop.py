@@ -1564,8 +1564,13 @@ def test_bcc_with_multiple_incorrect_symmetries_operator_calc():
     box, points = crystals_dict["bcc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
     correct_symmetries = ["Oh", "D3h"]
-    lenohsym = len(pgop.representations.CartesianRepMatrix("Oh").matrices)
-    lend3hsym = len(pgop.representations.CartesianRepMatrix("D3h").matrices)
+    # these two contain identity, but PGOP ignores identity and doesn't count it!!!
+    lenohsym = len(
+        pgop.representations.CartesianRepMatrix(correct_symmetries[0]).matrices
+    )
+    lend3hsym = len(
+        pgop.representations.CartesianRepMatrix(correct_symmetries[1]).matrices
+    )
     op_pg = pgop.PGOP(
         correct_symmetries,
         optimizer,
@@ -1573,10 +1578,16 @@ def test_bcc_with_multiple_incorrect_symmetries_operator_calc():
         compute_per_operator_values_for_final_orientation=True,
     )
     op_pg.compute((box, points), None, qargs)
+    # PGOP ignores identity and doesn't count it, so you have N less symmetry ops!!!
     assert np.asarray(op_pg.order).shape == (len(points), lenohsym + lend3hsym)
     assert np.allclose(op_pg.order[:, 0:lenohsym], 1.0, atol=1e-4)
     assert not np.allclose(op_pg.order[:, lenohsym:], 1.0, atol=1e-4)
-    assert np.asarray(op_pg.rotations).shape == (len(points), lenohsym + lend3hsym, 4)
+    # PGOP ignores identity and doesn't count it, so you have N less symmetry ops!!!
+    assert np.asarray(op_pg.rotations).shape == (
+        len(points),
+        lenohsym + lend3hsym,
+        4,
+    )
 
 
 symmetries_subgroup_d5d = ["D5d", "S10", "C2h", "C5v", "D5", "C5", "C2", "Ci", "Cs"]
