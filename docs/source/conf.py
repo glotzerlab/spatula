@@ -40,6 +40,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
+    "nbsphinx",
 ]
 
 napoleon_numpy_docstring = True
