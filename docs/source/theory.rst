@@ -288,10 +288,88 @@ chosen on a per particle basis, but this is not recommended.
 
 Calculation of overlap
 ~~~~~~~~~~~~~~~~~~~~~~
+To compute the overlap between two gaussians we use the Bhattacharyya
+coefficient :cite:`bhattacharyya_measure_1946` :cite:`bhattacharyya_measure_1943`. The
+formula for the Bhattacharyya coefficient is for fPGOP in cartesian representation
+between two gaussians :math:`G_1` and :math:`G_2` is given by :cite:`kashyap_perfect_2019`:
+
+.. math::
+  \mathrm{BC}(G_1,G_2)= \left(\frac{2\sigma_1\sigma_2}{\sqrt{\sigma_1^2+\sigma_2^2}}\right)^{3/2} \exp{-\frac{\left|\vec{r}_1-\vec{r}_2\right|^2}{4\left(\sigma_1^2+\sigma_2^2\right)}}.
+
+The formula for the Bhattacharyya coefficient for oPGOP, we first do a coordinate
+transformation to spherical coordinates and then compute the overlap between two fisher
+distributions:
+
+.. math::
+      \mathrm{BC}(P_1,P_2) = 2 \sqrt{\frac{\kappa_1\kappa_2}{\sinh{\kappa_1}\sinh{\kappa_2}}} \frac{\sinh{\frac{\sqrt{\kappa_1^2+\kappa_2^2+2\kappa_1\kappa_2\vec{r}_1\times\vec{r}_2}}{2}}}{\sqrt{\kappa_1^2+\kappa_2^2+2\kappa_1\kappa_2\vec{r}_1\times\vec{r}_2}}.
+
+In order to normalize the order parameter to the range [0,1], we always use normalized
+distributions for the calculation of the Bhattacharyya coefficient.
 
 
 Cartesian representation of symmetry operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Below, we provide an overview of the key symmetry operations and their matrix representations for 3D Cartesian representation.
+
+The identity matrix :math:`\mathbf{I}` represents the identity operation
+:math:`\hat{E}`, which leaves all points unchanged. It is given by:
+
+.. math::
+  \hat{E} = \mathbf{I} = 
+  \begin{pmatrix}
+  1 & 0 & 0 \\
+  0 & 1 & 0 \\
+  0 & 0 & 1
+  \end{pmatrix}.
+
+In three-dimensional space, a rotation matrix :math:`\hat{C}_n` can be constructed for a
+rotation by an angle :math:`\theta` about an axis defined by a unit vector
+:math:`\vec{u} = (u_x, u_y, u_z)`. Other representations that are more computationally
+efficient do exist, such as quaternions, but we shall use the matrix representation for
+its simplicity and compatibility with other symmetry operations. The general form of the
+rotation matrix in Cartesian coordinates is given by:
+
+.. math::
+  \hat{C}_n(\theta=2\pi/n, \vec{u}) = 
+  \begin{pmatrix}
+  \cos\theta + u_x^2(1 - \cos\theta) & u_x u_y (1 - \cos\theta) - u_z \sin\theta & u_x u_z (1 - \cos\theta) + u_y \sin\theta \\
+  u_y u_x (1 - \cos\theta) + u_z \sin\theta & \cos\theta + u_y^2(1 - \cos\theta) & u_y u_z (1 - \cos\theta) - u_x \sin\theta \\
+  u_z u_x (1 - \cos\theta) - u_y \sin\theta & u_z u_y (1 - \cos\theta) + u_x \sin\theta & \cos\theta + u_z^2(1 - \cos\theta)
+  \end{pmatrix}.
+
+We use the implementation provided by SciPy to compute the rotation matrix from
+angle-axis representation or Euler angles in zyz notation :cite:`virtanen_scipy_2020`. 
+
+Inversion is a symmetry operation that maps each point to its opposite point with
+respect to the origin. The inversion matrix :math:`\hat{i}` in Cartesian representation
+is simply:
+
+.. math::
+  \hat{i} = -\mathbf{I} = 
+  \begin{pmatrix}
+  -1 & 0 & 0 \\
+  0 & -1 & 0 \\
+  0 & 0 & -1
+  \end{pmatrix}.
+
+The reflection matrix :math:`\vec{\sigma}` for a reflection across a plane with a normal
+vector :math:`\vec{n} = (n_x, n_y, n_z)` is given by:
+
+.. math::
+  \vec{\sigma} = \hat{i} \hat{C}_2 (\theta=\pi, \vec{n}).
+
+Rotoreflections are combinations of rotations and reflections and can be represented by
+the composition of reflection and rotation. A rotoreflection matrix :math:`\vec{S}_n`
+for a rotation by an angle :math:`\theta=2\pi/n` about an axis :math:`\vec{u}` followed
+by a reflection across a plane :math:`\hat{\sigma}` perpendicular to :math:`\vec{u}` can
+be constructed as:
+
+.. math::
+  \vec{S}_n (\theta=2\pi/n, \vec{u}) = \hat{\sigma} (\vec{u}) \hat{C}_n(\theta=2\pi/n, \vec{u}),
+
+where :math:`\hat{\sigma}` is the reflection matrix across the plane perpendicular to
+the axis of rotation and :math:`\hat{C}_n` is the rotation matrix.
+
 
 
 Bond orientational order symmetry order parameter 
