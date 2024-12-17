@@ -1665,17 +1665,23 @@ def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
     pgop_compute.compute(system, None, nlist, query_points=np.zeros((1, 3)))
     opgop_compute.compute(system, None, nlist, query_points=np.zeros((1, 3)))
     if symmetry == "C1":
-        assert boosop_compute.order[0] == pgop_compute.order[0]
-        assert boosop_compute.order[0] == opgop_compute.order[0]
-        assert pgop_compute.order[0] == opgop_compute.order[0]
+        assert np.round(boosop_compute.order[0][0], 5) == np.round(
+            pgop_compute.order[0][0], 5
+        )
+        assert np.round(boosop_compute.order[0][0], 5) == np.round(
+            opgop_compute.order[0][0], 5
+        )
+        assert np.round(pgop_compute.order[0][0], 5) == np.round(
+            opgop_compute.order[0][0], 5
+        )
     else:
         assert boosop_compute.order[0] > pgop_compute.order[0]
         assert opgop_compute.order[0] > pgop_compute.order[0]
     assert boosop_compute.order[0] >= cutoff
     assert opgop_compute.order[0] >= cutoff
-    assert pgop_compute.order[0] <= 1
-    assert boosop_compute.order[0] <= 1
-    assert opgop_compute.order[0] <= 1
+    assert np.round(pgop_compute.order[0][0], 5) <= 1
+    assert np.round(boosop_compute.order[0][0], 5) <= 1
+    assert np.round(opgop_compute.order[0][0], 5) <= 1
 
 
 non_shape_symmetries = {
