@@ -700,6 +700,8 @@ def _rotation_operations_for_polyhedral_point_groups_cart(
     for i in scipy.spatial.transform.Rotation.create_group(point_group):
         rot = i.as_euler("zyz")
         operations.append(rotation_from_euler_angles_cart(*rot))
+    # swap first and 3rd element so that identity is first
+    operations[0], operations[3] = operations[3], operations[0]
     return operations
 
 

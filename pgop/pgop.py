@@ -15,7 +15,7 @@ def _compute_distance_vectors(neigh_query, neighbors, query_points):
     """Given a query and neighbors get wrapped distances to neighbors.
 
     .. todo::
-        This should be unnecessary come freud 3.0 as distance vectors should
+        This should be unnecessary come freud 3.0 as bond vectors should
         be directly available. UPDATE: nlist.vectors gives weird results?
     """
     pos, box = neigh_query.points, neigh_query.box
@@ -119,13 +119,14 @@ class BOOSOP:
         D_ij = np.stack(matrices, axis=0)  # noqa N806
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
         self._order = None
+        self._rotations = None
         self._ylm_cache = util._Cache(5)
 
     def compute(
         self,
         system: tuple[freud.box.Box, np.ndarray],
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
-        query_points: np.ndarray = None,
+        query_points: np.ndarray | None = None,
         l: int = 10,
         m: int = 10,
         refine: bool = False,
@@ -239,6 +240,8 @@ class BOOSOP:
         The symmetry order is consistent with the order passed to
         `BOOSOP.compute`.
         """
+        if self._order is None:
+            raise ValueError("BOOSOP not computed, call compute first.")
         return self._order
 
     @property
@@ -248,6 +251,8 @@ class BOOSOP:
         The optimial rotations expressed as quaternions for each particles and
         each point group.
         """
+        if self._rotations is None:
+            raise ValueError("BOOSOP not computed, call compute first.")
         return self._rotations
 
     @property
@@ -301,7 +306,7 @@ class PGOP:
             symmetries of interest, at same orientation as the point group of interest
             PGOP value. Defaults to False. `order` values are in order point group
             symmetry, order for symmetry operators of this point group in order given by
-            the representations.matrices, order for second point group symmetry, etc. 
+            the representations.matrices, order for second point group symmetry, etc.
 
         """
         if isinstance(symmetries, str):
@@ -329,13 +334,14 @@ class PGOP:
             compute_per_operator_values_for_final_orientation,
         )
         self._order = None
+        self._rotations = None
 
     def compute(
         self,
         system: tuple[freud.box.Box, np.ndarray],
         sigmas: np.ndarray | float | None,
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
-        query_points: np.ndarray = None,
+        query_points: np.ndarray | None = None,
     ):
         """Compute the point group symmetry for a given system and neighbor.
 
@@ -422,15 +428,19 @@ class PGOP:
         The symmetry order is consistent with the order passed to
         `PGOP.compute`.
         """
+        if self._order is None:
+            raise ValueError("PGOP not computed, call compute first.")
         return self._order
 
     @property
     def rotations(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimial rotations.
+        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimal rotations.
 
-        The optimial rotations expressed as quaternions for each particles and
+        The optimal rotations expressed as quaternions for each particles and
         each point group.
         """
+        if self._rotations is None:
+            raise ValueError("PGOP not computed, call compute first.")
         return self._rotations
 
     @property
