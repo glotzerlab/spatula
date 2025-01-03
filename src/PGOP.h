@@ -154,7 +154,7 @@ class PGOP {
      * @returns the optimized PGOP value and the optimal rotation for the given symmetry.
      */
     std::tuple<double, data::Vec3> compute_symmetry(LocalNeighborhood& neighborhood,
-                                                          const std::vector<double>& R_ij) const;
+                                                    const std::vector<double>& R_ij) const;
 
     /**
      * @brief Compute the PGOP for a set point group symmetry and rotation.

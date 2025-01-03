@@ -112,7 +112,8 @@ PGOP::PGOP(const py::list& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            const unsigned int mode,
            bool compute_per_operator)
-    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
+    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode),
+      m_compute_per_operator(compute_per_operator)
 {
     m_Rij.reserve(m_n_symmetries);
     for (size_t i = 0; i < m_n_symmetries; ++i) {
@@ -179,7 +180,9 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood) const
             neighborhood.rotate(std::get<1>(result));
             // loop over every operator; each operator is a 3x3 matrix so size 9
             for (size_t i = 0; i < R_ij.size(); i += 9) {
-                const auto particle_operator_op = compute_pgop(neighborhood, std::vector(R_ij.begin() + i, R_ij.begin() + i + 9));
+                const auto particle_operator_op
+                    = compute_pgop(neighborhood,
+                                   std::vector(R_ij.begin() + i, R_ij.begin() + i + 9));
                 pgop.emplace_back(particle_operator_op);
                 rotations.emplace_back(quat);
             }
@@ -189,7 +192,7 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood) const
 }
 
 std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighborhood,
-                                                            const std::vector<double>& R_ij) const
+                                                      const std::vector<double>& R_ij) const
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
@@ -293,7 +296,10 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
 void export_pgop(py::module& m)
 {
     py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::list&, std::shared_ptr<optimize::Optimizer>&, const unsigned int, bool>())
+        .def(py::init<const py::list&,
+                      std::shared_ptr<optimize::Optimizer>&,
+                      const unsigned int,
+                      bool>())
         .def("compute", &PGOP::compute);
 }
 
