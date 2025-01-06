@@ -1352,7 +1352,7 @@ optimizer = pgop.optimize.Union.with_step_gradient_descent(
 )
 
 higher_precision_optimizer = pgop.optimize.Union.with_step_gradient_descent(
-    pgop.optimize.Mesh.from_grid(n_axes=250, n_angles=30)
+    pgop.optimize.Mesh.from_grid(n_axes=250, n_angles=40)
 )
 
 

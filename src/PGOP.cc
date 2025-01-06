@@ -230,8 +230,10 @@ inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& positio
     auto symmetrized_position_norm = std::sqrt(symmetrized_position.dot(symmetrized_position));
     // If position norm is zero vector means this point is at origin and contributes 1
     // to the overlap, check that with a small epsilon.
-    if (position_norm < 1e-10) {
+    if ((position_norm < 1e-10) && (symmetrized_position_norm < 1e-10)) {
         return 1;
+    } else if ((position_norm < 1e-10) || (symmetrized_position_norm < 1e-10)) {
+        return 0;
     }
     auto k1_sq = kappa * kappa;
     auto k2_sq = kappa_symmetrized * kappa_symmetrized;

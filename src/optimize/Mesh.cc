@@ -10,7 +10,7 @@
 namespace pgop { namespace optimize {
 Mesh::Mesh(const std::vector<data::Quaternion>& points) : Optimizer(), m_points()
 {
-    m_points.reserve(m_points.size());
+    m_points.reserve(points.size());
     std::transform(points.cbegin(), points.cend(), std::back_inserter(m_points), [](const auto& q) {
         return q.to_axis_angle_3D();
     });
