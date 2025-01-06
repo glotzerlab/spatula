@@ -11,21 +11,6 @@ import pgop._pgop
 from . import freud, integrate, representations, sph_harm, util
 
 
-def _compute_distance_vectors(neigh_query, neighbors, query_points):
-    """Given a query and neighbors get wrapped distances to neighbors.
-
-    .. todo::
-        This should be unnecessary come freud 3.0 as bond vectors should
-        be directly available. UPDATE: nlist.vectors gives weird results?
-    """
-    pos, box = neigh_query.points, neigh_query.box
-    if query_points is None:
-        query_points = pos
-    return box.wrap(
-        pos[neighbors.point_indices] - query_points[neighbors.query_point_indices]
-    )
-
-
 def _get_neighbors(system, neighbors, query_points):
     """Get a NeighborQuery and NeighborList object.
 
@@ -34,11 +19,15 @@ def _get_neighbors(system, neighbors, query_points):
     """
     query = freud.locality.AABBQuery.from_system(system)
     if isinstance(neighbors, freud.locality.NeighborList):
-        return query, neighbors
+        return query.box.wrap(neighbors.vectors), neighbors
     elif query_points is None:
-        return query, query.query(query.points, neighbors).toNeighborList()
+        return query.box.wrap(neighbors.vectors), query.query(
+            query.points, neighbors
+        ).toNeighborList()
     else:
-        return query, query.query(query_points, neighbors).toNeighborList()
+        return query.box.wrap(neighbors.vectors), query.query(
+            query_points, neighbors
+        ).toNeighborList()
 
 
 class BOOSOP:
@@ -191,8 +180,7 @@ class BOOSOP:
                 raise ValueError("refine_l must be less than or equal to max_l.")
             if refine_l < l or refine_m < m or (refine_l == l and refine_m == m):
                 raise ValueError("refine_l and refine_m must be larger than l and m.")
-        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
-        dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
+        dist, neighbors = _get_neighbors(system, neighbors, query_points)
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
         )
@@ -363,17 +351,21 @@ class PGOP:
             value evaluated at half of the smallest bond distance has 25% height of max
             gaussian height for the same sigma for the "full" mode. In the "boo" mode,
             the default value is 15.0.
-        neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery
-            A ``freud`` neighbor query object. Defines neighbors for the system.
-            Weights provided by a neighbor list are currently unused.
+        neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery | dict
+            Neighbors used for the computation. If a `freud.locality.NeighborList` is
+            passed, the neighbors are used directly (in this case `query_points` should
+            not be given as they are ignored). If a `freud.locality.NeighborQuery`
+            is passed, the neighbors are computed using the query (working in
+            conjunction with query points). If a dictionary is used it should be used as
+            freud's neighbor query dictionary (can also be used in conjunction with
+            `query_points`).
         query_points : `numpy.ndarray`, optional
             The points to compute the PGOP for. Defaults to ``None`` which
             computes the PGOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.
 
         """
-        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
-        dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
+        dist, neighbors = _get_neighbors(system, neighbors, query_points)
         if isinstance(sigmas, (float, int)):
             sigmas = np.full(
                 neighbors.num_points * neighbors.num_query_points,
