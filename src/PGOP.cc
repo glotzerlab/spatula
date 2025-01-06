@@ -95,7 +95,7 @@ void PGOPStore::addOp(size_t i,
 void PGOPStore::addNull(size_t i)
 {
     for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = 0;
+        u_op(i, j) = std::numeric_limits<double>::quiet_NaN(); // Set NaN
         u_rotations(i, j, 0) = 1;
         u_rotations(i, j, 1) = 0;
         u_rotations(i, j, 2) = 0;
@@ -129,7 +129,6 @@ PGOP::PGOP(const py::list& R_ij,
     }
 }
 
-// TODO there is also a bug with self-neighbors.
 py::tuple PGOP::compute(const py::array_t<double> distances,
                         const py::array_t<double> weights,
                         const py::array_t<int> num_neighbors,
@@ -200,8 +199,6 @@ std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighbo
         const auto particle_op = compute_pgop(neighborhood, R_ij);
         opt->record_objective(-particle_op);
     }
-    // TODO currently optimum.first can be empty resulting in a SEGFAULT. This only happens in badly
-    // formed arguments (particles with no neighbors), but can occur.
     const auto optimum = opt->get_optimum();
     return std::make_tuple(-optimum.second, optimum.first);
 }
