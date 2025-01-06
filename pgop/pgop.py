@@ -19,10 +19,12 @@ def _get_neighbors(system, neighbors, query_points):
     """
     query = freud.locality.AABBQuery.from_system(system)
     if isinstance(neighbors, freud.locality.NeighborList):
+        neighbors.filter(neighbors.distances > 0)
         return query.box.wrap(neighbors.vectors), neighbors
     else:
         query_points = query_points if query_points is not None else query.points
         neighbors = query.query(query_points, neighbors).toNeighborList()
+        neighbors.filter(neighbors.distances > 0)
         return query.box.wrap(neighbors.vectors), neighbors
 
 
@@ -378,33 +380,51 @@ class PGOP:
                 [sigmas[i] for i in neighbors.point_indices], dtype=np.float32
             )
         elif sigmas is None:
+            distances = np.linalg.norm(dist, axis=1)
             if self.mode == "full":
-                dists = np.linalg.norm(dist, axis=1)
-                # remove all the zeros normalized distances, use np.isclose, use 0.1%
-                # of max distance as threshold
-                dists = dists[dists > 0.001 * np.max(dists)]
                 # find gaussian width sigma at which the value of the gaussian function
                 # at half of the smallest bond distance has 25% height of max gaussian
                 # height for the same sigma
-                sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
-                sigmas = np.full(
-                    neighbors.num_points * neighbors.num_query_points,
-                    sigma,
-                    dtype=np.float32,
-                )
+                sigma = np.min(distances) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
             elif self.mode == "boo":
-                # TODO for kappa the formula has to change, also distances here should
-                # be on a sphere!
-                sigmas = np.full(
-                    neighbors.num_points * neighbors.num_query_points,
-                    15.0,
-                    dtype=np.float32,
-                )
+                bond_vectors = dist / np.linalg.norm(dist, axis=1, keepdims=True)
+                # Get segments to split bond vectors into neighborhoods
+                min_angular_dists = []
+                # Iterate over neighborhoods
+                for iseg in range(len(neighbors.segments)):
+                    cseg = neighbors.segments[iseg]
+                    nseg = (
+                        neighbors.segments[iseg + 1]
+                        if iseg + 1 < len(neighbors.segments)
+                        else len(neighbors.point_indices)
+                    )
+                    neighborhood_vectors = bond_vectors[cseg:nseg]
+                    # Compute pairwise angular distances within the neighborhood
+                    angular_dists = np.arccos(
+                        np.clip(
+                            np.dot(neighborhood_vectors, neighborhood_vectors.T),
+                            -1.0,
+                            1.0,
+                        )
+                    )
+                    # Mask diagonal to ignore self-distances
+                    np.fill_diagonal(angular_dists, np.inf)
+                    min_angular_dists.append(np.min(angular_dists))
+                # Find the global minimum angular distance across all neighborhoods
+                min_angular_dist = np.min(min_angular_dists)
+                # again 25% height of max fisher distribution height
+                sigma = np.log(0.25) / (np.cos(min_angular_dist*0.5) - 1)
+            sigmas = np.full(
+                neighbors.num_points * neighbors.num_query_points,
+                sigma,
+                dtype=np.float32,
+            )
         else:
             raise ValueError(
                 "sigmas must be a float, a list of floats or an array of floats "
                 "with the same length as the number of points in the system."
             )
+        self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
             dist, neighbors.weights, neighbors.neighbor_counts, sigmas
         )
@@ -430,6 +450,13 @@ class PGOP:
         if self._rotations is None:
             raise ValueError("PGOP not computed, call compute first.")
         return self._rotations
+
+    @property
+    def sigmas(self) -> np.ndarray:
+        """The standard deviation of the Gaussian distribution for each particle."""
+        if self._sigmas is None:
+            raise ValueError("PGOP not computed, call compute first.")
+        return self._sigmas
 
     @property
     def symmetries(self) -> list[str]:
