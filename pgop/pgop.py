@@ -20,14 +20,10 @@ def _get_neighbors(system, neighbors, query_points):
     query = freud.locality.AABBQuery.from_system(system)
     if isinstance(neighbors, freud.locality.NeighborList):
         return query.box.wrap(neighbors.vectors), neighbors
-    elif query_points is None:
-        return query.box.wrap(neighbors.vectors), query.query(
-            query.points, neighbors
-        ).toNeighborList()
     else:
-        return query.box.wrap(neighbors.vectors), query.query(
-            query_points, neighbors
-        ).toNeighborList()
+        query_points = query_points if query_points is not None else query.points
+        neighbors = query.query(query_points, neighbors).toNeighborList()
+        return query.box.wrap(neighbors.vectors), neighbors
 
 
 class BOOSOP:
