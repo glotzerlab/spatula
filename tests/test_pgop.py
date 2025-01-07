@@ -1740,7 +1740,7 @@ non_shape_symmetries.update(
 )
 non_shape_symmetries.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
 
-cutin = 0.88
+cutin = 0.92
 
 
 @pytest.mark.parametrize(
