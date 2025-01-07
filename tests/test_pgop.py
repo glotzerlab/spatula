@@ -1356,7 +1356,7 @@ higher_precision_optimizer = pgop.optimize.Union.with_step_gradient_descent(
 )
 
 
-def get_shape_sys_nlist(vertices):
+def get_shape_sys_nlist_old(vertices):
     """Get a neighbor list of a shape.
 
     The neighbor list has a single point with all vertices as neighbors.
@@ -1372,6 +1372,22 @@ def get_shape_sys_nlist(vertices):
             1, len(vertices), query_point_indices, point_indices, vectors
         ),
     )
+
+
+def get_shape_sys_nlist(vertices):
+    """Get a neighbor list of a shape.
+
+    The neighbor list has a single point with all vertices as neighbors.
+    """
+    l = 100
+    box = freud.Box.cube(l)
+    system = (box, vertices)
+    neighbor_query = freud.locality.AABBQuery.from_system(system)
+    query_point = np.zeros((1, 3))
+    nlist = neighbor_query.query(
+        query_point, {"mode": "ball", "r_max": l * 0.4999}
+    ).toNeighborList()
+    return system, nlist
 
 
 def make_compute_object(symmetries, optimizer, optype):
