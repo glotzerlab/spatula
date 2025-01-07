@@ -4,6 +4,8 @@ Provides the `PGOP` and `BOOSOP` class which computes the point group symmetry f
 particle's neighborhood or its local bond orientation order diagram.
 """
 
+import warnings
+
 import numpy as np
 
 import pgop._pgop
@@ -19,13 +21,17 @@ def _get_neighbors(system, neighbors, query_points):
     """
     query = freud.locality.AABBQuery.from_system(system)
     if isinstance(neighbors, freud.locality.NeighborList):
-        neighbors.filter(neighbors.distances > 0)
-        return query.box.wrap(neighbors.vectors), neighbors
+        if query_points is not None:
+            warnings.warn(
+                "query_points are ignored when a NeighborList is passed.",
+                UserWarning,
+                stacklevel=2,
+            )
     else:
         query_points = query_points if query_points is not None else query.points
         neighbors = query.query(query_points, neighbors).toNeighborList()
-        neighbors.filter(neighbors.distances > 0)
-        return query.box.wrap(neighbors.vectors), neighbors
+    neighbors.filter(neighbors.distances > 0)
+    return query.box.wrap(neighbors.vectors), neighbors
 
 
 class BOOSOP:
@@ -413,7 +419,7 @@ class PGOP:
                 # Find the global minimum angular distance across all neighborhoods
                 min_angular_dist = np.min(min_angular_dists)
                 # again 25% height of max fisher distribution height
-                sigma = np.log(0.25) / (np.cos(min_angular_dist*0.5) - 1)
+                sigma = np.log(0.25) / (np.cos(min_angular_dist * 0.5) - 1)
             sigmas = np.full(
                 neighbors.num_points * neighbors.num_query_points,
                 sigma,
