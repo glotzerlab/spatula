@@ -421,7 +421,8 @@ class PGOP:
                     # Mask diagonal to ignore self-distances
                     np.fill_diagonal(angular_dists, np.inf)
                     # flatten angular dists and remove zeros if present
-                    angular_dists = angular_dists.flatten()[angular_dists > 0]
+                    angular_dists = angular_dists.flatten()
+                    angular_dists = angular_dists[angular_dists > 0]
                     min_angular_dists.append(np.min(angular_dists))
                 # Find the global minimum angular distance across all neighborhoods
                 min_angular_dist = np.min(min_angular_dists)
