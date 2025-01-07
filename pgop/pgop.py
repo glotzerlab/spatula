@@ -387,13 +387,18 @@ class PGOP:
             )
         elif sigmas is None:
             distances = np.linalg.norm(dist, axis=1)
+            # filter distances that are smaller then 0.001 of mean distance
+            filter = distances > 0.001 * np.mean(distances)
             if self.mode == "full":
+                distances_filtered = distances[filter]
                 # find gaussian width sigma at which the value of the gaussian function
                 # at half of the smallest bond distance has 25% height of max gaussian
                 # height for the same sigma
-                sigma = np.min(distances) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
+                sigma = np.min(distances_filtered) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
             elif self.mode == "boo":
-                bond_vectors = dist / np.linalg.norm(dist, axis=1, keepdims=True)
+                bond_vectors = dist[filter] / np.linalg.norm(
+                    dist[filter], axis=1, keepdims=True
+                )
                 # Get segments to split bond vectors into neighborhoods
                 min_angular_dists = []
                 # Iterate over neighborhoods
@@ -415,9 +420,14 @@ class PGOP:
                     )
                     # Mask diagonal to ignore self-distances
                     np.fill_diagonal(angular_dists, np.inf)
+                    # flatten angular dists and remove zeros if present
+                    angular_dists = angular_dists.flatten()[angular_dists > 0]
                     min_angular_dists.append(np.min(angular_dists))
                 # Find the global minimum angular distance across all neighborhoods
                 min_angular_dist = np.min(min_angular_dists)
+                # this is the minimum resolution that will work for optimization
+                if min_angular_dist < 0.33:
+                    min_angular_dist = 0.33
                 # again 25% height of max fisher distribution height
                 sigma = np.log(0.25) / (np.cos(min_angular_dist * 0.5) - 1)
             sigmas = np.full(
