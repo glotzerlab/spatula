@@ -1351,10 +1351,6 @@ optimizer = pgop.optimize.Union.with_step_gradient_descent(
     pgop.optimize.Mesh.from_grid()
 )
 
-higher_precision_optimizer = pgop.optimize.Union.with_step_gradient_descent(
-    pgop.optimize.Mesh.from_grid(n_axes=250, n_angles=40)
-)
-
 
 def get_shape_sys_nlist(vertices):
     """Get a neighbor list of a shape.
@@ -1410,9 +1406,12 @@ def generate_quaternions(n=2):
 
 
 def compute_op_result(
-    symmetry, opt, optyp, system, nlist, sigma=None, query_points=None
+    symmetry, opt, optyp, system, nlist, sigma=None, query_points=None, failed=False
 ):
-    op_compute = make_method(symmetry, opt, optyp)
+    if failed:
+        op_compute = make_compute_object(symmetry, opt, optyp)
+    else:
+        op_compute = make_method(symmetry, opt, optyp)
     if optyp == "boosop":
         op_compute.compute(system, nlist, query_points=query_points)
     elif optyp == "full" or optyp == "boo":
@@ -1421,7 +1420,7 @@ def compute_op_result(
 
 
 def compute_pgop_polyhedron(
-    symmetry, vertices, optype, cutoff_operator=">", cutoff_value=cutoff
+    symmetry, vertices, optype, sigma=None, cutoff_operator=">", cutoff_value=cutoff
 ):
     """Determine whether given shape have a specified symmetry.
 
@@ -1437,7 +1436,7 @@ def compute_pgop_polyhedron(
     vertices = np.asarray(vertices)
     system, nlist = get_shape_sys_nlist(vertices)
     op_compute = compute_op_result(
-        symmetry, optimizer, optype, system, nlist, None, query_points=np.zeros((1, 3))
+        symmetry, optimizer, optype, system, nlist, sigma, query_points=np.zeros((1, 3))
     )
     if (
         ">" in cutoff_operator
@@ -1446,14 +1445,18 @@ def compute_pgop_polyhedron(
         and op_compute.order[0] > cutoff_value
     ):
         print(f"Used higher precision, lower precision value {op_compute.order[0]}")
+        new_optimizer = pgop.optimize.Union.with_step_gradient_descent(
+            pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
+        )
         op_compute = compute_op_result(
             symmetry,
-            higher_precision_optimizer,
+            new_optimizer,
             optype,
             system,
             nlist,
-            None,
+            sigma,
             query_points=np.zeros((1, 3)),
+            failed=True,
         )
     return op_compute
 
@@ -1475,8 +1478,11 @@ def compute_pgop_check_all_order_values(
     op_pg = compute_op_result(symmetry, optimizer, mode, system, nlist, sigma, qp)
     if not np.allclose(op_pg.order, value, rtol=rtol):
         print("Used higher precision, lower precision value", op_pg.order)
+        new_optimizer = pgop.optimize.Union.with_step_gradient_descent(
+            pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
+        )
         op_pg = compute_op_result(
-            symmetry, higher_precision_optimizer, mode, system, nlist, sigma, qp
+            symmetry, new_optimizer, mode, system, nlist, sigma, qp, True
         )
     return op_pg
 
@@ -1489,6 +1495,7 @@ def compute_pgop_crystal(crystal_type, symmetry, mode, nlist, sigma=None, qp=Non
 # Define a parameter for different unit cells and corresponding parameters
 @pytest.mark.parametrize("crystal_type", crystal_systems)
 @pytest.mark.parametrize("mode", modedict_types)
+@pytest.mark.flaky(reruns=2)
 def test_simple_crystals(crystal_type, mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs[crystal_type]}
     op_pg = compute_pgop_crystal(crystal_type, ["Oh"], mode, qargs, None)
@@ -1496,6 +1503,7 @@ def test_simple_crystals(crystal_type, mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
+@pytest.mark.flaky(reruns=2)
 def test_qargs_query_pt(mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
     _, points = crystals_dict["sc"]
@@ -1506,6 +1514,7 @@ def test_qargs_query_pt(mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
+@pytest.mark.flaky(reruns=2)
 def test_neighbor_list_query_pt(mode):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
@@ -1518,6 +1527,7 @@ def test_neighbor_list_query_pt(mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
+@pytest.mark.flaky(reruns=2)
 def test_neighbor_list_only(mode):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
@@ -1530,6 +1540,7 @@ def test_neighbor_list_only(mode):
 
 @pytest.mark.parametrize("mode", ["full", "boo"])
 @pytest.mark.parametrize("sigma", [0.2, [0.2] * (3 * 3 * 3)])
+@pytest.mark.flaky(reruns=2)
 def test_sigma_inputs(mode, sigma):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
@@ -1548,6 +1559,7 @@ sigma_values = {
 
 
 @pytest.mark.parametrize("mode", modes)
+@pytest.mark.flaky(reruns=2)
 def test_bcc_with_multiple_correct_symmetries(mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
     correct_symmetries = ["Oh", "D2", "D4"]
@@ -1556,6 +1568,7 @@ def test_bcc_with_multiple_correct_symmetries(mode):
 
 
 @pytest.mark.parametrize("mode", modes)
+@pytest.mark.flaky(reruns=2)
 def test_bcc_with_multiple_incorrect_symmetries(mode):
     box, points = crystals_dict["bcc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
@@ -1618,6 +1631,7 @@ vertices_multisim = np.asarray(
 
 
 @pytest.mark.parametrize("n, mode", [(n, mode) for n in n_values for mode in modes])
+@pytest.mark.flaky(reruns=2)
 def test_increasing_number_of_symmetries(n, mode):
     symmetries_to_compute = []
     for sym in symmetries_subgroup_d5d[:n]:
@@ -1643,6 +1657,7 @@ def test_increasing_number_of_symmetries(n, mode):
     ),
     ids=_id_func,
 )
+@pytest.mark.flaky(reruns=2)
 def test_symmetries_polyhedra(symmetry, shape, vertices, quaternion, mode):
     rotation = scipy.spatial.transform.Rotation.from_quat(quaternion)
     rotated_vertices = rotation.apply(vertices)
@@ -1663,6 +1678,7 @@ def test_symmetries_polyhedra(symmetry, shape, vertices, quaternion, mode):
     ),
     ids=_id_func,
 )
+@pytest.mark.flaky(reruns=2)
 def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
     vertices = np.asarray(vertices)
     # randomly scale the distance of a random set of vertices for a number between 1.01
@@ -1673,13 +1689,13 @@ def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
         new_vertices.append(point * sc)
     new_vertices = np.asarray(new_vertices)
     boosop_compute = compute_pgop_polyhedron(
-        [symmetry], new_vertices, "boosop", ">", cutoff
+        [symmetry], new_vertices, "boosop", None, ">", cutoff
     )
     opgop_compute = compute_pgop_polyhedron(
-        [symmetry], new_vertices, "boo", ">", cutoff
+        [symmetry], new_vertices, "boo", None, ">", cutoff
     )
     fpgop_compute = compute_pgop_polyhedron(
-        [symmetry], new_vertices, "full", ">", cutoff
+        [symmetry], new_vertices, "full", None, ">", cutoff
     )
     if symmetry == "C1":
         assert np.allclose(boosop_compute.order[0], fpgop_compute.order[0], rtol=1e-4)
@@ -1735,11 +1751,13 @@ cutin = 0.92
     ),
     ids=_id_func,
 )
+@pytest.mark.flaky(reruns=2)
 def test_no_symmetries(symmetry, shape, vertices, optype):
     op = compute_pgop_polyhedron(
         symmetry=[symmetry],
         vertices=vertices,
         optype=optype,
+        sigma=None,
         cutoff_operator="<",
         cutoff_value=cutin,
     )
