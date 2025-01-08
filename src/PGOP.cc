@@ -164,18 +164,21 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP::compute_particle(LocalNeighborhood& neighborhood) const
+PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
 {
     auto pgop = std::vector<double>();
     auto rotations = std::vector<data::Quaternion>();
     pgop.reserve(m_Rij.size());
     rotations.reserve(m_Rij.size());
     for (const auto& R_ij : m_Rij) {
+        // make a copy of the neighborhood to avoid modifying the original
+        auto neighborhood = neighborhood_original;
         const auto result = compute_symmetry(neighborhood, R_ij);
         pgop.emplace_back(std::get<0>(result));
         const auto quat = data::Quaternion(std::get<1>(result));
         rotations.emplace_back(quat);
         if (m_compute_per_operator) {
+            auto neighborhood = neighborhood_original;
             neighborhood.rotate(std::get<1>(result));
             // loop over every operator; each operator is a 3x3 matrix so size 9
             for (size_t i = 0; i < R_ij.size(); i += 9) {
@@ -200,6 +203,8 @@ std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighbo
         opt->record_objective(-particle_op);
     }
     const auto optimum = opt->get_optimum();
+    // op value is negated to get the correct value, because optimization scheme is
+    // minimization not maximization!
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
