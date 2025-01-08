@@ -238,10 +238,12 @@ class BOOSOP:
 
     @property
     def rotations(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimial rotations.
+        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimal rotations.
 
-        The optimial rotations expressed as quaternions for each particles and
-        each point group.
+        The optimal rotations of local neighborhoods that maximize the value of PGOP for
+        each query particle and each point group. Rotations are expressed as
+        quaternions. Note that these use different convention to scipy! The convention
+        used here is [w,x,y,z]. The scipy convention is [x,y,z,w].
         """
         if self._rotations is None:
             raise ValueError("BOOSOP not computed, call compute first.")
@@ -461,8 +463,10 @@ class PGOP:
     def rotations(self) -> np.ndarray:
         """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimal rotations.
 
-        The optimal rotations expressed as quaternions for each particles and
-        each point group.
+        The optimal rotations of local neighborhoods that maximize the value of PGOP for
+        each query particle and each point group. Rotations are expressed as
+        quaternions. Note that these use different convention to scipy! The convention
+        used here is [w,x,y,z]. The scipy convention is [x,y,z,w].
         """
         if self._rotations is None:
             raise ValueError("PGOP not computed, call compute first.")
