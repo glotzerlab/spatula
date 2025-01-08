@@ -1669,6 +1669,32 @@ vertices_for_testing = np.asarray(
 )
 
 
+@pytest.mark.parametrize("mode", modedict_types)
+@pytest.mark.parametrize("symmetries", [["T"], ["T", "Th"]])
+@pytest.mark.flaky(reruns=2)
+def test_orientations(mode, symmetries):
+    # random orientation
+    rot = scipy.spatial.transform.Rotation.random(random_state=rng)
+    # compute new vertices
+    rotated_vertices = rot.apply(vertices_for_testing)
+    system, nlist = get_shape_sys_nlist(rotated_vertices)
+    op_opt = compute_op_result(
+        symmetries, optimizer, mode, system, nlist, None, np.zeros((1, 3))
+    )
+    #   op_opt.rotations is something like [w, x, y, z].
+    for cxx_q, symmetry, order in zip(op_opt.rotations[0], symmetries, op_opt.order[0]):
+        # Reorder it to [x, y, z, w] to use in SciPy
+        scipy_q = np.array([cxx_q[1], cxx_q[2], cxx_q[3], cxx_q[0]])
+        optimal_rotation = scipy.spatial.transform.Rotation.from_quat(scipy_q)
+        re_rotated_vertices = optimal_rotation.apply(rotated_vertices)
+        system, nlist = get_shape_sys_nlist(re_rotated_vertices)
+        norot = pgop.optimize.NoOptimization()
+        op_no_opt = compute_op_result(
+            [symmetry], norot, mode, system, nlist, None, np.zeros((1, 3))
+        )
+        assert np.allclose(order, op_no_opt.order[0], rtol=1e-4)
+
+
 optimizers_to_test = [
     (
         "Union_descent_random",
