@@ -1646,6 +1646,69 @@ def test_increasing_number_of_symmetries(n, mode):
     assert np.allclose(op.order, 1.0, rtol=1e-4)
 
 
+# propello tetrahedron vertices
+vertices_for_testing = np.asarray(
+    [
+        [0.5097553324933856, 0.13968058199610653, 1.0],
+        [0.5097553324933856, -0.13968058199610653, -1.0],
+        [-0.5097553324933856, -0.13968058199610653, 1.0],
+        [-0.5097553324933856, 0.13968058199610653, -1.0],
+        [1.0, 0.5097553324933856, 0.13968058199610653],
+        [1.0, -0.5097553324933856, -0.13968058199610653],
+        [-1.0, -0.5097553324933856, 0.13968058199610653],
+        [-1.0, 0.5097553324933856, -0.13968058199610653],
+        [0.13968058199610653, 1.0, 0.5097553324933856],
+        [0.13968058199610653, -1.0, -0.5097553324933856],
+        [-0.13968058199610653, -1.0, 0.5097553324933856],
+        [-0.13968058199610653, 1.0, -0.5097553324933856],
+        [0.6062678708614785, -0.6062678708614785, 0.6062678708614785],
+        [0.6062678708614785, 0.6062678708614785, -0.6062678708614785],
+        [-0.6062678708614785, 0.6062678708614785, 0.6062678708614785],
+        [-0.6062678708614785, -0.6062678708614785, -0.6062678708614785],
+    ]
+)
+
+
+optimizers_to_test = [
+    (
+        "Union_descent_random",
+        pgop.optimize.Union.with_step_gradient_descent(
+            pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
+        ),
+    ),
+    (
+        "Union_descent_Mesh",
+        pgop.optimize.Union.with_step_gradient_descent(pgop.optimize.Mesh.from_grid()),
+    ),
+    ("Descent", pgop.optimize.StepGradientDescent()),
+    (
+        "Random",
+        "RandomSearch",
+    ),
+    ("Mesh", pgop.optimize.Mesh([[1, 0, 0, 0]])),
+    ("Mesh", pgop.optimize.Mesh([[0, 0, 0, 1]])),
+    ("NoOptimization", pgop.optimize.NoOptimization()),
+]
+
+
+# parametrize over all optimizers and all modes
+@pytest.mark.parametrize(
+    "optim_name, optim",
+    optimizers_to_test,
+    ids=[name for name, _ in optimizers_to_test],
+)
+@pytest.mark.parametrize("mode", modedict_types)
+@pytest.mark.flaky(reruns=5)
+def test_optimization_classes(optim_name, optim, mode):
+    # this is so that rerun gets a new random seed
+    if "Random" in optim_name:
+        optim = pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 100000))
+    system, nlist = get_shape_sys_nlist(vertices_for_testing)
+    op = compute_op_result(["T"], optim, mode, system, nlist, None, np.zeros((1, 3)))
+    print(op.order)
+    assert op.order[0] > cutoff
+
+
 @pytest.mark.parametrize(
     "symmetry, shape, vertices, quaternion, mode",
     (
