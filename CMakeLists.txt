@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(pgop)
+project(spatula)
 
 set(DEFAULT_BUILD_TYPE Release)
 if(NOT CMAKE_BUILD_TYPE)
@@ -16,4 +16,4 @@ find_package(pybind11 CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/dependencies)
 add_subdirectory(src)
-add_subdirectory(pgop)
+add_subdirectory(spatula)

@@ -1,7 +1,7 @@
 #include "RandomSearch.h"
 #include "../data/Quaternion.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 RandomSearch::RandomSearch(unsigned int max_iter, long unsigned int seed)
     : Optimizer(), m_iterations(max_iter), m_seed(seed), m_rng(seed), m_normal_dist(0, 1.0)
@@ -56,4 +56,4 @@ void export_random_search(py::module& m)
         .def_property("max_iter", &RandomSearch::getIterations, &RandomSearch::setIterations)
         .def_property("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
 }
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

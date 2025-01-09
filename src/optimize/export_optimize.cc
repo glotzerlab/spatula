@@ -8,7 +8,7 @@
 #include "Union.h"
 #include "export_optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 void export_optimize(py::module& m)
 {
     export_base_optimize(m);
@@ -18,4 +18,4 @@ void export_optimize(py::module& m)
     export_union(m);
     export_no_optimization(m);
 }
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

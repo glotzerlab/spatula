@@ -2,6 +2,6 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 void export_optimize(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

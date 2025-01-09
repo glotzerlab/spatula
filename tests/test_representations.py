@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 import scipy.spatial
 
-import pgop
-from pgop.representations import (
+import spatula
+from spatula.representations import (
     CartesianRepMatrix,
     WignerD,
     _parse_point_group,
@@ -128,7 +128,7 @@ def test_wignerd_invalid_point_group():
 
 
 def test_wignerd_iter_sph_indices():
-    indices = list(pgop.representations.iter_sph_indices(2))
+    indices = list(spatula.representations.iter_sph_indices(2))
     expected_indices = [
         (0, 0, 0),
         (1, -1, -1),

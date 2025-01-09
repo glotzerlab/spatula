@@ -26,10 +26,10 @@ The package serves as an extension of `freud <https://github.com/glotzerlab/freu
 Resources
 =========
 
-- `Reference Documentation <https://pgop.readthedocs.io/>`__: Examples, tutorials, and package Python APIs.
-- `Installation Guide <https://pgop.readthedocs.io/en/stable/gettingstarted/installation.html>`__: Instructions for installing and compiling **PGOP**.
-- `GitHub repository <https://github.com/glotzerlab/pgop>`__: Download the **PGOP** source code.
-- `Issue tracker <https://github.com/glotzerlab/pgop/issues>`__: Report issues or request features.
+- `Reference Documentation <https://spatula.readthedocs.io/>`__: Examples, tutorials, and package Python APIs.
+- `Installation Guide <https://spatula.readthedocs.io/en/stable/gettingstarted/installation.html>`__: Instructions for installing and compiling **PGOP**.
+- `GitHub repository <https://github.com/glotzerlab/spatula>`__: Download the **PGOP** source code.
+- `Issue tracker <https://github.com/glotzerlab/spatula/issues>`__: Report issues or request features.
 
 Related Tools
 =============
@@ -43,7 +43,7 @@ Citation
 ========
 
 When using **PGOP** to process data for publication, please `cite the github repository
-<https://github.com/glotzerlab/pgop>`__.
+<https://github.com/glotzerlab/spatula>`__.
 
 
 Installation
@@ -57,13 +57,13 @@ Example
 .. code-block:: python
 
     import freud
-    import pgop
+    import spatula
 
     system = freud.data.UnitCell.fcc().generate_system(5)
-    optimizer = pgop.optimize.Union.with_step_gradient_descent(
-        optimizer=pgop.optimize.Mesh.from_grid()
+    optimizer = spatula.optimize.Union.with_step_gradient_descent(
+        optimizer=spatula.optimize.Mesh.from_grid()
     )
-    compute = pgop.PGOP(
+    compute = spatula.PGOP(
         dist="fisher", symmetries=("Oh",), optimizer=optimizer
     )
     compute.compute(system, {"num_neighbors": 12, "exclude_ii": True})

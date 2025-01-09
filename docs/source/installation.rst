@@ -32,8 +32,8 @@ The code that follows builds **PGOP**:
 
 .. code-block:: bash
 
-    git clone https://github.com/glotzerlab/pgop.git
-    cd pgop
+    git clone https://github.com/glotzerlab/spatula.git
+    cd spatula
     python -m pip install .
 
 

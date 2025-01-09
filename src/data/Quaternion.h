@@ -9,7 +9,7 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace data {
+namespace spatula { namespace data {
 /**
  * @brief Class provides helper methods for dealing with rotation quaternions.
  *
@@ -61,4 +61,4 @@ Quaternion operator*(const Quaternion& a, const Quaternion& b);
 Quaternion& operator*=(Quaternion& a, const Quaternion& b);
 
 void export_quaternion(py::module& m);
-}} // namespace pgop::data
+}} // namespace spatula::data

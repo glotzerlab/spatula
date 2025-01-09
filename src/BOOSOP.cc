@@ -6,7 +6,7 @@
 #include "BondOrder.h"
 #include "util/Threads.h"
 
-namespace pgop {
+namespace spatula {
 
 NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
                                    const int* neighbor_counts,
@@ -278,4 +278,4 @@ void export_BOOSOP(py::module& m)
     export_BOOSOP_class<UniformDistribution>(m, "BOOSOPUniform");
     export_BOOSOP_class<FisherDistribution>(m, "BOOSOPFisher");
 }
-} // namespace pgop
+} // namespace spatula

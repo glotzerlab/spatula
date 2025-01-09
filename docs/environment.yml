@@ -1,4 +1,4 @@
-name: pgop-rtd
+name: spatula-rtd
 channels:
   - conda-forge
 dependencies:

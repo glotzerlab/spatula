@@ -3,7 +3,7 @@ API
 
 .. rubric:: Overview
 
-.. py:currentmodule:: pgop
+.. py:currentmodule:: spatula
 
 .. autosummary::
     :nosignatures:
@@ -13,7 +13,7 @@ API
 
 .. rubric:: Details
 
-.. automodule:: pgop
+.. automodule:: spatula
     :members: PGOP, BOOSOP
 
 .. rubric:: Modules

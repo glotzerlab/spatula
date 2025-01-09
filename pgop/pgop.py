@@ -8,7 +8,7 @@ import warnings
 
 import numpy as np
 
-import pgop._pgop
+import spatula._spatula
 
 from . import freud, integrate, representations, sph_harm, util
 
@@ -47,7 +47,7 @@ class BOOSOP:
         self,
         dist: str,
         symmetries: list[str],
-        optimizer: pgop.optimize.Optimizer,
+        optimizer: spatula.optimize.Optimizer,
         max_l: int = 10,
         kappa: float = 10,
         max_theta: float = 0.61,
@@ -71,7 +71,7 @@ class BOOSOP:
             Schoenflies notation and is case sensitive. Options are Ci, Cs, Cn, Cnh,
             Cnv, Sn, Dn, Dnh, Dnd, T, Th, Td, O, Oh, I, Ih where n should be replaced
             with group order (an integer) and passed as a list of strings.
-        optimizer : pgop.optimize.Optimizer
+        optimizer : spatula.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
         max_l : `int`, optional
@@ -101,7 +101,7 @@ class BOOSOP:
         elif dist == "uniform":
             dist_param = max_theta
         try:
-            cls_ = getattr(pgop._pgop, "BOOSOP" + dist.title())
+            cls_ = getattr(spatula._spatula, "BOOSOP" + dist.title())
         except AttributeError as err:
             raise ValueError(f"Distribution {dist} not supported.") from err
         matrices = []
@@ -272,7 +272,7 @@ class PGOP:
     def __init__(
         self,
         symmetries: list[str],
-        optimizer: pgop.optimize.Optimizer,
+        optimizer: spatula.optimize.Optimizer,
         mode: str = "full",
         compute_per_operator_values_for_final_orientation: bool = False,
     ):
@@ -288,7 +288,7 @@ class PGOP:
             Schoenflies notation and is case sensitive. Options are Ci, Cs, Cn, Cnh,
             Cnv, Sn, Dn, Dnh, Dnd, T, Th, Td, O, Oh, I, Ih where n should be replaced
             with group order (an integer) and passed as a list of strings.
-        optimizer : pgop.optimize.Optimizer
+        optimizer : spatula.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
         mode : str, optional
@@ -321,7 +321,7 @@ class PGOP:
         elif mode == "boo":
             m_mode = 1
         self._mode = mode
-        self._cpp = pgop._pgop.PGOP(
+        self._cpp = spatula._spatula.PGOP(
             matrices,
             optimizer._cpp,
             m_mode,

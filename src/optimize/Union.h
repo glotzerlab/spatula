@@ -7,7 +7,7 @@
 
 #include "Optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 namespace py = pybind11;
 /**
  * @brief Combine two optimizers into one optimization.
@@ -43,4 +43,4 @@ class Union : public Optimizer {
 };
 
 void export_union(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

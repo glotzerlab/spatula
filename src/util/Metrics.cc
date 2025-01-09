@@ -8,7 +8,7 @@
 
 #include "Metrics.h"
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 double covariance(const std::vector<std::complex<double>>& f,
                   const std::vector<std::complex<double>>& g)
 {
@@ -27,4 +27,4 @@ double covariance(const std::vector<std::complex<double>>& f,
     }
     return mixed_covar / std::sqrt(g_covar * f_cov);
 }
-}} // namespace pgop::util
+}} // namespace spatula::util

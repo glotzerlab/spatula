@@ -7,9 +7,9 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 /**
- * @brief Helper class for handle the parallelization logic for the pgop module.
+ * @brief Helper class for handle the parallelization logic for the spatula module.
  *
  * ThreadPool is a singleton which stores the state of parallelization and thread pools for the
  * entire application.
@@ -79,4 +79,4 @@ class ThreadPool {
 };
 
 void export_threads(py::module& m);
-}} // namespace pgop::util
+}} // namespace spatula::util

@@ -7,7 +7,7 @@
 
 #include "Mesh.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 Mesh::Mesh(const std::vector<data::Quaternion>& points) : Optimizer(), m_points()
 {
     m_points.reserve(points.size());
@@ -36,4 +36,4 @@ void export_mesh(py::module& m)
     py::class_<Mesh, Optimizer, std::shared_ptr<Mesh>>(m, "Mesh").def(
         py::init<const std::vector<data::Quaternion>&>());
 }
-}} // end namespace pgop::optimize
+}} // end namespace spatula::optimize

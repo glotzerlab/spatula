@@ -163,7 +163,7 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "pgop.tex",
+        "spatula.tex",
         "event-detection Documentation",
         "Brandon Butler",
         "manual",

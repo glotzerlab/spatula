@@ -13,10 +13,10 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 
 // Bring Vec3 and Quaternion into namespace.
-using namespace pgop::data;
+using namespace spatula::data;
 
 using vec3_iter = decltype(std::declval<std::vector<Vec3>>().begin());
 using cvec3_iter = decltype(std::declval<const std::vector<Vec3>>().begin());
@@ -112,4 +112,4 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     unsigned int max_l);
 
 void export_util(py::module& m);
-}} // namespace pgop::util
+}} // namespace spatula::util

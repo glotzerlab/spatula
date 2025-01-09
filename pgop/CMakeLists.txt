@@ -1,2 +1,2 @@
  # Defaults to site-packages so only need package name
- install(DIRECTORY ./ DESTINATION pgop FILES_MATCHING PATTERN "*.py")
+ install(DIRECTORY ./ DESTINATION spatula FILES_MATCHING PATTERN "*.py")

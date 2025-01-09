@@ -3,7 +3,7 @@
 #include <complex>
 #include <vector>
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 /**
  * @brief compute the Pearson correlation between two spherical harmonic expansions.
  *
@@ -16,4 +16,4 @@ namespace pgop { namespace util {
  */
 double covariance(const std::vector<std::complex<double>>& f,
                   const std::vector<std::complex<double>>& g);
-}} // namespace pgop::util
+}} // namespace spatula::util

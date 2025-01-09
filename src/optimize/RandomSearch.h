@@ -5,7 +5,7 @@
 
 #include "Optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 /**
  * @brief Perform a random search through SO(3) for optimization.
@@ -50,4 +50,4 @@ class RandomSearch : public Optimizer {
 };
 
 void export_random_search(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

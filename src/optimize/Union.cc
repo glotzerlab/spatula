@@ -3,7 +3,7 @@
 #include "StepGradientDescent.h"
 #include "Union.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 Union::Union(const std::shared_ptr<const Optimizer>& initial_opt,
              std::function<std::unique_ptr<Optimizer>(const Optimizer&)> instantiate_final)
     : Optimizer(), m_inital_opt(initial_opt->clone()), m_final_opt(nullptr),
@@ -97,4 +97,4 @@ void export_union(py::module& m)
                             });
                     });
 }
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

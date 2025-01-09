@@ -1,9 +1,9 @@
-pgop.util
+spatula.util
 ---------
 
 .. rubric:: Overview
 
-.. py:currentmodule:: pgop.util
+.. py:currentmodule:: spatula.util
 
 .. autosummary::
     get_num_threads
@@ -12,7 +12,7 @@ pgop.util
 
 .. rubric:: Details
 
-.. automodule:: pgop.util
+.. automodule:: spatula.util
    :members:
     get_num_threads,
     set_num_threads,

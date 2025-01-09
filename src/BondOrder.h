@@ -5,7 +5,7 @@
 
 #include "data/Vec3.h"
 
-namespace pgop {
+namespace spatula {
 // Model concept to show expected interface. We cannot use C++20 for now so we have commented it
 // out.
 
@@ -164,4 +164,4 @@ template<typename distribution_type> class BondOrder {
     /// The normalization constant @c 1 / std::reduce(m_weights).
     double m_normalization;
 };
-} // End namespace pgop
+} // End namespace spatula

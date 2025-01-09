@@ -2,7 +2,7 @@
 
 #include <pybind11/pybind11.h>
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 class NoOptimization : public Optimizer {
     public:
@@ -23,4 +23,4 @@ class NoOptimization : public Optimizer {
 };
 
 void export_no_optimization(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

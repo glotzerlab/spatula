@@ -1,9 +1,9 @@
-pgop.optimize
+spatula.optimize
 -------------
 
 .. rubric:: Overview
 
-.. py:currentmodule:: pgop.optimize
+.. py:currentmodule:: spatula.optimize
 
 .. autosummary::
     Mesh
@@ -15,7 +15,7 @@ pgop.optimize
 
 .. rubric:: Details
 
-.. automodule:: pgop.optimize
+.. automodule:: spatula.optimize
    :members:
     Mesh,
     Optimizer,

@@ -6,7 +6,7 @@
 
 #include "Optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 class StepGradientDescent : public Optimizer {
     /**
@@ -86,4 +86,4 @@ class StepGradientDescent : public Optimizer {
 };
 
 void export_step_gradient_descent(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

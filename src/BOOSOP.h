@@ -16,7 +16,7 @@
 
 namespace py = pybind11;
 
-namespace pgop {
+namespace spatula {
 
 /**
  * @brief storage for neighbor positions, weights, and rotated positions.
@@ -245,4 +245,4 @@ template<typename distribution_type>
 void export_BOOSOP_class(py::module& m, const std::string& name);
 
 void export_BOOSOP(py::module& m);
-} // End namespace pgop
+} // End namespace spatula

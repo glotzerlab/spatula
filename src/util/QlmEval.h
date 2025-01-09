@@ -10,7 +10,7 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 // TODO: pass normalization factor not m for generalizing.
 /**
  * @brief Helper class to make computation of \f$ Q_{m}^{l} \f$ more efficient.
@@ -95,4 +95,4 @@ struct QlmBuf {
 
     QlmBuf(size_t size);
 };
-}} // namespace pgop::util
+}} // namespace spatula::util

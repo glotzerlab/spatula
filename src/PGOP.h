@@ -14,7 +14,7 @@
 
 namespace py = pybind11;
 
-namespace pgop {
+namespace spatula {
 
 /**
  * @brief storage for neighbor positions, weights, and rotated positions.
@@ -188,7 +188,7 @@ class PGOP {
     bool m_compute_per_operator;
 };
 
-void export_pgop_class(py::module& m, const std::string& name);
+void export_spatula_class(py::module& m, const std::string& name);
 
-void export_pgop(py::module& m);
-} // End namespace pgop
+void export_spatula(py::module& m);
+} // End namespace spatula

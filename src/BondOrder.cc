@@ -9,7 +9,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace pgop {
+namespace spatula {
 FisherDistribution::FisherDistribution(double kappa)
     : m_kappa(kappa), m_prefactor(kappa / (2 * M_PI * (std::exp(kappa) - std::exp(-kappa))))
 {
@@ -91,4 +91,4 @@ BondOrder<distribution_type>::operator()(const std::vector<data::Vec3>& points) 
 // explicitly create templates
 template class BondOrder<UniformDistribution>;
 template class BondOrder<FisherDistribution>;
-} // End namespace pgop
+} // End namespace spatula
