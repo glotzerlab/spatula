@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 name = "spatula"
 version = "0.0.1"
 requires-python = ">=3.8"
-description = "Local environment point group analysis for point cloud data."
+description = "Point group symmetry analysis of local environments for point cloud data."
 maintainers = [{name = "Brandon Butler", email = "butlerbr@umich.edu"}, {name = "Maria Ward Rashidi", email = "mariarw@umich.edu"}, {name = "Domagoj Fijan", email = "domagoj.fijan@gmail.com"}]
 authors = [{name = "Brandon Butler", email = "butlerbr@umich.edu"}, {name = "Maria Ward Rashidi", email = "mariarw@umich.edu"}, {name = "Domagoj Fijan", email = "domagoj.fijan@gmail.com"}]
 keywords = ["order parameter", "point groups", "molecular simulations", "symmetry", "crystallography", "condensed matter", "soft matter"]
