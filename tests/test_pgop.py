@@ -1704,7 +1704,9 @@ optimizers_to_test = [
     ),
     (
         "Union_descent_Mesh",
-        spatula.optimize.Union.with_step_gradient_descent(spatula.optimize.Mesh.from_grid()),
+        spatula.optimize.Union.with_step_gradient_descent(
+            spatula.optimize.Mesh.from_grid()
+        ),
     ),
     ("Descent", spatula.optimize.StepGradientDescent()),
     (
@@ -1728,7 +1730,9 @@ optimizers_to_test = [
 def test_optimization_classes(optim_name, optim, mode):
     # this is so that rerun gets a new random seed
     if "Random" in optim_name:
-        optim = spatula.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 100000))
+        optim = spatula.optimize.RandomSearch(
+            max_iter=10000, seed=rng.integers(0, 100000)
+        )
     system, nlist = get_shape_sys_nlist(vertices_for_testing)
     op = compute_op_result(["T"], optim, mode, system, nlist, None, np.zeros((1, 3)))
     print(op.order)
