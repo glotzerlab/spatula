@@ -45,7 +45,7 @@ repos:
     exclude: |
       (?x)(
           ^docs/
-          ^dependencies/
+          |^dependencies/
           )
     types_or: [python, c, c++]
     args:
@@ -54,4 +54,3 @@ repos:
     - --num=1
     - --add=Part of spatula, released under the BSD 3-Clause License.
     - --keep-before=#!
-    
