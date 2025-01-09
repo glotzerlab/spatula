@@ -1,11 +1,11 @@
-====
-spatula
-====
+=======
+SPATULA
+=======
 
 Overview
 --------
 
-``spatula`` is a Python package for computing the continuous point group ordering of the neighbors of a point in space.
+``SPATULA`` (Symmetry Pattern Analysis Toolkit for Understanding Local Arrangements) is a Python package for computing the continuous point group ordering of the neighbors of a point in space.
 In general, this is to compute the local ordering of particles (molecules) in simulations or experiments over time.
 The package serves as an extension of `freud <https://github.com/glotzerlab/freud>`__ with a new order parameter.
 
