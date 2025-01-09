@@ -37,3 +37,21 @@ repos:
   - id: clang-format
     types_or: [c, c++]
     exclude: "^dependencies/"
+- repo: https://github.com/glotzerlab/fix-license-header
+  rev: v0.4.1
+  hooks:
+  - id: fix-license-header
+    name: Fix license headers
+    exclude: |
+      (?x)(
+          ^docs/
+          ^dependencies/
+          )
+    types_or: [python, c, c++]
+    args:
+    - --license-file=LICENSE
+    - --start=2
+    - --num=1
+    - --add=Part of spatula, released under the BSD 3-Clause License.
+    - --keep-before=#!
+    
