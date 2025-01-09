@@ -44,8 +44,8 @@ repos:
     name: Fix license headers
     exclude: |
       (?x)(
-          ^docs/
-          |^dependencies/
+          ^docs/|
+          ^dependencies/
           )
     types_or: [python, c, c++]
     args:
