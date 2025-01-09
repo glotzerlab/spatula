@@ -1,5 +1,5 @@
 spatula.util
----------
+------------
 
 .. rubric:: Overview
 

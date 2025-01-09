@@ -16,7 +16,11 @@ import spatula._spatula
 from . import freud, integrate, representations, sph_harm, util
 
 
-def _get_neighbors(system, neighbors, query_points):
+def _get_neighbors(
+    system: tuple[freud.box.Box, np.ndarray],
+    neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
+    query_points: np.ndarray | None,
+) -> tuple[np.ndarray, freud.locality.NeighborList]:
     """Get a NeighborQuery and NeighborList object.
 
     Returns the query and neighbor list consistent with the system and
@@ -140,13 +144,13 @@ class BOOSOP:
         Parameters
         ----------
         system: tuple[freud.box.Box, np.ndarray]
-             A ``freud`` system-like object. Common examples include a tuple of
-             a `freud.box.Box` and a `numpy.ndarray` of positions and a
-             `gsd.hoomd.Frame`.
+            A ``freud`` system-like object. Common examples include a tuple of
+            a `freud.box.Box` and a `numpy.ndarray` of positions and a
+            `gsd.hoomd.Frame`.
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery
             A ``freud`` neighbor query object. Defines neighbors for the system.
             Weights provided by a neighbor list are currently unused.
-        query_points : `numpy.ndarray`, optional
+        query_points: np.ndarray | None, optional
             The points to compute the BOOSOP for. Defaults to ``None`` which
             computes the BOOSOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.
@@ -169,10 +173,10 @@ class BOOSOP:
             after a lower fidelity optimization. If used the ``refine_l`` and
             ``refine_m`` should be set to a higher value than ``l`` and ``m``. Make sure
             ``max_l`` is higher or equal to ``refine_l``.
-        refine_l : `int`, optional
+        refine_l: `int`, optional
             The maximum spherical harmonic l to use for refining. Defaults
             to 10.
-        refine_m : `int`, optional
+        refine_m: `int`, optional
             The number of points to use in the longitudinal direction for
             spherical Gauss-Legrende quadrature in refining. Defaults to 10. More
             concentrated distributions require larger ``m`` to properly evaluate
@@ -345,9 +349,9 @@ class PGOP:
         Parameters
         ----------
         system: tuple[freud.box.Box, np.ndarray]
-             A ``freud`` system-like object. Common examples include a tuple of
-             a `freud.box.Box` and a `numpy.ndarray` of positions and a
-             `gsd.hoomd.Frame`.
+            A ``freud`` system-like object. Common examples include a tuple of
+            a `freud.box.Box` and a `numpy.ndarray` of positions and a
+            `gsd.hoomd.Frame`.
         sigmas: np.ndarray | float
             The standard deviation of the Gaussian distribution for each particle for
             mode "full". If mode is "boo", the kappa parameter for the von-Mises-Fisher.
@@ -362,13 +366,13 @@ class PGOP:
             the default value is 15.0.
         neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery | dict
             Neighbors used for the computation. If a `freud.locality.NeighborList` is
-            passed, the neighbors are used directly (in this case `query_points` should
-            not be given as they are ignored). If a `freud.locality.NeighborQuery`
-            is passed, the neighbors are computed using the query (working in
-            conjunction with query points). If a dictionary is used it should be used as
-            freud's neighbor query dictionary (can also be used in conjunction with
-            `query_points`).
-        query_points : `numpy.ndarray`, optional
+            passed, the neighbors are used directly (in this case ``query_points``
+            should not be given as they are ignored). If a
+            `freud.locality.NeighborQuery` is passed, the neighbors are computed using
+            the query (working in conjunction with query points). If a dictionary is
+            used it should be used as freud's neighbor query dictionary (can also be
+            used in conjunction with ``query_points``).
+        query_points : np.ndarray | None, optional
             The points to compute the PGOP for. Defaults to ``None`` which
             computes the PGOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.

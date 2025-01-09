@@ -1,5 +1,5 @@
 spatula.optimize
--------------
+----------------
 
 .. rubric:: Overview
 
