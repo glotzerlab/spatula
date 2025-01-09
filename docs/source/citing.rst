@@ -1,6 +1,6 @@
 ================
-How to cite PGOP
+How to cite spatula
 ================
 
-If using PGOP in scientific research that will be published please check back here for a future
+If using spatula in scientific research that will be published please check back here for a future
 citation.

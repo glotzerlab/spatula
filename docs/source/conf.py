@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# PGOP documentation build configuration file, created by
+# spatula documentation build configuration file, created by
 # sphinx-quickstart on Fri Jun  9 13:47:02 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -72,7 +72,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "PGOP"
+project = "spatula"
 copyright = "The Regents of the University of Michigan"  # noqa: A001
 author = "Brandon Butler"
 
@@ -137,7 +137,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "PGOPdoc"
+htmlhelp_basename = "spatuladoc"
 
 
 # -- Options for LaTeX output ------------------------------------------

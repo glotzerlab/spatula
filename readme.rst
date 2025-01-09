@@ -1,15 +1,15 @@
 ====
-PGOP
+spatula
 ====
 
 Overview
 --------
 
-``PGOP`` is a Python package for computing the continuous point group ordering of the neighbors of a point in space.
+``spatula`` is a Python package for computing the continuous point group ordering of the neighbors of a point in space.
 In general, this is to compute the local ordering of particles (molecules) in simulations or experiments over time.
 The package serves as an extension of `freud <https://github.com/glotzerlab/freud>`__ with a new order parameter.
 
-``PGOP`` currently supports all point groups of finite order:
+``spatula`` currently supports all point groups of finite order:
 
 - All crystallographic point groups
 - Cyclical groups :math:`C_n`
@@ -27,29 +27,29 @@ Resources
 =========
 
 - `Reference Documentation <https://spatula.readthedocs.io/>`__: Examples, tutorials, and package Python APIs.
-- `Installation Guide <https://spatula.readthedocs.io/en/stable/gettingstarted/installation.html>`__: Instructions for installing and compiling **PGOP**.
-- `GitHub repository <https://github.com/glotzerlab/spatula>`__: Download the **PGOP** source code.
+- `Installation Guide <https://spatula.readthedocs.io/en/stable/gettingstarted/installation.html>`__: Instructions for installing and compiling **spatula**.
+- `GitHub repository <https://github.com/glotzerlab/spatula>`__: Download the **spatula** source code.
 - `Issue tracker <https://github.com/glotzerlab/spatula/issues>`__: Report issues or request features.
 
 Related Tools
 =============
 
 - `HOOMD-blue <https://hoomd-blue.readthedocs.io/>`__: Perform MD / MC simulations that
-  can be analyzed with **PGOP**.
+  can be analyzed with **spatula**.
 - `freud <https://freud.readthedocs.io/>`__: Analyze particle simulations.
 - `signac <https://signac.io/>`__: Manage your workflow with **signac**.
 
 Citation
 ========
 
-When using **PGOP** to process data for publication, please `cite the github repository
+When using **spatula** to process data for publication, please `cite the github repository
 <https://github.com/glotzerlab/spatula>`__.
 
 
 Installation
 ============
-Currently, **PGOP** is only available as a source package.
-See the Installation Guide to compile **PGOP** from source.
+Currently, **spatula** is only available as a source package.
+See the Installation Guide to compile **spatula** from source.
 
 Example
 -------
@@ -63,10 +63,6 @@ Example
     optimizer = spatula.optimize.Union.with_step_gradient_descent(
         optimizer=spatula.optimize.Mesh.from_grid()
     )
-    compute = spatula.PGOP(
-        dist="fisher", symmetries=("Oh",), optimizer=optimizer
-    )
+    compute = spatula.PGOP(symmetries, optimizer)
     compute.compute(system, {"num_neighbors": 12, "exclude_ii": True})
-    # Print the optimizer fractional point group ordering for full
-    # octahedral ordering Oh.
     print(compute.order)

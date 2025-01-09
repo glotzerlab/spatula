@@ -37,7 +37,7 @@ class ThreadPool {
         return m_out;
     }
 
-    /// Set the number of threads to run PGOP on.
+    /// Set the number of threads to run spatula on.
     void set_threads(unsigned int num_threads)
     {
         m_pool.reset(num_threads);

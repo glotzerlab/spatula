@@ -13,7 +13,7 @@ namespace spatula { namespace data {
 /**
  * @brief Class provides helper methods for dealing with rotation quaternions.
  *
- * PGOP uses quaternions primarily as an interface to Python to describe points in SO(3).
+ * spatula uses quaternions primarily as an interface to Python to describe points in SO(3).
  * Internally, we use a 3-vector to store the current rotation in optimization, and use rotation
  * matrices to actually perform the rotations. See Util.h for more information on this.
  *
