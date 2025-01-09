@@ -1,3 +1,6 @@
+# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Part of spatula, released under the BSD 3-Clause License.
+
 """Python interface for the package.
 
 Provides the `PGOP` and `BOOSOP` class which computes the point group symmetry for a

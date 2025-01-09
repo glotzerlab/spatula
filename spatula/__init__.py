@@ -1,3 +1,6 @@
+# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Part of spatula, released under the BSD 3-Clause License.
+
 """Package contains methods for computing symmetry order parameters."""
 
 import freud
