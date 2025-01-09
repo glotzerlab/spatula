@@ -1,15 +1,15 @@
 # Architecture
 ## Build System
 `PGOP` uses CMake for building its C++ code, and `scikit-build-core` as a build back end (for installation via Python tools like `pip` and `build`).
-We use install's `DIRECTORY` and `FILES_MATCHING PATTERN` features to automatically install all python files in the `pgop` directory.
+We use install's `DIRECTORY` and `FILES_MATCHING PATTERN` features to automatically install all python files in the `spatula` directory.
 Any non-Python files would need to be installed in a separate command.
 
 ## Platform Support
 Currently `PGOP` only supports Unix-like platforms, but nothing in the code should prevent extending to Windows.
 
 ## Python Code
-The Python is located in the `pgop` directory.
-Most of the files are for user use; however, `pgop/generate` provides files to generate data files shipped with PGOP.
+The Python is located in the `spatula` directory.
+Most of the files are for user use; however, `spatula/generate` provides files to generate data files shipped with PGOP.
 The current data files are
 * data.h5 - Stores Wigner D matrices for symmetrizing bond order diagrams.
 * sphere-codes.npz - Stores the optimal locations of points on a sphere for the Tammes problem.
