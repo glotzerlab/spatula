@@ -315,7 +315,7 @@ The identity matrix :math:`\mathbf{I}` represents the identity operation
 :math:`\hat{E}`, which leaves all points unchanged. It is given by:
 
 .. math::
-  \hat{E} = \mathbf{I} = 
+  \hat{E} = \mathbf{I} =
   \begin{pmatrix}
   1 & 0 & 0 \\
   0 & 1 & 0 \\
@@ -330,7 +330,7 @@ its simplicity and compatibility with other symmetry operations. The general for
 rotation matrix in Cartesian coordinates is given by:
 
 .. math::
-  \hat{C}_n(\theta=2\pi/n, \vec{u}) = 
+  \hat{C}_n(\theta=2\pi/n, \vec{u}) =
   \begin{pmatrix}
   \cos\theta + u_x^2(1 - \cos\theta) & u_x u_y (1 - \cos\theta) - u_z \sin\theta & u_x u_z (1 - \cos\theta) + u_y \sin\theta \\
   u_y u_x (1 - \cos\theta) + u_z \sin\theta & \cos\theta + u_y^2(1 - \cos\theta) & u_y u_z (1 - \cos\theta) - u_x \sin\theta \\
@@ -338,14 +338,14 @@ rotation matrix in Cartesian coordinates is given by:
   \end{pmatrix}.
 
 We use the implementation provided by SciPy to compute the rotation matrix from
-angle-axis representation or Euler angles in zyz notation :cite:`virtanen_scipy_2020`. 
+angle-axis representation or Euler angles in zyz notation :cite:`virtanen_scipy_2020`.
 
 Inversion is a symmetry operation that maps each point to its opposite point with
 respect to the origin. The inversion matrix :math:`\hat{i}` in Cartesian representation
 is simply:
 
 .. math::
-  \hat{i} = -\mathbf{I} = 
+  \hat{i} = -\mathbf{I} =
   \begin{pmatrix}
   -1 & 0 & 0 \\
   0 & -1 & 0 \\
@@ -372,7 +372,7 @@ the axis of rotation and :math:`\hat{C}_n` is the rotation matrix.
 
 
 
-Bond orientational order symmetry order parameter 
+Bond orientational order symmetry order parameter
 -------------------------------------------------
 
 BOOSOP is used to determine the symmetry of the bond orientational order diagram (BOOD).
@@ -386,7 +386,7 @@ to a particle location (which is usually the case), but doesn't have to. Thus, B
 not measure the point group symmetry of this chosen point in space, but rather the point
 group symmetry of projections of these points to a unit sphere (the BOOD). It is
 important to note that BOOSOP is not a measurement of Wyckoff site symmetry or
-crystalline point group symmetry. To compute a crystalline point group symmetry,BOOSOP 
+crystalline point group symmetry. To compute a crystalline point group symmetry,BOOSOP
 should be measured at the location of the general position. General position which is a
 point in a crystal that does not transform with any symmetry operations.
 Understanding this, a big strength of BOOSOP comes from its ability to interpret
@@ -414,7 +414,7 @@ Diagram (BOOD). A BOOD can be thought of as a projection of the relative positio
 particle neighbors projected onto a unit sphere.
 This is useful as it provides a way to examine the local environment that a particle
 is experiencing. For constructing a BOOD, the determination of nearest neighbors is
-important, as this can change the results. This will also affect the results of BOOSOP 
+important, as this can change the results. This will also affect the results of BOOSOP
 calculations. While the distance between particles may be important for determining
 if they are neighbors, it is not part of the BOOD.
 
