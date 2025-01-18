@@ -43,11 +43,18 @@ def extract_first_element_of_hermann_mauguin_notation(s: str) -> str:  # noqa N8
     if s[0].isdigit():
         string_to_return += s[0]
     elif s[0] == "(":
-        string_to_return += extract_number_from_bracket(s, 1)
+        # check if closing bracket is present
+        if ")" in s:
+            string_to_return += extract_number_from_bracket(s, 1)
+        else:
+            raise ValueError(f"Invalid HM input {s}, no closing bracket")
     elif s[0] == "-" and s[1].isdigit():
         string_to_return += s[0] + s[1]
     elif s[0] == "-" and s[1] == "(":
-        string_to_return += s[0] + extract_number_from_bracket(s, 2)
+        if ")" in s:
+            string_to_return += s[0] + extract_number_from_bracket(s, 2)
+        else:
+            raise ValueError(f"Invalid HM input {s}, no closing bracket")
     else:
         raise ValueError(f"Invalid HM input {s}, {string_to_return}")
     if len(s) > len(string_to_return):  # noqa SIM102

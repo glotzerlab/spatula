@@ -874,3 +874,12 @@ def test_notations(point_group):
         convert_hermann_mauguin_to_schonflies(point_group)
         == point_group_mapping[point_group]
     )
+
+
+inputs_that_fail = {"(2/m": ValueError}
+
+
+@pytest.mark.parametrize("point_group", inputs_that_fail.keys())
+def test_notations_fail(point_group):
+    with pytest.raises(inputs_that_fail[point_group]):
+        convert_hermann_mauguin_to_schonflies(point_group)
