@@ -30,78 +30,73 @@ def extract_first_element_of_hermann_mauguin_notation(s: str) -> tuple[str, int]
     if not s:
         raise ValueError("Invalid HM input: empty string")
 
-    i = 0
-    negative = False
-    # We'll build up the final canonical form here.
-    canonical = ""
+    i, negative = 0, False
 
-    # Check if it is a single 'm' at start.
     if s[i] == "m":
         return ("m", 1)
 
-    # Check for leading '-'
     if s[i] == "-":
-        negative = True
-        i += 1
+        negative, i = True, i + 1
         if i >= len(s):
             raise ValueError(f"Invalid HM input {s}, '-' with nothing after.")
 
-    # Now either we have digits, or we have '(' (possibly right after '-').
     if i < len(s) and s[i] == "(":
-        #  -- Parse parentheses block: "(-10)" or "(12)" etc.
-        i += 1  # skip '('
-        if s[i] == "-":
-            negative = True
-            i += 1
-        start_paren = i
-        while i < len(s) and s[i] != ")":
-            i += 1
-        if i >= len(s):
-            raise ValueError(f"Invalid HM input {s}, missing closing parenthesis.")
-        # Everything between '(' and ')' are digits (e.g. "12" or "10").
-        inside = s[start_paren:i]
-        i += 1  # skip the ')'
-        if not inside.isdigit():
-            raise ValueError(f"Invalid HM input {s}, parentheses must contain digits.")
-        # Make canonical form with or without leading '-'
-        canonical = ("-" if negative else "") + inside
-
+        canonical, i = _parse_parentheses_block(s, i, negative)
     elif i < len(s) and s[i].isdigit():
-        #  -- Parse digits directly (e.g. "10", "12", etc.)
-        start_digits = i
-        while i < len(s) and s[i].isdigit():
-            i += 1
-        digit_str = s[start_digits:i]
-        canonical = ("-" if negative else "") + digit_str
-
+        canonical, i = _parse_digits(s, i, negative)
     else:
-        # If we got here, we expected either '(' or digits, but found something else
         msg = "expected digits" if negative else "expected digits or '('"
         raise ValueError(f"Invalid HM input {s}, {msg} at start.")
-    # check if the number extracted is larger or smaller then 22
-    if np.abs(int(canonical)) > 21:
-        # return only first digit if the number is larger then 21
-        if canonical[0] == "-":
-            new_canonical = canonical[:2]
-            i = 2
-        else:
-            new_canonical = canonical[:1]
-            i = 1
-        canonical = new_canonical
-    else:
-        # Check if after those digits we have "/m"
-        # (e.g. "6/m" or "(12)/m" => "12/m").
-        if i + 1 < len(s) and s[i] == "/" and s[i + 1] == "m":
-            canonical += "/m"
-            i += 2
 
-    # Return the canonical form and how many characters we consumed in total.
+    if np.abs(int(canonical)) > 21:
+        canonical, i = _truncate_large_number(canonical)
+
+    if i + 1 < len(s) and s[i] == "/" and s[i + 1] == "m":
+        canonical += "/m"
+        i += 2
+
     return (canonical, i)
+
+
+def _parse_parentheses_block(s: str, i: int, negative: bool) -> tuple[str, int]:
+    i += 1
+    if s[i] == "-":
+        negative, i = True, i + 1
+    start_paren = i
+    while i < len(s) and s[i] != ")":
+        i += 1
+    if i >= len(s):
+        raise ValueError(f"Invalid HM input {s}, missing closing parenthesis.")
+    inside = s[start_paren:i]
+    i += 1
+    if not inside.isdigit():
+        raise ValueError(f"Invalid HM input {s}, parentheses must contain digits.")
+    canonical = ("-" if negative else "") + inside
+    return canonical, i
+
+
+def _parse_digits(s: str, i: int, negative: bool) -> tuple[str, int]:
+    start_digits = i
+    while i < len(s) and s[i].isdigit():
+        i += 1
+    digit_str = s[start_digits:i]
+    canonical = ("-" if negative else "") + digit_str
+    return canonical, i
+
+
+def _truncate_large_number(canonical: str) -> tuple[str, int]:
+    if canonical[0] == "-":
+        new_canonical = canonical[:2]
+        i = 2
+    else:
+        new_canonical = canonical[:1]
+        i = 1
+    return new_canonical, i
 
 
 def extract_elements_from_of_hermann_mauguin_notation(
     point_group: str,
-) -> list[str, str | None, str | None]:
+) -> tuple[str, str | None, str | None]:
     """Extract the elements of a Hermann-Mauguin notation string.
 
     Short and full symbols are supported.
