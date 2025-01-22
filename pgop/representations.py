@@ -8,60 +8,95 @@ import scipy.spatial
 import scipy.special
 
 
-def extract_first_element_of_hermann_mauguin_notation(s: str) -> str:  # noqa N802
-    """Extract the first element of a Hermann-Mauguin notation string.
+def extract_first_element_of_hermann_mauguin_notation(s: str) -> tuple[str, int]:
+    """Extract the elements according to Hermann-Mauguin notation.
 
-    Both short and full symbols are supported.
-    First character can be a number, letter m, string - or bracket. If it's
-    a number, the number should be extracted. If it's the letter m, the
-    letter m should be extracted. If it's a -, the number following it
-    should be extracted. If it's a bracket, the number inside the bracket
-    should be extracted. If the first character wasn't the letter m, check
-    if there is a string /m after the number or a bracket. Add the /m after
-    the previously extracted number.
+    Extract the first element of a Hermann-Mauguin notation string, returning
+    both the canonical form (e.g. "-10", "12/m", "m") AND the number of
+    characters physically consumed from the start of `s`.
 
-    Parameters
-    ----------
-    s : str
-        The Hermann-Mauguin notation string.
+    This resolves issues with multi-digit axes and parentheses such as
+    '(-10)', '(-12)', '(12)', etc.
 
     Returns
     -------
-    str
-        Returns the first extracted element from the input string.
+    (canonical_element, consumed_length)
+        canonical_element : str
+            The parsed chunk in canonical form (e.g. "-10", "12/m").
+        consumed_length : int
+            How many characters of `s` were used up (including parentheses).
 
     """
-    if s[0] == "m":
-        return s[0]
+    if not s:
+        raise ValueError("Invalid HM input: empty string")
 
-    def extract_number_from_bracket(s: str, starting_pos: int) -> str:
-        for i in range(starting_pos, len(s)):
-            if s[i] == ")":
-                return s[starting_pos:i]
+    i = 0
+    negative = False
+    # We'll build up the final canonical form here.
+    canonical = ""
 
-    string_to_return = ""
-    if s[0].isdigit():
-        string_to_return += s[0]
-    elif s[0] == "(":
-        # check if closing bracket is present
-        if ")" in s:
-            string_to_return += extract_number_from_bracket(s, 1)
-        else:
-            raise ValueError(f"Invalid HM input {s}, no closing bracket")
-    elif s[0] == "-" and s[1].isdigit():
-        string_to_return += s[0] + s[1]
-    elif s[0] == "-" and s[1] == "(":
-        if ")" in s:
-            string_to_return += s[0] + extract_number_from_bracket(s, 2)
-        else:
-            raise ValueError(f"Invalid HM input {s}, no closing bracket")
+    # Check if it is a single 'm' at start.
+    if s[i] == "m":
+        return ("m", 1)
+
+    # Check for leading '-'
+    if s[i] == "-":
+        negative = True
+        i += 1
+        if i >= len(s):
+            raise ValueError(f"Invalid HM input {s}, '-' with nothing after.")
+
+    # Now either we have digits, or we have '(' (possibly right after '-').
+    if i < len(s) and s[i] == "(":
+        #  -- Parse parentheses block: "(-10)" or "(12)" etc.
+        i += 1  # skip '('
+        if s[i] == "-":
+            negative = True
+            i += 1
+        start_paren = i
+        while i < len(s) and s[i] != ")":
+            i += 1
+        if i >= len(s):
+            raise ValueError(f"Invalid HM input {s}, missing closing parenthesis.")
+        # Everything between '(' and ')' are digits (e.g. "12" or "10").
+        inside = s[start_paren:i]
+        i += 1  # skip the ')'
+        if not inside.isdigit():
+            raise ValueError(f"Invalid HM input {s}, parentheses must contain digits.")
+        # Make canonical form with or without leading '-'
+        canonical = ("-" if negative else "") + inside
+
+    elif i < len(s) and s[i].isdigit():
+        #  -- Parse digits directly (e.g. "10", "12", etc.)
+        start_digits = i
+        while i < len(s) and s[i].isdigit():
+            i += 1
+        digit_str = s[start_digits:i]
+        canonical = ("-" if negative else "") + digit_str
+
     else:
-        raise ValueError(f"Invalid HM input {s}, {string_to_return}")
-    if len(s) > len(string_to_return):  # noqa SIM102
-        if s[len(string_to_return)] == "/":  # noqa SIM102
-            if s[len(string_to_return) + 1] == "m":
-                string_to_return += "/m"
-    return string_to_return
+        # If we got here, we expected either '(' or digits, but found something else
+        msg = "expected digits" if negative else "expected digits or '('"
+        raise ValueError(f"Invalid HM input {s}, {msg} at start.")
+    # check if the number extracted is larger or smaller then 22
+    if np.abs(int(canonical)) > 21:
+        # return only first digit if the number is larger then 21
+        if canonical[0] == "-":
+            new_canonical = canonical[:2]
+            i = 2
+        else:
+            new_canonical = canonical[:1]
+            i = 1
+        canonical = new_canonical
+    else:
+        # Check if after those digits we have "/m"
+        # (e.g. "6/m" or "(12)/m" => "12/m").
+        if i + 1 < len(s) and s[i] == "/" and s[i + 1] == "m":
+            canonical += "/m"
+            i += 2
+
+    # Return the canonical form and how many characters we consumed in total.
+    return (canonical, i)
 
 
 def extract_elements_from_of_hermann_mauguin_notation(
@@ -83,17 +118,19 @@ def extract_elements_from_of_hermann_mauguin_notation(
         Hermann-Mauguin notation.
 
     """
-    first = extract_first_element_of_hermann_mauguin_notation(point_group)
+    first, used1 = extract_first_element_of_hermann_mauguin_notation(point_group)
+    remainder = point_group[used1:]
     second = None
     third = None
-    if len(point_group) > len(first):
-        second = extract_first_element_of_hermann_mauguin_notation(
-            point_group[len(first) :]
-        )
-        if len(point_group) > len(first) + len(second):
-            third = extract_first_element_of_hermann_mauguin_notation(
-                point_group[len(first) + len(second) :]
-            )
+    if remainder:
+        second, used2 = extract_first_element_of_hermann_mauguin_notation(remainder)
+        remainder = remainder[used2:]
+        if remainder:
+            third, used3 = extract_first_element_of_hermann_mauguin_notation(remainder)
+            if used3 != len(remainder):
+                raise ValueError(
+                    f"Invalid HM input {point_group}, {first}, {second}, {third}"
+                )
     return first, second, third
 
 
@@ -131,9 +168,9 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
         elif first[0] == "-" and first[1:].isnumeric():
             if int(first[1:]) > 2:
                 if int(first[1:]) % 4 == 2:
-                    point_group = f"C{int(first[1:])//2}h"
+                    point_group = f"C{int(first[1:]) // 2}h"
                 elif int(first[1:]) % 2 == 1:
-                    point_group = f"S{2*int(first[1:])}"
+                    point_group = f"S{2 * int(first[1:])}"
                 elif int(first[1:]) % 2 == 0:
                     point_group = "S" + first[1:]
             elif int(first[1:]) == 1:
@@ -183,7 +220,7 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
     # Dn/2h is -nm2 for n=6,10,14.. this is Dnh for odd n
     elif second == "m" and third == "2" and first[0] == "-" and first[1:].isnumeric():
         if int(first[1:]) > 2 and int(first[1:]) % 4 == 2:
-            point_group = f"D{int(first[1:])//2}h"
+            point_group = f"D{int(first[1:]) // 2}h"
         else:
             raise ValueError(
                 f"Invalid HM input {point_group}; {first} {second} {third}"
@@ -216,7 +253,7 @@ def convert_hermann_mauguin_to_schonflies(point_group: str) -> str:  # noqa N802
     # Dn/2d is -n2m for n=4,8,12,...
     elif second == "2" and third == "m" and first[0] == "-" and int(first[1:]) % 4 == 0:
         if int(first[1:]) > 2:
-            point_group = f"D{int(first[1:])//2}d"
+            point_group = f"D{int(first[1:]) // 2}d"
         else:
             raise ValueError(
                 f"Invalid HM input {point_group}; {first} {second} {third}"
