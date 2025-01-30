@@ -14,8 +14,8 @@ PI_4 = np.pi / 4
 def sph_to_cart(theta, phi):
     r"""Convert spherical to Cartesian coordinates on the unit sphere.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     theta: :math:`(N,)` numpy.ndarray of float
         The longitudinal (polar) angle from :math:`[0, \pi]`.
     phi : :math:`(N,)` numpy.ndarray of float

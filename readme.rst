@@ -69,4 +69,4 @@ Example
     compute.compute(system, {"num_neighbors": 12, "exclude_ii": True})
     # Print the optimizer fractional point group ordering for full
     # octahedral ordering Oh.
-    print(compute.pgop)
+    print(compute.order)

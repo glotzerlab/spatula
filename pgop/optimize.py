@@ -129,7 +129,7 @@ class Mesh(Optimizer):
         self._cpp = _pgop.Mesh([_pgop.Quaternion(p) for p in points])
 
     @classmethod
-    def from_grid(cls, n_axes=65, n_angles=5):
+    def from_grid(cls, n_axes=75, n_angles=10):
         r"""Create a Mesh optimizer that tests rotations on a uniform grid.
 
         The axes are chosen by the numerical solutions to the Tammes problem and
@@ -241,3 +241,13 @@ class Union(Optimizer):
             optimizer._cpp, max_iter, initial_jump, learning_rate, tol
         )
         return instance
+
+
+class NoOptimization(Optimizer):
+    """No optimization is performed."""
+
+    def __init__(self):
+        """Create a NoOptimization object."""
+        self._cpp = _pgop.NoOptimization(
+            _pgop.Quaternion((1, 0, 0, 0)).to_axis_angle_3D()
+        )

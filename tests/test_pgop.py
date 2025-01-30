@@ -1,3 +1,5 @@
+import time
+
 import coxeter
 import freud
 import numpy as np
@@ -5,8 +7,6 @@ import pytest
 import scipy.spatial
 
 import pgop
-
-cutoff = 0.99
 
 n_dict = {
     3: "Triangular",
@@ -24,59 +24,6 @@ pgop_dict = {}
 
 
 pgop.util.set_num_threads(1)
-
-
-def get_shape_sys_nlist(vertices):
-    """Get a neighbor list of a shape.
-
-    The neighbor list has a single point with all vertices as neighbors.
-    """
-    # shape = coxeter.shapes.ConvexPolyhedron(vertices)
-    # shape.centroid = (0.0, 0.0, 0.0)
-    # vertices = shape.vertices
-    query_point_indices = np.zeros(len(vertices), dtype=int)
-    point_indices = np.arange(0, len(vertices), dtype=int)
-    # compute bond vectors between from query points to points
-    vectors = vertices[point_indices] - vertices[query_point_indices]
-    distances = np.linalg.norm(vertices, axis=1)
-    return (
-        (freud.Box.cube(2.1 * np.max(distances)), vertices),
-        freud.locality.NeighborList.from_arrays(
-            1, len(vertices), query_point_indices, point_indices, vectors
-        ),
-    )
-
-
-def check_symmetry(symmetry, vertices):
-    """Determine whether given shape have a specified symmetry.
-
-    Parameters
-    ----------
-    symmetry: str
-        The symmetry to test for.
-    vertices: :math:`(N, 3)` numpy.ndarray of floats
-        The vertices of the shape
-    threshold: float
-        The threshold below which ``check_symmetry`` returns ``False`` for
-        ``has_symmetry == True`` and above which ``check_symmetry`` returns
-        ``False`` for ``has_symmetry == False``.
-    has_symmetry: bool, optional
-        Whether to test if the shape has or does not have the symmetry.
-    """
-    vertices = np.asarray(vertices)
-    # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
-    # close to one as well.
-    optimizer = pgop.optimize.Union.with_step_gradient_descent(
-        pgop.optimize.Mesh.from_grid(n_axes=200)
-    )
-    # check if PGOP is already in the dictionary
-    if symmetry not in pgop_dict:
-        pgop_dict[symmetry] = pgop.PGOP("fisher", [symmetry], optimizer)
-    op_compute = pgop_dict[symmetry]
-
-    system, nlist = get_shape_sys_nlist(vertices)
-    op_compute.compute(system, nlist, query_points=np.zeros((1, 3)))
-    return op_compute.pgop[0]
 
 
 def get_pyramid(n: int) -> np.ndarray:
@@ -1391,10 +1338,264 @@ shape_symmetries.update(
     }
 )
 
+cutoff = 0.99
 
-def generate_quaternions(n=5):
+current_time_seed = int(time.time())
+rng = np.random.default_rng(seed=current_time_seed)
+
+methods_dict = {}
+
+# n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
+# close to one as well.
+optimizer = pgop.optimize.Union.with_step_gradient_descent(
+    pgop.optimize.Mesh.from_grid()
+)
+
+
+def get_shape_sys_nlist(vertices):
+    """Get a neighbor list of a shape.
+
+    The neighbor list has a single point with all vertices as neighbors.
+    """
+    query_point_indices = np.zeros(len(vertices), dtype=int)
+    point_indices = np.arange(0, len(vertices), dtype=int)
+    # compute bond vectors between from query points to points
+    vectors = vertices[point_indices] - vertices[query_point_indices]
+    distances = np.linalg.norm(vertices, axis=1)
+    return (
+        (freud.Box.cube(4.1 * np.max(distances)), vertices),
+        freud.locality.NeighborList.from_arrays(
+            1, len(vertices), query_point_indices, point_indices, vectors
+        ),
+    )
+
+
+def check_symmetry(symmetry, vertices, optype):
+    """Determine whether given shape have a specified symmetry.
+
+    Parameters
+    ----------
+    symmetry: str
+        The symmetry to test for.
+    vertices: :math:`(N, 3)` numpy.ndarray of floats
+        The vertices of the shape
+    threshold: float
+        The threshold below which ``check_symmetry`` returns ``False`` for
+        ``has_symmetry == True`` and above which ``check_symmetry`` returns
+        ``False`` for ``has_symmetry == False``.
+    has_symmetry: bool, optional
+        Whether to test if the shape has or does not have the symmetry.
+    """
+    vertices = np.asarray(vertices)
+    op_compute = make_method(symmetry, optimizer, optype)
+    system, nlist = get_shape_sys_nlist(vertices)
+    if optype == "boosop":
+        op_compute.compute(system, nlist, query_points=np.zeros((1, 3)))
+        return op_compute.order[0]
+    elif optype == "fpgop" or optype == "opgop":
+        op_compute.compute(system, None, nlist, query_points=np.zeros((1, 3)))
+        return op_compute.order[0]
+
+
+def make_method(symmetry, optimizer, optype):
+    # check if BOOSOP or PGOP is already in the dictionary
+    if symmetry not in methods_dict:
+        methods_dict[symmetry] = {}
+        if optype == "boosop":
+            methods_dict[symmetry][optype] = pgop.BOOSOP(
+                "fisher", [symmetry], optimizer
+            )
+        elif optype == "fpgop":
+            methods_dict[symmetry][optype] = pgop.PGOP([symmetry], optimizer)
+        elif optype == "opgop":
+            methods_dict[symmetry][optype] = pgop.PGOP(
+                [symmetry], optimizer, mode="boo"
+            )
+    else:
+        if optype not in methods_dict[symmetry]:
+            if optype == "boosop":
+                methods_dict[symmetry][optype] = pgop.BOOSOP(
+                    "fisher", [symmetry], optimizer
+                )
+            elif optype == "fpgop":
+                methods_dict[symmetry][optype] = pgop.PGOP([symmetry], optimizer)
+            elif optype == "opgop":
+                methods_dict[symmetry][optype] = pgop.PGOP(
+                    [symmetry], optimizer, mode="boo"
+                )
+    return methods_dict[symmetry][optype]
+
+
+def generate_quaternions(n=2):
     """Generate `n` random quaternions]."""
-    return [scipy.spatial.transform.Rotation.random().as_quat() for _ in range(n)]
+    rotations = [scipy.spatial.transform.Rotation([1, 0, 0, 0]).as_quat()]
+    for _ in range(n):
+        rotations.append(
+            scipy.spatial.transform.Rotation.random(random_state=rng).as_quat()
+        )
+    return rotations
+
+
+modedict_types = ["fpgop", "opgop", "boosop"]
+crystal_systems = ["sc", "fcc", "bcc"]
+crystal_sizes = {"sc": 3, "fcc": 2, "bcc": 2}
+crystal_cutoffs = {"sc": 1.1, "fcc": 0.9, "bcc": 0.9}
+crystals_dict = {
+    "sc": freud.data.UnitCell.sc().generate_system(crystal_sizes["sc"]),
+    "fcc": freud.data.UnitCell.fcc().generate_system(crystal_sizes["fcc"]),
+    "bcc": freud.data.UnitCell.bcc().generate_system(crystal_sizes["bcc"]),
+}
+
+
+# Define a parameter for different unit cells and corresponding parameters
+@pytest.mark.parametrize("crystal_type", crystal_systems)
+@pytest.mark.parametrize("mode", modedict_types)
+def test_simple_crystals(crystal_type, mode):
+    box, points = crystals_dict[crystal_type]
+    cutoff = crystal_cutoffs[crystal_type]
+    # Create PGOP object and compute with the given parameters
+    op_pg = make_method("Oh", optimizer, mode)
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": cutoff}
+    if mode == "boosop":
+        op_pg.compute((box, points), qargs)
+        assert np.allclose(op_pg.order, 1.0, rtol=1e-4)
+    else:
+        op_pg.compute((box, points), None, qargs)
+        assert np.allclose(op_pg.order, 1.0)
+
+
+@pytest.mark.parametrize("mode", modedict_types)
+def test_qargs_query_pt(mode):
+    box, points = crystals_dict["sc"]
+    op_pg = make_method("Oh", optimizer, mode)
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
+    if mode == "boosop":
+        op_pg.compute((box, points), qargs, query_points=np.asarray([points[0]]))
+        assert np.allclose(op_pg.order, 1.0, rtol=1e-4)
+    else:
+        op_pg.compute((box, points), None, qargs, query_points=np.asarray([points[0]]))
+        assert np.allclose(op_pg.order, 1.0)
+
+
+@pytest.mark.parametrize("mode", modedict_types)
+def test_neighbor_list_query_pt(mode):
+    box, points = crystals_dict["sc"]
+    op_pg = make_method("Oh", optimizer, mode)
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
+    qp = np.asarray([points[0]])
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(qp, qargs).toNeighborList()
+    )
+    if mode == "boosop":
+        op_pg.compute((box, points), neighborlist, query_points=qp)
+        assert np.allclose(op_pg.order, 1.0, rtol=1e-4)
+    else:
+        op_pg.compute((box, points), None, neighborlist, query_points=qp)
+        assert np.allclose(op_pg.order, 1.0)
+
+
+@pytest.mark.parametrize("mode", modedict_types)
+def test_neighbor_list_only(mode):
+    box, points = crystals_dict["sc"]
+    op_pg = make_method("Oh", optimizer, mode)
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    )
+    if mode == "boosop":
+        op_pg.compute((box, points), neighborlist)
+        assert np.allclose(op_pg.order, 1.0, rtol=1e-4)
+    else:
+        op_pg.compute((box, points), None, neighborlist)
+        assert np.allclose(op_pg.order, 1.0)
+
+
+@pytest.mark.parametrize("mode", ["fpgop", "opgop"])
+@pytest.mark.parametrize("sigma", [0.2, [0.2] * (3 * 3 * 3)])
+def test_sigma_inputs(mode, sigma):
+    box, points = crystals_dict["sc"]
+    op_pg = make_method("Oh", optimizer, mode)
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
+    neighborlist = (
+        freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    )
+    op_pg.compute((box, points), sigma, neighborlist)
+    assert np.allclose(op_pg.order, 1.0, atol=1e-4)
+
+
+modes = ["full", "boo", "boosop"]
+sigma_values = {
+    "full": 0.2,
+    "boo": 19.55,
+}
+
+
+@pytest.mark.parametrize("mode", modes)
+def test_bcc_with_multiple_correct_symmetries(mode):
+    box, points = crystals_dict["bcc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
+    correct_symmetries = ["Oh", "D2", "D4"]
+    if mode == "boosop":
+        op_pg = pgop.BOOSOP("fisher", correct_symmetries, optimizer)
+        op_pg.compute((box, points), qargs)
+    else:
+        op_pg = pgop.PGOP(correct_symmetries, optimizer, mode=mode)
+        op_pg.compute((box, points), None, qargs)
+    assert np.allclose(op_pg.order, 1.0, atol=1e-4)
+
+
+@pytest.mark.parametrize("mode", modes)
+def test_bcc_with_multiple_incorrect_symmetries(mode):
+    box, points = crystals_dict["bcc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
+    incorrect_symmetries = ["Oh", "D3h"]
+    if mode == "boosop":
+        op_pg = pgop.BOOSOP("fisher", incorrect_symmetries, optimizer)
+        op_pg.compute((box, points), qargs)
+        assert np.allclose(op_pg.order[:, 1], 0.7316, rtol=1e-4)
+    else:
+        op_pg = pgop.PGOP(incorrect_symmetries, optimizer, mode=mode)
+        op_pg.compute((box, points), sigma_values[mode], qargs)
+        assert np.allclose(op_pg.order[:, 1], 0.76054, rtol=1e-4)
+    assert np.allclose(op_pg.order[:, 0], 1.0, rtol=1e-4)
+
+
+symmetries_subgroup_d5d = ["D5d", "S10", "C2h", "C5v", "D5", "C5", "C2", "Ci", "Cs"]
+n_values = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+vertices_multisim = np.asarray(
+    [
+        [0.6180339887498949, 0.0, 1.0],
+        [0.6180339887498949, 0.0, -1.0],
+        [-0.6180339887498949, 0.0, 1.0],
+        [-0.6180339887498949, 0.0, -1.0],
+        [0.0, 1.0, 0.6180339887498949],
+        [0.0, 1.0, -0.6180339887498949],
+        [0.0, -1.0, 0.6180339887498949],
+        [0.0, -1.0, -0.6180339887498949],
+        [1.0, 0.6180339887498949, 0.0],
+        [-1.0, -0.6180339887498949, 0.0],
+    ]
+)
+
+
+@pytest.mark.parametrize("n, mode", [(n, mode) for n in n_values for mode in modes])
+def test_increasing_number_of_symmetries(n, mode):
+    symmetries_to_compute = []
+    for sym in symmetries_subgroup_d5d[:n]:
+        symmetries_to_compute.append(sym)
+    maxl = 10
+    system, nlist = get_shape_sys_nlist(vertices_multisim)
+    if mode == "boosop":
+        op = pgop.BOOSOP("fisher", symmetries_to_compute, optimizer, maxl)
+        assert op.max_l == maxl
+        op.compute(system, nlist, query_points=np.zeros((1, 3)))
+    else:
+        op = pgop.PGOP(symmetries_to_compute, optimizer, mode=mode)
+        op.compute(system, None, nlist, query_points=np.zeros((1, 3)))
+    assert len(op.symmetries) == n
+    assert len(op.order[0]) == n
+    assert len(op.rotations[0]) == n
+    assert np.allclose(op.order, 1.0, rtol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -1407,11 +1608,80 @@ def generate_quaternions(n=5):
     ),
     ids=_id_func,
 )
-def test_symmetries(symmetry, shape, vertices, quaternion):
+def test_symmetries_boosop(symmetry, shape, vertices, quaternion):
     rotation = scipy.spatial.transform.Rotation.from_quat(quaternion)
     rotated_vertices = rotation.apply(vertices)
-    op = check_symmetry(symmetry=symmetry, vertices=rotated_vertices)
+    op = check_symmetry(symmetry=symmetry, vertices=rotated_vertices, optype="boosop")[
+        0
+    ]
     assert op >= cutoff
+
+
+@pytest.mark.parametrize(
+    "symmetry, shape, vertices, quaternion, mode",
+    (
+        (sym, shape, vertices, quat, mode)
+        for sym, shapes in shape_symmetries.items()
+        for shape, vertices in map(parse_shape_values, shapes)
+        for quat in generate_quaternions()
+        for mode in modedict_types
+    ),
+    ids=_id_func,
+)
+def test_symmetries_polyhedra(symmetry, shape, vertices, quaternion, mode):
+    rotation = scipy.spatial.transform.Rotation.from_quat(quaternion)
+    rotated_vertices = rotation.apply(vertices)
+    op = check_symmetry(symmetry=symmetry, vertices=rotated_vertices, optype=mode)
+    assert op[0] >= cutoff
+
+
+# for shapes take move its vertices it along its bond vector away or towards the center
+# and compute bosoop and pgop. Boosop should be still be one but pgop should be smaller!
+@pytest.mark.parametrize(
+    "symmetry, shape, vertices",
+    (
+        (sym, shape, vertices)
+        for sym, shapes in shape_symmetries.items()
+        for shape, vertices in map(parse_shape_values, shapes)
+    ),
+    ids=_id_func,
+)
+def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
+    vertices = np.asarray(vertices)
+    # randomly scale the distance of a random set of vertices for a number between 1.01
+    # and 2
+    scale = rng.uniform(0.5, 2, len(vertices))
+    new_vertices = []
+    for point, sc in zip(vertices, scale):
+        new_vertices.append(point * sc)
+    new_vertices = np.asarray(new_vertices)
+
+    # check if BOOSOP or PGOP is already in the dictionary
+    boosop_compute = make_method(symmetry, optimizer, "boosop")
+    pgop_compute = make_method(symmetry, optimizer, "fpgop")
+    opgop_compute = make_method(symmetry, optimizer, "opgop")
+    system, nlist = get_shape_sys_nlist(new_vertices)
+    boosop_compute.compute(system, nlist, query_points=np.zeros((1, 3)))
+    pgop_compute.compute(system, None, nlist, query_points=np.zeros((1, 3)))
+    opgop_compute.compute(system, None, nlist, query_points=np.zeros((1, 3)))
+    if symmetry == "C1":
+        assert np.round(boosop_compute.order[0][0], 5) == np.round(
+            pgop_compute.order[0][0], 5
+        )
+        assert np.round(boosop_compute.order[0][0], 5) == np.round(
+            opgop_compute.order[0][0], 5
+        )
+        assert np.round(pgop_compute.order[0][0], 5) == np.round(
+            opgop_compute.order[0][0], 5
+        )
+    else:
+        assert boosop_compute.order[0] > pgop_compute.order[0]
+        assert opgop_compute.order[0] > pgop_compute.order[0]
+    assert boosop_compute.order[0] >= cutoff
+    assert opgop_compute.order[0] >= cutoff
+    assert np.round(pgop_compute.order[0][0], 5) <= 1
+    assert np.round(boosop_compute.order[0][0], 5) <= 1
+    assert np.round(opgop_compute.order[0][0], 5) <= 1
 
 
 non_shape_symmetries = {
@@ -1451,6 +1721,20 @@ non_shape_symmetries.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
     ),
     ids=_id_func,
 )
-def test_no_symmetries(symmetry, shape, vertices):
-    op = check_symmetry(symmetry=symmetry, vertices=vertices)
-    assert op < 0.85
+def test_no_symmetries_boosop(symmetry, shape, vertices):
+    op = check_symmetry(symmetry=symmetry, vertices=vertices, optype="boosop")
+    assert op < 0.88
+
+
+@pytest.mark.parametrize(
+    "symmetry, shape, vertices",
+    (
+        (sym, shape, vertices)
+        for sym, shapes in non_shape_symmetries.items()
+        for shape, vertices in map(parse_shape_values, shapes)
+    ),
+    ids=_id_func,
+)
+def test_no_symmetries_pgop(symmetry, shape, vertices):
+    op = check_symmetry(symmetry=symmetry, vertices=vertices, optype="fpgop")
+    assert op < 0.88

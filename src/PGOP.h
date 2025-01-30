@@ -3,7 +3,6 @@
 #include <tuple>
 #include <vector>
 
-#include <complex>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -11,7 +10,6 @@
 #include "data/Quaternion.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
-#include "util/QlmEval.h"
 #include "util/Util.h"
 
 namespace py = pybind11;
@@ -25,14 +23,17 @@ namespace pgop {
  * SO(3), by keeping all the data together.
  */
 struct LocalNeighborhood {
-    LocalNeighborhood(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
+    LocalNeighborhood(std::vector<data::Vec3>&& positions_,
+                      std::vector<double>&& weights_,
+                      std::vector<double>&& sigmas_);
 
     void rotate(const data::Vec3& q);
 
-    /// BOD neighbor bonds
+    /// neighbor bonds
     const std::vector<data::Vec3> positions;
-    /// BOD neighbor weights
+    /// neighbor weights
     const std::vector<double> weights;
+    const std::vector<double> sigmas;
     /// Storage for the current positions under a given rotation used in optimization.
     std::vector<data::Vec3> rotated_positions;
 };
@@ -48,14 +49,15 @@ class Neighborhoods {
     Neighborhoods(size_t N,
                   const int* neighbor_counts,
                   const double* weights,
-                  const double* distance);
+                  const double* distance,
+                  const double* sigmas);
 
     /// Get the neighbors for point i.
     LocalNeighborhood getNeighborhood(size_t i) const;
-    /// Get the normalized neighbor distance vectors for point i.
-    std::vector<data::Vec3> getNormalizedDistances(size_t i) const;
     /// Get the neighbor weight for point i.
     std::vector<double> getWeights(size_t i) const;
+    /// Get the sigmas for each neighbor bond
+    std::vector<double> getSigmas(size_t i) const;
     /// Get the number of neighbors for point i.
     int getNeighborCount(size_t i) const;
 
@@ -68,6 +70,8 @@ class Neighborhoods {
     const double* m_distances;
     /// The weights for each neighbor bond
     const double* m_weights;
+    /// The sigmas for each neighbor bond
+    const double* m_sigmas;
     /// The offsets to index into the distances array
     std::vector<size_t> m_neighbor_offsets;
 };
@@ -107,11 +111,11 @@ struct PGOPStore {
  * Compute uses many levels of functions to compute PGOP these should be inlined for performance.
  * The nestedness is to make each function comprehendible by itself and not too long.
  */
-template<typename distribution_type> class PGOP {
+class PGOP {
     public:
-    PGOP(const py::array_t<std::complex<double>> D_ij,
+    PGOP(const py::list& R_ij,
          std::shared_ptr<optimize::Optimizer>& optimizer,
-         typename distribution_type::param_type distribution_params);
+         const unsigned int mode);
 
     /**
      * @brief Root function for computing PGOP for a set of points.
@@ -119,52 +123,12 @@ template<typename distribution_type> class PGOP {
      * @param distances An array of distance vectors for neighbors
      * @param weights An array of neighbor weights. For unweighted PGOP use an array of 1s.
      * @param num_neighboors An array of the number of neighbor for each point.
-     * @param m The degree of Gauss-Legendre quadrature to use when computing Qlms. This is not used
-     * directly expect for normalizing the quadrature values.
-     * @param ylms 2D array of spherical harmonic values for all points in the Gauss-Legendre
-     * quadrature as well as for every combination of m (spherical harmonic number) and l upto a
-     * maximum l. The first dimension is the harmonic numbers and the second is the quadrature
-     * points.
-     * @param quad_positions The positions of the Gauss-Legendre quadrature.
-     * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
     py::tuple compute(const py::array_t<double> distances,
                       const py::array_t<double> weights,
                       const py::array_t<int> num_neighbors,
-                      const unsigned int m,
-                      const py::array_t<std::complex<double>> ylms,
-                      const py::array_t<double> quad_positions,
-                      const py::array_t<double> quad_weights) const;
-
-    /**
-     * @brief Compute PGOP at given rotations for each point.
-     *
-     * This method is primarily for computing PGOP after an initial optimization was performed and a
-     * calculation at higher quadrature and spherical harmonic number is desired.
-     *
-     * @param distances An array of distance vectors for neighbors
-     * @param distances An array of quaternion rotations to use for computing PGOP.
-     * @param weights An array of neighbor weights. For unweighted PGOP use an array of 1s.
-     * @param num_neighboors An array of the number of neighbor for each point.
-     * @param m The degree of Gauss-Legendre quadrature to use when computing Qlms. This is not used
-     * directly expect for normalizing the quadrature values.
-     * @param ylms 2D array of spherical harmonic values for all points in the Gauss-Legendre
-     * quadrature as well as for every combination of m (spherical harmonic number) and l upto a
-     * maximum l. The first dimension is the harmonic numbers and the second is the quadrature
-     * points.
-     * @param quad_positions The positions of the Gauss-Legendre quadrature.
-     * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
-     *
-     */
-    py::array_t<double> refine(const py::array_t<double> distances,
-                               const py::array_t<double> rotations,
-                               const py::array_t<double> weights,
-                               const py::array_t<int> num_neighbors,
-                               const unsigned int m,
-                               const py::array_t<std::complex<double>> ylms,
-                               const py::array_t<double> quad_positions,
-                               const py::array_t<double> quad_weights) const;
+                      const py::array_t<double> sigmas) const;
 
     private:
     /**
@@ -172,37 +136,24 @@ template<typename distribution_type> class PGOP {
      *
      *
      * @param neighborhood the local neighborhood (weights, positions) to compute PGOP for
-     * @param qlm_eval The object to evaluate the spherical harmonic expansion for the BOD of
-     * neighborhood
-     * @param qlm_buf The buffer for the symmetrized and unsymmetrized BOD spherical harmonic
-     * expansions
      *
      * @returns the optimized PGOP value and the optimal rotation for the given point for all
      * specified point group symmetries.
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(LocalNeighborhood& neighborhood,
-                     const util::QlmEval& qlm_eval,
-                     util::QlmBuf& qlm_buf) const;
+    compute_particle(LocalNeighborhood& neighborhood) const;
 
     /**
      * @brief Compute the optimal PGOP and rotation for a given point group symmetry.
      *
      *
      * @param neighborhood the local neighborhood (weights, positions) to compute PGOP for
-     * @param D_ij The Wigner D matrix for the given point group
-     * @param qlm_eval The object to evaluate the spherical harmonic expansion for the BOD of
-     * neighborhood
-     * @param qlm_buf The buffer for the symmetrized and unsymmetrized BOD spherical harmonic
-     * expansions
+     * @param R_ij The group action matrix for the given point group
      *
      * @returns the optimized PGOP value and the optimal rotation for the given symmetry.
      */
-    std::tuple<double, data::Quaternion>
-    compute_symmetry(LocalNeighborhood& neighborhood,
-                     const std::vector<std::complex<double>>& D_ij,
-                     const util::QlmEval& qlm_eval,
-                     util::QlmBuf& qlm_buf) const;
+    std::tuple<double, data::Quaternion> compute_symmetry(LocalNeighborhood& neighborhood,
+                                                          const std::vector<double>& R_ij) const;
 
     /**
      * @brief Compute the PGOP for a set point group symmetry and rotation.
@@ -211,18 +162,11 @@ template<typename distribution_type> class PGOP {
      * calculation.
      *
      * @param neighborhood the local neighborhood (weights, rotated positions) to compute PGOP for
-     * @param D_ij The Wigner D matrix for the given point group
-     * @param qlm_eval The object to evaluate the spherical harmonic expansion for the BOD of
-     * neighborhood
-     * @param qlm_buf The buffer for the symmetrized and unsymmetrized BOD spherical harmonic
-     * expansions
+     * @param R_ij The group action matrix for the given point group
      *
      * @returns The PGOP value.
      */
-    double compute_pgop(LocalNeighborhood& neighborhood,
-                        const std::vector<std::complex<double>>& D_ij,
-                        const util::QlmEval& qlm_eval,
-                        util::QlmBuf& qlm_buf) const;
+    double compute_pgop(LocalNeighborhood& neighborhood, const std::vector<double>& R_ij) const;
 
     /**
      * Helper function to better handle both single threaded and multithreaded behavior. In single
@@ -231,17 +175,17 @@ template<typename distribution_type> class PGOP {
      */
     void execute_func(std::function<void(size_t, size_t)> func, size_t N) const;
 
-    /// The type of distribution to use for the BOD.
-    distribution_type m_distribution;
     /// The number of symmetries that PGOP is being computed for.
     unsigned int m_n_symmetries;
     /// The Wigner D matrices for each point group symmetry
-    std::vector<std::vector<std::complex<double>>> m_Dij;
+    std::vector<std::vector<double>> m_Rij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
+    /// The mode of the PGOP computation.
+    unsigned int m_mode;
 };
 
-template<typename distribution_type> void export_pgop_class(py::module& m, const std::string& name);
+void export_pgop_class(py::module& m, const std::string& name);
 
 void export_pgop(py::module& m);
 } // End namespace pgop

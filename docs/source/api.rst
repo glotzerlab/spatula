@@ -8,12 +8,13 @@ API
 .. autosummary::
     :nosignatures:
 
+    BOOSOP
     PGOP
 
 .. rubric:: Details
 
 .. automodule:: pgop
-    :members: PGOP
+    :members: PGOP, BOOSOP
 
 .. rubric:: Modules
 

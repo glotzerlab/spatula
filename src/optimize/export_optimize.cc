@@ -1,6 +1,7 @@
 #include <pybind11/stl.h>
 
 #include "Mesh.h"
+#include "NoOptimization.h"
 #include "Optimize.h"
 #include "RandomSearch.h"
 #include "StepGradientDescent.h"
@@ -15,5 +16,6 @@ void export_optimize(py::module& m)
     export_mesh(m);
     export_random_search(m);
     export_union(m);
+    export_no_optimization(m);
 }
 }} // namespace pgop::optimize

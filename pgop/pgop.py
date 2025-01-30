@@ -1,18 +1,48 @@
 """Python interface for the package.
 
-Provides the `PGOP` class which computes the point group symmetry for a
-particle's neighborhood.
+Provides the `PGOP` and `BOOSOP` class which computes the point group symmetry for a
+particle's neighborhood or its local bond orientation order diagram.
 """
 
 import numpy as np
 
 import pgop._pgop
 
-from . import freud, integrate, sph_harm, util, wignerd
+from . import freud, integrate, representations, sph_harm, util
 
 
-class PGOP:
-    """Compute the degree of point group symmetry for specified point groups.
+def _compute_distance_vectors(neigh_query, neighbors, query_points):
+    """Given a query and neighbors get wrapped distances to neighbors.
+
+    .. todo::
+        This should be unnecessary come freud 3.0 as distance vectors should
+        be directly available. UPDATE: nlist.vectors gives weird results?
+    """
+    pos, box = neigh_query.points, neigh_query.box
+    if query_points is None:
+        query_points = pos
+    return box.wrap(
+        pos[neighbors.point_indices] - query_points[neighbors.query_point_indices]
+    )
+
+
+def _get_neighbors(system, neighbors, query_points):
+    """Get a NeighborQuery and NeighborList object.
+
+    Returns the query and neighbor list consistent with the system and
+    neighbors passed.
+    """
+    query = freud.locality.AABBQuery.from_system(system)
+    if isinstance(neighbors, freud.locality.NeighborList):
+        return query, neighbors
+    elif query_points is None:
+        return query, query.query(query.points, neighbors).toNeighborList()
+    else:
+        return query, query.query(query_points, neighbors).toNeighborList()
+
+
+class BOOSOP:
+    """Compute the point group symmetry order for bond orientational order diagram.
 
     This class detects the point group symmetry of the modified bond order
     diagram of a particles. Rather than treating the neighbor vectors as delta
@@ -26,10 +56,10 @@ class PGOP:
         symmetries: list[str],
         optimizer: pgop.optimize.Optimizer,
         max_l: int = 10,
-        kappa: float = 11.5,
+        kappa: float = 10,
         max_theta: float = 0.61,
     ):
-        """Create a PGOP object.
+        """Create a BOOSOP object.
 
         All point groups of finite order are supported.
 
@@ -70,7 +100,7 @@ class PGOP:
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
         self._symmetries = symmetries
-        # computing the PGOP
+        # computing the BOOSOP
         self._optmizer = optimizer
         self._max_l = max_l
         if dist == "fisher":
@@ -78,17 +108,17 @@ class PGOP:
         elif dist == "uniform":
             dist_param = max_theta
         try:
-            cls_ = getattr(pgop._pgop, "PGOP" + dist.title())
+            cls_ = getattr(pgop._pgop, "BOOSOP" + dist.title())
         except AttributeError as err:
             raise ValueError(f"Distribution {dist} not supported.") from err
         matrices = []
         for point_group in self._symmetries:
             matrices.append(
-                wignerd.WignerD(point_group, self._max_l).condensed_matrices
+                representations.WignerD(point_group, self._max_l).condensed_matrices
             )
         D_ij = np.stack(matrices, axis=0)  # noqa N806
         self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
-        self._pgop = None
+        self._order = None
         self._ylm_cache = util._Cache(5)
 
     def compute(
@@ -120,8 +150,8 @@ class PGOP:
             A ``freud`` neighbor query object. Defines neighbors for the system.
             Weights provided by a neighbor list are currently unused.
         query_points : `numpy.ndarray`, optional
-            The points to compute the PGOP for. Defaults to ``None`` which
-            computes the PGOP for all points in the system. The shape should be
+            The points to compute the BOOSOP for. Defaults to ``None`` which
+            computes the BOOSOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.
         l: `int`, optional
             The spherical harmonic l to use for the bond order functions calculation.
@@ -137,7 +167,7 @@ class PGOP:
             ``m`` to properly evaluate bond order functions. The number of points to
             evaluate scales as :math:`4 m^2`.
         refine: `bool`, optional
-            Whether to recompute the PGOP after optimizing. Defaults to
+            Whether to recompute the BOOSOP after optimizing. Defaults to
             ``False``. This is used to enable a higher fidelity calculation
             after a lower fidelity optimization. If used the ``refine_l`` and
             ``refine_m`` should be set to a higher value than ``l`` and ``m``. Make sure
@@ -160,12 +190,12 @@ class PGOP:
                 raise ValueError("refine_l must be less than or equal to max_l.")
             if refine_l < l or refine_m < m or (refine_l == l and refine_m == m):
                 raise ValueError("refine_l and refine_m must be larger than l and m.")
-        neigh_query, neighbors = self._get_neighbors(system, neighbors)
-        dist = self._compute_distance_vectors(neigh_query, neighbors, query_points)
+        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
+        dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
         )
-        self._pgop, self._rotations = self._cpp.compute(
+        self._order, self._rotations = self._cpp.compute(
             dist,
             neighbors.weights,
             neighbors.neighbor_counts,
@@ -178,7 +208,7 @@ class PGOP:
             quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
                 m=refine_m, weights=True, cartesian=True
             )
-            self._pgop = self._cpp.refine(
+            self._order = self._cpp.refine(
                 dist,
                 self._rotations,
                 neighbors.weights,
@@ -188,31 +218,6 @@ class PGOP:
                 quad_positions,
                 quad_weights,
             )
-
-    def _compute_distance_vectors(self, neigh_query, neighbors, query_points):
-        """Given a query and neighbors get wrapped distances to neighbors.
-
-        .. todo::
-            This should be unnecessary come freud 3.0 as distance vectors should
-            be directly available.
-        """
-        pos, box = neigh_query.points, neigh_query.box
-        if query_points is None:
-            query_points = pos
-        return box.wrap(
-            query_points[neighbors.query_point_indices] - pos[neighbors.point_indices]
-        )
-
-    def _get_neighbors(self, system, neighbors):
-        """Get a NeighborQuery and NeighborList object.
-
-        Returns the query and neighbor list consistent with the system and
-        neighbors passed to `PGOP.compute`.
-        """
-        query = freud.locality.AABBQuery.from_system(system)
-        if isinstance(neighbors, freud.locality.NeighborList):
-            return query, neighbors
-        return query, query.query(query.points, neighbors).toNeighborList()
 
     def _ylms(self, l, m):
         """Return the spherical harmonics at the Gauss-Legrende points.
@@ -228,13 +233,13 @@ class PGOP:
         return self._ylm_cache[key]
 
     @property
-    def pgop(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter.
+    def order(self) -> np.ndarray:
+        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter is [0,1].
 
         The symmetry order is consistent with the order passed to
-        `PGOP.compute`.
+        `BOOSOP.compute`.
         """
-        return self._pgop
+        return self._order
 
     @property
     def rotations(self) -> np.ndarray:
@@ -254,3 +259,174 @@ class PGOP:
     def symmetries(self) -> list[str]:
         """The point group symmetries tested."""
         return self._symmetries
+
+
+class PGOP:
+    """Compute the point group symmetry order for a given point cloud.
+
+    This class detects the point group symmetry of a point in space based on the
+    surrounding points. Rather than treating the neighbor vectors as delta
+    functions, this class treats these vectors as a Gaussian distribution. This enables
+    continuous evaluation of the point group symmetry.
+    """
+
+    def __init__(
+        self,
+        symmetries: list[str],
+        optimizer: pgop.optimize.Optimizer,
+        mode: str = "full",
+    ):
+        """Create a PGOP object.
+
+        All point groups of finite order are supported.
+
+
+        Parameters
+        ----------
+        symmetries : list[str]
+            A list of point groups to test each particles' neighborhood. Uses
+            Schoenflies notation and is case sensitive. Options are Ci, Cs, Cn, Cnh,
+            Cnv, Sn, Dn, Dnh, Dnd, T, Th, Td, O, Oh, I, Ih where n should be replaced
+            with group order (an integer) and passed as a list of strings.
+        optimizer : pgop.optimize.Optimizer
+            An optimizer to optimize the rotation of the particle's local
+            neighborhoods.
+        mode : str, optional
+            The mode to use for the computation. Either "full" or "boo". Defaults to
+            "full". "full" computes the full point group symmetry and "boo" uses the
+            bond orientational order (diagram) symmetry.
+
+        """
+        if isinstance(symmetries, str):
+            raise ValueError("symmetries must be an iterable of str instances.")
+        self._symmetries = symmetries
+        # computing the PGOP
+        self._optmizer = optimizer
+        matrices = []
+        for point_group in self._symmetries:
+            pg = representations.CartesianRepMatrix(point_group)
+            # skips E operator if group is not C1
+            if point_group == "C1":
+                matrices.append(pg.condensed_matrices)
+            else:
+                matrices.append(pg.condensed_matrices[9:])
+        if mode == "full":
+            m_mode = 0
+        elif mode == "boo":
+            m_mode = 1
+        self._mode = mode
+        self._cpp = pgop._pgop.PGOP(matrices, optimizer._cpp, m_mode)
+        self._order = None
+
+    def compute(
+        self,
+        system: tuple[freud.box.Box, np.ndarray],
+        sigmas: np.ndarray | float | None,
+        neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery,
+        query_points: np.ndarray = None,
+    ):
+        """Compute the point group symmetry for a given system and neighbor.
+
+        Parameters
+        ----------
+        system: tuple[freud.box.Box, np.ndarray]
+             A ``freud`` system-like object. Common examples include a tuple of
+             a `freud.box.Box` and a `numpy.ndarray` of positions and a
+             `gsd.hoomd.Frame`.
+        sigmas: np.ndarray | float
+            The standard deviation of the Gaussian distribution for each particle for
+            mode "full". If mode is "boo", the kappa parameter for the von-Mises-Fisher.
+            Note that for gaussian distribution, smaller sigma values are more
+            concentrated and larger sigma values are more spread out. For von-Mises-
+            Fisher distribution, smaller kappa values are more spread out and larger
+            kappa values are more concentrated.
+            If a float is passed, the same value is used for all particles. If `None` is
+            passed, sigma is determined as the value at which the gaussian function
+            value evaluated at half of the smallest bond distance has 25% height of max
+            gaussian height for the same sigma for the "full" mode. In the "boo" mode,
+            the default value is 15.0.
+        neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery
+            A ``freud`` neighbor query object. Defines neighbors for the system.
+            Weights provided by a neighbor list are currently unused.
+        query_points : `numpy.ndarray`, optional
+            The points to compute the PGOP for. Defaults to ``None`` which
+            computes the PGOP for all points in the system. The shape should be
+            ``(N_p, 3)`` where ``N_p`` is the number of points.
+
+        """
+        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
+        dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
+        if isinstance(sigmas, (float, int)):
+            sigmas = np.full(
+                neighbors.num_points * neighbors.num_query_points,
+                sigmas,
+                dtype=np.float32,
+            )
+        elif isinstance(sigmas, (np.ndarray, list)):
+            if len(sigmas) != neighbors.num_points:
+                raise ValueError(
+                    "sigmas must be a float, a list of floats or an array of floats "
+                    "with the same length as the number of points in the system."
+                )
+            sigmas = np.array(
+                [sigmas[i] for i in neighbors.point_indices], dtype=np.float32
+            )
+        elif sigmas is None:
+            if self.mode == "full":
+                dists = np.linalg.norm(dist, axis=1)
+                # remove all the zeros normalized distances, use np.isclose, use 0.1%
+                # of max distance as threshold
+                dists = dists[dists > 0.001 * np.max(dists)]
+                # find gaussian width sigma at which the value of the gaussian function
+                # at half of the smallest bond distance has 25% height of max gaussian
+                # height for the same sigma
+                sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
+                sigmas = np.full(
+                    neighbors.num_points * neighbors.num_query_points,
+                    sigma,
+                    dtype=np.float32,
+                )
+            elif self.mode == "boo":
+                # TODO for kappa the formula has to change, also distances here should
+                # be on a sphere!
+                sigmas = np.full(
+                    neighbors.num_points * neighbors.num_query_points,
+                    15.0,
+                    dtype=np.float32,
+                )
+        else:
+            raise ValueError(
+                "sigmas must be a float, a list of floats or an array of floats "
+                "with the same length as the number of points in the system."
+            )
+        self._order, self._rotations = self._cpp.compute(
+            dist, neighbors.weights, neighbors.neighbor_counts, sigmas
+        )
+
+    @property
+    def order(self) -> np.ndarray:
+        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter is [0,1].
+
+        The symmetry order is consistent with the order passed to
+        `PGOP.compute`.
+        """
+        return self._order
+
+    @property
+    def rotations(self) -> np.ndarray:
+        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimial rotations.
+
+        The optimial rotations expressed as quaternions for each particles and
+        each point group.
+        """
+        return self._rotations
+
+    @property
+    def symmetries(self) -> list[str]:
+        """The point group symmetries tested."""
+        return self._symmetries
+
+    @property
+    def mode(self) -> str:
+        """The mode used for the computation."""
+        return self._mode
