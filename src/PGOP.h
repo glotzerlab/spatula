@@ -115,7 +115,8 @@ class PGOP {
     public:
     PGOP(const py::list& R_ij,
          std::shared_ptr<optimize::Optimizer>& optimizer,
-         const unsigned int mode);
+         const unsigned int mode,
+         bool compute_per_operator);
 
     /**
      * @brief Root function for computing PGOP for a set of points.
@@ -152,8 +153,8 @@ class PGOP {
      *
      * @returns the optimized PGOP value and the optimal rotation for the given symmetry.
      */
-    std::tuple<double, data::Quaternion> compute_symmetry(LocalNeighborhood& neighborhood,
-                                                          const std::vector<double>& R_ij) const;
+    std::tuple<double, data::Vec3> compute_symmetry(LocalNeighborhood& neighborhood,
+                                                    const std::vector<double>& R_ij) const;
 
     /**
      * @brief Compute the PGOP for a set point group symmetry and rotation.
@@ -183,6 +184,8 @@ class PGOP {
     std::shared_ptr<const optimize::Optimizer> m_optimize;
     /// The mode of the PGOP computation.
     unsigned int m_mode;
+    // Whether to compute the PGOP for each operator.
+    bool m_compute_per_operator;
 };
 
 void export_pgop_class(py::module& m, const std::string& name);
