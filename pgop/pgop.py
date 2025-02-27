@@ -4,26 +4,13 @@ Provides the `PGOP` and `BOOSOP` class which computes the point group symmetry f
 particle's neighborhood or its local bond orientation order diagram.
 """
 
+import warnings
+
 import numpy as np
 
 import pgop._pgop
 
 from . import freud, integrate, representations, sph_harm, util
-
-
-def _compute_distance_vectors(neigh_query, neighbors, query_points):
-    """Given a query and neighbors get wrapped distances to neighbors.
-
-    .. todo::
-        This should be unnecessary come freud 3.0 as bond vectors should
-        be directly available. UPDATE: nlist.vectors gives weird results?
-    """
-    pos, box = neigh_query.points, neigh_query.box
-    if query_points is None:
-        query_points = pos
-    return box.wrap(
-        pos[neighbors.point_indices] - query_points[neighbors.query_point_indices]
-    )
 
 
 def _get_neighbors(system, neighbors, query_points):
@@ -34,11 +21,17 @@ def _get_neighbors(system, neighbors, query_points):
     """
     query = freud.locality.AABBQuery.from_system(system)
     if isinstance(neighbors, freud.locality.NeighborList):
-        return query, neighbors
-    elif query_points is None:
-        return query, query.query(query.points, neighbors).toNeighborList()
+        if query_points is not None:
+            warnings.warn(
+                "query_points are ignored when a NeighborList is passed.",
+                UserWarning,
+                stacklevel=2,
+            )
     else:
-        return query, query.query(query_points, neighbors).toNeighborList()
+        query_points = query_points if query_points is not None else query.points
+        neighbors = query.query(query_points, neighbors).toNeighborList()
+    neighbors.filter(neighbors.distances > 0)
+    return query.box.wrap(neighbors.vectors), neighbors
 
 
 class BOOSOP:
@@ -191,8 +184,7 @@ class BOOSOP:
                 raise ValueError("refine_l must be less than or equal to max_l.")
             if refine_l < l or refine_m < m or (refine_l == l and refine_m == m):
                 raise ValueError("refine_l and refine_m must be larger than l and m.")
-        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
-        dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
+        dist, neighbors = _get_neighbors(system, neighbors, query_points)
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
         )
@@ -246,10 +238,12 @@ class BOOSOP:
 
     @property
     def rotations(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimial rotations.
+        """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimal rotations.
 
-        The optimial rotations expressed as quaternions for each particles and
-        each point group.
+        The optimal rotations of local neighborhoods that maximize the value of PGOP for
+        each query particle and each point group. Rotations are expressed as
+        quaternions. Note that these use different convention to scipy! The convention
+        used here is [w,x,y,z]. The scipy convention is [x,y,z,w].
         """
         if self._rotations is None:
             raise ValueError("BOOSOP not computed, call compute first.")
@@ -363,17 +357,21 @@ class PGOP:
             value evaluated at half of the smallest bond distance has 25% height of max
             gaussian height for the same sigma for the "full" mode. In the "boo" mode,
             the default value is 15.0.
-        neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery
-            A ``freud`` neighbor query object. Defines neighbors for the system.
-            Weights provided by a neighbor list are currently unused.
+        neighbors: freud.locality.NeighborList | freud.locality.NeighborQuery | dict
+            Neighbors used for the computation. If a `freud.locality.NeighborList` is
+            passed, the neighbors are used directly (in this case `query_points` should
+            not be given as they are ignored). If a `freud.locality.NeighborQuery`
+            is passed, the neighbors are computed using the query (working in
+            conjunction with query points). If a dictionary is used it should be used as
+            freud's neighbor query dictionary (can also be used in conjunction with
+            `query_points`).
         query_points : `numpy.ndarray`, optional
             The points to compute the PGOP for. Defaults to ``None`` which
             computes the PGOP for all points in the system. The shape should be
             ``(N_p, 3)`` where ``N_p`` is the number of points.
 
         """
-        neigh_query, neighbors = _get_neighbors(system, neighbors, query_points)
-        dist = _compute_distance_vectors(neigh_query, neighbors, query_points)
+        dist, neighbors = _get_neighbors(system, neighbors, query_points)
         if isinstance(sigmas, (float, int)):
             sigmas = np.full(
                 neighbors.num_points * neighbors.num_query_points,
@@ -390,33 +388,62 @@ class PGOP:
                 [sigmas[i] for i in neighbors.point_indices], dtype=np.float32
             )
         elif sigmas is None:
+            distances = np.linalg.norm(dist, axis=1)
+            # filter distances that are smaller then 0.001 of mean distance
+            filter = distances > 0.001 * np.mean(distances)
             if self.mode == "full":
-                dists = np.linalg.norm(dist, axis=1)
-                # remove all the zeros normalized distances, use np.isclose, use 0.1%
-                # of max distance as threshold
-                dists = dists[dists > 0.001 * np.max(dists)]
+                distances_filtered = distances[filter]
                 # find gaussian width sigma at which the value of the gaussian function
                 # at half of the smallest bond distance has 25% height of max gaussian
                 # height for the same sigma
-                sigma = np.min(dists) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
-                sigmas = np.full(
-                    neighbors.num_points * neighbors.num_query_points,
-                    sigma,
-                    dtype=np.float32,
-                )
+                sigma = np.min(distances_filtered) * 0.5 / (np.sqrt(-2 * np.log(0.25)))
             elif self.mode == "boo":
-                # TODO for kappa the formula has to change, also distances here should
-                # be on a sphere!
-                sigmas = np.full(
-                    neighbors.num_points * neighbors.num_query_points,
-                    15.0,
-                    dtype=np.float32,
+                bond_vectors = dist[filter] / np.linalg.norm(
+                    dist[filter], axis=1, keepdims=True
                 )
+                # Get segments to split bond vectors into neighborhoods
+                min_angular_dists = []
+                # Iterate over neighborhoods
+                for iseg in range(len(neighbors.segments)):
+                    cseg = neighbors.segments[iseg]
+                    nseg = (
+                        neighbors.segments[iseg + 1]
+                        if iseg + 1 < len(neighbors.segments)
+                        else len(neighbors.point_indices)
+                    )
+                    neighborhood_vectors = bond_vectors[cseg:nseg]
+                    # Compute pairwise angular distances within the neighborhood
+                    angular_dists = np.arccos(
+                        np.clip(
+                            np.dot(neighborhood_vectors, neighborhood_vectors.T),
+                            -1.0,
+                            1.0,
+                        )
+                    )
+                    # Mask diagonal to ignore self-distances
+                    np.fill_diagonal(angular_dists, np.inf)
+                    # flatten angular dists and remove zeros if present
+                    angular_dists = angular_dists.flatten()
+                    angular_dists = angular_dists[angular_dists > 0]
+                    min_angular_dists.append(np.min(angular_dists))
+                # Find the global minimum angular distance across all neighborhoods
+                min_angular_dist = np.min(min_angular_dists)
+                # this is the minimum resolution that will work for optimization
+                if min_angular_dist < 0.33:
+                    min_angular_dist = 0.33
+                # again 25% height of max fisher distribution height
+                sigma = np.log(0.25) / (np.cos(min_angular_dist * 0.5) - 1)
+            sigmas = np.full(
+                neighbors.num_points * neighbors.num_query_points,
+                sigma,
+                dtype=np.float32,
+            )
         else:
             raise ValueError(
                 "sigmas must be a float, a list of floats or an array of floats "
                 "with the same length as the number of points in the system."
             )
+        self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
             dist, neighbors.weights, neighbors.neighbor_counts, sigmas
         )
@@ -436,12 +463,21 @@ class PGOP:
     def rotations(self) -> np.ndarray:
         """:math:`(N_p, N_{sym}, 4)` numpy.ndarray of float: Optimal rotations.
 
-        The optimal rotations expressed as quaternions for each particles and
-        each point group.
+        The optimal rotations of local neighborhoods that maximize the value of PGOP for
+        each query particle and each point group. Rotations are expressed as
+        quaternions. Note that these use different convention to scipy! The convention
+        used here is [w,x,y,z]. The scipy convention is [x,y,z,w].
         """
         if self._rotations is None:
             raise ValueError("PGOP not computed, call compute first.")
         return self._rotations
+
+    @property
+    def sigmas(self) -> np.ndarray:
+        """The standard deviation of the Gaussian distribution for each particle."""
+        if self._sigmas is None:
+            raise ValueError("PGOP not computed, call compute first.")
+        return self._sigmas
 
     @property
     def symmetries(self) -> list[str]:

@@ -63,16 +63,6 @@ void Quaternion::normalize()
     z *= inv_norm;
 }
 
-Quaternion Quaternion::recipical() const
-{
-    const auto norm_ = norm();
-    const auto neg_inv_norm_sq = -1 / (norm_ * norm_);
-    return Quaternion(w * neg_inv_norm_sq,
-                      x * neg_inv_norm_sq,
-                      y * neg_inv_norm_sq,
-                      z * neg_inv_norm_sq);
-}
-
 std::vector<double> Quaternion::to_rotation_matrix() const
 {
     // Necessary if not unit quaternion. Otherwise it is just 2 / 1 = 2.
@@ -137,7 +127,6 @@ void export_quaternion(py::module& m)
                       << std::to_string(q.y) << ", " << std::to_string(q.z) << ")";
                  return repr.str();
              })
-        .def("recipical", &Quaternion::recipical)
         .def("conjugate", &Quaternion::conjugate)
         .def("to_axis_angle", &Quaternion::to_axis_angle)
         .def("to_axis_angle_3D", &Quaternion::to_axis_angle_3D)

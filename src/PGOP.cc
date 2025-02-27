@@ -95,7 +95,7 @@ void PGOPStore::addOp(size_t i,
 void PGOPStore::addNull(size_t i)
 {
     for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = 0;
+        u_op(i, j) = std::numeric_limits<double>::quiet_NaN(); // Set NaN
         u_rotations(i, j, 0) = 1;
         u_rotations(i, j, 1) = 0;
         u_rotations(i, j, 2) = 0;
@@ -129,7 +129,6 @@ PGOP::PGOP(const py::list& R_ij,
     }
 }
 
-// TODO there is also a bug with self-neighbors.
 py::tuple PGOP::compute(const py::array_t<double> distances,
                         const py::array_t<double> weights,
                         const py::array_t<int> num_neighbors,
@@ -165,18 +164,21 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP::compute_particle(LocalNeighborhood& neighborhood) const
+PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
 {
     auto pgop = std::vector<double>();
     auto rotations = std::vector<data::Quaternion>();
     pgop.reserve(m_Rij.size());
     rotations.reserve(m_Rij.size());
     for (const auto& R_ij : m_Rij) {
+        // make a copy of the neighborhood to avoid modifying the original
+        auto neighborhood = neighborhood_original;
         const auto result = compute_symmetry(neighborhood, R_ij);
         pgop.emplace_back(std::get<0>(result));
         const auto quat = data::Quaternion(std::get<1>(result));
         rotations.emplace_back(quat);
         if (m_compute_per_operator) {
+            auto neighborhood = neighborhood_original;
             neighborhood.rotate(std::get<1>(result));
             // loop over every operator; each operator is a 3x3 matrix so size 9
             for (size_t i = 0; i < R_ij.size(); i += 9) {
@@ -200,9 +202,9 @@ std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighbo
         const auto particle_op = compute_pgop(neighborhood, R_ij);
         opt->record_objective(-particle_op);
     }
-    // TODO currently optimum.first can be empty resulting in a SEGFAULT. This only happens in badly
-    // formed arguments (particles with no neighbors), but can occur.
     const auto optimum = opt->get_optimum();
+    // op value is negated to get the correct value, because optimization scheme is
+    // minimization not maximization!
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
@@ -228,6 +230,13 @@ inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& positio
 {
     auto position_norm = std::sqrt(position.dot(position));
     auto symmetrized_position_norm = std::sqrt(symmetrized_position.dot(symmetrized_position));
+    // If position norm is zero vector means this point is at origin and contributes 1
+    // to the overlap, check that with a small epsilon.
+    if ((position_norm < 1e-10) && (symmetrized_position_norm < 1e-10)) {
+        return 1;
+    } else if ((position_norm < 1e-10) || (symmetrized_position_norm < 1e-10)) {
+        return 0;
+    }
     auto k1_sq = kappa * kappa;
     auto k2_sq = kappa_symmetrized * kappa_symmetrized;
     auto k1k2 = kappa * kappa_symmetrized;

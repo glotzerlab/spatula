@@ -10,7 +10,7 @@ RandomSearch::RandomSearch(unsigned int max_iter, long unsigned int seed)
 
 bool RandomSearch::terminate() const
 {
-    return m_count > m_iterations;
+    return m_count >= m_iterations;
 }
 
 std::unique_ptr<Optimizer> RandomSearch::clone() const

@@ -136,13 +136,13 @@ class PGOP {
      * @brief Compute the optimal PGOP and rotation for all points groups for a given point.
      *
      *
-     * @param neighborhood the local neighborhood (weights, positions) to compute PGOP for
+     * @param neighborhood_original the local neighborhood (weights, positions) to compute PGOP for
      *
      * @returns the optimized PGOP value and the optimal rotation for the given point for all
      * specified point group symmetries.
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(LocalNeighborhood& neighborhood) const;
+    compute_particle(LocalNeighborhood& neighborhood_original) const;
 
     /**
      * @brief Compute the optimal PGOP and rotation for a given point group symmetry.
