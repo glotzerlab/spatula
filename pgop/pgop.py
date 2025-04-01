@@ -320,6 +320,9 @@ class PGOP:
             m_mode = 0
         elif mode == "boo":
             m_mode = 1
+        else:
+            msg = f"Mode '{mode}' is not valid " "(valid params: {'full', 'boo'})"
+            raise ValueError(msg)
         self._mode = mode
         self._cpp = pgop._pgop.PGOP(
             matrices,
