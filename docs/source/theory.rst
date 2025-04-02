@@ -254,7 +254,7 @@ symmetrized configuration with the original configuration. We also support a ver
 which quantifies full point group symmetry (fPGOP) in which we don't project the
 neighbors onto the unit sphere, but rather consider the full 3D positions of the
 neighbors which are now replaced by 3D gaussian distribution. The distance between
-symmetrized and original configuration is computed by computing the overlap between the
+the symmetrized and original configurations are calculated by computing the overlap between the
 two gaussians. The main difference here is that in the PGOP version is in the
 symmetrization procedure. In PGOP we cannot apply the group action at once, but rather
 each symmetry operation has to be applied to each neighbor separately, and results of
