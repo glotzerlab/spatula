@@ -431,7 +431,7 @@ spherical harmonics.
 
 Steps 3 and 4: Construction of the symmetrized BOOD and BOOD Comparison
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Next, we have to symmetrize the constructed BOOD. To do that we simply apply the Wigner
+Next, we have to symmetrize the constructed BOOD. To do this, we simply apply the Wigner
 D matrix of a group action operation of a given point group symmetry on the computed
 BOOD. To quantify if the symmetrized BOOD is different from the initially constructed
 BOOD, we compute the normalized inner product between the two spherical harmonic
