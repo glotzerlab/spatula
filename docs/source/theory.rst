@@ -248,7 +248,7 @@ projected onto a unit sphere, replaced with fisher distribution (gaussian on a s
 and then symmetrized with respect to the point group of interest by applying the Wigner
 D matrix of a group action operation. The comparison of the two distributions is done
 by computing the normalized inner product between the two spherical harmonic expansions.
-In oPGOP we use the same idea, but instead of computing the spherical harmonic expasion
+In oPGOP we use the same idea, but instead of computing the spherical harmonic expansion
 of the fisher distributions, we consider the overlaps between fisher functions of the
 symmetrized configuration with the original configuration. We also support a version
 which quantifies full point group symmetry (fPGOP) in which we don't project the
