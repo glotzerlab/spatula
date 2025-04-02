@@ -249,7 +249,7 @@ and then symmetrized with respect to the point group of interest by applying the
 D matrix of a group action operation. The comparison of the two distributions is done
 by computing the normalized inner product between the two spherical harmonic expansions.
 In oPGOP we use the same idea, but instead of computing the spherical harmonic expasion
-of the fisher distributions, we consider overlaps between fisher functions of
+of the fisher distributions, we consider the overlaps between fisher functions of the
 symmetrized configuration with the original configuration. We also support a version
 which quantifies full point group symmetry (fPGOP) in which we don't project the
 neighbors onto the unit sphere, but rather consider the full 3D positions of the
@@ -273,10 +273,10 @@ operation from the point group. Next, for each symemtrized position we compute t
 maximal overlap between a normalized gaussian centered at that symmetrized position and
 any other normalized gaussian centered at original positions. This is done for all
 positions in the set of symmetrized positions and for all symmetry operations. The final
-value of the order parameter is just the average of all these overlaps. Last step is to
+value of the order parameter is just the average of all these overlaps. The last step is to
 find the orientation of the principal symmetry axis of the point group which maximizes
 the value of the order parameter. This can be done in several ways and the code supports
-several optimization procedures. We support two flavors of PGOP, one in which the
+several optimization procedures. We support two flavors of PGOP: one in which the
 point group symmetry of bond orientational order is measured (oPGOP) and one in which
 the full point group symmetry is measured (fPGOP). The main free parameter of the method
 is the choice of gaussian width. The width determines the sensitivity of the order
@@ -296,7 +296,7 @@ between two gaussians :math:`G_1` and :math:`G_2` is given by :cite:`kashyap_per
 .. math::
   \mathrm{BC}(G_1,G_2)= \left(\frac{2\sigma_1\sigma_2}{\sqrt{\sigma_1^2+\sigma_2^2}}\right)^{3/2} \exp{-\frac{\left|\vec{r}_1-\vec{r}_2\right|^2}{4\left(\sigma_1^2+\sigma_2^2\right)}}.
 
-The formula for the Bhattacharyya coefficient for oPGOP, we first do a coordinate
+Using the formula for the Bhattacharyya coefficient for oPGOP, we first do a coordinate
 transformation to spherical coordinates and then compute the overlap between two fisher
 distributions:
 
@@ -378,7 +378,7 @@ Bond orientational order symmetry order parameter
 BOOSOP is used to determine the symmetry of the bond orientational order diagram (BOOD).
 BOOD is a tool for visually analyzing and interpreting the bond orientational order.
 Bond orientational order describes relative arrangement of neighbors of a central
-particle. An intuitive way to think about it is to consider different type of
+particle. An intuitive way to think about it is to consider different types of
 coordination environments. For example, octahedral orientational order and tetrahedral
 orientational order are different types of bond orientational order. The neighbors have
 to be computed with respect to some reference in space. This point in space can belong
@@ -387,7 +387,7 @@ not measure the point group symmetry of this chosen point in space, but rather t
 group symmetry of projections of these points to a unit sphere (the BOOD). It is
 important to note that BOOSOP is not a measurement of Wyckoff site symmetry or
 crystalline point group symmetry. To compute a crystalline point group symmetry,BOOSOP
-should be measured at the location of the general position. General position which is a
+should be measured at the location of the general position. The general position refers to a
 point in a crystal that does not transform with any symmetry operations.
 Understanding this, a big strength of BOOSOP comes from its ability to interpret
 symmetry on a continuous scale, instead of a binary property. Symmetry is typically
@@ -435,7 +435,7 @@ Next, we have to symmetrize the constructed BOOD. To do this, we simply apply th
 D matrix of a group action operation of a given point group symmetry on the computed
 BOOD. To quantify if the symmetrized BOOD is different from the initially constructed
 BOOD, we compute the normalized inner product between the two spherical harmonic
-expansion that are defined by the initial and symmetrized BOOD. Before computing the
+expansions that are defined by the initial and symmetrized BOOD. Before computing the
 final value of BOOSOP, we have to find the rotation which minimizes this inner product.
 If we take the BOOD of our system, we want to find where it best matches the symmetrized
 one. This is done using a brute force optimization plus gradient descent. The search is
