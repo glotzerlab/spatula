@@ -9,9 +9,8 @@ Currently `PGOP` only supports Unix-like platforms, but nothing in the code shou
 
 ## Python Code
 The Python is located in the `pgop` directory.
-Most of the files are for user use; however, `pgop/generate` provides files to generate data files shipped with PGOP.
+Most of the files are for user use.
 The current data files are
-* data.h5 - Stores Wigner D matrices for symmetrizing bond order diagrams.
 * sphere-codes.npz - Stores the optimal locations of points on a sphere for the Tammes problem.
   This is used for the ``Mesh`` optimizer's ``with_grid`` method.
 
