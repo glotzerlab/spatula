@@ -38,8 +38,10 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
+    "IPython.sphinxext.ipython_console_highlighting",
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
+    "nbsphinx",
 ]
 
 napoleon_numpy_docstring = True

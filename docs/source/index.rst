@@ -13,6 +13,7 @@ Table of Contents
 
    installation
    theory
+   tutorials
    api
    contributing
    credits

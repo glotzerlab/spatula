@@ -1807,6 +1807,7 @@ def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
     assert np.round(opgop_compute.order[0], 4) <= 1
 
 
+
 non_shape_symmetries = {
     "O": ["PlatonicFamily.Tetrahedron", "PlatonicFamily.Icosahedron"],
     "Oh": ["PlatonicFamily.Tetrahedron", "PlatonicFamily.Icosahedron"],

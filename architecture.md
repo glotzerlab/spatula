@@ -9,9 +9,8 @@ Currently `spatula` only supports Unix-like platforms, but nothing in the code s
 
 ## Python Code
 The Python is located in the `spatula` directory.
-Most of the files are for user use; however, `spatula/generate` provides files to generate data files shipped with spatula.
+Most of the files are for user use.
 The current data files are
-* data.h5 - Stores Wigner D matrices for symmetrizing bond order diagrams.
 * sphere-codes.npz - Stores the optimal locations of points on a sphere for the Tammes problem.
   This is used for the ``Mesh`` optimizer's ``with_grid`` method.
 
