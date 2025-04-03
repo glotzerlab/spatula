@@ -12,4 +12,4 @@ jobs:
     secrets: inherit
     with:
       branch: main
-      path: .github/workflows/envs
+      path: .github/workflows/env-files
