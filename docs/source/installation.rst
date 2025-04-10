@@ -20,7 +20,7 @@ The following are **required** for building and installing **spatula** from sour
 
 .. code-block:: bash
 
-    mamba install conda-forge cxx-compiler numpy scipy freud pybind11 scikit-build-core cmake
+    mamba install -c conda-forge cxx-compiler numpy scipy freud pybind11 scikit-build-core cmake
 
 All requirements other than the compiler can also be installed via the `Python Package Index <https://pypi.org/>`__
 
