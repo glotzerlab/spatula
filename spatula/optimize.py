@@ -1,4 +1,7 @@
-"""Classes to optimize over SO(3) for `pgop.PGOP`."""
+# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Part of spatula, released under the BSD 3-Clause License.
+
+"""Classes to optimize over SO(3) for `spatula.PGOP`."""
 
 from pathlib import Path
 
@@ -6,7 +9,7 @@ import numpy as np
 import scipy as sp
 from scipy.spatial.transform import Rotation
 
-from . import _pgop
+from . import _spatula
 
 
 # Only here for typing/documentation purposes.
@@ -29,7 +32,7 @@ class RandomSearch(Optimizer):
             Defaults to 42.
 
         """
-        self._cpp = _pgop.RandomSearch(max_iter, seed)
+        self._cpp = _spatula.RandomSearch(max_iter, seed)
 
 
 class StepGradientDescent(Optimizer):
@@ -87,8 +90,8 @@ class StepGradientDescent(Optimizer):
             below ``tol``. Defaults to 1e-6.
 
         """
-        self._cpp = _pgop.StepGradientDescent(
-            _pgop.Quaternion(initial_point).to_axis_angle_3D(),
+        self._cpp = _spatula.StepGradientDescent(
+            _spatula.Quaternion(initial_point).to_axis_angle_3D(),
             max_iter,
             initial_jump,
             learning_rate,
@@ -126,7 +129,7 @@ class Mesh(Optimizer):
             The rotaional quaternions to test.
 
         """
-        self._cpp = _pgop.Mesh([_pgop.Quaternion(p) for p in points])
+        self._cpp = _spatula.Mesh([_spatula.Quaternion(p) for p in points])
 
     @classmethod
     def from_grid(cls, n_axes=75, n_angles=10):
@@ -237,7 +240,7 @@ class Union(Optimizer):
 
         """
         instance = cls()
-        instance._cpp = _pgop.Union.with_step_gradient_descent(
+        instance._cpp = _spatula.Union.with_step_gradient_descent(
             optimizer._cpp, max_iter, initial_jump, learning_rate, tol
         )
         return instance
@@ -248,6 +251,6 @@ class NoOptimization(Optimizer):
 
     def __init__(self):
         """Create a NoOptimization object."""
-        self._cpp = _pgop.NoOptimization(
-            _pgop.Quaternion((1, 0, 0, 0)).to_axis_angle_3D()
+        self._cpp = _spatula.NoOptimization(
+            _spatula.Quaternion((1, 0, 0, 0)).to_axis_angle_3D()
         )

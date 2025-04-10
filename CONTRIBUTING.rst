@@ -2,7 +2,7 @@
 Contributing
 ============
 
-Contributions are welcomed via `pull requests on GitHub <https://github.com/glotzerlab/pgop>`__.
+Contributions are welcomed via `pull requests on GitHub <https://github.com/glotzerlab/spatula>`__.
 Create an issue first to ensure that the proposed changes are in line with the direction of the package.
 
 Features
@@ -24,7 +24,7 @@ Agree to the Contributor Agreement
 
 All contributors implicitly agree to the Contributor Agreement (`ContributorAgreement`_) when contributing code to this project.
 
-.. _ContributorAgreement: https://github.com/glotzerlab/pgop/blob/main/ContributorAgreement.md
+.. _ContributorAgreement: https://github.com/glotzerlab/spatula/blob/main/ContributorAgreement.md
 
 Source code
 ===========

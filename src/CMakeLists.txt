@@ -1,4 +1,4 @@
-list(APPEND pgop_sources
+list(APPEND spatula_sources
     "export-module.cc"
     "BondOrder.h" "BondOrder.cc"
     "PGOP.h" "PGOP.cc"
@@ -18,25 +18,25 @@ list(APPEND pgop_sources
     "util/Threads.h" "util/Threads.cc"
 )
 
-pybind11_add_module(_pgop ${pgop_sources})
+pybind11_add_module(_spatula ${spatula_sources})
 
-set_target_properties(_pgop PROPERTIES
+set_target_properties(_spatula PROPERTIES
     CXX_STANDARD 17
     CMAKE_CXX_STANDARD_REQUIRED True
     THREADS_PREFER_PTHREAD_FLAG ON
 )
 if (CMAKE_SYSTEM_NAME EQUAL "Linux")
-    target_compile_options(_pgop PRIVATE -pthreads)
+    target_compile_options(_spatula PRIVATE -pthreads)
 endif (CMAKE_SYSTEM_NAME EQUAL "Linux")
 if (UNIX)
-    target_link_libraries(_pgop PRIVATE Threads::Threads)
-    target_compile_options(_pgop PRIVATE -Werror -Wall -Wextra)
+    target_link_libraries(_spatula PRIVATE Threads::Threads)
+    target_compile_options(_spatula PRIVATE -Werror -Wall -Wextra)
 endif (UNIX)
 if (MSVC)
     # Does not compile without errors on MSVC
-    target_compile_options(_pgop PRIVATE /Wall  /permissive-)
+    target_compile_options(_spatula PRIVATE /Wall  /permissive-)
 endif (MSVC)
-target_compile_definitions(_pgop PRIVATE VERSION_INFO=${VERSION_INFO})
+target_compile_definitions(_spatula PRIVATE VERSION_INFO=${VERSION_INFO})
 
 # Installs C++ extension into the root of the Python package
-install(TARGETS _pgop LIBRARY DESTINATION pgop)
+install(TARGETS _spatula LIBRARY DESTINATION spatula)

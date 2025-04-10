@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <cmath>
 #include <iterator>
 #include <string>
@@ -6,7 +9,7 @@
 #include "BondOrder.h"
 #include "util/Threads.h"
 
-namespace pgop {
+namespace spatula {
 
 NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
                                    const int* neighbor_counts,
@@ -278,4 +281,4 @@ void export_BOOSOP(py::module& m)
     export_BOOSOP_class<UniformDistribution>(m, "BOOSOPUniform");
     export_BOOSOP_class<FisherDistribution>(m, "BOOSOPFisher");
 }
-} // namespace pgop
+} // namespace spatula

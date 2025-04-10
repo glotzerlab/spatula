@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <cmath>
 #include <iterator>
 #include <string>
@@ -5,7 +8,7 @@
 #include "PGOP.h"
 #include "util/Threads.h"
 
-namespace pgop {
+namespace spatula {
 
 Neighborhoods::Neighborhoods(size_t N,
                              const int* neighbor_counts,
@@ -166,15 +169,15 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
 {
-    auto pgop = std::vector<double>();
+    auto spatula = std::vector<double>();
     auto rotations = std::vector<data::Quaternion>();
-    pgop.reserve(m_Rij.size());
+    spatula.reserve(m_Rij.size());
     rotations.reserve(m_Rij.size());
     for (const auto& R_ij : m_Rij) {
         // make a copy of the neighborhood to avoid modifying the original
         auto neighborhood = neighborhood_original;
         const auto result = compute_symmetry(neighborhood, R_ij);
-        pgop.emplace_back(std::get<0>(result));
+        spatula.emplace_back(std::get<0>(result));
         const auto quat = data::Quaternion(std::get<1>(result));
         rotations.emplace_back(quat);
         if (m_compute_per_operator) {
@@ -185,12 +188,12 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
                 const auto particle_operator_op
                     = compute_pgop(neighborhood,
                                    std::vector(R_ij.begin() + i, R_ij.begin() + i + 9));
-                pgop.emplace_back(particle_operator_op);
+                spatula.emplace_back(particle_operator_op);
                 rotations.emplace_back(quat);
             }
         }
     }
-    return std::make_tuple(std::move(pgop), std::move(rotations));
+    return std::make_tuple(std::move(spatula), std::move(rotations));
 }
 
 std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighborhood,
@@ -302,7 +305,7 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
     }
 }
 
-void export_pgop(py::module& m)
+void export_spatula(py::module& m)
 {
     py::class_<PGOP>(m, "PGOP")
         .def(py::init<const py::list&,
@@ -312,4 +315,4 @@ void export_pgop(py::module& m)
         .def("compute", &PGOP::compute);
 }
 
-} // End namespace pgop
+} // End namespace spatula

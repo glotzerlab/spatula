@@ -7,7 +7,7 @@ Installation
 Compile from source
 -------------------
 
-The following are **required** for building and installing **PGOP** from source:
+The following are **required** for building and installing **spatula** from source:
 
 - A C++17-compliant compiler
 - `Python <https://www.python.org/>`__
@@ -28,12 +28,12 @@ All requirements other than the compiler can also be installed via the `Python P
 
     uv pip install numpy scipy freud-analysis pybind11 scikit-build-core cmake
 
-The code that follows builds **PGOP**:
+The code that follows builds **spatula**:
 
 .. code-block:: bash
 
-    git clone https://github.com/glotzerlab/pgop.git
-    cd pgop
+    git clone https://github.com/glotzerlab/spatula.git
+    cd spatula
     python -m pip install .
 
 

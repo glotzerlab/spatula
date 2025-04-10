@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #pragma once
 
 #include <functional>
@@ -7,9 +10,9 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 /**
- * @brief Helper class for handle the parallelization logic for the pgop module.
+ * @brief Helper class for handle the parallelization logic for the spatula module.
  *
  * ThreadPool is a singleton which stores the state of parallelization and thread pools for the
  * entire application.
@@ -37,7 +40,7 @@ class ThreadPool {
         return m_out;
     }
 
-    /// Set the number of threads to run PGOP on.
+    /// Set the number of threads to run spatula on.
     void set_threads(unsigned int num_threads)
     {
         m_pool.reset(num_threads);
@@ -79,4 +82,4 @@ class ThreadPool {
 };
 
 void export_threads(py::module& m);
-}} // namespace pgop::util
+}} // namespace spatula::util

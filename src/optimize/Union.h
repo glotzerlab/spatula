@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #pragma once
 
 #include <functional>
@@ -7,7 +10,7 @@
 
 #include "Optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 namespace py = pybind11;
 /**
  * @brief Combine two optimizers into one optimization.
@@ -43,4 +46,4 @@ class Union : public Optimizer {
 };
 
 void export_union(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

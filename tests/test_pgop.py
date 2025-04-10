@@ -1,3 +1,6 @@
+# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Part of spatula, released under the BSD 3-Clause License.
+
 import time
 
 import coxeter
@@ -6,7 +9,7 @@ import numpy as np
 import pytest
 import scipy.spatial
 
-import pgop
+import spatula
 
 n_dict = {
     3: "Triangular",
@@ -23,7 +26,7 @@ n_dict = {
 pgop_dict = {}
 
 
-pgop.util.set_num_threads(1)
+spatula.util.set_num_threads(1)
 
 
 def get_pyramid(n: int) -> np.ndarray:
@@ -1347,8 +1350,8 @@ methods_dict = {}
 
 # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
 # close to one as well.
-optimizer = pgop.optimize.Union.with_step_gradient_descent(
-    pgop.optimize.Mesh.from_grid()
+optimizer = spatula.optimize.Union.with_step_gradient_descent(
+    spatula.optimize.Mesh.from_grid()
 )
 
 
@@ -1370,11 +1373,11 @@ def get_shape_sys_nlist(vertices):
 
 def make_compute_object(symmetries, optimizer, optype):
     if optype == "boosop":
-        return pgop.BOOSOP("fisher", symmetries, optimizer)
+        return spatula.BOOSOP("fisher", symmetries, optimizer)
     elif optype == "full":
-        return pgop.PGOP(symmetries, optimizer)
+        return spatula.PGOP(symmetries, optimizer)
     elif optype == "boo":
-        return pgop.PGOP(symmetries, optimizer, mode="boo")
+        return spatula.PGOP(symmetries, optimizer, mode="boo")
     else:
         raise ValueError(f"Invalid optype {optype}")
 
@@ -1445,8 +1448,8 @@ def compute_pgop_polyhedron(
         and op_compute.order[0] > cutoff_value
     ):
         print(f"Used higher precision, lower precision value {op_compute.order[0]}")
-        new_optimizer = pgop.optimize.Union.with_step_gradient_descent(
-            pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
+        new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
+            spatula.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
         )
         op_compute = compute_op_result(
             symmetry,
@@ -1478,8 +1481,8 @@ def compute_pgop_check_all_order_values(
     op_pg = compute_op_result(symmetry, optimizer, mode, system, nlist, sigma, qp)
     if not np.allclose(op_pg.order, value, rtol=rtol):
         print("Used higher precision, lower precision value", op_pg.order)
-        new_optimizer = pgop.optimize.Union.with_step_gradient_descent(
-            pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
+        new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
+            spatula.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
         )
         op_pg = compute_op_result(
             symmetry, new_optimizer, mode, system, nlist, sigma, qp, True
@@ -1588,12 +1591,12 @@ def test_bcc_with_multiple_incorrect_symmetries_operator_calc():
     correct_symmetries = ["Oh", "D3h"]
     # these two contain identity, but PGOP ignores identity and doesn't count it!!!
     lenohsym = len(
-        pgop.representations.CartesianRepMatrix(correct_symmetries[0]).matrices
+        spatula.representations.CartesianRepMatrix(correct_symmetries[0]).matrices
     )
     lend3hsym = len(
-        pgop.representations.CartesianRepMatrix(correct_symmetries[1]).matrices
+        spatula.representations.CartesianRepMatrix(correct_symmetries[1]).matrices
     )
-    op_pg = pgop.PGOP(
+    op_pg = spatula.PGOP(
         correct_symmetries,
         optimizer,
         mode="full",
@@ -1688,7 +1691,7 @@ def test_orientations(mode, symmetries):
         optimal_rotation = scipy.spatial.transform.Rotation.from_quat(scipy_q)
         re_rotated_vertices = optimal_rotation.apply(rotated_vertices)
         system, nlist = get_shape_sys_nlist(re_rotated_vertices)
-        norot = pgop.optimize.NoOptimization()
+        norot = spatula.optimize.NoOptimization()
         op_no_opt = compute_op_result(
             [symmetry], norot, mode, system, nlist, None, np.zeros((1, 3))
         )
@@ -1698,22 +1701,24 @@ def test_orientations(mode, symmetries):
 optimizers_to_test = [
     (
         "Union_descent_random",
-        pgop.optimize.Union.with_step_gradient_descent(
-            pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
+        spatula.optimize.Union.with_step_gradient_descent(
+            spatula.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
         ),
     ),
     (
         "Union_descent_Mesh",
-        pgop.optimize.Union.with_step_gradient_descent(pgop.optimize.Mesh.from_grid()),
+        spatula.optimize.Union.with_step_gradient_descent(
+            spatula.optimize.Mesh.from_grid()
+        ),
     ),
-    ("Descent", pgop.optimize.StepGradientDescent()),
+    ("Descent", spatula.optimize.StepGradientDescent()),
     (
         "Random",
         "RandomSearch",
     ),
-    ("Mesh", pgop.optimize.Mesh([[1, 0, 0, 0]])),
-    ("Mesh", pgop.optimize.Mesh([[0, 0, 0, 1]])),
-    ("NoOptimization", pgop.optimize.NoOptimization()),
+    ("Mesh", spatula.optimize.Mesh([[1, 0, 0, 0]])),
+    ("Mesh", spatula.optimize.Mesh([[0, 0, 0, 1]])),
+    ("NoOptimization", spatula.optimize.NoOptimization()),
 ]
 
 
@@ -1728,7 +1733,9 @@ optimizers_to_test = [
 def test_optimization_classes(optim_name, optim, mode):
     # this is so that rerun gets a new random seed
     if "Random" in optim_name:
-        optim = pgop.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 100000))
+        optim = spatula.optimize.RandomSearch(
+            max_iter=10000, seed=rng.integers(0, 100000)
+        )
     system, nlist = get_shape_sys_nlist(vertices_for_testing)
     op = compute_op_result(["T"], optim, mode, system, nlist, None, np.zeros((1, 3)))
     print(op.order)
@@ -1798,7 +1805,6 @@ def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
     assert np.round(fpgop_compute.order[0], 4) <= 1
     assert np.round(boosop_compute.order[0], 4) <= 1
     assert np.round(opgop_compute.order[0], 4) <= 1
-
 
 
 non_shape_symmetries = {

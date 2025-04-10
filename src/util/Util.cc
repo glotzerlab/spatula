@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <cmath>
 #include <iterator>
 #include <numeric>
@@ -12,7 +15,7 @@
  * function signatures reminescent of C, but is necessary the best possible performance.
  */
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 /**
  * @brief Get the angle between two vectors.
  *
@@ -153,4 +156,4 @@ void export_util(py::module& m)
     m.def("to_rotation_matrix", &to_rotation_matrix);
     m.def("single_rotate", &single_rotate);
 }
-}} // namespace pgop::util
+}} // namespace spatula::util

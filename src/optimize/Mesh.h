@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #pragma once
 
 #include <memory>
@@ -7,7 +10,7 @@
 #include "../data/Vec3.h"
 #include "Optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 /**
  * @brief An Optimizer that just tests prescribed points.
@@ -37,4 +40,4 @@ class Mesh : public Optimizer {
 };
 
 void export_mesh(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

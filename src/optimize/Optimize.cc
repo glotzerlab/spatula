@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -6,7 +9,7 @@
 
 #include "Optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 Optimizer::Optimizer()
     : m_point(), m_objective(), m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<double>::max()),
       m_count(0), m_need_objective(false)
@@ -73,4 +76,4 @@ void export_base_optimize(py::module& m)
         .def_property_readonly("terminate", &Optimizer::terminate)
         .def_property_readonly("count", &Optimizer::getCount);
 }
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

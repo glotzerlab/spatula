@@ -303,7 +303,7 @@ distributions:
 .. math::
       \mathrm{BC}(P_1,P_2) = 2 \sqrt{\frac{\kappa_1\kappa_2}{\sinh{\kappa_1}\sinh{\kappa_2}}} \frac{\sinh{\frac{\sqrt{\kappa_1^2+\kappa_2^2+2\kappa_1\kappa_2\vec{r}_1\times\vec{r}_2}}{2}}}{\sqrt{\kappa_1^2+\kappa_2^2+2\kappa_1\kappa_2\vec{r}_1\times\vec{r}_2}}.
 
-We always use normalized distributions for the calculation of the Bhattacharyya coefficient 
+We always use normalized distributions for the calculation of the Bhattacharyya coefficient
 to normalize the order parameter to the range [0,1].
 
 

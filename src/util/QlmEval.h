@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #pragma once
 #include <complex>
 #include <vector>
@@ -10,7 +13,7 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 // TODO: pass normalization factor not m for generalizing.
 /**
  * @brief Helper class to make computation of \f$ Q_{m}^{l} \f$ more efficient.
@@ -95,4 +98,4 @@ struct QlmBuf {
 
     QlmBuf(size_t size);
 };
-}} // namespace pgop::util
+}} // namespace spatula::util

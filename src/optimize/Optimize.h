@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #pragma once
 
 #include <memory>
@@ -10,9 +13,9 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 /**
- * @brief Base class for pgop optimizers.
+ * @brief Base class for spatula optimizers.
  *
  * We use a state model where an optimizer is always either expecting an objective for a queried
  * point or to be queried for a point. To do the other * operation is an error and leads to an
@@ -100,4 +103,4 @@ class PyOptimizer : public Optimizer {
 
 void export_base_optimize(py::module& m);
 
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

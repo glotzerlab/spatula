@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <cmath>
 #include <sstream>
 #include <string>
@@ -7,7 +10,7 @@
 
 #include "Quaternion.h"
 
-namespace pgop { namespace data {
+namespace spatula { namespace data {
 Quaternion::Quaternion() : w(1.0), x(0.0), y(0.0), z(0.0) { }
 
 Quaternion::Quaternion(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) { }
@@ -136,4 +139,4 @@ void export_quaternion(py::module& m)
         .def(py::self * py::self)
         .def(py::self *= py::self);
 }
-}} // namespace pgop::data
+}} // namespace spatula::data

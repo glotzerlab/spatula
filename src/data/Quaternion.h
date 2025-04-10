@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #pragma once
 
 #include <utility>
@@ -9,11 +12,11 @@
 
 namespace py = pybind11;
 
-namespace pgop { namespace data {
+namespace spatula { namespace data {
 /**
  * @brief Class provides helper methods for dealing with rotation quaternions.
  *
- * PGOP uses quaternions primarily as an interface to Python to describe points in SO(3).
+ * spatula uses quaternions primarily as an interface to Python to describe points in SO(3).
  * Internally, we use a 3-vector to store the current rotation in optimization, and use rotation
  * matrices to actually perform the rotations. See Util.h for more information on this.
  *
@@ -61,4 +64,4 @@ Quaternion operator*(const Quaternion& a, const Quaternion& b);
 Quaternion& operator*=(Quaternion& a, const Quaternion& b);
 
 void export_quaternion(py::module& m);
-}} // namespace pgop::data
+}} // namespace spatula::data

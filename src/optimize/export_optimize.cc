@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <pybind11/stl.h>
 
 #include "Mesh.h"
@@ -8,7 +11,7 @@
 #include "Union.h"
 #include "export_optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 void export_optimize(py::module& m)
 {
     export_base_optimize(m);
@@ -18,4 +21,4 @@ void export_optimize(py::module& m)
     export_union(m);
     export_no_optimization(m);
 }
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

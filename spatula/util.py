@@ -1,3 +1,6 @@
+# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Part of spatula, released under the BSD 3-Clause License.
+
 """General utility functions for the package and users."""
 
 import collections
@@ -5,7 +8,7 @@ import operator
 
 import numpy as np
 
-from . import _pgop, freud
+from . import _spatula, freud
 
 PI_2 = np.pi / 2
 PI_4 = np.pi / 4
@@ -50,7 +53,7 @@ def set_num_threads(num_threads):
         num_threads = int(num_threads)
     except ValueError as err:
         raise ValueError("num_threads must be convertible to an int") from err
-    _pgop.set_num_threads(num_threads)
+    _spatula.set_num_threads(num_threads)
     freud.parallel.set_num_threads(num_threads)
 
 
@@ -63,7 +66,7 @@ def get_num_threads():
         The number of threads.
 
     """
-    return _pgop.get_num_threads()
+    return _spatula.get_num_threads()
 
 
 class _Cache:

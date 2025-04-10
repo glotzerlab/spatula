@@ -1,6 +1,9 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include "NoOptimization.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 NoOptimization::NoOptimization(const data::Vec3& initial_point) : Optimizer()
 {
@@ -31,4 +34,4 @@ void export_no_optimization(py::module& m)
     py::class_<NoOptimization, Optimizer, std::shared_ptr<NoOptimization>>(m, "NoOptimization")
         .def(py::init<const data::Vec3&>());
 }
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

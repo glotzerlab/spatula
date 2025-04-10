@@ -1,6 +1,6 @@
-=============================
-Welcome to PGOP documentation
-=============================
+================================
+Welcome to spatula documentation
+================================
 
 .. include:: ../../readme.rst
 

@@ -6,9 +6,10 @@ Development Lead
 ----------------
 
 * Brandon Butler (GitHub: b-butler)
+* Domagoj Fijan (GitHub: DomFijan)
+* Maria Ward Rashidi (GitHub: mariaward10)
 
 Contributors
 ------------
 
-* Domagoj Fijan (GitHub: DomFijan)
-* Maria Ward Rashidi (GitHub: mariaward10)
+* Jen Bradley (Github: janbridley)

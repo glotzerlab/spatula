@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <algorithm>
 #include <cmath>
 #include <iterator>
@@ -7,7 +10,7 @@
 
 #include "Mesh.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 Mesh::Mesh(const std::vector<data::Quaternion>& points) : Optimizer(), m_points()
 {
     m_points.reserve(points.size());
@@ -36,4 +39,4 @@ void export_mesh(py::module& m)
     py::class_<Mesh, Optimizer, std::shared_ptr<Mesh>>(m, "Mesh").def(
         py::init<const std::vector<data::Quaternion>&>());
 }
-}} // end namespace pgop::optimize
+}} // end namespace spatula::optimize

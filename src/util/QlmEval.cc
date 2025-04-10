@@ -1,10 +1,13 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <algorithm>
 #include <cmath>
 #include <iterator>
 
 #include "QlmEval.h"
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 QlmEval::QlmEval(unsigned int m,
                  const py::array_t<double> positions,
                  const py::array_t<double> weights,
@@ -100,4 +103,4 @@ QlmBuf::QlmBuf(size_t size) : qlms(), sym_qlms()
     sym_qlms.reserve(size);
 }
 
-}} // namespace pgop::util
+}} // namespace spatula::util

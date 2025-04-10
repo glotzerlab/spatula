@@ -1,6 +1,9 @@
+# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Part of spatula, released under the BSD 3-Clause License.
+
 """Simply bond order diagram classes."""
 
-import pgop._pgop
+import spatula._spatula
 
 
 class BondOrder:
@@ -36,8 +39,8 @@ class BondOrderFisher(BondOrder):
             The concentration parameter for the von-Mises Fisher distribution.
 
         """
-        self._cpp = pgop._pgop.FisherBondOrder(
-            pgop._pgop.FisherDistribution(kappa), positions
+        self._cpp = spatula._spatula.FisherBondOrder(
+            spatula._spatula.FisherDistribution(kappa), positions
         )
 
 
@@ -56,6 +59,6 @@ class BondOrderUniform(BondOrder):
             non-zero for the uniform distribution.
 
         """
-        self._cpp = pgop._pgop.UniformBondOrder(
-            pgop._pgop.UniformDistribution(max_theta), positions
+        self._cpp = spatula._spatula.UniformBondOrder(
+            spatula._spatula.UniformDistribution(max_theta), positions
         )

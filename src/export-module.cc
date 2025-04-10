@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <pybind11/pybind11.h>
 
 #include "BOOSOP.h"
@@ -8,13 +11,13 @@
 #include "util/Threads.h"
 #include "util/Util.h"
 
-PYBIND11_MODULE(_pgop, m)
+PYBIND11_MODULE(_spatula, m)
 {
-    pgop::data::export_Vec3(m);
-    pgop::data::export_quaternion(m);
-    pgop::optimize::export_optimize(m);
-    pgop::export_pgop(m);
-    pgop::export_BOOSOP(m);
-    pgop::util::export_threads(m);
-    pgop::util::export_util(m);
+    spatula::data::export_Vec3(m);
+    spatula::data::export_quaternion(m);
+    spatula::optimize::export_optimize(m);
+    spatula::export_spatula(m);
+    spatula::export_BOOSOP(m);
+    spatula::util::export_threads(m);
+    spatula::util::export_util(m);
 }

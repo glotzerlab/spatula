@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <cmath>
 #include <sstream>
 #include <string>
@@ -6,7 +9,7 @@
 
 #include "Vec3.h"
 
-namespace pgop { namespace data {
+namespace spatula { namespace data {
 Vec3::Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
 
 Vec3::Vec3(const double* point) : x(point[0]), y(point[1]), z(point[2]) { }
@@ -228,4 +231,4 @@ void export_Vec3(py::module& m)
         .def(py::self += float())
         .def(py::self == py::self);
 }
-}} // namespace pgop::data
+}} // namespace spatula::data

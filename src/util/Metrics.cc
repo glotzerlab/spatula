@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include <complex>
 #include <numeric>
 #include <string>
@@ -8,7 +11,7 @@
 
 #include "Metrics.h"
 
-namespace pgop { namespace util {
+namespace spatula { namespace util {
 double covariance(const std::vector<std::complex<double>>& f,
                   const std::vector<std::complex<double>>& g)
 {
@@ -27,4 +30,4 @@ double covariance(const std::vector<std::complex<double>>& f,
     }
     return mixed_covar / std::sqrt(g_covar * f_cov);
 }
-}} // namespace pgop::util
+}} // namespace spatula::util

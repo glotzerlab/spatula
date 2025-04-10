@@ -1,6 +1,9 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #include "StepGradientDescent.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 StepGradientDescent::StepGradientDescent(const data::Vec3& initial_point,
                                          unsigned int max_iter,
@@ -98,4 +101,4 @@ void export_step_gradient_descent(py::module& m)
         "StepGradientDescent")
         .def(py::init<const data::Vec3&, unsigned int, double, double, double>());
 }
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize

@@ -1,3 +1,6 @@
+// Copyright (c) 2010-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
 #pragma once
 
 #include <memory>
@@ -5,7 +8,7 @@
 
 #include "Optimize.h"
 
-namespace pgop { namespace optimize {
+namespace spatula { namespace optimize {
 
 /**
  * @brief Perform a random search through SO(3) for optimization.
@@ -50,4 +53,4 @@ class RandomSearch : public Optimizer {
 };
 
 void export_random_search(py::module& m);
-}} // namespace pgop::optimize
+}} // namespace spatula::optimize
