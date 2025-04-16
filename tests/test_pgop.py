@@ -1398,7 +1398,7 @@ def make_method(symmetries, optimizer, optype):
     return methods_dict[symmetry][optype][optimizer.__hash__()]
 
 
-def generate_quaternions(n=2):
+def generate_quaternions(n=1):
     """Generate `n` random quaternions]."""
     rotations = [scipy.spatial.transform.Rotation([1, 0, 0, 0]).as_quat()]
     for _ in range(n):
