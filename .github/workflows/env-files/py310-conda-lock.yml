@@ -13,10 +13,10 @@
 version: 1
 metadata:
   content_hash:
-    osx-arm64: b60fd78f4900f7fc0b346575f5e3d582faf0c14bd84d1cc250be410cb0dd151c
-    osx-64: 650e6b91f878911e1e551c2c3f037d8358bbf85a978c0c942f6949887d11aad7
-    linux-64: 64f3000ef43b1a2a725f91c3eeeb1ce2c234694c44b634f30524e7e00e0ed13d
-    win-64: 50b1cf7dca43ecd1c62389bf859a78a45eef5f4930b3d3b903de338852d1951b
+    osx-arm64: aaa244172beeea2d3ca2cc8ba7e565c8b200c3cfd9b63aea83c37e19e5377f5c
+    osx-64: c5faa02a7ab81859301c7f1e9c8857e218bf49d8bb7638d0bdfa4206b15f3d57
+    linux-64: 57c89dc6ff5af57857a85ec2835b0dbc5ef45834b9490e150fdb92e9c029e4ee
+    win-64: 3fed2a0d016cb10625bd80f65723e9a75a1c9b936b9c944a6980b308386b3238
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -428,7 +428,7 @@ package:
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: linux-64
   dependencies:
@@ -441,52 +441,52 @@ package:
     rowan: '>=1.2'
     scipy: '>=1.1'
     tbb: '>=2021.13.0'
-  url: https://conda.anaconda.org/conda-forge/linux-64/freud-3.2.0-py310h7bf1d77_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/freud-3.1.0-py310h7bf1d77_2.conda
   hash:
-    md5: 46e771647b107f0392dbbdc4b626e747
-    sha256: 171a13636f336cae95235fa0efc2f9144ead5e59ff3323302da2b06d2425be68
+    md5: cccee38e4ed1270796068f997b6c1e31
+    sha256: dc4e09ced0aecb305abc2ab22abddc9a0df2c62a03d89bcd3ededd0df3f1fb60
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: osx-64
   dependencies:
     __osx: '>=10.14'
-    libcxx: '>=18'
+    libcxx: '>=17'
     numpy: '>=1.19,<3'
     python: '>=3.10,<3.11.0a0'
     python_abi: 3.10.*
     rowan: '>=1.2'
     scipy: '>=1.1'
     tbb: '>=2021.13.0'
-  url: https://conda.anaconda.org/conda-forge/osx-64/freud-3.2.0-py310h829f172_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/freud-3.1.0-py310h2e3240f_2.conda
   hash:
-    md5: 9fbd423f5665316d37d24916ab3c858e
-    sha256: 4e62647dfb7c9a1bf995f0705d69ad3f5ad2f35f59cfca66cc9227f919e78d84
+    md5: d92e8c897849fcf89c4fd721096a05ea
+    sha256: a677ff2bc493c83ede1298287337c1feeb0ebf74e3d9b36819903d4b41b6cace
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: osx-arm64
   dependencies:
     __osx: '>=11.0'
-    libcxx: '>=18'
+    libcxx: '>=17'
     numpy: '>=1.19,<3'
     python: '>=3.10,<3.11.0a0'
     python_abi: 3.10.*
     rowan: '>=1.2'
     scipy: '>=1.1'
     tbb: '>=2021.13.0'
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/freud-3.2.0-py310h264a424_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/freud-3.1.0-py310h56127b7_2.conda
   hash:
-    md5: ec9412063b991fd191a6339d57ab5dbf
-    sha256: fdebc96a99c3894548048209684591b4dd17f18d9548657a984d61c31b822f84
+    md5: db298ac9fca029cbd9acb8346696b1a6
+    sha256: 80ba503dc19ba3d4ee761e621dbfc3d18e28625faadd5586afeec77389f86f45
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: win-64
   dependencies:
@@ -499,10 +499,10 @@ package:
     ucrt: '>=10.0.20348.0'
     vc: '>=14.2,<15'
     vc14_runtime: '>=14.29.30139'
-  url: https://conda.anaconda.org/conda-forge/win-64/freud-3.2.0-py310h836ffe6_0.conda
+  url: https://conda.anaconda.org/conda-forge/win-64/freud-3.1.0-py310h836ffe6_2.conda
   hash:
-    md5: 9b850b6a62a6027adb9f4df1b17dddca
-    sha256: 7c50564744eb53068ddf213975c76c3640bc05867b4b9212a935815ffe84f84b
+    md5: 9021043be28ffe70555411cef94963c4
+    sha256: b3840915fc650b4ad4902a3f10d7fea7ff2b5af0ca64488e6adc83236062c6c7
   category: main
   optional: false
 - name: icu

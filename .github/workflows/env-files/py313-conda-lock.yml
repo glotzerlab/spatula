@@ -13,10 +13,10 @@
 version: 1
 metadata:
   content_hash:
-    osx-arm64: 48c4106c73c0f370aa14d5a2547cc3b6237cb62b25aa352220e17b203545f820
-    osx-64: ab2ae1026dbd91a619ea3ceea498ebaf06f921f45e86f5a92837a9a717db0581
-    linux-64: e14e32f57870b6b6838e70b297da1977dba0b9dc515bd60e3f5086df9cf79681
-    win-64: c7d24a5e566f2f950afa000c0c9f3bdcf138742a3bdb28319dd70ea7ce280ff3
+    osx-arm64: 131c8cb50ec363c75f2f3fc1bb5b7aac18f7675970aaaaf7a79454e1b75537d4
+    osx-64: 7b0157ae7e5344740e7d22e3d4efa1455dc60579a5bc0a9c93e00baaa0b27b59
+    linux-64: 9728766e9bac23519423fc9a075b07b4613499c6df56c79ad9155d3e18e610a7
+    win-64: d0eef78075c46b6d17a0b2839f010bb12665e1b847960c587fd37d39ad1809ef
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -428,7 +428,7 @@ package:
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: linux-64
   dependencies:
@@ -436,62 +436,62 @@ package:
     libgcc: '>=13'
     libstdcxx: '>=13'
     numpy: '>=1.21,<3'
-    python: '>=3.13,<3.14.0a0'
+    python: '>=3.13.0rc2,<3.14.0a0'
     python_abi: 3.13.*
     rowan: '>=1.2'
     scipy: '>=1.1'
     tbb: '>=2021.13.0'
-  url: https://conda.anaconda.org/conda-forge/linux-64/freud-3.2.0-py313h6e4d355_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/freud-3.1.0-py313h6e4d355_2.conda
   hash:
-    md5: 66a472c262b902083b14f29c6122a212
-    sha256: d19bce1e73fb1fb78870a9bd0e189776d9f945831f473f755f07e3043f58d0b5
+    md5: f95db94cece81c443b4aa3e7f3b8f882
+    sha256: 64b564ff0ff13581a3bf2a1b7c1d23c38738bf938719fca331f892975f674019
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: osx-64
   dependencies:
     __osx: '>=10.14'
-    libcxx: '>=18'
+    libcxx: '>=17'
     numpy: '>=1.21,<3'
-    python: '>=3.13,<3.14.0a0'
+    python: '>=3.13.0rc2,<3.14.0a0'
     python_abi: 3.13.*
     rowan: '>=1.2'
     scipy: '>=1.1'
     tbb: '>=2021.13.0'
-  url: https://conda.anaconda.org/conda-forge/osx-64/freud-3.2.0-py313h0f011e8_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/freud-3.1.0-py313h4b53ed6_2.conda
   hash:
-    md5: d8d362ffe0e258f7fe7b76d1a299c7b6
-    sha256: ea9af1a55f26ff51dc50eb7cd9e95ba4cf3bc1c29b6a786f20515ac449af686e
+    md5: 28f7f69d87eea5e1d88d102d206019f5
+    sha256: a0e6e17db4d2db0967a2ca4674fbc5dfaacb1fbb6eb327a1f4514acdcc600a0d
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: osx-arm64
   dependencies:
     __osx: '>=11.0'
-    libcxx: '>=18'
+    libcxx: '>=17'
     numpy: '>=1.21,<3'
-    python: '>=3.13,<3.14.0a0'
+    python: '>=3.13.0rc2,<3.14.0a0'
     python_abi: 3.13.*
     rowan: '>=1.2'
     scipy: '>=1.1'
     tbb: '>=2021.13.0'
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/freud-3.2.0-py313hcb73a2b_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/freud-3.1.0-py313h2ad47fd_2.conda
   hash:
-    md5: 73120df0e578ba4ad1fe992ad3fabf7d
-    sha256: 4a9b17531431396240d96fd3c7fd53c82048f5c1555eea0c74d7c8e140c90640
+    md5: e3d51b95560991036ea2baaf0452b156
+    sha256: e4ffbc942a11b2be7d2606d180a64cdaa1bfbdcca2a7dd525af4e969d86cccd9
   category: main
   optional: false
 - name: freud
-  version: 3.2.0
+  version: 3.1.0
   manager: conda
   platform: win-64
   dependencies:
     numpy: '>=1.21,<3'
-    python: '>=3.13,<3.14.0a0'
+    python: '>=3.13.0rc2,<3.14.0a0'
     python_abi: 3.13.*
     rowan: '>=1.2'
     scipy: '>=1.1'
@@ -499,10 +499,10 @@ package:
     ucrt: '>=10.0.20348.0'
     vc: '>=14.2,<15'
     vc14_runtime: '>=14.29.30139'
-  url: https://conda.anaconda.org/conda-forge/win-64/freud-3.2.0-py313h71103f0_0.conda
+  url: https://conda.anaconda.org/conda-forge/win-64/freud-3.1.0-py313h71103f0_2.conda
   hash:
-    md5: 990dfd898cbc49983a28cb508863081c
-    sha256: 0ea09ebc8a28ceb724d1171006d34c9aea1d79b9adddfd8e7d9c1ac1288492ce
+    md5: 94ac046374ba4dd283e22d0395843936
+    sha256: b7df3a9e4ba9dbe4892437941e990d5217bcb4feba3ca579f09bd28012d00654
   category: main
   optional: false
 - name: icu

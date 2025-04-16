@@ -8,7 +8,7 @@ dependencies:
   - cmake
   - coxeter
   - pybind11
-  - 'freud>=3.0,!=3.2*'
+  - 'freud>=3.0,!=3.2.0'
   - numpy
   - pytest
   - scikit-build-core
