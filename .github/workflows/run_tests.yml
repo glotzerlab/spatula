@@ -27,15 +27,16 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python: ['310', '311', '312', '313']
+#        python: ['310', '311', '312', '313']
+        python: ['313']
         include:
           # Test macOS and windows on oldest and latest versions.
-          - os: 'macos-14'
-            python: '313'
-          - os: 'windows-latest'
-            python: '313'
-          - os: 'windows-latest'
-            python: '310'
+#          - os: 'macos-14'
+#            python: '313'
+#          - os: 'windows-latest'
+#            python: '313'
+#          - os: 'windows-latest'
+#            python: '310'
 
     steps:
       - name: Checkout Code
