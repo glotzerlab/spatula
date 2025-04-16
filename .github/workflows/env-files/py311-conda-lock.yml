@@ -13,10 +13,10 @@
 version: 1
 metadata:
   content_hash:
-    osx-arm64: 86a7ee934a7a851c7e72ae30f4a5f904de95edda37b032d0a1659d6eb23711cd
-    osx-64: efdaa2b2bb94d39455f73e6710878cbe36c765f39d0e70c34434d2a5d9a501a0
-    linux-64: 82e9e4112c104cf25319fb31bccfc81ce63f60191bd0586d79b1692ce4736f79
-    win-64: 056c7eb40feb48a1a8e6c4a30513c752d8aceab73bd35108679c4f7aef6a351c
+    osx-arm64: 232a9e02a957409a6320ae0e2952ab85abe6074e4802918704c59322c273d76b
+    osx-64: 876a62964cded013548d43d73e97864b43d04ca094854c07bebc57f47ca6eae3
+    linux-64: 5da3efd40667de083a01fc3b758c799335b3ad1a654fb2f0f7e78726a295bf18
+    win-64: 0fa21182b6af6c5dfaad9aa0a76fd01d2012ca7c3fe6f90d18f19f497ac678d1
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -317,6 +317,66 @@ package:
   hash:
     md5: 962b9857ee8e7018c22f2776ffa0b2d7
     sha256: ab29d57dc70786c1269633ba3dff20288b81664d3ff8d21af995742e2bb03287
+  category: main
+  optional: false
+- name: coxeter
+  version: 0.10.0
+  manager: conda
+  platform: linux-64
+  dependencies:
+    numpy: '>=1.10'
+    python: '>=3.9'
+    rowan: ''
+    scipy: ''
+  url: https://conda.anaconda.org/conda-forge/noarch/coxeter-0.10.0-pyhd8ed1ab_0.conda
+  hash:
+    md5: 209d43588cab8854700dbe534566dbe8
+    sha256: fe1c37cd2620c54b02976735472cb9e9447d5e5bcb16b0210dcf947a84a9c829
+  category: main
+  optional: false
+- name: coxeter
+  version: 0.10.0
+  manager: conda
+  platform: osx-64
+  dependencies:
+    scipy: ''
+    rowan: ''
+    python: '>=3.9'
+    numpy: '>=1.10'
+  url: https://conda.anaconda.org/conda-forge/noarch/coxeter-0.10.0-pyhd8ed1ab_0.conda
+  hash:
+    md5: 209d43588cab8854700dbe534566dbe8
+    sha256: fe1c37cd2620c54b02976735472cb9e9447d5e5bcb16b0210dcf947a84a9c829
+  category: main
+  optional: false
+- name: coxeter
+  version: 0.10.0
+  manager: conda
+  platform: osx-arm64
+  dependencies:
+    scipy: ''
+    rowan: ''
+    python: '>=3.9'
+    numpy: '>=1.10'
+  url: https://conda.anaconda.org/conda-forge/noarch/coxeter-0.10.0-pyhd8ed1ab_0.conda
+  hash:
+    md5: 209d43588cab8854700dbe534566dbe8
+    sha256: fe1c37cd2620c54b02976735472cb9e9447d5e5bcb16b0210dcf947a84a9c829
+  category: main
+  optional: false
+- name: coxeter
+  version: 0.10.0
+  manager: conda
+  platform: win-64
+  dependencies:
+    scipy: ''
+    rowan: ''
+    python: '>=3.9'
+    numpy: '>=1.10'
+  url: https://conda.anaconda.org/conda-forge/noarch/coxeter-0.10.0-pyhd8ed1ab_0.conda
+  hash:
+    md5: 209d43588cab8854700dbe534566dbe8
+    sha256: fe1c37cd2620c54b02976735472cb9e9447d5e5bcb16b0210dcf947a84a9c829
   category: main
   optional: false
 - name: exceptiongroup
