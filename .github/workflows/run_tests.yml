@@ -5,13 +5,13 @@ concurrency:
   cancel-in-progress: true
 
 on:
-#  # trigger on pull requests
-#  pull_request:
-#
-#  # trigger on all commits to trunk branches
-#  push:
-#    branches:
-#      - "main"
+  # trigger on pull requests
+  pull_request:
+
+  # trigger on all commits to trunk branches
+  push:
+    branches:
+      - "main"
 
   # trigger on request
   workflow_dispatch:
@@ -29,8 +29,8 @@ jobs:
         os: [ubuntu-latest]
 #        python: ['310', '311', '312', '313']
         python: ['313']
-        include:
-          # Test macOS and windows on oldest and latest versions.
+#        include:
+#          # Test macOS and windows on oldest and latest versions.
 #          - os: 'macos-14'
 #            python: '313'
 #          - os: 'windows-latest'
