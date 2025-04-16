@@ -13,10 +13,10 @@
 version: 1
 metadata:
   content_hash:
-    osx-arm64: 131c8cb50ec363c75f2f3fc1bb5b7aac18f7675970aaaaf7a79454e1b75537d4
-    osx-64: 7b0157ae7e5344740e7d22e3d4efa1455dc60579a5bc0a9c93e00baaa0b27b59
-    linux-64: 9728766e9bac23519423fc9a075b07b4613499c6df56c79ad9155d3e18e610a7
-    win-64: d0eef78075c46b6d17a0b2839f010bb12665e1b847960c587fd37d39ad1809ef
+    osx-arm64: 3080be25d51cd7ecabf9d1db5a7d47f287b87544a6b2a3a50b2aa5b372b81259
+    osx-64: f08fabc45bf5c7d364bc0e2a75f2902a24a5fd7e2a5bd936d4195e06342dd3dd
+    linux-64: 270e06f7057461c7c712d732a854565a431fb96a03696b521faab1ed8f55b6c6
+    win-64: cb55d2ddd34db3575f508fc61cfc96b568e1a15a23e328a295ac30e840b5f6b5
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -2552,6 +2552,62 @@ package:
   hash:
     md5: c3c9316209dec74a705a36797970c6be
     sha256: 963524de7340c56615583ba7b97a6beb20d5c56a59defb59724dc2a3105169c9
+  category: main
+  optional: false
+- name: pytest-rerunfailures
+  version: '15.0'
+  manager: conda
+  platform: linux-64
+  dependencies:
+    packaging: '>=17.1'
+    pytest: '>=7.4,!=8.2.2'
+    python: '>=3.9'
+  url: https://conda.anaconda.org/conda-forge/noarch/pytest-rerunfailures-15.0-pyhd8ed1ab_1.conda
+  hash:
+    md5: 88b97f71be492bc9b0b76db20faf1965
+    sha256: ae8138f842194ca67d238fd15ffe348413f75c9f10babf0c464588a3d2e7768c
+  category: main
+  optional: false
+- name: pytest-rerunfailures
+  version: '15.0'
+  manager: conda
+  platform: osx-64
+  dependencies:
+    python: '>=3.9'
+    packaging: '>=17.1'
+    pytest: '>=7.4,!=8.2.2'
+  url: https://conda.anaconda.org/conda-forge/noarch/pytest-rerunfailures-15.0-pyhd8ed1ab_1.conda
+  hash:
+    md5: 88b97f71be492bc9b0b76db20faf1965
+    sha256: ae8138f842194ca67d238fd15ffe348413f75c9f10babf0c464588a3d2e7768c
+  category: main
+  optional: false
+- name: pytest-rerunfailures
+  version: '15.0'
+  manager: conda
+  platform: osx-arm64
+  dependencies:
+    python: '>=3.9'
+    packaging: '>=17.1'
+    pytest: '>=7.4,!=8.2.2'
+  url: https://conda.anaconda.org/conda-forge/noarch/pytest-rerunfailures-15.0-pyhd8ed1ab_1.conda
+  hash:
+    md5: 88b97f71be492bc9b0b76db20faf1965
+    sha256: ae8138f842194ca67d238fd15ffe348413f75c9f10babf0c464588a3d2e7768c
+  category: main
+  optional: false
+- name: pytest-rerunfailures
+  version: '15.0'
+  manager: conda
+  platform: win-64
+  dependencies:
+    python: '>=3.9'
+    packaging: '>=17.1'
+    pytest: '>=7.4,!=8.2.2'
+  url: https://conda.anaconda.org/conda-forge/noarch/pytest-rerunfailures-15.0-pyhd8ed1ab_1.conda
+  hash:
+    md5: 88b97f71be492bc9b0b76db20faf1965
+    sha256: ae8138f842194ca67d238fd15ffe348413f75c9f10babf0c464588a3d2e7768c
   category: main
   optional: false
 - name: python
