@@ -1333,11 +1333,11 @@ shape_symmetries = {
     ],
     "Ih": ["PlatonicFamily.Icosahedron", "PlatonicFamily.Dodecahedron"],
 }
-shape_symmetries.update({f"C{n}v": [get_pyramid(n)] for n in range(4, 11)})
+shape_symmetries.update({f"C{n}v": [get_pyramid(n)] for n in range(4, 8)})
 shape_symmetries.update(
     {
         f"D{n}h": [get_bipyramid(n), f"PrismAntiprismFamily.{n_dict[n]} Prism"]
-        for n in range(3, 11)
+        for n in range(3, 7)
     }
 )
 
