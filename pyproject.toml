@@ -22,7 +22,7 @@ classifiers = [
     ]
 dependencies = [
     "numpy",  # basic numerical Python
-    "freud-analysis>=3.0.0",  # for neighbor finding
+    "freud-analysis>=3.0.0,!=3.2.0",# for neighbor finding
     "scipy",
 ]
 
