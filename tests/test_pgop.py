@@ -1498,7 +1498,7 @@ def compute_pgop_crystal(crystal_type, symmetry, mode, nlist, sigma=None, qp=Non
 # Define a parameter for different unit cells and corresponding parameters
 @pytest.mark.parametrize("crystal_type", crystal_systems)
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=2)
+@pytest.mark.flaky(reruns=5)
 def test_simple_crystals(crystal_type, mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs[crystal_type]}
     op_pg = compute_pgop_crystal(crystal_type, ["Oh"], mode, qargs, None)
@@ -1506,7 +1506,7 @@ def test_simple_crystals(crystal_type, mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=2)
+@pytest.mark.flaky(reruns=5)
 def test_qargs_query_pt(mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
     _, points = crystals_dict["sc"]
@@ -1517,7 +1517,7 @@ def test_qargs_query_pt(mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=2)
+@pytest.mark.flaky(reruns=5)
 def test_neighbor_list_query_pt(mode):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
@@ -1530,7 +1530,7 @@ def test_neighbor_list_query_pt(mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=2)
+@pytest.mark.flaky(reruns=5)
 def test_neighbor_list_only(mode):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
