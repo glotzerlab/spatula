@@ -29,7 +29,7 @@ pgop_dict = {}
 spatula.util.set_num_threads(1)
 
 
-def get_pyramid(n: int) -> np.ndarray:
+def get_pyramid(n: int) -> tuple[str, np.ndarray]:
     base = coxeter.families.RegularNGonFamily().get_shape(n).vertices
     # Need to offset polygon to make dihedral order low for testing.
     return (
@@ -38,7 +38,7 @@ def get_pyramid(n: int) -> np.ndarray:
     )
 
 
-def get_bipyramid(n: int) -> np.ndarray:
+def get_bipyramid(n: int) -> tuple[str, np.ndarray]:
     base = coxeter.families.RegularNGonFamily().get_shape(n).vertices
     return (
         f"Bipyramid({n})",
@@ -48,7 +48,7 @@ def get_bipyramid(n: int) -> np.ndarray:
 
 def parse_shape_values(
     a: str | tuple[str, np.ndarray],
-) -> tuple[str, np.ndarray]:
+) -> tuple[str | int, np.ndarray]:
     if isinstance(a, tuple):
         return a
     family, shape = a.split(".")
@@ -1399,12 +1399,13 @@ def make_method(symmetries, optimizer, optype):
 
 
 def generate_quaternions(n=1):
-    """Generate `n` random quaternions]."""
-    rotations = [scipy.spatial.transform.Rotation([1, 0, 0, 0]).as_quat()]
-    for _ in range(n):
-        rotations.append(
-            scipy.spatial.transform.Rotation.random(random_state=rng).as_quat()
-        )
+    """Generate `n` random quaternions."""
+    rotations = np.zeros(shape=(n, 4))
+    rotations[0] = scipy.spatial.transform.Rotation([1, 0, 0, 0]).as_quat()
+    if n > 1:
+        rotations[1:] = scipy.spatial.transform.Rotation.random(
+            random_state=rng, num=n - 1
+        ).as_quat()
     return rotations
 
 
