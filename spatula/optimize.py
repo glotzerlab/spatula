@@ -167,6 +167,41 @@ class Mesh(Optimizer):
         points[1:] = np.hstack((quaternions[:, -1].reshape(-1, 1), quaternions[:, :-1]))
         return cls(points)
 
+    @classmethod
+    def from_predefined_axes(cls, axes, n_angles=10):
+        r"""Create a Mesh optimizer that tests rotations on an axis-angle grid.
+
+        In contrast to `~.from_grid`, this method takes in a list of *predefined* axes,
+        which may or may not form a uniform grid.
+
+        Parameters
+        ----------
+        axes : :math:`N_{axes}` `np.ndarray`, optional
+            The axes which will be rotated about.
+        n_angles : `int`, optional
+            The number of angles to rotate per axes. Defaults to 5.
+
+        Returns
+        -------
+        mesh : Mesh
+            The optimizer which will test :math:`N_{axes} \cdot N_{angles}`
+            points.
+
+        """
+        axes = np.asarray(axes).reshape((-1, 1, 3))
+        n_axes = len(axes)
+        points = np.empty((n_angles * n_axes + 1, 4), dtype=float)
+        points[0] = np.array([1.0, 0.0, 0.0, 0.0])
+        angles = cls._sample_angles(n_angles).reshape((1, -1, 1))
+        # Flatten axes and angles for creating the rotation objects
+        axes = axes.repeat(n_angles, axis=1).reshape(-1, 3)
+        angles = angles.repeat(n_axes, axis=0).reshape(-1)
+        # Generate quaternions from axis-angle
+        quaternions = Rotation.from_rotvec(axes * angles[:, None]).as_quat()
+        quaternions = quaternions.reshape((n_axes * n_angles, 4))
+        points[1:] = np.hstack((quaternions[:, -1].reshape(-1, 1), quaternions[:, :-1]))
+        return cls(points)
+
     @staticmethod
     def _sample_angles(n_angles):
         """Find n equally spaced angle rotations w.r.t. the Haar measure."""
