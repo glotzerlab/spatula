@@ -141,9 +141,9 @@ class Mesh(Optimizer):
         Parameters
         ----------
         n_axes : `int`, optional
-            The number of axes to rotate about. Defaults to 65.
+            The number of axes to rotate about. Defaults to 75.
         n_angles : `int`, optional
-            The number of angles to rotate per axes. Defaults to 5.
+            The number of angles to rotate per axes. Defaults to 10.
 
         Returns
         -------
