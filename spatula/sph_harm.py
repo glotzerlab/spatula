@@ -56,8 +56,11 @@ class SphHarm:
         """
         # Note the different convention in theta and phi between scipy and this
         sph_ind, angle_ind = np.mgrid[0 : len(self._m), 0 : len(theta)]
-        return sp.special.sph_harm(
-            self._m[sph_ind], self._l[sph_ind], phi[angle_ind], theta[angle_ind]
+        return sp.special.sph_harm_y(
+            self._l[sph_ind],
+            self._m[sph_ind],
+            theta[angle_ind],
+            phi[angle_ind],
         )
 
     @property
