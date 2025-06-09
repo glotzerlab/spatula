@@ -5,10 +5,11 @@
 
 import freud
 
-from . import bond_order, integrate, optimize, representations, sph_harm, util
+from . import _grid, bond_order, integrate, optimize, representations, sph_harm, util
 from .pgop import BOOSOP, PGOP
 
 __all__ = [
+    "_grid",
     "bond_order",
     "integrate",
     "optimize",

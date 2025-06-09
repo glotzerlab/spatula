@@ -10,6 +10,7 @@ import pytest
 import scipy.spatial
 
 import spatula
+from spatula._grid import fib_sphere_mod_cn
 
 n_dict = {
     3: "Triangular",
@@ -1424,7 +1425,13 @@ def compute_op_result(
 
 
 def compute_pgop_polyhedron(
-    symmetry, vertices, optype, sigma=None, cutoff_operator=">", cutoff_value=cutoff
+    symmetry,
+    vertices,
+    optype,
+    sigma=None,
+    cutoff_operator=">",
+    cutoff_value=cutoff,
+    axes=None,
 ):
     """Determine whether given shape have a specified symmetry.
 
@@ -1436,6 +1443,8 @@ def compute_pgop_polyhedron(
         The vertices of the shape
     optype: str
         The type of order parameter to compute. boosop or fpgop or opgop.
+    axes: None | np.ndarray
+        An array of (symmetry-restricted) axes to use for the optimizer mesh.
     """
     vertices = np.asarray(vertices)
     system, nlist = get_shape_sys_nlist(vertices)
@@ -1449,9 +1458,17 @@ def compute_pgop_polyhedron(
         and op_compute.order[0] > cutoff_value
     ):
         print(f"Used higher precision, lower precision value {op_compute.order[0]}")
-        new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
-            spatula.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
-        )
+
+        if axes is not None:
+            new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
+                spatula.optimize.Mesh.from_predefined_axes(axes, n_angles=30)
+            )
+        else:
+            new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
+                spatula.optimize.RandomSearch(
+                    max_iter=10000, seed=rng.integers(0, 1000000)
+                )
+            )
         op_compute = compute_op_result(
             symmetry,
             new_optimizer,
@@ -1477,9 +1494,18 @@ crystals_dict = {
 
 
 def compute_pgop_check_all_order_values(
-    system, symmetry, mode, nlist, sigma=None, qp=None, value=1.0, rtol=1e-4
+    system, symmetry, mode, nlist, sigma=None, qp=None, value=1.0, rtol=1e-4, axes=None
 ):
     op_pg = compute_op_result(symmetry, optimizer, mode, system, nlist, sigma, qp)
+
+    if axes is not None:
+        gridded = spatula.optimize.Union.with_step_gradient_descent(
+            spatula.optimize.Mesh.from_predefined_axes(axes, n_angles=30)
+        )
+        return compute_op_result(
+            symmetry, gridded, mode, system, nlist, sigma, qp, True
+        )
+
     if not np.allclose(op_pg.order, value, rtol=rtol):
         print("Used higher precision, lower precision value", op_pg.order)
         new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
@@ -1649,6 +1675,16 @@ def test_increasing_number_of_symmetries(n, mode):
     assert len(op.rotations[0]) == n
     assert np.allclose(op.order, 1.0, rtol=1e-4)
 
+    # NEW CODE:
+    axes = fib_sphere_mod_cn(5, cn=5)
+    symmetry_restricted_op = compute_pgop_check_all_order_values(
+        system, symmetries_to_compute, mode, nlist, None, qp=np.zeros((1, 3)), axes=axes
+    )
+    assert len(symmetry_restricted_op.symmetries) == n
+    assert len(symmetry_restricted_op.order[0]) == n
+    assert len(symmetry_restricted_op.rotations[0]) == n
+    assert np.allclose(symmetry_restricted_op.order, 1.0, rtol=1e-4)
+
 
 # propello tetrahedron vertices
 vertices_for_testing = np.asarray(
@@ -1762,6 +1798,22 @@ def test_symmetries_polyhedra(symmetry, shape, vertices, quaternion, mode):
         symmetry=[symmetry], vertices=rotated_vertices, optype=mode
     )
     assert op.order[0] >= cutoff
+
+    if symmetry[0] in ("D", "C") and symmetry[1] not in ("i", "s"):
+        largest_c_subgroup = int(symmetry[1])
+    elif symmetry[0] == "T":
+        largest_c_subgroup = 3
+    elif symmetry[0] == "O":
+        largest_c_subgroup = 4
+    elif symmetry[0] == "I":
+        largest_c_subgroup = 5
+    else:
+        return
+    axes = fib_sphere_mod_cn(n=75, cn=largest_c_subgroup)
+    symmetry_restricted_op = compute_pgop_polyhedron(
+        symmetry=[symmetry], vertices=rotated_vertices, optype=mode, axes=axes
+    )
+    assert symmetry_restricted_op.order[0] >= cutoff
 
 
 # for shapes take move its vertices it along its bond vector away or towards the center
