@@ -33,6 +33,10 @@ test = [
     "coxeter",
 ]
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore:Gimbal lock:UserWarning',
+]
 
 [tool.ruff]
 line-length = 88
