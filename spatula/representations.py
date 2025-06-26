@@ -1240,14 +1240,25 @@ def rotoreflection_from_euler_angles_sph(
     np.ndarray
         The WignerD matrix for the generalized rotoreflection up to the given l.
 
+    Raises
+    ------
+    ______
+    ValueError
+        If all angles are zero, the axis for the rotoreflection cannot be determined.
+
     """
+    if np.allclose([alpha, beta, gamma], 0.0):
+        msg = "Reflection axis cannot be uniquely determined for angle==0.0!"
+        raise ValueError(msg)
     rotation_operator = rotation_from_euler_angles_sph(max_l, alpha, beta, gamma)
     # find axis of rotation
     rotation_axis = scipy.spatial.transform.Rotation.from_euler(
         "zyz", [alpha, beta, gamma]
     ).as_rotvec()
     # normalize rotation axis
+    print(rotation_axis)
     rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+    print(rotation_axis)
     rotoreflection_operator = reflection_from_normal_sph(max_l, rotation_axis)
     return dot_product(rotoreflection_operator, rotation_operator)
 
@@ -1272,8 +1283,11 @@ def rotoreflection_from_axis_angle_sph(
         The WignerD matrix for the generalized rotoreflection up to the given l.
 
     """
+    if angle == 0.0:
+        return reflection_from_normal_sph(max_l, axis / np.linalg.norm(axis))
     # normalize the axis of rotation
     rotation_axis = axis / np.linalg.norm(axis)
+    print(rotation_axis, angle)
     rotoreflection_euler = scipy.spatial.transform.Rotation.from_rotvec(
         rotation_axis * angle
     ).as_euler("zyz")
