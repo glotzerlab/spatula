@@ -208,7 +208,4 @@ texinfo_documents = [
 ]
 
 # Common link locations
-rst_epilog = """
-.. _ruptures: https://centre-borelli.github.io/ruptures-docs/code-reference/
-.. _kneed: https://kneed.readthedocs.io/en/stable/
-"""
+rst_epilog = """"""
