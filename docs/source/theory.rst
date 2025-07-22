@@ -184,7 +184,7 @@ same operation multiple times. For example :math:`{\hat{C}_2}^2` applies
    * - :math:`D_n`
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`
    * - :math:`D_{nh}`
-     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{\sigma}_h`, :math:`\hat{S}_n`, :math:`{\hat{S}_n}^3`, ... :math:`{\hat{S}_n}^{n-1}`, :math:`n\hat{\sigma}_v`
+     - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{\sigma}_h`, :math:`\hat{C}_n \hat{\sigma}_h`, :math:`{\hat{C}_n}^2 \hat{\sigma}_h`, ... :math:`{\hat{C}_n}^{n-1} \hat{\sigma}_h`, :math:`n\hat{\sigma}_v`
    * - :math:`D_{nd}` (sometimes called :math:`D_{nv}`)
      - :math:`\hat{E}`, :math:`\hat{C}_n`, :math:`{\hat{C}_n}^2`, ... :math:`{\hat{C}_n}^{n-1}`, :math:`n \hat{C}_2^{'}`, :math:`\hat{S}_{2n}`, :math:`{\hat{S}_{2n}}^3`, ... :math:`{\hat{S}_{2n}}^{2n-1}`, :math:`n\hat{\sigma}_v`
    * - :math:`S_{n}`, :math:`n` is even
@@ -217,6 +217,9 @@ Notes on the table:
   :math:`\frac{2\pi}{n}`.
 * :math:`D_{nh}`: each :math:`\hat{\sigma}_v` is a reflection plane parallel to
   both principal (:math:`z`) and each :math:`\hat{C}_2^{'}` axis.
+* :math:`D_{nh}`: the :math:`\hat{C}_n^m \hat{\sigma}_h` evaluate to different 
+  :math:`\hat{S}_n` or :math:`\hat{S}_{n/2}` operator powers, see :cite:`bishop1993`
+  for more details.
 * :math:`D_{nd}`: each :math:`\hat{\sigma}_d` is a reflection plane parallel to
   the principal axis of symmetry (:math:`z`) and also contains the vector which
   bisects two neighboring :math:`\hat{C}_2^{'}` axes of symmetry.
