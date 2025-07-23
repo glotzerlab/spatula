@@ -1607,6 +1607,7 @@ def test_bcc_with_multiple_correct_symmetries(mode):
 @pytest.mark.parametrize("mode", modes)
 @pytest.mark.flaky(reruns=2)
 def test_bcc_with_multiple_incorrect_symmetries(mode):
+    cutoff = 0.8
     box, points = crystals_dict["bcc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
     incorrect_symmetries = ["Oh", "D3h"]
@@ -1614,7 +1615,7 @@ def test_bcc_with_multiple_incorrect_symmetries(mode):
     op_pg = compute_op_result(
         incorrect_symmetries, optimizer, mode, (box, points), qargs, sigs
     )
-    assert np.all(op_pg.order[:, 1] < 0.8)
+    assert np.all(op_pg.order[:, 1] < cutoff)
     assert np.allclose(op_pg.order[:, 0], 1.0, rtol=1e-4)
 
 
