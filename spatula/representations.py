@@ -686,17 +686,18 @@ def _dnh_operations_cart(n: int) -> np.ndarray:
     operations = _dn_operations_cart(n)
     identity_operation = identity_cart()
     sigma_h_operation = reflection_from_normal_cart([0, 0, 1])
-    rotoreflection_operation = rotoreflection_from_euler_angles_cart(
+    rotation_operation = rotation_from_euler_angles_cart(
         0, 0, 2 * np.pi / n
     )
     for i in range(n, 2 * n):
         c2prime_operation = operations[i]
         operations.append(np.dot(sigma_h_operation, c2prime_operation))
     operations.append(sigma_h_operation)
-    for i in range(1, n, 2):
+    for i in range(1, n):
         final_operation = identity_operation
         for _ in range(0, i):
-            final_operation = np.dot(final_operation, rotoreflection_operation)
+            final_operation = np.dot(final_operation, rotation_operation)
+        final_operation = np.dot(final_operation, sigma_h_operation)
         operations.append(final_operation)
     return operations
 
@@ -1535,17 +1536,18 @@ def _dnh_operations_sph(max_l: int, n: int) -> np.ndarray:
     operations = _dn_operations_sph(max_l, n)
     identity_operation = identity_sph(max_l)
     sigma_h_operation = reflection_from_normal_sph(max_l, [0, 0, 1])
-    rotoreflection_operation = rotoreflection_from_euler_angles_sph(
+    rotation_operation = rotation_from_euler_angles_sph(
         max_l, 0, 0, 2 * np.pi / n
     )
     for i in range(n, 2 * n):
         c2prime_operation = operations[i]
         operations.append(dot_product(sigma_h_operation, c2prime_operation))
     operations.append(sigma_h_operation)
-    for i in range(1, n, 2):
+    for i in range(1, n):
         final_operation = identity_operation
         for _ in range(0, i):
-            final_operation = dot_product(final_operation, rotoreflection_operation)
+            final_operation = dot_product(final_operation, rotation_operation)
+        final_operation = dot_product(final_operation, sigma_h_operation)
         operations.append(final_operation)
     return operations
 

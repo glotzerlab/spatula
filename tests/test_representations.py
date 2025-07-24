@@ -9,7 +9,16 @@ import spatula
 from spatula.representations import (
     CartesianRepMatrix,
     WignerD,
+    _ch_operations_sph,
+    _ci_operations_sph,
+    _cn_operations_sph,
+    _cnh_operations_sph,
+    _cnv_operations_sph,
+    _dn_operations_sph,
+    _dnd_operations_sph,
+    _dnh_operations_sph,
     _parse_point_group,
+    _sn_operations_sph,
     compute_Cartesian_Representation_matrix_for_a_given_point_group,
     compute_condensed_wignerD_matrix_for_a_given_point_group,
     condensed_wignerD_from_operations,
@@ -905,3 +914,71 @@ inputs_that_fail = {"(2/m": ValueError}
 def test_notations_fail(point_group):
     with pytest.raises(inputs_that_fail[point_group]):
         convert_hermann_mauguin_to_schonflies(point_group)
+
+
+order_to_test = range(2, 16)
+group_orders = []
+for i in order_to_test:
+    group_orders.append(("C" + str(i), i))
+    group_orders.append(("C" + str(i) + "v", 2 * i))
+    group_orders.append(("C" + str(i) + "h", 2 * i))
+    group_orders.append(("D" + str(i), 2 * i))
+    group_orders.append(("D" + str(i) + "h", 4 * i))
+    group_orders.append(("D" + str(i) + "d", 4 * i))
+    if i % 2 == 0:
+        group_orders.append(("S" + str(i), i))
+group_orders.extend(
+    [
+        ("Ci", 2),
+        ("Cs", 2),
+        ("T", 12),
+        ("Th", 24),
+        ("Td", 24),
+        ("O", 24),
+        ("Oh", 48),
+        ("I", 60),
+        ("Ih", 120),
+    ]
+)
+
+
+# parametrize over all groups for orders 2 to 15
+# correct solutions for Cs =2; Ci=2, Cn = n, Dnh=4n, Td=24, Oh = 48, Ih = 120, Cnv =2n,
+# Cnh=2n, S2n = 2n, Dn = 2n, Dnd=4n, T=12, Td=24, O=24, I=60
+@pytest.mark.parametrize(
+    "point_group, expected_order",
+    group_orders,
+)
+def test_point_group_order(point_group, expected_order):
+    grp = CartesianRepMatrix(point_group)
+    point_group_order = len(grp.matrices)
+    assert point_group_order == expected_order, (
+        f"Point group {point_group} has order {point_group_order}, "
+        f"expected {expected_order}; Cartesian."
+    )
+    # if cnh call _cnh_operations_sph
+    if point_group.startswith("C") and point_group.endswith("h"):
+        sph_mats = _cnh_operations_sph(3, int(point_group[1:-1]))
+    elif point_group.startswith("C") and point_group.endswith("v"):
+        sph_mats = _cnv_operations_sph(3, int(point_group[1:-1]))
+    elif point_group.startswith("D") and point_group.endswith("d"):
+        sph_mats = _dnd_operations_sph(3, int(point_group[1:-1]))
+    elif point_group.startswith("D") and point_group.endswith("h"):
+        sph_mats = _dnh_operations_sph(3, int(point_group[1:-1]))
+    elif point_group.startswith("D") and point_group[1:-1].isdigit():
+        sph_mats = _dn_operations_sph(3, int(point_group[1:]))
+    elif point_group.startswith("C") and point_group[1:-1].isdigit():
+        sph_mats = _cn_operations_sph(3, int(point_group[1:]))
+    elif point_group.startswith("S") and point_group[1:-1].isdigit():
+        sph_mats = _sn_operations_sph(3, int(point_group[1:]))
+    elif point_group.startswith("C") and point_group.endswith("i"):
+        sph_mats = _ci_operations_sph(3)
+    elif point_group.startswith("C") and point_group.endswith("s"):
+        sph_mats = _ch_operations_sph(3)
+    else:
+        return
+
+    assert len(sph_mats) == expected_order, (
+        f"Point group {point_group} has order {len(sph_mats)}, "
+        f"expected {expected_order}; WignerD."
+    )
