@@ -12,6 +12,25 @@ from scipy.spatial.transform import Rotation
 from . import _spatula
 
 
+def _quaternion_fibonacci_lattice(n):
+    """Generate a near-uniform grid of `n` quaternions.
+
+    This is equivalent to a Fibonacci lattice on the 3-sphere. See
+    `this paper <https://ieeexplore.ieee.org/document/9878746>`_ for a derivation.
+    """
+    psi = 1.533751168755204288118041413  # Solution to ψ**4 = ψ + 4
+    s = np.arange(n) + 1 / 2
+    t = s / n
+    d = 2 * np.pi * s
+    r0, r1 = (np.sqrt(t), np.sqrt(1 - t))
+    α, β = (d / np.sqrt(2), d / psi)
+
+    # Allocate as rows and then transpose, rather than stacking columns
+    result = np.empty((4, n))
+    result[...] = r0 * np.sin(α), r0 * np.cos(α), r1 * np.sin(β), r1 * np.cos(β)
+    return result.T
+
+
 # Only here for typing/documentation purposes.
 class Optimizer:
     """Base class for optimizers."""
@@ -166,6 +185,26 @@ class Mesh(Optimizer):
         quaternions = quaternions.reshape((n_axes * n_angles, 4))
         points[1:] = np.hstack((quaternions[:, -1].reshape(-1, 1), quaternions[:, :-1]))
         return cls(points)
+
+    @classmethod
+    def from_lattice(cls, n_rotations=150):
+        r"""Create a Mesh optimizer that tests rotations on a Fibonacci lattice.
+
+        The lattice provides a mostly-uniform covering of the 3-sphere. Refer to
+        `this paper <https://ieeexplore.ieee.org/document/9878746>`_ for a derivation.
+
+        Parameters
+        ----------
+        n_rotations : `int`, optional
+            The number of rotation in the lattice. Defaults to 75.
+
+        Returns
+        -------
+        mesh : Mesh
+            The optimizer which will test :math:`N_{rotations}` samples.
+
+        """
+        return cls(_quaternion_fibonacci_lattice(n_rotations))
 
     @staticmethod
     def _sample_angles(n_angles):
