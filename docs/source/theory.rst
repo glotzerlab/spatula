@@ -217,7 +217,7 @@ Notes on the table:
   :math:`\frac{2\pi}{n}`.
 * :math:`D_{nh}`: each :math:`\hat{\sigma}_v` is a reflection plane parallel to
   both principal (:math:`z`) and each :math:`\hat{C}_2^{'}` axis.
-* :math:`D_{nh}`: the :math:`\hat{C}_n^m \hat{\sigma}_h` evaluate to different 
+* :math:`D_{nh}`: the :math:`\hat{C}_n^m \hat{\sigma}_h` evaluate to different
   :math:`\hat{S}_n` or :math:`\hat{S}_{n/2}` operator powers, see :cite:`bishop1993`
   for more details.
 * :math:`D_{nd}`: each :math:`\hat{\sigma}_d` is a reflection plane parallel to

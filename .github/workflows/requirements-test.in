@@ -1,0 +1,10 @@
+ninja
+cmake
+coxeter
+pybind11
+freud
+numpy
+pytest
+pytest-rerunfailures
+scikit-build-core
+scipy
