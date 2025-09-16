@@ -18,6 +18,7 @@
 # absolute, like shown here.
 #
 
+import os
 import pathlib
 import sys
 
@@ -39,10 +40,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "IPython.sphinxext.ipython_console_highlighting",
-    "sphinx.ext.mathjax",
+    "sphinxcontrib.katex",
     "sphinxcontrib.bibtex",
     "nbsphinx",
 ]
+
+if os.getenv("READTHEDOCS"):
+    katex_prerender = True
 
 napoleon_numpy_docstring = True
 
@@ -134,7 +138,7 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
+html_css_files = ["fix-katex.css"]
 
 # -- Options for HTMLHelp output ---------------------------------------
 
