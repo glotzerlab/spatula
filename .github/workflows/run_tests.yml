@@ -1,7 +1,7 @@
 name: Run Unit Tests
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 on:
@@ -16,15 +16,12 @@ on:
   # trigger on request
   workflow_dispatch:
 
-defaults:
-  run:
-    shell: bash -leo pipefail {0}
-
 jobs:
   run_tests:
     name: Unit test [py${{ matrix.python }} ${{ matrix.os }}]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-24.04]
         python: ['310', '311', '312', '313']
@@ -49,7 +46,7 @@ jobs:
           lockfile: ".github/workflows/requirements-test.txt"
       - name: Build and Install
         run: |
-          uv pip install . --no-build-isolation --no-deps -v
+          uv pip install . --no-build-isolation --no-deps --system -v
 
       - name: Run Tests
         run: |
