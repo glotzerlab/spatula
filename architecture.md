@@ -26,7 +26,7 @@ The code is broken into a few small sections
 - util: Sundry classes and methods used to aid/simplify computation of spatula
 
 ## CI
-The code uses pre-commit to format and lint code before committing.
+The code uses prek to format and lint code before committing.
 
 ## Testing
 Testing is done through `pytest`.
