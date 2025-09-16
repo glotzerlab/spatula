@@ -6,5 +6,6 @@ freud
 numpy
 pytest
 pytest-rerunfailures
+setuptools
 scikit-build-core
 scipy

@@ -55,6 +55,8 @@ scipy==1.16.2
     # via
     #   -r .github/workflows/requirements-test.in
     #   coxeter
+setuptools==80.9.0
+    # via -r .github/workflows/requirements-test.in
 six==1.17.0
     # via prompt-toolkit
 urllib3==2.5.0
