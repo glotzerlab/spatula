@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Copyright (c) 2021-2025 The Regents of the University of Michigan
 # Part of spatula, released under the BSD 3-Clause License.
 
 """Point group and symmetry operation representations."""
@@ -686,9 +686,7 @@ def _dnh_operations_cart(n: int) -> np.ndarray:
     operations = _dn_operations_cart(n)
     identity_operation = identity_cart()
     sigma_h_operation = reflection_from_normal_cart([0, 0, 1])
-    rotation_operation = rotation_from_euler_angles_cart(
-        0, 0, 2 * np.pi / n
-    )
+    rotation_operation = rotation_from_euler_angles_cart(0, 0, 2 * np.pi / n)
     for i in range(n, 2 * n):
         c2prime_operation = operations[i]
         operations.append(np.dot(sigma_h_operation, c2prime_operation))
@@ -1536,9 +1534,7 @@ def _dnh_operations_sph(max_l: int, n: int) -> np.ndarray:
     operations = _dn_operations_sph(max_l, n)
     identity_operation = identity_sph(max_l)
     sigma_h_operation = reflection_from_normal_sph(max_l, [0, 0, 1])
-    rotation_operation = rotation_from_euler_angles_sph(
-        max_l, 0, 0, 2 * np.pi / n
-    )
+    rotation_operation = rotation_from_euler_angles_sph(max_l, 0, 0, 2 * np.pi / n)
     for i in range(n, 2 * n):
         c2prime_operation = operations[i]
         operations.append(dot_product(sigma_h_operation, c2prime_operation))
