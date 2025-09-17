@@ -7,7 +7,7 @@ Source code
 
 Pybind11
 ~~~~~~~~
-`GitHub <https://github.com/pybind/pybind11>`_
+`GitHub Pybind11 <https://github.com/pybind/pybind11>`_
 
 Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.
 
@@ -41,7 +41,7 @@ external contributions to this project including patches, pull requests, etc.
 
 thread_pool
 ~~~~~~~~~~~
-`GitHub <https://github.com/bshoshany/thread-pool>`_
+`GitHub thread_pool <https://github.com/bshoshany/thread-pool>`_
 
 MIT License
 
@@ -67,7 +67,7 @@ SOFTWARE.
 
 Pybind11 CMake Example
 ~~~~~~~~~~~~~~~~~~~~~~
-`GitHub <https://github.com/pybind/cmake_example>`_
+`GitHub Pybind11 Cmake Example <https://github.com/pybind/cmake_example>`_
 
 Copyright (c) 2016 The Pybind Development Team, All rights reserved.
 
@@ -109,7 +109,7 @@ derivative works thereof, in binary and source code form.
 
 HOOMD-blue
 ~~~~~~~~~~
-`GitHub <https://github.com/glotzerlab/hoomd-blue>`_
+`GitHub HOOMD-blue <https://github.com/glotzerlab/hoomd-blue>`_
 
 Copyright (c) 2009-2022 The Regents of the University of Michigan.
 All rights reserved.
