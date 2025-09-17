@@ -8,7 +8,7 @@ rst_in="changelog.rst"
 if [[ -z "${1:-}" ]]; then
   pcregrep -M "^\^{4,}.*\n[\s\S]*" ${rst_in} \
   | tail -n +2 \
-  | pandoc --from=rst --to=markdown --wrap=none  
+  | pandoc --from=rst --to=markdown --wrap=none
   exit 0
 fi
 
