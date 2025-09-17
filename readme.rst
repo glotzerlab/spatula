@@ -5,7 +5,7 @@ SPATULA
 Overview
 --------
 
-``SPATULA`` (Symmetry Pattern Analysis Toolkit for Understanding Local Arrangements) is a Python package for computing the continuous point group ordering of the neighbors of a point in space.
+``SPATULA`` (Symmetry Pattern Analysis Toolkit for Understanding Local Arrangements) is a Python package for computing the continuous symmetry ordering of the neighbors of a point in space.
 In general, this is to compute the local ordering of particles (molecules) in simulations or experiments over time.
 The package serves as an extension of `freud <https://github.com/glotzerlab/freud>`__ with a new order parameter.
 
@@ -27,7 +27,7 @@ Resources
 =========
 
 - `Reference Documentation <https://spatula.readthedocs.io/>`__: Examples, tutorials, and package Python APIs.
-- `Installation Guide <https://spatula.readthedocs.io/en/stable/gettingstarted/installation.html>`__: Instructions for installing and compiling **spatula**.
+- `Installation Guide <https://spatula.readthedocs.io/en/latest/installation.html>`__: Instructions for installing and compiling **spatula**.
 - `GitHub repository <https://github.com/glotzerlab/spatula>`__: Download the **spatula** source code.
 - `Issue tracker <https://github.com/glotzerlab/spatula/issues>`__: Report issues or request features.
 
@@ -59,10 +59,10 @@ Example
     import freud
     import spatula
 
-    system = freud.data.UnitCell.fcc().generate_system(5)
+    system = freud.data.UnitCell.fcc().generate_system(3)
     optimizer = spatula.optimize.Union.with_step_gradient_descent(
         optimizer=spatula.optimize.Mesh.from_grid()
     )
-    compute = spatula.PGOP(symmetries, optimizer)
-    compute.compute(system, {"num_neighbors": 12, "exclude_ii": True})
-    print(compute.order)
+    PGOP_Oh_Ih = spatula.PGOP(["Oh","Ih"], optimizer)
+    PGOP_Oh_Ih.compute(system, sigmas=None, neighbors={"r_max": 1.2, "exclude_ii": True})
+    print(PGOP_Oh_Ih.order)
