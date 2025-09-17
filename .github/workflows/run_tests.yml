@@ -50,9 +50,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd tests
-          python -m pytest -v --disable-warnings -W ignore::DeprecationWarning
-          cd ..
+          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning
 
   tests_complete:
     name: All tests

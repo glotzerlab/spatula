@@ -39,7 +39,6 @@ jobs:
 
       - name: Determine last tag via git describe
         if: ${{ ! startsWith(github.ref, 'refs/tags/v') }}
-        #run: echo tag="$(git describe --abbrev=0)" >> "$GITHUB_ENV"
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
