@@ -17,5 +17,3 @@ Change Log
 *Added:*
 
 * First public release.
-
-

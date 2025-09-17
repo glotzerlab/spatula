@@ -11,11 +11,11 @@ Please acknowledge the use of this software within the body of your publication 
 The following is a BibTex citation for the spatula paper::
 
     @misc{fijan2025quantifying,
-          title={Quantifying Local Point-Group-Symmetry Order in Complex Particle Systems}, 
+          title={Quantifying Local Point-Group-Symmetry Order in Complex Particle Systems},
           author={Domagoj Fijan and Maria R. Ward Rashidi and Sharon C. Glotzer},
           year={2025},
           eprint={2509.12665},
           archivePrefix={arXiv},
           primaryClass={physics.comp-ph},
-          url={https://arxiv.org/abs/2509.12665}, 
+          url={https://arxiv.org/abs/2509.12665},
     }
