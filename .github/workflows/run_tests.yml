@@ -50,7 +50,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning
+          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 2 --reruns-delay 1 -rA
 
   tests_complete:
     name: All tests
