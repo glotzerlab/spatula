@@ -48,3 +48,8 @@ ignore = ["B905","D107","D213","D211","E741","S101","UP006","SIM116","D203"]
 "tests/*" = ["D", "B018", "F811"]
 "tests/test_wignerd.py" = ["N802"]
 "docs/source/conf.py" = ["D100"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore:Gimbal lock:UserWarning',
+]
