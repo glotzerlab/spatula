@@ -55,8 +55,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 2 --reruns-delay 1 -rA `
-            -o rerunfailures.fail_on_flaky=false
+          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 2 --reruns-delay 1 -rA -o rerunfailures.fail_on_flaky=false
           if ($LASTEXITCODE -eq 0) { exit 0 } else { exit $LASTEXITCODE }
 #
 #      - name: Run Tests
