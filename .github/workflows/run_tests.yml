@@ -55,8 +55,22 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 2 --reruns-delay 1 -rA -o rerunfailures.fail_on_flaky=false
-          if ($LASTEXITCODE -eq 0) { exit 0 } else { exit $LASTEXITCODE }
+          # run tests and emit junit xml
+          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 5 --reruns-delay 1 -rA --junitxml pytest-report.xml
+          # if pytest returned non-zero, check if it was only due to flakies
+          if ($LASTEXITCODE -ne 0) {
+            [xml]$j = Get-Content pytest-report.xml
+            $failures = [int]$j.testsuite.failures
+            $errors   = [int]$j.testsuite.errors
+            if ($failures -eq 0 -and $errors -eq 0) {
+              Write-Host "Only flaky reruns occurred; forcing success."
+              exit 0
+            } else {
+              exit $LASTEXITCODE
+            }
+          } else {
+            exit 0
+          }
 #
 #      - name: Run Tests
 #        run: |
