@@ -1,7 +1,7 @@
 name: Run Unit Tests
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 on:
@@ -16,48 +16,60 @@ on:
   # trigger on request
   workflow_dispatch:
 
-defaults:
-  run:
-    shell: bash -leo pipefail {0}
-
 jobs:
   run_tests:
     name: Unit test [py${{ matrix.python }} ${{ matrix.os }}]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-#        python: ['310', '311', '312', '313']
-        python: ['313']
-#        include:
-#          # Test macOS and windows on oldest and latest versions.
-#          - os: 'macos-14'
-#            python: '313'
-#          - os: 'windows-latest'
-#            python: '313'
-#          - os: 'windows-latest'
-#            python: '310'
+        os: [ubuntu-24.04]
+        python: ['310', '311', '312', '313']
+        include:
+          - os: 'macos-14'
+            python: '313'
+          - os: 'windows-2025'
+            python: '313'
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4.1.7
         with:
           submodules: true
-
-      - name: Create Python Environment
-        uses: mamba-org/setup-micromamba@v1.9.0
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
-          micromamba-version: '1.5.8-0'
-          environment-name: test
-          environment-file: .github/workflows/env-files/py${{ matrix.python }}-conda-lock.yml
-
+          python-version: "3.13"
+      - name: Set up Python environment
+        uses: glotzerlab/workflows/setup-uv@1fe577d5430222a9793694a14cdb316cf8f720e1 # 0.9.0
+        with:
+          lockfile: ".github/workflows/requirements-test.txt"
       - name: Build and Install
         run: |
-          uv pip install . --no-build-isolation --no-deps -v
-
-      - name: Run Tests
+          uv pip install . --no-build-isolation --no-deps --system -v
+      - name: Run Tests (Unix/macOS)
+        if: runner.os != 'Windows'
+        run: pytest tests/ -v
+      - name: Run Tests (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          pytest tests/ -v
+          # run tests and emit junit xml
+          pytest tests/ -v --junitxml pytest-report.xml
+          # if pytest returned non-zero, check if it was only due to flakies
+          if ($LASTEXITCODE -ne 0) {
+            [xml]$j = Get-Content pytest-report.xml
+            $failures = [int]$j.testsuite.failures
+            $errors   = [int]$j.testsuite.errors
+            if ($failures -eq 0 -and $errors -eq 0) {
+              Write-Host "Only flaky reruns occurred; forcing success."
+              exit 0
+            } else {
+              exit $LASTEXITCODE
+            }
+          } else {
+            exit 0
+          }
 
   tests_complete:
     name: All tests

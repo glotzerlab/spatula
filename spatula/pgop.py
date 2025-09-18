@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2025 The Regents of the University of Michigan
+# Copyright (c) 2021-2025 The Regents of the University of Michigan
 # Part of spatula, released under the BSD 3-Clause License.
 
 """Python interface for the package.
@@ -44,10 +44,11 @@ def _get_neighbors(
 class BOOSOP:
     """Compute the point group symmetry order for bond orientational order diagram.
 
-    This class detects the point group symmetry of the modified bond order
-    diagram of a particles. Rather than treating the neighbor vectors as delta
-    functions, this class treats these vectors as the mean of a distribution on
-    the surface of the sphere (e.g. von-Mises-Fisher or uniform distributions).
+    This class implements the method described in :cite:`butler2024development`. It
+    detects the point group symmetry of the modified bond order diagram of a particles.
+    Rather than treating the neighbor vectors as delta functions, this class treats
+    these vectors as the mean of a distribution on the surface of the sphere (e.g.
+    von-Mises-Fisher or uniform distributions).
     """
 
     def __init__(
@@ -61,12 +62,13 @@ class BOOSOP:
     ):
         """Create a BOOSOP object.
 
-        All point groups of finite order are supported.
+        This class implements the method described in :cite:`butler2024development`. All
+        point groups of finite order are supported.
 
         Note
         ----
             A ``max_l`` of at least 9 is needed to capture several higher order groups
-            such as Cnh, Cnv and some D groups.
+            such as :math:`C_{nh}`, :math:`C_{nv}` and some :math:`D` groups.
 
         Parameters
         ----------
@@ -75,9 +77,12 @@ class BOOSOP:
             distribution or "uniform" for a uniform distribution.
         symmetries : list[str]
             A list of point groups to test each particles' neighborhood. Uses
-            Schoenflies notation and is case sensitive. Options are Ci, Cs, Cn, Cnh,
-            Cnv, Sn, Dn, Dnh, Dnd, T, Th, Td, O, Oh, I, Ih where n should be replaced
-            with group order (an integer) and passed as a list of strings.
+            Schoenflies notation and is case sensitive. Options are
+            :math:`C_i`, :math:`C_s`, :math:`C_n`, :math:`C_{nh}`, :math:`C_{nv}`,
+            :math:`S_n`, :math:`D_n`, :math:`D_{nh}`, :math:`D_{nd}`, :math:`T`,
+            :math:`T_h`, :math:`T_d`, :math:`O`, :math:`O_h`, :math:`I`, :math:`I_h`.
+            Replace :math:`n` with an integer, and pass them as strings, e.g.,
+            ``["C3", "D6h"]``.
         optimizer : spatula.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
@@ -93,7 +98,7 @@ class BOOSOP:
             good accuracy. Defaults to 11.5.
         max_theta : float
             The maximum angle (in radians) that the uniform distribution
-            extends. Only used when ``dist`` is uniform. Defauts to 0.61
+            extends. Only used when ``dist`` is uniform. Defaults to 0.61
             (roughly 35 degrees).
 
         """
@@ -133,7 +138,7 @@ class BOOSOP:
         refine_l: int = 20,
         refine_m: int = 20,
     ):
-        """Compute the point group symmetry for a given system and neighbor.
+        r"""Compute the point group symmetry for a given system and neighbor.
 
         Note
         ----
@@ -268,12 +273,13 @@ class BOOSOP:
 
 
 class PGOP:
-    """Compute the point group symmetry order for a given point cloud.
+    r"""Compute the point group symmetry order for a given point cloud.
 
-    This class detects the point group symmetry of a point in space based on the
-    surrounding points. Rather than treating the neighbor vectors as delta
-    functions, this class treats these vectors as a Gaussian distribution. This enables
-    continuous evaluation of the point group symmetry.
+    This class implements the algorithm highlighted in :cite:`fijan2025quantifying`. It
+    detects the point group symmetry of a point in space based on the surrounding
+    points. Rather than treating the neighbor vectors as delta functions, this class
+    treats these vectors as a Gaussian distribution. This enables continuous evaluation
+    of the point group symmetry.
     """
 
     def __init__(
@@ -283,8 +289,9 @@ class PGOP:
         mode: str = "full",
         compute_per_operator_values_for_final_orientation: bool = False,
     ):
-        """Create a PGOP object.
+        r"""Create a PGOP object.
 
+        This class implements the algorithm highlighted in :cite:`fijan2025quantifying`.
         All point groups of finite order are supported.
 
 
@@ -292,16 +299,20 @@ class PGOP:
         ----------
         symmetries : list[str]
             A list of point groups to test each particles' neighborhood. Uses
-            Schoenflies notation and is case sensitive. Options are Ci, Cs, Cn, Cnh,
-            Cnv, Sn, Dn, Dnh, Dnd, T, Th, Td, O, Oh, I, Ih where n should be replaced
-            with group order (an integer) and passed as a list of strings.
+            Schoenflies notation and is case sensitive. Options are :math:`C_i`,
+            :math:`C_s`, :math:`C_n`, :math:`C_{nh}`, :math:`C_{nv}`, :math:`S_n`,
+            :math:`D_n`, :math:`D_{nh}`, :math:`D_{nd}`, :math:`T`, :math:`T_h`,
+            :math:`T_d`, :math:`O`, :math:`O_h`, :math:`I`, :math:`I_h`, where :math:`n`
+            where n should be replaced with group order (an integer) and passed as a
+            list of strings.
         optimizer : spatula.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
             neighborhoods.
         mode : str, optional
             The mode to use for the computation. Either "full" or "boo". Defaults to
-            "full". "full" computes the full point group symmetry and "boo" uses the
-            bond orientational order (diagram) symmetry.
+            "full". "full" computes the full point group symmetry order parameter (PGOP)
+            while "boo" computes the point group symmetry order of the bond
+            orientational order diagram (PGOP-BOOD).
         compute_per_operator_values_for_final_orientation : bool, optional
             Whether to compute the PGOP values for all subgroups of point group
             symmetries of interest, at same orientation as the point group of interest
@@ -328,7 +339,7 @@ class PGOP:
         elif mode == "boo":
             m_mode = 1
         else:
-            msg = f"Mode '{mode}' is not valid " "(valid params: {'full', 'boo'})"
+            msg = f"Mode '{mode}' is not valid (valid params: {{'full', 'boo'}})"
             raise ValueError(msg)
         self._mode = mode
         self._cpp = spatula._spatula.PGOP(
