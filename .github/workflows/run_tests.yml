@@ -47,7 +47,6 @@ jobs:
       - name: Build and Install
         run: |
           uv pip install . --no-build-isolation --no-deps --system -v
-# temporary for testing windows stuff
       - name: Run Tests (Unix/macOS)
         if: runner.os != 'Windows'
         run: pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning
@@ -56,7 +55,8 @@ jobs:
         shell: pwsh
         run: |
           # run tests and emit junit xml
-          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 5 --reruns-delay 1 -rA --junitxml pytest-report.xml
+          # pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 5 --reruns-delay 1 -rA --junitxml pytest-report.xml
+          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --junitxml pytest-report.xml
           # if pytest returned non-zero, check if it was only due to flakies
           if ($LASTEXITCODE -ne 0) {
             [xml]$j = Get-Content pytest-report.xml
@@ -71,10 +71,6 @@ jobs:
           } else {
             exit 0
           }
-#
-#      - name: Run Tests
-#        run: |
-#          pytest tests/ -v --disable-warnings -W ignore::DeprecationWarning --reruns 2 --reruns-delay 1 -rA
 
   tests_complete:
     name: All tests
