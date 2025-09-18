@@ -248,22 +248,24 @@ same configuration. This symmetrization can simply be obtained by applying the g
 action. We provide several ways to do this. Bond orientational order symmetry order
 parameter (BOOSOP) is based on an old implementation in which neighbor positions are
 projected onto a unit sphere, replaced with fisher distribution (gaussian on a sphere)
-and then symmetrized with respect to the point group of interest by applying the Wigner
+and then symmetrized with respect to the point group of interest, by applying the Wigner
 D matrix of a group action operation. The comparison of the two distributions is done
 by computing the normalized inner product between the two spherical harmonic expansions.
-In oPGOP we use the same idea, but instead of computing the spherical harmonic expansion
-of the fisher distributions, we consider the overlaps between fisher functions of the
-symmetrized configuration with the original configuration. We also support a version
-which quantifies full point group symmetry (fPGOP) in which we don't project the
-neighbors onto the unit sphere, but rather consider the full 3D positions of the
-neighbors which are now replaced by 3D gaussian distribution. The distance between
-the symmetrized and original configurations are calculated by computing the overlap between the
-two gaussians. The main difference here is that in the PGOP version is in the
-symmetrization procedure. In PGOP we cannot apply the group action at once, but rather
-each symmetry operation has to be applied to each neighbor separately, and results of
-the overlaps are averaged over all neighbors and symmetry operations. This is because
-the representation of the group action is different in cartesian (or spherical harmonic
-space) vs the function space in which we expanded the configurations in BOOSOP.
+In a newer implementation named PGOP-BOOD (Point Group Order Parameter of Bond
+Orientational Order Diagram) we use the same idea, but instead of computing the
+spherical harmonic expansion of the fisher distributions, we consider the overlaps
+between fisher functions of the symmetrized configuration with the original
+configuration. We also support a version which quantifies full point group symmetry
+(called simply PGOP) in which we don't project the neighbors onto the unit sphere, but
+rather consider the full 3D positions of the neighbors which are now replaced by 3D
+gaussian distribution. The distance between the symmetrized and original configurations
+are calculated by computing the overlap between the two gaussians. The main difference
+here is that in the PGOP version is in the symmetrization procedure. In PGOP we cannot
+apply the group action at once, but rather each symmetry operation has to be applied to
+each neighbor separately, and results of the overlaps are averaged over all neighbors
+and symmetry operations. This is because the representation of the group action is
+different in Cartesian (or spherical harmonic space) vs the function space in which we
+expanded the configurations in BOOSOP.
 
 Point group order parameter
 ---------------------------
@@ -280,8 +282,8 @@ value of the order parameter is just the average of all these overlaps. The last
 find the orientation of the principal symmetry axis of the point group which maximizes
 the value of the order parameter. This can be done in several ways and the code supports
 several optimization procedures. We support two flavors of PGOP: one in which the
-point group symmetry of bond orientational order is measured (oPGOP) and one in which
-the full point group symmetry is measured (fPGOP). The main free parameter of the method
+point group symmetry of bond orientational order is measured (PGOP-BOOD) and one in which
+the full point group symmetry is measured (PGOP). The main free parameter of the method
 is the choice of gaussian width. The width determines the sensitivity of the order
 parameter. In the limit of :math:`\sigma \rightarrow 0` the order parameter will be 1
 for perfect symmetry and 0 for no symmetry, so binary. The choice of the width also
@@ -293,13 +295,13 @@ Calculation of overlap
 ~~~~~~~~~~~~~~~~~~~~~~
 To compute the overlap between two gaussians we use the Bhattacharyya
 coefficient :cite:`bhattacharyya_measure_1946` :cite:`bhattacharyya_measure_1943`. The
-formula for the Bhattacharyya coefficient is for fPGOP in cartesian representation
+formula for the Bhattacharyya coefficient is for PGOP in Cartesian representation
 between two gaussians :math:`G_1` and :math:`G_2` is given by :cite:`kashyap_perfect_2019`:
 
 .. math::
   \mathrm{BC}(G_1,G_2)= \left(\frac{2\sigma_1\sigma_2}{\sqrt{\sigma_1^2+\sigma_2^2}}\right)^{3/2} \exp{-\frac{\left|\vec{r}_1-\vec{r}_2\right|^2}{4\left(\sigma_1^2+\sigma_2^2\right)}}.
 
-Using the formula for the Bhattacharyya coefficient for oPGOP, we first do a coordinate
+Using the formula for the Bhattacharyya coefficient for PGOP-BOOD, we first do a coordinate
 transformation to spherical coordinates and then compute the overlap between two fisher
 distributions:
 
@@ -492,8 +494,3 @@ for each operation and group action will be the sum of these matrices. Effective
 :math:`l` plays the role of the size of the basis sets (of spherical harmonics). So we
 shall have :math:`l` matrices for each operation in the group, and :math:`l` matrices
 for group action.
-
-Bibliography
--------------
-.. bibliography::
-   :filter: docname in docnames

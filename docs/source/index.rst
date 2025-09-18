@@ -19,6 +19,7 @@ Table of Contents
    credits
    changelog
    citing
+   references
 
 Indices and tables
 ==================

@@ -124,3 +124,23 @@ Cambridge Philosophical Society}, author={Altmann, S. L.}, year={1957}, pages={3
   isbn = {978-0-486-67355-4},
   langid = {english}
 }
+
+@misc{fijan2025quantifying,
+      title={Quantifying Local Point-Group-Symmetry Order in Complex Particle Systems},
+      author={Domagoj Fijan and Maria R. Ward Rashidi and Sharon C. Glotzer},
+      year={2025},
+      eprint={2509.12665},
+      archivePrefix={arXiv},
+      primaryClass={physics.comp-ph},
+      url={https://arxiv.org/abs/2509.12665},
+}
+
+@phdthesis{butler2024development,
+  title = {On the {{Development}} of {{Tools}} for the {{Study}} of {{Colloidal Self-Assembly}}},
+  author = {Butler, Brandon},
+  year = {2024},
+  doi = {10.7302/23058},
+  urldate = {2025-02-27},
+  abstract = {Self-assembly is the process by which a material organizes itself without the need for external stimuli. This process spans a broad range of phenomena, from the crystallization of solids from atoms and molecules to the formation of micelles and cell membranes by amphiphilic molecules to the organization of colloidal crystals from nanoparticles. Understanding these phase transitions is essential to the intelligent development of new materials and structures and in particular for controlling the thermodynamic and kinetic pathways for assembly. In Chapter 1, we describe the phenomena and challenges to detailed investigation of assembly pathways that this dissertation addresses. In Chapter 2, we outline two methods used throughout the dissertation. In Chapter 3, we present a six-step pipeline and Python package, dupin, developed for detecting events from particle trajectories. The detection of transitions in molecular simulations is typically handled in an ad hoc way, while dupin provides a generalized detection scheme that maintains interpretability and permits comparison among disparate systems and pathways. Furthermore, dupin enables self-assembly studies at larger length and time scales than previously feasible by removing the operator from the data-processing loop. We conclude Chapter 3 with example applications of dupin to the study of self-assembly. In Chapter 4, we outline and discuss a new order parameter (OP) that quantifies the symmetry of local particle environments. During the formation of crystals, particles organize themselves locally into motifs with new symmetries. The "Point Group Order Parameter", PGOP identifies these point group symmetries. We compare PGOP to other commonly used local OP and, through examples, show how it provides a level of description not accessible to other OP. The chapter begins with an outline of the algorithm followed by various demonstrations of PGOP's ability to detect and quantify local order in noisy crystalline and amorphous phases. In Chapter 5, we present another new OP developed for studying phase transformations. This new OP consists of a group of functions that form a vector of continuous local coordination numbers, CNv, in a system of particles. The local coordination number, CN, is defined as the number of particles that are first nearest neighbors to a given particle. Consequently, CN takes on only discrete integer values, which can be problematic when used as a local OP due to thermal fluctuations. CNv smooths CN into a continuous value making it useful in self-assembly studies in which thermal noise and other forces can cause discontinuous changes in CN. To do this, CNv uses the area of facets in Voronoi tessellation polytopes to weigh neighbor contributions to a coordination shell. We provide a detailed description of CNv and demonstrate its usefulness in noisy systems and in combination with PGOP. In Chapter 6, we discuss our software development contributions to HOOMD-blue, our group's open source Python simulation toolkit, for its version 3 release. This release included a complete redesign of the application programming interface, various ways to extend simulations of particle-based systems in Python and direct access to HOOMD-blue's internal data buffers. These advancements facilitated numerous new simulation protocols and methodologies while reducing the human capital necessary for the design of new simulation techniques. We conclude my dissertation in Chapter 7 with a summary of the preceding chapters and provide a forward-looking perspective regarding further work and the potential new applications of our work in the field of self-assembly.},
+  school = {University of Michigan},
+}
