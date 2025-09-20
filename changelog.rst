@@ -4,14 +4,26 @@
 Change Log
 ==========
 
-`GSD <https://github.com/glotzerlab/spatula>`_ releases follow `semantic versioning
+`spatula <https://github.com/glotzerlab/spatula>`_ releases follow `semantic versioning
 <https://semver.org/>`_.
 
 
 0.x
 ---
 
-0.1.0 (2025-09-16)
+0.1.0 (2025-09-20)
+^^^^^^^^^^^^^^^^^^
+
+*Added:*
+
+* First PyPI release.
+
+*Changed:*
+
+* Documentation improvements.
+* CI improvements.
+
+0.0.1 (2025-09-16)
 ^^^^^^^^^^^^^^^^^^
 
 *Added:*

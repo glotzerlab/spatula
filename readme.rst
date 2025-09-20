@@ -48,8 +48,8 @@ When using **spatula** to process data for publication, please `cite the github 
 
 Installation
 ============
-Currently, **spatula** is only available as a source package.
-See the Installation Guide to compile **spatula** from source.
+**Spatula** is available on PyPI and conda-forge.
+See the Installation Guide for more information.
 
 Example
 -------
