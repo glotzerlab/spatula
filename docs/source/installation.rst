@@ -87,9 +87,11 @@ The required packages are
 + furo
 + sphinx
 + sphinxcontrib-bibtex
++ sphinxcontrib-katex
++ ipython
 + nbsphinx
 
-These can be installed with ``python -m pip install sphinx furo sphinxcontrib-bibtex nbsphinx``.
+These can be installed with ``python -m pip install sphinx furo sphinxcontrib-bibtex sphinxcontrib-katex ipython nbsphinx``.
 Navigate to docs folder ``cd docs``.
 To build documentation in ``html`` form run ``make html``.
 To view the built documentation open the ``index.html`` file in ``./docs/build`` with your preferred browser.
