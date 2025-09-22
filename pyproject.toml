@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 
 [project]
-name = "spatula"
+name = "spatula-analysis"
 version = "0.1.0"
 requires-python = ">=3.8"
 description = "Point group symmetry analysis of local environments for point cloud data."
