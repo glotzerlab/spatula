@@ -3,7 +3,7 @@
 
 """Classes to optimize over SO(3) for `spatula.PGOP`."""
 
-from pathlib import Path
+from importlib.resources import as_file, files
 
 import numpy as np
 import scipy as sp
@@ -110,8 +110,8 @@ def _load_sphere_codes():
         The list of sphere codes from 1 to 249 points.
 
     """
-    fn = Path(__file__).parent / "sphere-codes.npz"
-    with np.load(str(fn)) as data:
+    res = files(__package__) / "sphere-codes.npz"
+    with as_file(res) as fn, np.load(str(fn)) as data:
         return list(data.values())
 
 
