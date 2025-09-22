@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 
 [project]
-name = "spatula"
+name = "spatula-analysis"
 version = "0.1.0"
 requires-python = ">=3.8"
 description = "Point group symmetry analysis of local environments for point cloud data."
@@ -53,3 +53,6 @@ ignore = ["B905","D107","D213","D211","E741","S101","UP006","SIM116","D203"]
 filterwarnings = [
     'ignore:Gimbal lock:UserWarning',
 ]
+
+[tool.scikit-build]
+wheel.packages = ["spatula"]           # copy the whole Python package folder into the wheel
