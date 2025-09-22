@@ -8,6 +8,8 @@ name = "spatula-analysis"
 version = "0.1.0"
 requires-python = ">=3.8"
 description = "Point group symmetry analysis of local environments for point cloud data."
+readme = "readme.rst"
+license = { file = "LICENSE" }
 maintainers = [{name = "Brandon Butler", email = "butlerbr@umich.edu"}, {name = "Maria Ward Rashidi", email = "mariarw@umich.edu"}, {name = "Domagoj Fijan", email = "domagoj.fijan@gmail.com"}]
 authors = [{name = "Brandon Butler", email = "butlerbr@umich.edu"}, {name = "Maria Ward Rashidi", email = "mariarw@umich.edu"}, {name = "Domagoj Fijan", email = "domagoj.fijan@gmail.com"}]
 keywords = ["order parameter", "point groups", "molecular simulations", "symmetry", "crystallography", "condensed matter", "soft matter"]
@@ -32,6 +34,12 @@ test = [
     "pytest-rerunfailures",
     "coxeter",
 ]
+
+[project.urls]
+Documentation = "https://spatula.readthedocs.io"
+Download = "https://pypi.org/project/spatula-analysis/"
+Source = "https://github.com/glotzerlab/spatula"
+Issues = "https://github.com/glotzerlab/spatula/issues"
 
 
 [tool.ruff]
