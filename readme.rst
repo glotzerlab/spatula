@@ -43,7 +43,7 @@ Citation
 ========
 
 When using **spatula** to process data for publication, please refer to the `documentation instructions
-<https://spatula.readthedocs.io/en/v0.1.0/citing.html>`__.
+<https://spatula.readthedocs.io/en/latest/citing.html>`__.
 
 
 Installation
