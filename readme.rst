@@ -42,8 +42,8 @@ Related Tools
 Citation
 ========
 
-When using **spatula** to process data for publication, please `cite the github repository
-<https://github.com/glotzerlab/spatula>`__.
+When using **spatula** to process data for publication, please refer to the `documentation instructions
+<https://spatula.readthedocs.io/en/v0.1.0/citing.html>`__.
 
 
 Installation
@@ -66,3 +66,4 @@ Example
     PGOP_Oh_Ih = spatula.PGOP(["Oh","Ih"], optimizer)
     PGOP_Oh_Ih.compute(system, sigmas=None, neighbors={"r_max": 1.2, "exclude_ii": True})
     print(PGOP_Oh_Ih.order)
+
