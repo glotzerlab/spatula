@@ -42,8 +42,8 @@ Related Tools
 Citation
 ========
 
-When using **spatula** to process data for publication, please `cite the github repository
-<https://github.com/glotzerlab/spatula>`__.
+When using **spatula** to process data for publication, please refer to the `documentation instructions
+<https://spatula.readthedocs.io/en/latest/citing.html>`__.
 
 
 Installation

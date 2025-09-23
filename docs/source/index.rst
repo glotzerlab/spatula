@@ -2,7 +2,7 @@
 Welcome to spatula documentation
 ================================
 
-.. include:: ../../readme.rst
+.. include:: ../../README.rst
 
 Table of Contents
 =================
