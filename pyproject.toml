@@ -8,7 +8,7 @@ name = "spatula-analysis"
 version = "0.1.0"
 requires-python = ">=3.8"
 description = "Point group symmetry analysis of local environments for point cloud data."
-readme = "readme.rst"
+readme = "README.rst"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 keywords = ["order parameter", "point groups", "molecular simulations", "symmetry", "crystallography", "condensed matter", "soft matter"]
