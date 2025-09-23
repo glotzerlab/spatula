@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report a bug in spatula.
+labels: ['bug']
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: Describe the problem.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Script
+      description: |
+        The *minimal* script that demonstrates the problem. The script should depend only on
+        spatula and its dependencies so that developers can run it.
+      placeholder: |
+        import spatula 
+        ...
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Input files
+      description: Attach any input files needed to run the script.
+  - type: textarea
+    attributes:
+      label: Output
+      description: |
+        What output did you get?
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected output
+      description: What output do you expect?
+  - type: input
+    attributes:
+      label: spatula Version
+      description: What version of spatula are you using?
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Python Version
+      description: What version of python are you using?
+      placeholder: 3.13.0
+  - type: dropdown
+    attributes:
+      label: Platform
+      description: What platform are you using? Select all that apply.
+      multiple: true
+      options:
+        - Linux
+        - macOS
+  - type: dropdown
+    attributes:
+      label: Installation method
+      description: How did you install spatula?
+      options:
+        - Download from PyPI
+        - Download from conda-forge
+        - built from source
