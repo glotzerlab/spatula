@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature for spatula 
+description: Suggest a new feature for spatula
 labels: ['enhancement']
 body:
   - type: textarea

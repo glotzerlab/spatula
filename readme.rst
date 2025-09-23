@@ -66,4 +66,3 @@ Example
     PGOP_Oh_Ih = spatula.PGOP(["Oh","Ih"], optimizer)
     PGOP_Oh_Ih.compute(system, sigmas=None, neighbors={"r_max": 1.2, "exclude_ii": True})
     print(PGOP_Oh_Ih.order)
-
