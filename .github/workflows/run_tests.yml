@@ -24,12 +24,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04]
-        python: ['3.11', '3.12', '3.13', '3.14']
+        python: ['3.12', '3.13', '3.14']
         include:
           - os: 'macos-14'
-            python: '3.13'
+            python: '3.14'
           - os: 'windows-2025'
-            python: '3.13'
+            python: '3.14'
 
     steps:
       - name: Checkout Code

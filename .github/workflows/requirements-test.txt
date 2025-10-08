@@ -4,7 +4,7 @@ cmake==4.1.0
     # via -r .github/workflows/requirements-test.in
 coxeter==0.10.0
     # via -r .github/workflows/requirements-test.in
-freud-analysis==3.4.0
+freud-analysis==3.5.0
     # via -r .github/workflows/requirements-test.in
 iniconfig==2.1.0
     # via pytest
