@@ -30,18 +30,16 @@ jobs:
           version: 2025
           arch: 'amd64'
         - base: macos
-          version: 14
+          version: 15
           arch: 'arm64'
 
         python:
-        - version: 'cp310'
-          oldest_numpy: '2.0.0'
-        - version: 'cp311'
-          oldest_numpy: '2.0.0'
         - version: 'cp312'
           oldest_numpy: '2.0.0'
         - version: 'cp313'
           oldest_numpy: '2.1.1'
+        - version: 'cp314'
+          oldest_numpy: '2.3.3'
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -66,7 +64,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
-          python-version: 3.13
+          python-version: 3.14
       - name: Set up Python environment
         uses: glotzerlab/workflows/setup-uv@894d9678188a02b06560fdeb2b9ba98d016cd371 # 0.10.0
       - name: Build sdist
