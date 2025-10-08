@@ -30,7 +30,7 @@ jobs:
           version: 2025
           arch: 'amd64'
         - base: macos
-          version: 14
+          version: 15
           arch: 'arm64'
 
         python:
