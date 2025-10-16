@@ -56,15 +56,17 @@ jobs:
         run: |
           $ErrorActionPreference = 'Continue'
           $PSNativeCommandUseErrorActionPreference = $false
-          $args = @('-m','pytest','tests/test_pgop.py','-v','--pg-first','--skip-boosop','--junitxml=pytest-report.xml')
-          $p = Start-Process -FilePath python -ArgumentList $args -NoNewWindow -PassThru -Wait
-          $code = $p.ExitCode
-          Write-Host ("pytest exit code: {0}" -f $code)
+          $xmlPath = Join-Path $env:GITHUB_WORKSPACE 'pytest-report.xml'
+          pytest tests/test_pgop.py -v --pg-first --skip-boosop --junitxml="$xmlPath"
+          Write-Host "pytest exit code: $code"
+          Write-Host "pwd: $(Get-Location)"
+          Write-Host "xml exists: $(Test-Path -LiteralPath $xmlPath)"
+          $code = $LASTEXITCODE
 
           if ($code -eq 0) { exit 0 }
 
-          if ($code -eq 1 -and (Test-Path pytest-report.xml)) {
-            [xml]$j = Get-Content pytest-report.xml
+          if ($code -eq 1 -and (Test-Path -LiteralPath $xmlPath)) {
+            [xml]$j = Get-Content -LiteralPath $xmlPath -ErrorAction Stop
 
             $suites = @()
             if ($j.testsuite) { $suites = @($j.testsuite) }
