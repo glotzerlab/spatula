@@ -34,6 +34,10 @@ jobs:
           arch: 'arm64'
 
         python:
+        - version: 'cp310'
+          oldest_numpy: '2.0.0'
+        - version: 'cp311'
+          oldest_numpy: '2.0.0'
         - version: 'cp312'
           oldest_numpy: '2.0.0'
         - version: 'cp313'
