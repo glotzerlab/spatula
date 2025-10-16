@@ -54,22 +54,42 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          # run tests and emit junit xml
-          pytest tests/ -v --junitxml pytest-report.xml
-          # if pytest returned non-zero, check if it was only due to flakies
-          if ($LASTEXITCODE -ne 0) {
-            [xml]$j = Get-Content pytest-report.xml
-            $failures = [int]$j.testsuite.failures
-            $errors   = [int]$j.testsuite.errors
-            if ($failures -eq 0 -and $errors -eq 0) {
-              Write-Host "Only flaky reruns occurred; forcing success."
-              exit 0
-            } else {
-              exit $LASTEXITCODE
+          $ErrorActionPreference = 'Continue'
+          $PSNativeCommandUseErrorActionPreference = $false
+          $xmlPath = Join-Path $env:GITHUB_WORKSPACE 'pytest-report.xml'
+          pytest tests/ -v --junitxml="$xmlPath"
+          $code = $LASTEXITCODE
+          Write-Host "pytest exit code: $code"
+          Write-Host "pwd: $(Get-Location)"
+          Write-Host "xml exists: $(Test-Path -LiteralPath $xmlPath)"
+
+          if ($code -eq 0) { exit 0 }
+
+          if ($code -ne 0 -and (Test-Path -LiteralPath $xmlPath)) {
+            [xml]$j = Get-Content -LiteralPath $xmlPath -ErrorAction Stop
+
+            $suites = @()
+            if ($j.testsuite) { $suites = @($j.testsuite) }
+            elseif ($j.testsuites) { $suites = @($j.testsuites.testsuite) }
+
+            $failures = ($suites | ForEach-Object { [int]$_.failures } | Measure-Object -Sum).Sum
+            $errors   = ($suites | ForEach-Object { [int]$_.errors }   | Measure-Object -Sum).Sum
+            $tests    = ($suites | ForEach-Object { [int]$_.tests }    | Measure-Object -Sum).Sum
+
+            Write-Host ("second JUnit aggregate: tests={0} failures={1} errors={2}" -f $tests, $failures, $errors)
+            $suites | % {
+              $name = if ($_.name) { $_.name } else { "<unnamed>" }
+              Write-Host (" - suite {0}: tests={1} failures={2} errors={3}" -f $name, $_.tests, $_.failures, $_.errors)
             }
-          } else {
-            exit 0
+
+            if ($tests -gt 0 -and $failures -eq 0 -and $errors -eq 0) {
+              Write-Host "Non-zero process exit ($code) but JUnit shows 0 failures and 0 errors across $tests tests. Overriding to success."
+              exit 0
+            }
           }
+
+          # In every other case, return the original pytest exit code.
+          exit $code
 
   tests_complete:
     name: All tests
