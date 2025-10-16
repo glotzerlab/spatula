@@ -4,7 +4,7 @@
 """Point group and symmetry operation representations."""
 
 import itertools
-from typing import Generator
+from collections.abc import Generator
 
 import numpy as np
 import scipy.spatial
