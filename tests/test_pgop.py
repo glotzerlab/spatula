@@ -1776,6 +1776,7 @@ def test_optimization_classes(optim_name, optim, mode):
     assert op.order[0] > cutoff
 
 
+@pytest.mark.pg_first_only
 @pytest.mark.parametrize(
     "symmetry, shape, vertices, quaternion, mode",
     (
@@ -1797,8 +1798,9 @@ def test_symmetries_polyhedra(symmetry, shape, vertices, quaternion, mode):
     assert op.order[0] >= cutoff
 
 
-# for shapes take move its vertices it along its bond vector away or towards the center
-# and compute bosoop and pgop. Boosop should be still be one but pgop should be smaller!
+@pytest.mark.pg_first_only
+# Move shape vertices along their bond vector away or towards the center
+# and compute bosoop and pgop. Boosop should be still be 1 but pgop should be smaller!
 @pytest.mark.parametrize(
     "symmetry, shape, vertices",
     (
