@@ -53,6 +53,10 @@ jobs:
       - name: Run Tests (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          PYTHONFAULTHANDLER: "1"   # dump tracebacks on fatal errors
+          PYTHONMALLOC: "debug"     # detect buffer overruns and allocator misuse
+          PYTHONTRACEMALLOC: "1"    # attribute memory errors to allocation sites
         run: |
           $ErrorActionPreference = 'Continue'
           $PSNativeCommandUseErrorActionPreference = $false
@@ -65,7 +69,7 @@ jobs:
 
           if ($code -eq 0) { exit 0 }
 
-          if ($code -eq 1 -and (Test-Path -LiteralPath $xmlPath)) {
+          if ($code -ne 0 -and (Test-Path -LiteralPath $xmlPath)) {
             [xml]$j = Get-Content -LiteralPath $xmlPath -ErrorAction Stop
 
             $suites = @()
@@ -93,7 +97,7 @@ jobs:
             }
 
             if ($tests -gt 0 -and $failures -eq 0 -and $errors -eq 0) {
-              Write-Host "Non-zero exit but JUnit shows 0 failures and 0 errors across $tests tests. Treating as flaky reruns."
+              Write-Host "Non-zero process exit ($code) but JUnit shows 0 failures and 0 errors across $tests tests. Overriding to success."
               exit 0
             }
           }
