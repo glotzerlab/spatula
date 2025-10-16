@@ -54,22 +54,34 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          # run tests and emit junit xml
-          pytest tests/ -v --junitxml pytest-report.xml
-          # if pytest returned non-zero, check if it was only due to flakies
-          if ($LASTEXITCODE -ne 0) {
+          pytest tests/ -v --junitxml=pytest-report.xml
+          $code = $LASTEXITCODE
+
+          # If everything passed, we're done.
+          if ($code -eq 0) { exit 0 }
+
+          # Only consider overriding for "tests failed" exit code.
+          if ($code -eq 1 -and (Test-Path pytest-report.xml)) {
             [xml]$j = Get-Content pytest-report.xml
-            $failures = [int]$j.testsuite.failures
-            $errors   = [int]$j.testsuite.errors
-            if ($failures -eq 0 -and $errors -eq 0) {
-              Write-Host "Only flaky reruns occurred; forcing success."
+
+            # Handle both <testsuite> and <testsuites><testsuite/></testsuites>
+            $suites = @()
+            if ($j.testsuite) { $suites = @($j.testsuite) }
+            elseif ($j.testsuites) { $suites = @($j.testsuites.testsuite) }
+
+            $failures = ($suites | ForEach-Object { [int]$_.failures } | Measure-Object -Sum).Sum
+            $errors   = ($suites | ForEach-Object { [int]$_.errors }   | Measure-Object -Sum).Sum
+            $tests    = ($suites | ForEach-Object { [int]$_.tests }    | Measure-Object -Sum).Sum
+
+            # Only "forgive" if junit says we actually ran tests and none failed/errored.
+            if ($tests -gt 0 -and $failures -eq 0 -and $errors -eq 0) {
+              Write-Host "Non-zero exit but JUnit shows 0 failures and 0 errors across $tests tests. Treating as flaky reruns."
               exit 0
-            } else {
-              exit $LASTEXITCODE
             }
-          } else {
-            exit 0
           }
+
+          # In every other case, return the original pytest exit code.
+          exit $code
 
   tests_complete:
     name: All tests
