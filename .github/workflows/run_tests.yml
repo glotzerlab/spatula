@@ -54,7 +54,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          pytest tests/ -v --junitxml=pytest-report.xml
+          pytest tests/ test_representations.py -v --junitxml=pytest-report.xml
           $code = $LASTEXITCODE
 
           # If everything passed, we're done.
@@ -69,9 +69,17 @@ jobs:
             if ($j.testsuite) { $suites = @($j.testsuite) }
             elseif ($j.testsuites) { $suites = @($j.testsuites.testsuite) }
 
+            $tests    = ($suites | % { [int]$_.tests }    | Measure-Object -Sum).Sum
+            $failures = ($suites | % { [int]$_.failures } | Measure-Object -Sum).Sum
+            $errors   = ($suites | % { [int]$_.errors }   | Measure-Object -Sum).Sum
+
+            Write-Host ("first JUnit aggregate: tests={0} failures={1} errors={2}" -f $tests, $failures, $errors)
+
             $failures = ($suites | ForEach-Object { [int]$_.failures } | Measure-Object -Sum).Sum
             $errors   = ($suites | ForEach-Object { [int]$_.errors }   | Measure-Object -Sum).Sum
             $tests    = ($suites | ForEach-Object { [int]$_.tests }    | Measure-Object -Sum).Sum
+
+            Write-Host ("second JUnit aggregate: tests={0} failures={1} errors={2}" -f $tests, $failures, $errors)
 
             # Only "forgive" if junit says we actually ran tests and none failed/errored.
             if ($tests -gt 0 -and $failures -eq 0 -and $errors -eq 0) {
