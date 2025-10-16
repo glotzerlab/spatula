@@ -53,15 +53,11 @@ jobs:
       - name: Run Tests (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        env:
-          PYTHONFAULTHANDLER: "1"   # dump tracebacks on fatal errors
-          PYTHONMALLOC: "debug"     # detect buffer overruns and allocator misuse
-          PYTHONTRACEMALLOC: "1"    # attribute memory errors to allocation sites
         run: |
           $ErrorActionPreference = 'Continue'
           $PSNativeCommandUseErrorActionPreference = $false
           $xmlPath = Join-Path $env:GITHUB_WORKSPACE 'pytest-report.xml'
-          pytest tests/test_pgop.py -v --pg-first --skip-boosop --junitxml="$xmlPath"
+          pytest tests/ -v --junitxml="$xmlPath"
           $code = $LASTEXITCODE
           Write-Host "pytest exit code: $code"
           Write-Host "pwd: $(Get-Location)"
@@ -75,16 +71,6 @@ jobs:
             $suites = @()
             if ($j.testsuite) { $suites = @($j.testsuite) }
             elseif ($j.testsuites) { $suites = @($j.testsuites.testsuite) }
-
-            $tests    = ($suites | % { [int]$_.tests }    | Measure-Object -Sum).Sum
-            $failures = ($suites | % { [int]$_.failures } | Measure-Object -Sum).Sum
-            $errors   = ($suites | % { [int]$_.errors }   | Measure-Object -Sum).Sum
-
-            Write-Host ("first JUnit aggregate: tests={0} failures={1} errors={2}" -f $tests, $failures, $errors)
-            $suites | % {
-             $name = if ($_.name) { $_.name } else { "<unnamed>" }
-              Write-Host (" - suite {0}: tests={1} failures={2} errors={3}" -f $name, $_.tests, $_.failures, $_.errors)
-            }
 
             $failures = ($suites | ForEach-Object { [int]$_.failures } | Measure-Object -Sum).Sum
             $errors   = ($suites | ForEach-Object { [int]$_.errors }   | Measure-Object -Sum).Sum
