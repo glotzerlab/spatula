@@ -54,17 +54,16 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Continue'
+          $PSNativeCommandUseErrorActionPreference = $false
           pytest tests/test_pgop.py -v --pg-first --skip-boosop --junitxml=pytest-report.xml
           $code = $LASTEXITCODE
 
-          # If everything passed, we're done.
           if ($code -eq 0) { exit 0 }
 
-          # Only consider overriding for "tests failed" exit code.
           if ($code -eq 1 -and (Test-Path pytest-report.xml)) {
             [xml]$j = Get-Content pytest-report.xml
 
-            # Handle both <testsuite> and <testsuites><testsuite/></testsuites>
             $suites = @()
             if ($j.testsuite) { $suites = @($j.testsuite) }
             elseif ($j.testsuites) { $suites = @($j.testsuites.testsuite) }
@@ -74,14 +73,21 @@ jobs:
             $errors   = ($suites | % { [int]$_.errors }   | Measure-Object -Sum).Sum
 
             Write-Host ("first JUnit aggregate: tests={0} failures={1} errors={2}" -f $tests, $failures, $errors)
+            $suites | % {
+             $name = if ($_.name) { $_.name } else { "<unnamed>" }
+              Write-Host (" - suite {0}: tests={1} failures={2} errors={3}" -f $name, $_.tests, $_.failures, $_.errors)
+            }
 
             $failures = ($suites | ForEach-Object { [int]$_.failures } | Measure-Object -Sum).Sum
             $errors   = ($suites | ForEach-Object { [int]$_.errors }   | Measure-Object -Sum).Sum
             $tests    = ($suites | ForEach-Object { [int]$_.tests }    | Measure-Object -Sum).Sum
 
             Write-Host ("second JUnit aggregate: tests={0} failures={1} errors={2}" -f $tests, $failures, $errors)
+            $suites | % {
+              $name = if ($_.name) { $_.name } else { "<unnamed>" }
+              Write-Host (" - suite {0}: tests={1} failures={2} errors={3}" -f $name, $_.tests, $_.failures, $_.errors)
+            }
 
-            # Only "forgive" if junit says we actually ran tests and none failed/errored.
             if ($tests -gt 0 -and $failures -eq 0 -and $errors -eq 0) {
               Write-Host "Non-zero exit but JUnit shows 0 failures and 0 errors across $tests tests. Treating as flaky reruns."
               exit 0
