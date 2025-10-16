@@ -54,7 +54,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          pytest tests/ test_representations.py -v --junitxml=pytest-report.xml
+          pytest tests/test_representations.py -v --junitxml=pytest-report.xml
           $code = $LASTEXITCODE
 
           # If everything passed, we're done.
