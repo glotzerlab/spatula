@@ -11,6 +11,22 @@ Change Log
 0.x
 ---
 
+
+
+0.1.1 (2025-10-16)
+^^^^^^^^^^^^^^^^^^
+
+*Added:*
+
+* Python 3.14 support.
+* Python 3.10 and 3.11 wheels on PyPI.
+* Pytest mode to run tests for single example per point group.
+
+*Fixed:*
+
+* Windows failures catching.
+
+
 0.1.0 (2025-09-20)
 ^^^^^^^^^^^^^^^^^^
 
