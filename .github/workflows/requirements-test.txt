@@ -6,7 +6,7 @@ coxeter==0.10.0
     # via -r .github/workflows/requirements-test.in
 freud-analysis==3.5.0
     # via -r .github/workflows/requirements-test.in
-iniconfig==2.1.0
+iniconfig==2.3.0
     # via pytest
 more-itertools==10.8.0
     # via parsnip-cif
