@@ -222,7 +222,8 @@ inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& posit
     auto sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
     // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient
     //    is used.
-    return std::pow((2 * sigma * sigma_symmetrized / sigmas_squared_summed), 3 / 2)
+    double lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
+    return lead_term * std::sqrt(lead_term)
            * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
 }
 
