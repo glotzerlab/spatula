@@ -265,20 +265,5 @@ void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)>
 template class BOOSOP<UniformDistribution>;
 template class BOOSOP<FisherDistribution>;
 
-template<typename distribution_type>
-void export_BOOSOP_class(py::module& m, const std::string& name)
-{
-    py::class_<BOOSOP<distribution_type>>(m, name.c_str())
-        .def(py::init<const py::array_t<std::complex<double>>,
-                      std::shared_ptr<optimize::Optimizer>&,
-                      typename distribution_type::param_type>())
-        .def("compute", &BOOSOP<distribution_type>::compute)
-        .def("refine", &BOOSOP<distribution_type>::refine);
-}
 
-void export_BOOSOP(py::module& m)
-{
-    export_BOOSOP_class<UniformDistribution>(m, "BOOSOPUniform");
-    export_BOOSOP_class<FisherDistribution>(m, "BOOSOPFisher");
-}
 } // namespace spatula

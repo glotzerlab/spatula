@@ -305,14 +305,6 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
     }
 }
 
-void export_spatula(py::module& m)
-{
-    py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::list&,
-                      std::shared_ptr<optimize::Optimizer>&,
-                      const unsigned int,
-                      bool>())
-        .def("compute", &PGOP::compute);
-}
+
 
 } // End namespace spatula
