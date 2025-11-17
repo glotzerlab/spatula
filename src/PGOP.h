@@ -94,11 +94,6 @@ struct PGOPStore {
     void addNull(size_t i);
     /// Return a tuple of the two arrays op and rotations.
     std::pair<std::vector<double>, std::vector<double>> getArrays();
-
-    private:
-    // Dimensions for op and rotations
-    size_t m_N_particles;
-    size_t m_N_symmetries;
 };
 
 /**

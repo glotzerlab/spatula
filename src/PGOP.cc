@@ -77,9 +77,7 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
 PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
     : N_syms(N_symmetries),
       op(N_particles * N_symmetries),
-      rotations(N_particles * N_symmetries * 4),
-      m_N_particles(N_particles),
-      m_N_symmetries(N_symmetries)
+      rotations(N_particles * N_symmetries * 4)
 {
 }
 
@@ -88,23 +86,23 @@ void PGOPStore::addOp(size_t i,
 {
     const auto& values = std::get<0>(op_);
     const auto& rots = std::get<1>(op_);
-    for (size_t j {0}; j < m_N_symmetries; ++j) {
-        op[i * m_N_symmetries + j] = values[j];
-        rotations[(i * m_N_symmetries + j) * 4 + 0] = rots[j].w;
-        rotations[(i * m_N_symmetries + j) * 4 + 1] = rots[j].x;
-        rotations[(i * m_N_symmetries + j) * 4 + 2] = rots[j].y;
-        rotations[(i * m_N_symmetries + j) * 4 + 3] = rots[j].z;
+    for (size_t j {0}; j < N_syms; ++j) {
+        op[i * N_syms + j] = values[j];
+        rotations[(i * N_syms + j) * 4 + 0] = rots[j].w;
+        rotations[(i * N_syms + j) * 4 + 1] = rots[j].x;
+        rotations[(i * N_syms + j) * 4 + 2] = rots[j].y;
+        rotations[(i * N_syms + j) * 4 + 3] = rots[j].z;
     }
 }
 
 void PGOPStore::addNull(size_t i)
 {
-    for (size_t j {0}; j < m_N_symmetries; ++j) {
-        op[i * m_N_symmetries + j] = std::numeric_limits<double>::quiet_NaN(); // Set NaN
-        rotations[(i * m_N_symmetries + j) * 4 + 0] = 1;
-        rotations[(i * m_N_symmetries + j) * 4 + 1] = 0;
-        rotations[(i * m_N_symmetries + j) * 4 + 2] = 0;
-        rotations[(i * m_N_symmetries + j) * 4 + 3] = 0;
+    for (size_t j {0}; j < N_syms; ++j) {
+        op[i * N_syms + j] = std::numeric_limits<double>::quiet_NaN(); // Set NaN
+        rotations[(i * N_syms + j) * 4 + 0] = 1;
+        rotations[(i * N_syms + j) * 4 + 1] = 0;
+        rotations[(i * N_syms + j) * 4 + 2] = 0;
+        rotations[(i * N_syms + j) * 4 + 3] = 0;
     }
 }
 
