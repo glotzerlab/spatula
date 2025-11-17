@@ -75,9 +75,11 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
 }
 
 PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
+    : N_syms(N_symmetries),
+      op(N_particles * N_symmetries),
+      rotations(N_particles * N_symmetries * 4),
+      m_N_particles(N_particles),
+      m_N_symmetries(N_symmetries)
 {
 }
 
@@ -87,62 +89,51 @@ void PGOPStore::addOp(size_t i,
     const auto& values = std::get<0>(op_);
     const auto& rots = std::get<1>(op_);
     for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
+        op[i * N_syms + j] = values[j];
+        rotations[(i * N_syms + j) * 4 + 0] = rots[j].w;
+        rotations[(i * N_syms + j) * 4 + 1] = rots[j].x;
+        rotations[(i * N_syms + j) * 4 + 2] = rots[j].y;
+        rotations[(i * N_syms + j) * 4 + 3] = rots[j].z;
     }
 }
 
 void PGOPStore::addNull(size_t i)
 {
     for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = std::numeric_limits<double>::quiet_NaN(); // Set NaN
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
+        op[i * N_syms + j] = std::numeric_limits<double>::quiet_NaN(); // Set NaN
+        rotations[(i * N_syms + j) * 4 + 0] = 1;
+        rotations[(i * N_syms + j) * 4 + 1] = 0;
+        rotations[(i * N_syms + j) * 4 + 2] = 0;
+        rotations[(i * N_syms + j) * 4 + 3] = 0;
     }
 }
 
-py::tuple PGOPStore::getArrays()
+std::pair<std::vector<double>, std::vector<double>> PGOPStore::getArrays()
 {
-    return py::make_tuple(op, rotations);
+    return std::make_pair(op, rotations);
 }
 
-PGOP::PGOP(const py::list& R_ij,
+PGOP::PGOP(const std::vector<std::vector<double>>& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            const unsigned int mode,
            bool compute_per_operator)
-    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode),
+    : m_n_symmetries(R_ij.size()), m_Rij(R_ij), m_optimize(optimizer), m_mode(mode),
       m_compute_per_operator(compute_per_operator)
 {
-    m_Rij.reserve(m_n_symmetries);
-    for (size_t i = 0; i < m_n_symmetries; ++i) {
-        py::list inner_list = R_ij[i].cast<py::list>();
-        std::vector<double> vec;
-        vec.reserve(inner_list.size());
-
-        for (size_t j = 0; j < inner_list.size(); ++j) {
-            vec.push_back(inner_list[j].cast<double>());
-        }
-
-        m_Rij.emplace_back(std::move(vec));
-    }
 }
 
-py::tuple PGOP::compute(const py::array_t<double> distances,
-                        const py::array_t<double> weights,
-                        const py::array_t<int> num_neighbors,
-                        const py::array_t<double> sigmas) const
+std::pair<std::vector<double>, std::vector<double>> PGOP::compute(size_t N_points,
+                                                                 const double* distances,
+                                                                 const double* weights,
+                                                                 const int* num_neighbors,
+                                                                 const double* sigmas) const
 {
-    const auto neighborhoods = Neighborhoods(num_neighbors.size(),
-                                             num_neighbors.data(0),
-                                             weights.data(0),
-                                             distances.data(0),
-                                             sigmas.data(0));
-    const size_t N_particles = num_neighbors.size();
+    const auto neighborhoods = Neighborhoods(N_points,
+                                             num_neighbors,
+                                             weights,
+                                             distances,
+                                             sigmas);
+    const size_t N_particles = N_points;
     auto total_number_of_op_to_store = m_n_symmetries;
     if (m_compute_per_operator) {
         for (const auto& R_ij : m_Rij) {

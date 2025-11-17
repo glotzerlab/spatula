@@ -6,16 +6,10 @@
 #include <tuple>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include "data/Quaternion.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/Util.h"
-
-namespace py = pybind11;
 
 namespace spatula {
 
@@ -90,22 +84,21 @@ struct PGOPStore {
     /// Number of point group symmetries to compute
     size_t N_syms;
     /// The optimized value of PGOP for each point group
-    py::array_t<double> op;
+    std::vector<double> op;
     /// The optimal rotations used to obtain the maximum PGOP as quaternions.
-    py::array_t<double> rotations;
+    std::vector<double> rotations;
 
     /// Add a single point's set of PGOP and rotation values
     void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
     /// Store 0's for point i. This is used when no neighbors for a point exist.
     void addNull(size_t i);
     /// Return a tuple of the two arrays op and rotations.
-    py::tuple getArrays();
+    std::pair<std::vector<double>, std::vector<double>> getArrays();
 
     private:
-    /// Fast access to op
-    py::detail::unchecked_mutable_reference<double, 2> u_op;
-    /// Fast access to rotations
-    py::detail::unchecked_mutable_reference<double, 3> u_rotations;
+    // Dimensions for op and rotations
+    size_t m_N_particles;
+    size_t m_N_symmetries;
 };
 
 /**
@@ -116,7 +109,7 @@ struct PGOPStore {
  */
 class PGOP {
     public:
-    PGOP(const py::list& R_ij,
+    PGOP(const std::vector<std::vector<double>>& R_ij,
          std::shared_ptr<optimize::Optimizer>& optimizer,
          const unsigned int mode,
          bool compute_per_operator);
@@ -129,10 +122,11 @@ class PGOP {
      * @param num_neighboors An array of the number of neighbor for each point.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
-                      const py::array_t<double> sigmas) const;
+    std::pair<std::vector<double>, std::vector<double>> compute(size_t N_points,
+                                                                 const double* distances,
+                                                                 const double* weights,
+                                                                 const int* num_neighbors,
+                                                                 const double* sigmas) const;
 
     private:
     /**
