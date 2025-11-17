@@ -172,6 +172,8 @@ class PGOP {
 
     /// The number of symmetries that PGOP is being computed for.
     unsigned int m_n_symmetries;
+    /// The total number of operators to store (including per-operator values).
+    unsigned int m_total_n_symmetries;
     /// The Wigner D matrices for each point group symmetry
     std::vector<std::vector<double>> m_Rij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
@@ -182,7 +184,7 @@ class PGOP {
     bool m_compute_per_operator;
 
     public:
-    unsigned int get_n_symmetries() const { return m_n_symmetries; }
+    unsigned int get_n_symmetries() const { return m_total_n_symmetries; }
 };
 
 void export_spatula_class(py::module& m, const std::string& name);

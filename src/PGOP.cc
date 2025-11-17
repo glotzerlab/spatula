@@ -119,6 +119,12 @@ PGOP::PGOP(const std::vector<std::vector<double>>& R_ij,
     : m_n_symmetries(R_ij.size()), m_Rij(R_ij), m_optimize(optimizer), m_mode(mode),
       m_compute_per_operator(compute_per_operator)
 {
+    m_total_n_symmetries = m_n_symmetries;
+    if (m_compute_per_operator) {
+        for (const auto& R_ij_item : m_Rij) {
+            m_total_n_symmetries += R_ij_item.size() / 9;
+        }
+    }
 }
 
 std::pair<std::vector<double>, std::vector<double>> PGOP::compute(size_t N_points,
@@ -133,13 +139,7 @@ std::pair<std::vector<double>, std::vector<double>> PGOP::compute(size_t N_point
                                              distances,
                                              sigmas);
     const size_t N_particles = N_points;
-    auto total_number_of_op_to_store = m_n_symmetries;
-    if (m_compute_per_operator) {
-        for (const auto& R_ij : m_Rij) {
-            total_number_of_op_to_store += R_ij.size() / 9;
-        }
-    }
-    auto op_store = PGOPStore(N_particles, total_number_of_op_to_store);
+    auto op_store = PGOPStore(N_particles, m_total_n_symmetries);
     const auto loop_func
         = [&op_store, &neighborhoods, this](const size_t start, const size_t stop) {
               for (size_t i = start; i < stop; ++i) {
