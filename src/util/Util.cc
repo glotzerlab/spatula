@@ -4,8 +4,6 @@
 #include <cmath>
 #include <iterator>
 #include <numeric>
-#include <pybind11/stl.h>
-
 #include "Util.h"
 
 /**
@@ -151,9 +149,4 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
     }
 }
 
-void export_util(py::module& m)
-{
-    m.def("to_rotation_matrix", &to_rotation_matrix);
-    m.def("single_rotate", &single_rotate);
-}
 }} // namespace spatula::util

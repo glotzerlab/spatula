@@ -16,6 +16,7 @@ list(APPEND spatula_sources
     "util/Util.h" "util/Util.cc"
     "util/QlmEval.h" "util/QlmEval.cc"
     "util/Threads.h" "util/Threads.cc"
+    "util/export-utils.cc"
 )
 
 pybind11_add_module(_spatula ${spatula_sources})
