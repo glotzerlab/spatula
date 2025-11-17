@@ -77,7 +77,8 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
 PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
     : N_syms(N_symmetries),
       op(N_particles * N_symmetries),
-      rotations(N_particles * N_symmetries * 4)
+      rotations(N_particles * N_symmetries * 4),
+      m_N_particles(N_particles)
 {
 }
 

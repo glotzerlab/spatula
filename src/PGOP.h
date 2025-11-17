@@ -94,6 +94,8 @@ struct PGOPStore {
     void addNull(size_t i);
     /// Return a tuple of the two arrays op and rotations.
     std::pair<std::vector<double>, std::vector<double>> getArrays();
+
+    size_t m_N_particles;
 };
 
 /**
@@ -178,6 +180,9 @@ class PGOP {
     unsigned int m_mode;
     // Whether to compute the PGOP for each operator.
     bool m_compute_per_operator;
+
+    public:
+    unsigned int get_n_symmetries() const { return m_n_symmetries; }
 };
 
 void export_spatula_class(py::module& m, const std::string& name);

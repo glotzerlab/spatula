@@ -70,8 +70,11 @@ void export_PGOP(py::module& m)
             auto result = self.compute(N_points, distances_ptr, weights_ptr, num_neighbors_ptr, sigmas_ptr);
 
             // Convert std::vector<double> to py::array_t<double>
-            py::array_t<double> op_array(result.first.size(), result.first.data());
-            py::array_t<double> rotations_array(result.second.size(), result.second.data());
+            std::vector<size_t> op_shape = {N_points, self.get_n_symmetries()};
+            py::array_t<double> op_array(op_shape, result.first.data());
+
+            std::vector<size_t> rotations_shape = {N_points, self.get_n_symmetries(), 4};
+            py::array_t<double> rotations_array(rotations_shape, result.second.data());
 
             return py::make_tuple(op_array, rotations_array);
         }, py::arg("distances"), py::arg("weights"), py::arg("num_neighbors"), py::arg("sigmas"));
