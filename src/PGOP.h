@@ -186,8 +186,4 @@ class PGOP {
     public:
     unsigned int get_n_symmetries() const { return m_total_n_symmetries; }
 };
-
-void export_spatula_class(py::module& m, const std::string& name);
-
-void export_spatula(py::module& m);
 } // End namespace spatula
