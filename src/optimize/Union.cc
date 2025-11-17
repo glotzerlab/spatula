@@ -79,25 +79,4 @@ void Union::createFinalOptimizer()
     m_final_opt = m_instantiate_final(*m_inital_opt.get());
 }
 
-void export_union(py::module& m)
-{
-    py::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "Union")
-        .def_static("with_step_gradient_descent",
-                    [](const std::shared_ptr<const Optimizer> initial_opt,
-                       unsigned int max_iter,
-                       double initial_jump,
-                       double learning_rate,
-                       double tol) -> auto {
-                        return std::make_shared<Union>(
-                            initial_opt,
-                            [max_iter, initial_jump, learning_rate, tol](const Optimizer& opt) {
-                                return std::make_unique<StepGradientDescent>(
-                                    opt.get_optimum().first,
-                                    max_iter,
-                                    initial_jump,
-                                    learning_rate,
-                                    tol);
-                            });
-                    });
-}
 }} // namespace spatula::optimize

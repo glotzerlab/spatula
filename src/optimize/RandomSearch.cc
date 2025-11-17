@@ -52,11 +52,4 @@ void RandomSearch::setIterations(unsigned int iter)
     m_iterations = iter;
 }
 
-void export_random_search(py::module& m)
-{
-    py::class_<RandomSearch, Optimizer, std::shared_ptr<RandomSearch>>(m, "RandomSearch")
-        .def(py::init<unsigned int, unsigned int>())
-        .def_property("max_iter", &RandomSearch::getIterations, &RandomSearch::setIterations)
-        .def_property("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
-}
 }} // namespace spatula::optimize

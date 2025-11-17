@@ -94,11 +94,4 @@ void StepGradientDescent::searchAlongGradient()
     m_point[m_current_dim] -= m_delta;
 }
 
-void export_step_gradient_descent(py::module& m)
-{
-    py::class_<StepGradientDescent, Optimizer, std::shared_ptr<StepGradientDescent>>(
-        m,
-        "StepGradientDescent")
-        .def(py::init<const data::Vec3&, unsigned int, double, double, double>());
-}
 }} // namespace spatula::optimize

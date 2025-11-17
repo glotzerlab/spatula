@@ -52,5 +52,4 @@ class RandomSearch : public Optimizer {
     std::normal_distribution<double> m_normal_dist;
 };
 
-void export_random_search(py::module& m);
 }} // namespace spatula::optimize

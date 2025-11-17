@@ -29,9 +29,4 @@ std::unique_ptr<Optimizer> NoOptimization::clone() const
     return std::make_unique<NoOptimization>(*this);
 }
 
-void export_no_optimization(py::module& m)
-{
-    py::class_<NoOptimization, Optimizer, std::shared_ptr<NoOptimization>>(m, "NoOptimization")
-        .def(py::init<const data::Vec3&>());
-}
 }} // namespace spatula::optimize

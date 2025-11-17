@@ -69,11 +69,4 @@ std::unique_ptr<Optimizer> PyOptimizer::clone() const
     return std::make_unique<PyOptimizer>(*this);
 }
 
-void export_base_optimize(py::module& m)
-{
-    py::class_<Optimizer, PyOptimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
-        .def("record_objective", &Optimizer::record_objective)
-        .def_property_readonly("terminate", &Optimizer::terminate)
-        .def_property_readonly("count", &Optimizer::getCount);
-}
 }} // namespace spatula::optimize

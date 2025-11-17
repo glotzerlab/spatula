@@ -39,5 +39,4 @@ class Mesh : public Optimizer {
     std::vector<data::Vec3> m_points;
 };
 
-void export_mesh(py::module& m);
 }} // namespace spatula::optimize

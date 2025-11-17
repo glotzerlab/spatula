@@ -6,8 +6,6 @@
 #include <iterator>
 #include <limits>
 
-#include <pybind11/stl.h>
-
 #include "Mesh.h"
 
 namespace spatula { namespace optimize {
@@ -32,11 +30,5 @@ bool Mesh::terminate() const
 std::unique_ptr<Optimizer> Mesh::clone() const
 {
     return std::make_unique<Mesh>(*this);
-}
-
-void export_mesh(py::module& m)
-{
-    py::class_<Mesh, Optimizer, std::shared_ptr<Mesh>>(m, "Mesh").def(
-        py::init<const std::vector<data::Quaternion>&>());
 }
 }} // end namespace spatula::optimize

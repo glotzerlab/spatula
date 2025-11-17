@@ -6,12 +6,9 @@
 #include <functional>
 #include <memory>
 
-#include <pybind11/pybind11.h>
-
 #include "Optimize.h"
 
 namespace spatula { namespace optimize {
-namespace py = pybind11;
 /**
  * @brief Combine two optimizers into one optimization.
  */
@@ -44,6 +41,4 @@ class Union : public Optimizer {
     std::function<std::unique_ptr<Optimizer>(const Optimizer&)> m_instantiate_final;
     bool m_on_final_opt;
 };
-
-void export_union(py::module& m);
 }} // namespace spatula::optimize

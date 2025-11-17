@@ -5,8 +5,6 @@
 
 #include <random>
 
-#include <pybind11/pybind11.h>
-
 #include "Optimize.h"
 
 namespace spatula { namespace optimize {
@@ -87,6 +85,4 @@ class StepGradientDescent : public Optimizer {
     /// The current change between iterations in gradient descent.
     double m_delta;
 };
-
-void export_step_gradient_descent(py::module& m);
 }} // namespace spatula::optimize

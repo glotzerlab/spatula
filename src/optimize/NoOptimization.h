@@ -3,8 +3,6 @@
 
 #include "Optimize.h"
 
-#include <pybind11/pybind11.h>
-
 namespace spatula { namespace optimize {
 
 class NoOptimization : public Optimizer {
@@ -24,6 +22,4 @@ class NoOptimization : public Optimizer {
     // Flag to terminate the optimization
     bool m_terminate;
 };
-
-void export_no_optimization(py::module& m);
 }} // namespace spatula::optimize

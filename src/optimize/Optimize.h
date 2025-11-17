@@ -7,11 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include <pybind11/pybind11.h>
-
 #include "../data/Vec3.h"
-
-namespace py = pybind11;
 
 namespace spatula { namespace optimize {
 /**
@@ -100,7 +96,4 @@ class PyOptimizer : public Optimizer {
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const override;
 };
-
-void export_base_optimize(py::module& m);
-
 }} // namespace spatula::optimize
