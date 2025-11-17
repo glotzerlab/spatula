@@ -265,5 +265,4 @@ void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)>
 template class BOOSOP<UniformDistribution>;
 template class BOOSOP<FisherDistribution>;
 
-
 } // namespace spatula

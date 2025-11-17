@@ -120,10 +120,10 @@ class PGOP {
      *
      */
     std::pair<std::vector<double>, std::vector<double>> compute(size_t N_points,
-                                                                 const double* distances,
-                                                                 const double* weights,
-                                                                 const int* num_neighbors,
-                                                                 const double* sigmas) const;
+                                                                const double* distances,
+                                                                const double* weights,
+                                                                const int* num_neighbors,
+                                                                const double* sigmas) const;
 
     private:
     /**
@@ -184,6 +184,9 @@ class PGOP {
     bool m_compute_per_operator;
 
     public:
-    unsigned int get_n_symmetries() const { return m_total_n_symmetries; }
+    unsigned int get_n_symmetries() const
+    {
+        return m_total_n_symmetries;
+    }
 };
 } // End namespace spatula

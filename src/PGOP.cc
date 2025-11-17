@@ -75,10 +75,8 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
 }
 
 PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries),
-      op(N_particles * N_symmetries),
-      rotations(N_particles * N_symmetries * 4),
-      m_N_particles(N_particles)
+    : N_syms(N_symmetries), op(N_particles * N_symmetries),
+      rotations(N_particles * N_symmetries * 4), m_N_particles(N_particles)
 {
 }
 
@@ -128,16 +126,12 @@ PGOP::PGOP(const std::vector<std::vector<double>>& R_ij,
 }
 
 std::pair<std::vector<double>, std::vector<double>> PGOP::compute(size_t N_points,
-                                                                 const double* distances,
-                                                                 const double* weights,
-                                                                 const int* num_neighbors,
-                                                                 const double* sigmas) const
+                                                                  const double* distances,
+                                                                  const double* weights,
+                                                                  const int* num_neighbors,
+                                                                  const double* sigmas) const
 {
-    const auto neighborhoods = Neighborhoods(N_points,
-                                             num_neighbors,
-                                             weights,
-                                             distances,
-                                             sigmas);
+    const auto neighborhoods = Neighborhoods(N_points, num_neighbors, weights, distances, sigmas);
     const size_t N_particles = N_points;
     auto op_store = PGOPStore(N_particles, m_total_n_symmetries);
     const auto loop_func
@@ -294,7 +288,5 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
         pool.wait_for_tasks();
     }
 }
-
-
 
 } // End namespace spatula
