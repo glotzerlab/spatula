@@ -466,7 +466,7 @@ class PGOP:
             )
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
-            dist.flatten(), neighbors.weights, neighbors.neighbor_counts, sigmas
+            dist, neighbors.weights, neighbors.neighbor_counts, sigmas
         )
 
     @property

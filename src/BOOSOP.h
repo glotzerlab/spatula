@@ -7,12 +7,17 @@
 #include <vector>
 
 #include <complex>
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "data/Quaternion.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/QlmEval.h"
 #include "util/Util.h"
+
+namespace py = pybind11;
 
 namespace spatula {
 
@@ -81,18 +86,22 @@ struct BOOSOPStore {
     /// Number of point group symmetries to compute
     size_t N_syms;
     /// The optimized value of BOOSOP for each point group
-    std::vector<double> op;
+    py::array_t<double> op;
     /// The optimal rotations used to obtain the maximum BOOSOP as quaternions.
-    std::vector<double> rotations;
+    py::array_t<double> rotations;
 
     /// Add a single point's set of BOOSOP and rotation values
     void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
     /// Store 0's for point i. This is used when no neighbors for a point exist.
     void addNull(size_t i);
     /// Return a tuple of the two arrays op and rotations.
-    std::pair<std::vector<double>, std::vector<double>> getArrays();
+    py::tuple getArrays();
 
-    size_t m_N_particles;
+    private:
+    /// Fast access to op
+    py::detail::unchecked_mutable_reference<double, 2> u_op;
+    /// Fast access to rotations
+    py::detail::unchecked_mutable_reference<double, 3> u_rotations;
 };
 
 /**
@@ -103,28 +112,62 @@ struct BOOSOPStore {
  */
 template<typename distribution_type> class BOOSOP {
     public:
-    BOOSOP(const std::vector<std::vector<std::complex<double>>>& D_ij,
+    BOOSOP(const py::array_t<std::complex<double>> D_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            typename distribution_type::param_type distribution_params);
 
-    std::pair<std::vector<double>, std::vector<double>> compute(size_t N_points,
-                                                                 const double* distances,
-                                                                 const double* weights,
-                                                                 const int* num_neighbors,
-                                                                 const unsigned int m,
-                                                                 const std::complex<double>* ylms,
-                                                                 const double* quad_positions,
-                                                                 const double* quad_weights) const;
+    /**
+     * @brief Root function for computing BOOSOP for a set of points.
+     *
+     * @param distances An array of distance vectors for neighbors
+     * @param weights An array of neighbor weights. For unweighted BOOSOP use an array of 1s.
+     * @param num_neighboors An array of the number of neighbor for each point.
+     * @param m The degree of Gauss-Legendre quadrature to use when computing Qlms. This is not used
+     * directly expect for normalizing the quadrature values.
+     * @param ylms 2D array of spherical harmonic values for all points in the Gauss-Legendre
+     * quadrature as well as for every combination of m (spherical harmonic number) and l upto a
+     * maximum l. The first dimension is the harmonic numbers and the second is the quadrature
+     * points.
+     * @param quad_positions The positions of the Gauss-Legendre quadrature.
+     * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
+     *
+     */
+    py::tuple compute(const py::array_t<double> distances,
+                      const py::array_t<double> weights,
+                      const py::array_t<int> num_neighbors,
+                      const unsigned int m,
+                      const py::array_t<std::complex<double>> ylms,
+                      const py::array_t<double> quad_positions,
+                      const py::array_t<double> quad_weights) const;
 
-    std::vector<double> refine(size_t N_points,
-                               const double* distances,
-                               const double* rotations,
-                               const double* weights,
-                               const int* num_neighbors,
+    /**
+     * @brief Compute BOOSOP at given rotations for each point.
+     *
+     * This method is primarily for computing BOOSOP after an initial optimization was performed and
+     * a calculation at higher quadrature and spherical harmonic number is desired.
+     *
+     * @param distances An array of distance vectors for neighbors
+     * @param distances An array of quaternion rotations to use for computing BOOSOP.
+     * @param weights An array of neighbor weights. For unweighted BOOSOP use an array of 1s.
+     * @param num_neighboors An array of the number of neighbor for each point.
+     * @param m The degree of Gauss-Legendre quadrature to use when computing Qlms. This is not used
+     * directly expect for normalizing the quadrature values.
+     * @param ylms 2D array of spherical harmonic values for all points in the Gauss-Legendre
+     * quadrature as well as for every combination of m (spherical harmonic number) and l upto a
+     * maximum l. The first dimension is the harmonic numbers and the second is the quadrature
+     * points.
+     * @param quad_positions The positions of the Gauss-Legendre quadrature.
+     * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
+     *
+     */
+    py::array_t<double> refine(const py::array_t<double> distances,
+                               const py::array_t<double> rotations,
+                               const py::array_t<double> weights,
+                               const py::array_t<int> num_neighbors,
                                const unsigned int m,
-                               const std::complex<double>* ylms,
-                               const double* quad_positions,
-                               const double* quad_weights) const;
+                               const py::array_t<std::complex<double>> ylms,
+                               const py::array_t<double> quad_positions,
+                               const py::array_t<double> quad_weights) const;
 
     private:
     /**
@@ -199,7 +242,10 @@ template<typename distribution_type> class BOOSOP {
     std::vector<std::vector<std::complex<double>>> m_Dij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
-
-    public:
-    unsigned int get_n_symmetries() const { return m_n_symmetries; }
 };
+
+template<typename distribution_type>
+void export_BOOSOP_class(py::module& m, const std::string& name);
+
+void export_BOOSOP(py::module& m);
+} // End namespace spatula

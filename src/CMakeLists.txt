@@ -1,6 +1,5 @@
 list(APPEND spatula_sources
     "export-module.cc"
-    "export-spatula.h" "export-spatula.cc"
     "BondOrder.h" "BondOrder.cc"
     "PGOP.h" "PGOP.cc"
     "BOOSOP.h" "BOOSOP.cc"
