@@ -63,9 +63,10 @@ void LocalNeighborhoodBOOBOO::rotate(const data::Vec3& v)
 }
 
 BOOSOPStore::BOOSOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
+    : N_syms(N_symmetries),
+      op(N_particles * N_symmetries),
+      rotations(N_particles * N_symmetries * 4),
+      m_N_particles(N_particles)
 {
 }
 
@@ -75,62 +76,57 @@ void BOOSOPStore::addOp(size_t i,
     const auto& values = std::get<0>(op_);
     const auto& rots = std::get<1>(op_);
     for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
+        op[i * N_syms + j] = values[j];
+        rotations[(i * N_syms + j) * 4 + 0] = rots[j].w;
+        rotations[(i * N_syms + j) * 4 + 1] = rots[j].x;
+        rotations[(i * N_syms + j) * 4 + 2] = rots[j].y;
+        rotations[(i * N_syms + j) * 4 + 3] = rots[j].z;
     }
 }
 
 void BOOSOPStore::addNull(size_t i)
 {
     for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = 0;
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
+        op[i * N_syms + j] = 0;
+        rotations[(i * N_syms + j) * 4 + 0] = 1;
+        rotations[(i * N_syms + j) * 4 + 1] = 0;
+        rotations[(i * N_syms + j) * 4 + 2] = 0;
+        rotations[(i * N_syms + j) * 4 + 3] = 0;
     }
 }
 
-py::tuple BOOSOPStore::getArrays()
+std::pair<std::vector<double>, std::vector<double>> BOOSOPStore::getArrays()
 {
-    return py::make_tuple(op, rotations);
+    return std::make_pair(op, rotations);
 }
 
 template<typename distribution_type>
-BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
+BOOSOP<distribution_type>::BOOSOP(const std::vector<std::vector<std::complex<double>>>& D_ij,
                                   std::shared_ptr<optimize::Optimizer>& optimizer,
                                   typename distribution_type::param_type distribution_params)
-    : m_distribution(distribution_params), m_n_symmetries(D_ij.shape(0)), m_Dij(),
+    : m_distribution(distribution_params), m_n_symmetries(D_ij.size()), m_Dij(D_ij),
       m_optimize(optimizer)
 {
-    m_Dij.reserve(m_n_symmetries);
-    const auto u_D_ij = D_ij.unchecked<2>();
-    const size_t n_mlms = D_ij.shape(1);
-    for (size_t i {0}; i < m_n_symmetries; ++i) {
-        m_Dij.emplace_back(
-            std::vector<std::complex<double>>(u_D_ij.data(i, 0), u_D_ij.data(i, 0) + n_mlms));
-    }
 }
 
 // TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
-py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances,
-                                             const py::array_t<double> weights,
-                                             const py::array_t<int> num_neighbors,
-                                             const unsigned int m,
-                                             const py::array_t<std::complex<double>> ylms,
-                                             const py::array_t<double> quad_positions,
-                                             const py::array_t<double> quad_weights) const
+std::pair<std::vector<double>, std::vector<double>>
+BOOSOP<distribution_type>::compute(size_t N_points,
+                                   const double* distances,
+                                   const double* weights,
+                                   const int* num_neighbors,
+                                   const unsigned int m,
+                                   const std::complex<double>* ylms,
+                                   const double* quad_positions,
+                                   const double* quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
-    const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
-                                                num_neighbors.data(0),
-                                                weights.data(0),
-                                                distances.data(0));
-    const size_t N_particles = num_neighbors.size();
+    const auto neighborhoods = NeighborhoodBOOs(N_points,
+                                                num_neighbors,
+                                                weights,
+                                                distances);
+    const size_t N_particles = N_points;
     auto op_store = BOOSOPStore(N_particles, m_n_symmetries);
     const auto loop_func = [&op_store, &neighborhoods, &qlm_eval, this](const size_t start,
                                                                         const size_t stop) {
@@ -150,44 +146,43 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
 }
 
 template<typename distribution_type>
-py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> distances,
-                                                      const py::array_t<double> rotations,
-                                                      const py::array_t<double> weights,
-                                                      const py::array_t<int> num_neighbors,
-                                                      const unsigned int m,
-                                                      const py::array_t<std::complex<double>> ylms,
-                                                      const py::array_t<double> quad_positions,
-                                                      const py::array_t<double> quad_weights) const
+std::vector<double> BOOSOP<distribution_type>::refine(size_t N_points,
+                                                      const double* distances,
+                                                      const double* rotations,
+                                                      const double* weights,
+                                                      const int* num_neighbors,
+                                                                                                            const unsigned int m,
+                                                      const std::complex<double>* ylms,
+                                                      const double* quad_positions,
+                                                      const double* quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
-    const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
-                                                num_neighbors.data(0),
-                                                weights.data(0),
-                                                distances.data(0));
-    const size_t N_particles = num_neighbors.size();
-    py::array_t<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
-    auto u_op_store = op_store.mutable_unchecked<2>();
-    auto u_rotations = rotations.unchecked<3>();
+    const auto neighborhoods = NeighborhoodBOOs(N_points,
+                                                num_neighbors,
+                                                weights,
+                                                distances);
+    const size_t N_particles = N_points;
+    std::vector<double> op_store(N_particles * m_n_symmetries);
     const auto loop_func
-        = [&u_op_store, &u_rotations, &neighborhoods, &qlm_eval, this](const size_t start,
+        = [&op_store, &rotations, &neighborhoods, &qlm_eval, this, N_points](const size_t start,
                                                                        const size_t stop) {
               auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
               for (size_t i = start; i < stop; ++i) {
                   if (neighborhoods.getNeighborCount(i) == 0) {
                       for (size_t j {0}; j < m_n_symmetries; ++j) {
-                          u_op_store(i, j) = 0;
+                          op_store[i * m_n_symmetries + j] = 0;
                       }
                       continue;
                   }
                   auto neighborhood = neighborhoods.getNeighborhoodBOO(i);
                   for (size_t j {0}; j < m_n_symmetries; ++j) {
-                      const auto rot = data::Quaternion(u_rotations(i, j, 0),
-                                                        u_rotations(i, j, 1),
-                                                        u_rotations(i, j, 2),
-                                                        u_rotations(i, j, 3))
+                      const auto rot = data::Quaternion(rotations[(i * m_n_symmetries + j) * 4 + 0],
+                                                        rotations[(i * m_n_symmetries + j) * 4 + 1],
+                                                        rotations[(i * m_n_symmetries + j) * 4 + 2],
+                                                        rotations[(i * m_n_symmetries + j) * 4 + 3])
                                            .to_axis_angle_3D();
                       neighborhood.rotate(rot);
-                      u_op_store(i, j)
+                      op_store[i * m_n_symmetries + j]
                           = this->compute_BOOSOP(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
                   }
               }
