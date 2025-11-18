@@ -5,8 +5,6 @@
 #include <cmath>
 #include <limits>
 
-#include <pybind11/pybind11.h>
-
 #include "Optimize.h"
 
 namespace spatula { namespace optimize {
@@ -48,25 +46,6 @@ data::Vec3 Optimizer::next_point()
 unsigned int Optimizer::getCount() const
 {
     return m_count;
-}
-
-void PyOptimizer::internal_next_point()
-{
-    PYBIND11_OVERRIDE_PURE(void, Optimizer, internal_next_point);
-}
-
-void PyOptimizer::record_objective(double objective)
-{
-    PYBIND11_OVERRIDE(void, Optimizer, record_objective, objective);
-}
-bool PyOptimizer::terminate() const
-{
-    PYBIND11_OVERRIDE_PURE(bool, Optimizer, terminate);
-}
-
-std::unique_ptr<Optimizer> PyOptimizer::clone() const
-{
-    return std::make_unique<PyOptimizer>(*this);
 }
 
 }} // namespace spatula::optimize
