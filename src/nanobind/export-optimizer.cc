@@ -33,13 +33,19 @@ void export_optimizers(nb::module_& m)
         .def_prop_rw("max_iter", &RandomSearch::getIterations, &RandomSearch::setIterations)
         .def_prop_rw("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
 
-    nb::class_<StepGradientDescent, Optimizer>(m, "StepGradientDescent")
-        .def(nb::init<const data::Vec3&, unsigned int, double, double, double>(),
-             "initial_point"_a,
-             "max_iter"_a,
-             "initial_jump"_a,
-             "learning_rate"_a,
-             "tol"_a);
+        nb::class_<StepGradientDescent, Optimizer>(m, "StepGradientDescent")
+
+            .def(nb::init<const data::Quaternion&, unsigned int, double, double, double>(),
+
+                 "initial_point"_a,
+
+                 "max_iter"_a,
+
+                 "initial_jump"_a,
+
+                 "learning_rate"_a,
+
+                 "tol"_a);
 
     nb::class_<Union, Optimizer>(m, "Union")
         .def_static(

@@ -91,7 +91,7 @@ class StepGradientDescent(Optimizer):
 
         """
         self._cpp = _spatula_nb.StepGradientDescent(
-            _spatula_nb.Quaternion(*initial_point).to_axis_angle_3D(),
+            _spatula_nb.Quaternion(*initial_point),
             max_iter,
             initial_jump,
             learning_rate,
