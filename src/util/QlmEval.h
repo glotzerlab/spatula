@@ -6,15 +6,11 @@
 #include <cmath>
 #include <complex>
 #include <iterator>
+#include <stdexcept>
 #include <vector>
-
-#include <nanobind/nanobind.h>
-#include <nanobind/ndarray.h>
 
 #include "../BondOrder.h"
 #include "Util.h"
-
-namespace nb = nanobind;
 
 namespace spatula { namespace util {
 // TODO: pass normalization factor not m for generalizing.
@@ -31,16 +27,19 @@ class QlmEval {
      * @brief Create a QlmEval and pre-compute as much computation as possible.
      *
      * @param m the order of the Gauss-Legendre quadrature.
-     * @param positions NumPy array of positions of shape \f$ (N_{quad}, 3) \f$.
-     * @param positions NumPy array of quadrature weights of shape \f$ (N_{quad}) \f$.
-     * @param positions NumPy array of spherical harmonics of shape \f$ (N_{lm}, N_{quad}) \f$. The
-     * ordering of the first dimension is in accending order of \f$ l \f$ and \f$ m \f$.
+     * @param n_points The number of quadrature points.
+     * @param n_lms The number of spherical harmonic moments.
+     * @param positions_data pointer to an array of positions of shape \f$ (N_{quad}, 3) \f$.
+     * @param weights_data pointer to an array of quadrature weights of shape \f$ (N_{quad}) \f$.
+     * @param ylms_data pointer to an array of spherical harmonics of shape \f$ (N_{lm}, N_{quad}) \f$.
      */
     QlmEval(unsigned int m,
-            const nb::ndarray<double, nb::shape<nb::any, 3>, nb::c_contig> positions,
-            const nb::ndarray<double, nb::shape<nb::any>, nb::c_contig> weights,
-            const nb::ndarray<std::complex<double>, nb::shape<nb::any, nb::any>, nb::c_contig> ylms)
-        : m_n_lms(ylms.shape(0)), m_max_l(0), m_n_points(ylms.shape(1)), m_positions(),
+            size_t n_points,
+            size_t n_lms,
+            const double* positions_data,
+            const double* weights_data,
+            const std::complex<double>* ylms_data)
+        : m_n_lms(n_lms), m_max_l(0), m_n_points(n_points), m_positions(),
           m_weighted_ylms()
     {
         unsigned int count = 1;
@@ -49,20 +48,19 @@ class QlmEval {
             count += 2 * m_max_l + 1;
         }
         m_weighted_ylms.reserve(m_n_lms);
-        const auto unchecked_ylms = ylms.unchecked<2>();
-        const auto u_weights = static_cast<const double*>(weights.data());
         const double normalization = 1.0 / (4.0 * static_cast<double>(m));
         for (size_t lm {0}; lm < m_n_lms; ++lm) {
             auto ylm = std::vector<std::complex<double>>();
             ylm.reserve(m_n_points);
             for (size_t i {0}; i < m_n_points; ++i) {
-                ylm.emplace_back(normalization * u_weights[i] * unchecked_ylms(lm, i));
+                ylm.emplace_back(normalization * weights_data[i]
+                                 * ylms_data[lm * m_n_points + i]);
             }
             m_weighted_ylms.emplace_back(ylm);
         }
-        m_positions.reserve(positions.shape(0));
-        for (size_t i {0}; i < static_cast<size_t>(positions.shape(0)); ++i) {
-            m_positions.emplace_back(positions.data(i, 0));
+        m_positions.reserve(m_n_points);
+        for (size_t i {0}; i < m_n_points; ++i) {
+            m_positions.emplace_back(&positions_data[i * 3]);
         }
     }
 

@@ -9,7 +9,6 @@
 
 #include "../data/Vec3.h"
 #include "../util/Metrics.h"
-#include "../util/QlmEval.h"
 #include "../util/Util.h"
 
 namespace nb = nanobind;
@@ -33,30 +32,5 @@ void export_util(nb::module_& m)
     m.def("covariance",
           &spatula::util::covariance,
           "Compute the Pearson correlation between two spherical harmonic expansions.");
-
-    nb::class_<QlmBuf>(m, "QlmBuf")
-        .def(nb::init<size_t>())
-        .def_readwrite("qlms", &QlmBuf::qlms)
-        .def_readwrite("sym_qlms", &QlmBuf::sym_qlms);
-
-    nb::class_<QlmEval>(m, "QlmEval")
-        .def(nb::init<unsigned int,
-                      const nb::ndarray<double, nb::shape<nb::any, 3>, nb::c_contig>,
-                      const nb::ndarray<double, nb::shape<nb::any>, nb::c_contig>,
-                      const nb::ndarray<std::complex<double>, nb::shape<nb::any, nb::any>, nb::c_contig>>(),
-             nb::arg("m"), nb::arg("positions"), nb::arg("weights"),
-             nb::arg("ylms"))
-        .def("eval",
-             static_cast<std::vector<std::complex<double>> (QlmEval::*)(
-                 const BondOrder<UniformDistribution>&) const>(&QlmEval::eval<UniformDistribution>),
-             nb::arg("bod"),
-             "Evaluate the Qlms for a given bond order diagram.")
-        .def("eval",
-             static_cast<std::vector<std::complex<double>> (QlmEval::*)(
-                 const BondOrder<FisherDistribution>&) const>(&QlmEval::eval<FisherDistribution>),
-             nb::arg("bod"),
-             "Evaluate the Qlms for a given bond order diagram.")
-        .def("getNlm", &QlmEval::getNlm, "Get the number of lm values.")
-        .def("getMaxL", &QlmEval::getMaxL, "Get the maximum l value.");
 }
 }} // namespace spatula::util
