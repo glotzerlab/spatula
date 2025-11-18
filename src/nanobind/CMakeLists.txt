@@ -2,6 +2,7 @@ nanobind_add_module(_spatula_nb
     export.cc
     export-threads.cc
     export-quat.cc
+    export-optimizer.cc
 )
 
 target_include_directories(_spatula_nb PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../util)

@@ -16,16 +16,9 @@ void export_optimize(py::module& m)
 {
     export_base_optimize(m);
     export_step_gradient_descent(m);
-    export_mesh(m);
     export_random_search(m);
     export_union(m);
     export_no_optimization(m);
-}
-
-void export_mesh(py::module& m)
-{
-    py::class_<Mesh, Optimizer, std::shared_ptr<Mesh>>(m, "Mesh").def(
-        py::init<const std::vector<data::Quaternion>&>());
 }
 
 void export_no_optimization(py::module& m)
