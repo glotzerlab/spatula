@@ -6,7 +6,7 @@
 #include "BOOSOP.h"
 #include "PGOP.h"
 #include "data/Quaternion.h"
-#include "data/Vec3.h"
+#include "data/export-vec.cc"
 #include "optimize/export_optimize.h"
 #include "util/export-utils.h"
 

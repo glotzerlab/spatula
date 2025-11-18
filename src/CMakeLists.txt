@@ -3,7 +3,7 @@ list(APPEND spatula_sources
     "BondOrder.h"
     "PGOP.h" "PGOP.cc"
     "BOOSOP.h" "BOOSOP.cc"
-    "data/Vec3.h" "data/Vec3.cc"
+    "data/Vec3.h"
     "data/Quaternion.h" "data/Quaternion.cc"
     "optimize/Optimize.h" "optimize/Optimize.cc"
     "optimize/RandomSearch.h" "optimize/RandomSearch.cc"
