@@ -265,6 +265,10 @@ void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)>
 template class BOOSOP<UniformDistribution>;
 template class BOOSOP<FisherDistribution>;
 
+// Explicit template instantiations for BondOrder
+template class BondOrder<UniformDistribution>;
+template class BondOrder<FisherDistribution>;
+
 template<typename distribution_type>
 void export_BOOSOP_class(py::module& m, const std::string& name)
 {
