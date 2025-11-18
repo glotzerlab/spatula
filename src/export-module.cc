@@ -7,12 +7,10 @@
 #include "PGOP.h"
 #include "data/Quaternion.h"
 // #include "data/export-quaternion.cc"
-#include "util/export-utils.h"
 
 PYBIND11_MODULE(_spatula, m)
 {
     // spatula::data::export_quaternion(m);
     spatula::export_spatula(m);
     spatula::export_BOOSOP(m);
-    spatula::util::export_util(m);
 }

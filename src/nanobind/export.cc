@@ -9,6 +9,7 @@
 #include "export-optimizer.h"
 #include "export-quat.h" // Include the new header
 #include "export-threads.h"
+#include "export-utils.h"
 
 namespace nb = nanobind;
 
@@ -23,4 +24,5 @@ NB_MODULE(_spatula_nb, m)
     spatula::util::export_threads(m);
     spatula::data::bind_quaternion(m); // Call the bind_quaternion function
     spatula::optimize::export_optimizers(m);
+    spatula::util::export_util(m);
 }
