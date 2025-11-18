@@ -35,17 +35,30 @@ void export_pgop(nb::module_& m)
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> sigmas) {
-                if (distances.shape(0) != weights.shape(0)
-                    || distances.shape(0) != num_neighbors.shape(0)
-                    || distances.shape(0) != sigmas.shape(0)) {
-                    throw std::invalid_argument(
-                        "Shape mismatch between distances, weights, num_neighbors, and sigmas");
-                }
-                return pgop_instance.compute(distances.shape(0),
+                PGOPStore result = pgop_instance.compute(num_neighbors.shape(0), // N_particles = num_query_points
                                              distances.data(),
                                              weights.data(),
                                              num_neighbors.data(),
                                              sigmas.data());
+
+                size_t N_particles = result.m_n_particles;
+                size_t N_symmetries = result.N_syms;
+
+                // Create nanobind ndarray for 'op'
+                nb::ndarray<double, nb::ndim<2>, nb::c_contig> op_array(
+                    result.op.data(),
+                    {N_particles, N_symmetries},
+                    nb::cast(std::move(result.op)) // Pass the moved vector as owner
+                );
+
+                // Create nanobind ndarray for 'rotations'
+                nb::ndarray<double, nb::ndim<3>, nb::c_contig> rotations_array(
+                    result.rotations.data(),
+                    {N_particles, N_symmetries, 4},
+                    nb::cast(std::move(result.rotations)) // Pass the moved vector as owner
+                );
+
+                return nb::make_tuple(op_array, rotations_array);
             },
             nb::arg("distances"),
             nb::arg("weights"),

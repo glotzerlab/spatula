@@ -10,7 +10,7 @@ import scipy.spatial
 
 import spatula
 
-reruns = 5
+reruns = 1
 
 n_dict = {
     3: "Triangular",
