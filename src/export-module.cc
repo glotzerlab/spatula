@@ -7,6 +7,7 @@
 #include "PGOP.h"
 #include "data/Quaternion.h"
 #include "data/export-vec.cc"
+#include "data/export-quaternion.cc"
 #include "optimize/export_optimize.h"
 #include "util/export-utils.h"
 
