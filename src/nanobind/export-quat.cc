@@ -1,6 +1,3 @@
-// Copyright (c) 2021-2025 The Regents of the University of Michigan
-// Part of spatula, released under the BSD 3-Clause License.
-
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
 #include <nanobind/stl/vector.h> // For std::vector
@@ -15,7 +12,7 @@ namespace nb = nanobind;
 
 namespace spatula { namespace data {
 
-NB_MODULE(_spatula_quaternion, m) {
+void bind_quaternion(nb::module_ &m) {
     nb::class_<Quaternion>(m, "Quaternion")
         .def(nb::init<double, double, double, double>())
         .def_rw("w", &Quaternion::w)

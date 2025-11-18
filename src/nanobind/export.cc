@@ -4,6 +4,7 @@
 
 #include "../util/Metrics.h" // Relative path to Metrics.h
 #include "export-threads.h"
+#include "export-quat.h" // Include the new header
 
 namespace nb = nanobind;
 
@@ -14,4 +15,5 @@ NB_MODULE(_spatula_nb, m) {
           "Compute the Pearson correlation between two spherical harmonic expansions.");
 
     spatula::util::export_threads(m);
+    spatula::data::bind_quaternion(m); // Call the bind_quaternion function
 }
