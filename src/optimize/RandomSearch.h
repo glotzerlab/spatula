@@ -7,6 +7,7 @@
 #include <random>
 
 #include "Optimize.h"
+#include "../data/Quaternion.h"
 
 namespace spatula { namespace optimize {
 
@@ -21,23 +22,38 @@ namespace spatula { namespace optimize {
  */
 class RandomSearch : public Optimizer {
     public:
-    RandomSearch(unsigned int iterations, long unsigned int seed);
+    RandomSearch(unsigned int max_iter, long unsigned int seed)
+        : Optimizer(), m_iterations(max_iter), m_seed(seed), m_rng(seed), m_normal_dist(0, 1.0)
+    {
+    }
     ~RandomSearch() override = default;
     /// Returns whether or not convergence or termination conditions have been met.
-    bool terminate() const override;
+    bool terminate() const override { return m_count >= m_iterations; }
     /// Create a clone of this optimizer
-    std::unique_ptr<Optimizer> clone() const override;
+    std::unique_ptr<Optimizer> clone() const override { return std::make_unique<RandomSearch>(*this); }
 
     /// Set the next point to compute the objective for to m_point.
-    void internal_next_point() override;
+    void internal_next_point() override
+    {
+        data::Quaternion q(m_normal_dist(m_rng),
+                           m_normal_dist(m_rng),
+                           m_normal_dist(m_rng),
+                           m_normal_dist(m_rng));
+        q.normalize();
+        m_point = q.to_axis_angle_3D();
+    }
 
-    long unsigned int getSeed() const;
+    long unsigned int getSeed() const { return m_seed; }
 
-    void setSeed(long unsigned int seed);
+    void setSeed(long unsigned int seed)
+    {
+        m_seed = seed;
+        m_rng.seed(seed);
+    }
 
-    unsigned int getIterations() const;
+    unsigned int getIterations() const { return m_iterations; }
 
-    void setIterations(unsigned int iter);
+    void setIterations(unsigned int iter) { m_iterations = iter; }
 
     private:
     /// The total number of iterations to run the search
