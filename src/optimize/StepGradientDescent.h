@@ -8,8 +8,8 @@
 #include <memory>
 #include <random>
 
-#include "Optimize.h"
 #include "../data/Quaternion.h"
+#include "Optimize.h"
 
 namespace spatula { namespace optimize {
 
@@ -44,7 +44,11 @@ class StepGradientDescent : public Optimizer {
                         double initial_jump,
                         double learning_rate,
                         double tol)
-        : StepGradientDescent(initial_point.to_axis_angle_3D(), max_iter, initial_jump, learning_rate, tol)
+        : StepGradientDescent(initial_point.to_axis_angle_3D(),
+                              max_iter,
+                              initial_jump,
+                              learning_rate,
+                              tol)
     {
     }
 

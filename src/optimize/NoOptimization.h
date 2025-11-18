@@ -3,15 +3,14 @@
 
 #pragma once
 
-#include "Optimize.h"
 #include "../data/Quaternion.h"
 #include "../data/Vec3.h"
+#include "Optimize.h"
 
 namespace spatula { namespace optimize {
 
-class NoOptimization : public Optimizer
-{
-public:
+class NoOptimization : public Optimizer {
+    public:
     NoOptimization()
     {
         m_best_point.first = data::Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D();
