@@ -3,6 +3,7 @@
 
 #include "export-optimizer.h"
 
+#include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/vector.h>
 
 #include "../data/Quaternion.h"
