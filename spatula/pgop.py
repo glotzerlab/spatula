@@ -397,7 +397,7 @@ class PGOP:
             sigmas = np.full(
                 neighbors.num_points * neighbors.num_query_points,
                 sigmas,
-                dtype=np.float32,
+                dtype=np.float64,
             )
         elif isinstance(sigmas, (np.ndarray, list)):
             if len(sigmas) != neighbors.num_points:
@@ -406,7 +406,7 @@ class PGOP:
                     "with the same length as the number of points in the system."
                 )
             sigmas = np.array(
-                [sigmas[i] for i in neighbors.point_indices], dtype=np.float32
+                [sigmas[i] for i in neighbors.point_indices], dtype=np.float64
             )
         elif sigmas is None:
             distances = np.linalg.norm(dist, axis=1)
@@ -457,7 +457,7 @@ class PGOP:
             sigmas = np.full(
                 neighbors.num_points * neighbors.num_query_points,
                 sigma,
-                dtype=np.float32,
+                dtype=np.float64,
             )
         else:
             raise ValueError(
@@ -466,7 +466,10 @@ class PGOP:
             )
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
-            dist, neighbors.weights, neighbors.neighbor_counts, sigmas
+            dist.astype(np.float64),
+            neighbors.weights.astype(np.float64),
+            neighbors.neighbor_counts.astype(np.int32),
+            sigmas.astype(np.float64),
         )
 
     @property
