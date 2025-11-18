@@ -6,6 +6,7 @@
 #include <nanobind/stl/vector.h>
 
 #include "export-optimizer.h"
+#include "export-PGOP.h"
 #include "export-quat.h" // Include the new header
 #include "export-stores.h"
 #include "export-threads.h"
@@ -22,4 +23,5 @@ NB_MODULE(_spatula_nb, m)
     spatula::optimize::export_optimizers(m);
     spatula::util::export_util(m);
     spatula::export_stores(m);
+    spatula::export_pgop(m);
 }

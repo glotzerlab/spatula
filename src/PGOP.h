@@ -6,18 +6,12 @@
 #include <tuple>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include "data/Quaternion.h"
 #include "locality.h"
 #include "optimize/Optimize.h"
 #include "stores.h"
 #include "util/Metrics.h"
 #include "util/Util.h"
-
-namespace py = pybind11;
 
 namespace spatula {
 
@@ -29,7 +23,7 @@ namespace spatula {
  */
 class PGOP {
     public:
-    PGOP(const py::list& R_ij,
+    PGOP(const std::vector<std::vector<double>>& R_ij,
          std::shared_ptr<optimize::Optimizer>& optimizer,
          const unsigned int mode,
          bool compute_per_operator);
@@ -42,10 +36,11 @@ class PGOP {
      * @param num_neighboors An array of the number of neighbor for each point.
      *
      */
-    PGOPStore compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
-                      const py::array_t<double> sigmas) const;
+    PGOPStore compute(size_t N_particles,
+                      const double* distances_data,
+                      const double* weights_data,
+                      const int* num_neighbors_data,
+                      const double* sigmas_data) const;
 
     private:
     /**
@@ -104,7 +99,4 @@ class PGOP {
     bool m_compute_per_operator;
 };
 
-void export_spatula_class(py::module& m, const std::string& name);
-
-void export_spatula(py::module& m);
 } // End namespace spatula

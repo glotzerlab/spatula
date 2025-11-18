@@ -11,6 +11,5 @@
 PYBIND11_MODULE(_spatula, m)
 {
     // spatula::data::export_quaternion(m);
-    spatula::export_spatula(m);
     spatula::export_BOOSOP(m);
 }

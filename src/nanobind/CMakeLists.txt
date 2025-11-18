@@ -5,6 +5,7 @@ nanobind_add_module(_spatula_nb
     export-optimizer.cc
     export-utils.cc
     export-stores.cc
+    export-PGOP.cc
 )
 
 target_include_directories(_spatula_nb PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../util)

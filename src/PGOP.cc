@@ -10,38 +10,26 @@
 
 namespace spatula {
 
-PGOP::PGOP(const py::list& R_ij,
+PGOP::PGOP(const std::vector<std::vector<double>>& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            const unsigned int mode,
            bool compute_per_operator)
-    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode),
+    : m_n_symmetries(R_ij.size()), m_Rij(R_ij), m_optimize(optimizer), m_mode(mode),
       m_compute_per_operator(compute_per_operator)
 {
-    m_Rij.reserve(m_n_symmetries);
-    for (size_t i = 0; i < m_n_symmetries; ++i) {
-        py::list inner_list = R_ij[i].cast<py::list>();
-        std::vector<double> vec;
-        vec.reserve(inner_list.size());
-
-        for (size_t j = 0; j < inner_list.size(); ++j) {
-            vec.push_back(inner_list[j].cast<double>());
-        }
-
-        m_Rij.emplace_back(std::move(vec));
-    }
 }
 
-PGOPStore PGOP::compute(const py::array_t<double> distances,
-                        const py::array_t<double> weights,
-                        const py::array_t<int> num_neighbors,
-                        const py::array_t<double> sigmas) const
+PGOPStore PGOP::compute(size_t N_particles,
+                        const double* distances_data,
+                        const double* weights_data,
+                        const int* num_neighbors_data,
+                        const double* sigmas_data) const
 {
-    const auto neighborhoods = Neighborhoods(num_neighbors.size(),
-                                             num_neighbors.data(0),
-                                             weights.data(0),
-                                             distances.data(0),
-                                             sigmas.data(0));
-    const size_t N_particles = num_neighbors.size();
+    const auto neighborhoods = Neighborhoods(N_particles,
+                                             num_neighbors_data,
+                                                                                         weights_data,
+                                             distances_data,
+                                             sigmas_data);
     auto total_number_of_op_to_store = m_n_symmetries;
     if (m_compute_per_operator) {
         for (const auto& R_ij : m_Rij) {
@@ -202,16 +190,6 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
         pool.push_loop(0, N, func, 2 * pool.get_thread_count());
         pool.wait_for_tasks();
     }
-}
-
-void export_spatula(py::module& m)
-{
-    py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::list&,
-                      std::shared_ptr<optimize::Optimizer>&,
-                      const unsigned int,
-                      bool>())
-        .def("compute", &PGOP::compute);
 }
 
 } // End namespace spatula
