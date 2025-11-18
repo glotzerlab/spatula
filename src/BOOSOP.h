@@ -14,6 +14,7 @@
 #include "data/Quaternion.h"
 #include "locality.h"
 #include "optimize/Optimize.h"
+#include "stores.h"
 #include "util/Metrics.h"
 #include "util/QlmEval.h"
 #include "util/Util.h"
@@ -21,35 +22,6 @@
 namespace py = pybind11;
 
 namespace spatula {
-
-/**
- * @brief Store for the optimal BOOSOP values and rotations
- *
- * This simplifies the setting of the results from the optimization, and the use of numpy arrays in
- * the code.
- */
-struct BOOSOPStore {
-    BOOSOPStore(size_t N_particles, size_t N_symmetries);
-    /// Number of point group symmetries to compute
-    size_t N_syms;
-    /// The optimized value of BOOSOP for each point group
-    py::array_t<double> op;
-    /// The optimal rotations used to obtain the maximum BOOSOP as quaternions.
-    py::array_t<double> rotations;
-
-    /// Add a single point's set of BOOSOP and rotation values
-    void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
-    /// Store 0's for point i. This is used when no neighbors for a point exist.
-    void addNull(size_t i);
-    /// Return a tuple of the two arrays op and rotations.
-    py::tuple getArrays();
-
-    private:
-    /// Fast access to op
-    py::detail::unchecked_mutable_reference<double, 2> u_op;
-    /// Fast access to rotations
-    py::detail::unchecked_mutable_reference<double, 3> u_rotations;
-};
 
 /**
  * @brief Central class, computes BOOSOP for provided points.

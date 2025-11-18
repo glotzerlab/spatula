@@ -12,43 +12,6 @@
 
 namespace spatula {
 
-BOOSOPStore::BOOSOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
-{
-}
-
-void BOOSOPStore::addOp(size_t i,
-                        const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
-{
-    const auto& values = std::get<0>(op_);
-    const auto& rots = std::get<1>(op_);
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
-    }
-}
-
-void BOOSOPStore::addNull(size_t i)
-{
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = 0;
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
-    }
-}
-
-py::tuple BOOSOPStore::getArrays()
-{
-    return py::make_tuple(op, rotations);
-}
-
 template<typename distribution_type>
 BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
                                   std::shared_ptr<optimize::Optimizer>& optimizer,

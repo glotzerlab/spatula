@@ -10,43 +10,6 @@
 
 namespace spatula {
 
-PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
-{
-}
-
-void PGOPStore::addOp(size_t i,
-                      const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
-{
-    const auto& values = std::get<0>(op_);
-    const auto& rots = std::get<1>(op_);
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
-    }
-}
-
-void PGOPStore::addNull(size_t i)
-{
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = std::numeric_limits<double>::quiet_NaN(); // Set NaN
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
-    }
-}
-
-py::tuple PGOPStore::getArrays()
-{
-    return py::make_tuple(op, rotations);
-}
-
 PGOP::PGOP(const py::list& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            const unsigned int mode,
