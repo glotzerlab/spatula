@@ -4,12 +4,12 @@
 #include "export-threads.h"
 #include "Threads.h"
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace spatula { namespace util {
-void export_threads(py::module& m)
+void export_threads(nb::module_& m)
 {
     m.def("set_num_threads",
           [](size_t num_threads) { ThreadPool::get().set_threads(num_threads); });

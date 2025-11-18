@@ -8,7 +8,7 @@ import operator
 
 import numpy as np
 
-from . import _spatula, freud
+from . import _spatula, freud, _spatula_nb
 
 PI_2 = np.pi / 2
 PI_4 = np.pi / 4
@@ -53,7 +53,7 @@ def set_num_threads(num_threads):
         num_threads = int(num_threads)
     except ValueError as err:
         raise ValueError("num_threads must be convertible to an int") from err
-    _spatula.set_num_threads(num_threads)
+    _spatula_nb.set_num_threads(num_threads)
     freud.parallel.set_num_threads(num_threads)
 
 
@@ -66,7 +66,7 @@ def get_num_threads():
         The number of threads.
 
     """
-    return _spatula.get_num_threads()
+    return _spatula_nb.get_num_threads()
 
 
 class _Cache:

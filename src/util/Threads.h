@@ -6,9 +6,6 @@
 #include <functional>
 
 #include "BS_thread_pool.hpp"
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
 
 namespace spatula { namespace util {
 /**

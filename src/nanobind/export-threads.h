@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace spatula { namespace util {
-void export_threads(pybind11::module& m);
+void export_threads(nanobind::module_& m);
 }} // namespace spatula::util

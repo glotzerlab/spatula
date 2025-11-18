@@ -8,7 +8,6 @@
 #include "data/Quaternion.h"
 #include "data/Vec3.h"
 #include "optimize/export_optimize.h"
-#include "util/export-threads.h" // Changed from util/Threads.h
 #include "util/export-utils.h"
 
 PYBIND11_MODULE(_spatula, m)
@@ -18,6 +17,5 @@ PYBIND11_MODULE(_spatula, m)
     spatula::optimize::export_optimize(m);
     spatula::export_spatula(m);
     spatula::export_BOOSOP(m);
-    spatula::util::export_threads(m);
     spatula::util::export_util(m);
 }
