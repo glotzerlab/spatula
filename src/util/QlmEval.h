@@ -2,7 +2,10 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #pragma once
+#include <algorithm>
+#include <cmath>
 #include <complex>
+#include <iterator>
 #include <vector>
 
 #include <pybind11/numpy.h>
@@ -36,7 +39,33 @@ class QlmEval {
     QlmEval(unsigned int m,
             const py::array_t<double> positions,
             const py::array_t<double> weights,
-            const py::array_t<std::complex<double>> ylms);
+            const py::array_t<std::complex<double>> ylms)
+        : m_n_lms(ylms.shape(0)), m_max_l(0), m_n_points(ylms.shape(1)), m_positions(),
+          m_weighted_ylms()
+    {
+        unsigned int count = 1;
+        while (count != m_n_lms) {
+            ++m_max_l;
+            count += 2 * m_max_l + 1;
+        }
+        m_weighted_ylms.reserve(m_n_lms);
+        const auto unchecked_ylms = ylms.unchecked<2>();
+        const auto u_weights = static_cast<const double*>(weights.data());
+        const double normalization = 1.0 / (4.0 * static_cast<double>(m));
+        for (size_t lm {0}; lm < m_n_lms; ++lm) {
+            auto ylm = std::vector<std::complex<double>>();
+            ylm.reserve(m_n_points);
+            for (size_t i {0}; i < m_n_points; ++i) {
+                ylm.emplace_back(normalization * u_weights[i] * unchecked_ylms(lm, i));
+            }
+            m_weighted_ylms.emplace_back(ylm);
+        }
+        const auto u_positions = positions.unchecked<2>();
+        m_positions.reserve(positions.shape(0));
+        for (size_t i {0}; i < static_cast<size_t>(positions.shape(0)); ++i) {
+            m_positions.emplace_back(u_positions.data(i, 0));
+        }
+    }
 
     /**
      * @brief For the provided bond order diagram compute the spherical harmonic expansion
@@ -49,7 +78,13 @@ class QlmEval {
      * @returns the \f$ Q_{m}^{l} \f$ for the spherical harmonic expansion.
      */
     template<typename distribution_type>
-    std::vector<std::complex<double>> eval(const BondOrder<distribution_type>& bod) const;
+    std::vector<std::complex<double>> eval(const BondOrder<distribution_type>& bod) const
+    {
+        std::vector<std::complex<double>> qlms;
+        qlms.reserve(m_n_lms);
+        eval(bod, qlms);
+        return qlms;
+    }
 
     /**
      * @brief For the provided bond order diagram compute the spherical harmonic expansion
@@ -63,13 +98,44 @@ class QlmEval {
      */
     template<typename distribution_type>
     void eval(const BondOrder<distribution_type>& bod,
-              std::vector<std::complex<double>>& qlm_buf) const;
+              std::vector<std::complex<double>>& qlm_buf) const
+    {
+        qlm_buf.clear();
+        qlm_buf.reserve(m_n_lms);
+        const auto B_quad = bod(m_positions);
+        std::transform(m_weighted_ylms.begin(),
+                       m_weighted_ylms.end(),
+                       std::back_insert_iterator(qlm_buf),
+                       [&B_quad](const auto& w_ylm) {
+                           std::complex<double> dot = 0;
+                           size_t i = 0;
+                           // Attempt to unroll loop for improved performance.
+                           for (; i + 10 < w_ylm.size(); i += 10) {
+                               // Simple summation seems to work here unlike in the BondOrder<> classes.
+                               dot += B_quad[i] * w_ylm[i] + B_quad[i + 1] * w_ylm[i + 1]
+                                      + B_quad[i + 2] * w_ylm[i + 2] + B_quad[i + 3] * w_ylm[i + 3]
+                                      + B_quad[i + 4] * w_ylm[i + 4] + B_quad[i + 5] * w_ylm[i + 5]
+                                      + B_quad[i + 6] * w_ylm[i + 6] + B_quad[i + 7] * w_ylm[i + 7]
+                                      + B_quad[i + 8] * w_ylm[i + 8] + B_quad[i + 9] * w_ylm[i + 9];
+                           }
+                           for (; i < w_ylm.size(); ++i) {
+                               dot += B_quad[i] * w_ylm[i];
+                           }
+                           return dot;
+                       });
+    }
 
     /// Get the number of unique combintations of \f$ l \f$ and \f$ m \f$.
-    unsigned int getNlm() const;
+    unsigned int getNlm() const
+    {
+        return m_n_lms;
+    }
 
     /// Get the maximum l value represented in the stored Ylms.
-    unsigned int getMaxL() const;
+    unsigned int getMaxL() const
+    {
+        return m_max_l;
+    }
 
     private:
     /// Number of unique combintations of \f$ l \f$ and \f$ m \f$.
@@ -96,6 +162,10 @@ struct QlmBuf {
     /// symmetrized values
     std::vector<std::complex<double>> sym_qlms;
 
-    QlmBuf(size_t size);
+    QlmBuf(size_t size) : qlms(), sym_qlms()
+    {
+        qlms.reserve(size);
+        sym_qlms.reserve(size);
+    }
 };
 }} // namespace spatula::util

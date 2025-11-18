@@ -13,7 +13,7 @@ list(APPEND spatula_sources
     "optimize/Union.h"
     "util/Metrics.h"
     "util/Util.h"
-    "util/QlmEval.h" "util/QlmEval.cc"
+    "util/QlmEval.h"
 )
 
 pybind11_add_module(_spatula ${spatula_sources})
