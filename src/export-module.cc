@@ -5,14 +5,12 @@
 
 #include "BOOSOP.h"
 #include "PGOP.h"
-#include "data/Quaternion.h"
 #include "data/Vec3.h"
 #include "util/export-utils.h"
 
 PYBIND11_MODULE(_spatula, m)
 {
     spatula::data::export_Vec3(m);
-    spatula::data::export_quaternion(m);
     spatula::export_spatula(m);
     spatula::export_BOOSOP(m);
     spatula::util::export_util(m);

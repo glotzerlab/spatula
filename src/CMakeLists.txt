@@ -3,7 +3,6 @@ list(APPEND spatula_sources
     "PGOP.cc"
     "BOOSOP.cc"
     "data/Vec3.cc"
-    "data/Quaternion.cc"
     "optimize/Optimize.cc"
     "optimize/RandomSearch.cc"
     "optimize/StepGradientDescent.cc"
