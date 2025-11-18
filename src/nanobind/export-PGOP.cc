@@ -16,6 +16,9 @@ namespace nb = nanobind;
 using namespace nb::literals;
 
 namespace spatula {
+// using Vector3f = nb::ndarray<float, nb::numpy, nb::shape<3>>;
+using ArrayXXd = nb::ndarray<double, nb::numpy, nb::ndim<2>, nb::c_contig>;
+using ArrayXXXd = nb::ndarray<double, nb::numpy, nb::ndim<3>, nb::c_contig>;
 
 void export_pgop(nb::module_& m)
 {
@@ -35,28 +38,34 @@ void export_pgop(nb::module_& m)
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> sigmas) {
-                PGOPStore result = pgop_instance.compute(num_neighbors.shape(0), // N_particles = num_query_points
-                                             distances.data(),
-                                             weights.data(),
-                                             num_neighbors.data(),
-                                             sigmas.data());
+                PGOPStore result = pgop_instance.compute(
+                    num_neighbors.shape(0), // N_particles = num_query_points
+                    distances.data(),
+                    weights.data(),
+                    num_neighbors.data(),
+                    sigmas.data());
 
                 size_t N_particles = result.m_n_particles;
                 size_t N_symmetries = result.N_syms;
 
                 // Create nanobind ndarray for 'op'
-                nb::ndarray<double, nb::ndim<2>, nb::c_contig> op_array(
-                    result.op.data(),
-                    {N_particles, N_symmetries},
-                    nb::cast(std::move(result.op)) // Pass the moved vector as owner
-                );
+                // ArrayXXd op_array(
+                //     result.op.data(),
+                //     {N_particles, N_symmetries},
+                //     deleter
+                //     // nb::cast(std::move(result.op)) // Pass the moved vector as owner
+                //     )
+                //     .cast();
+
+                auto op_array = ArrayXXd(result.op.data(), {N_particles, N_symmetries});
+                auto rotations_array = ArrayXXd(result.op.data(), {N_particles, N_symmetries, 4});
 
                 // Create nanobind ndarray for 'rotations'
-                nb::ndarray<double, nb::ndim<3>, nb::c_contig> rotations_array(
-                    result.rotations.data(),
-                    {N_particles, N_symmetries, 4},
-                    nb::cast(std::move(result.rotations)) // Pass the moved vector as owner
-                );
+                // nb::ndarray<double, nb::ndim<3>, nb::c_contig> rotations_array(
+                //     result.rotations.data(),
+                //     {N_particles, N_symmetries, 4},
+                //     nb::cast(std::move(result.rotations)) // Pass the moved vector as owner
+                // );
 
                 return nb::make_tuple(op_array, rotations_array);
             },
