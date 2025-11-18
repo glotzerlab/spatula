@@ -10,7 +10,7 @@ import scipy.spatial
 
 import spatula
 
-reruns = 1
+reruns = 0
 
 n_dict = {
     3: "Triangular",
@@ -1481,7 +1481,7 @@ def compute_pgop_polyhedron(
         or "<" in cutoff_operator
         and op_compute.order[0] > cutoff_value
     ):
-        print(f"Used higher precision, lower precision value {op_compute.order[0]}")
+        print(f"Used higher precision, lower precision value\n{op_compute.order[0]}")
         new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
             spatula.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
         )
@@ -1514,7 +1514,7 @@ def compute_pgop_check_all_order_values(
 ):
     op_pg = compute_op_result(symmetry, optimizer, mode, system, nlist, sigma, qp)
     if not np.allclose(op_pg.order, value, rtol=rtol):
-        print("Used higher precision, lower precision value", op_pg.order)
+        print("Used higher precision, lower precision value\n", op_pg.order)
         new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
             spatula.optimize.RandomSearch(max_iter=10000, seed=rng.integers(0, 1000000))
         )
@@ -1536,7 +1536,7 @@ def compute_pgop_crystal(crystal_type, symmetry, mode, nlist, sigma=None, qp=Non
 def test_simple_crystals(crystal_type, mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs[crystal_type]}
     op_pg = compute_pgop_crystal(crystal_type, ["Oh"], mode, qargs, None)
-    assert np.allclose(op_pg.order, 1.0, rtol=1e-4)
+    np.testing.assert_allclose(op_pg.order, 1.0, rtol=1e-4, atol=1e-6)
 
 
 @pytest.mark.parametrize("mode", modedict_types)

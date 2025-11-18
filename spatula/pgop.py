@@ -408,6 +408,7 @@ class PGOP:
             sigmas = np.array(sigmas, dtype=np.float64)
         elif sigmas is None:
             distances = np.linalg.norm(dist, axis=1)
+
             # filter distances that are smaller then 0.001 of mean distance
             filter = distances > 0.001 * np.mean(distances)
             if self.mode == "full":
@@ -462,6 +463,8 @@ class PGOP:
                 "sigmas must be a float, a list of floats or an array of floats "
                 "with the same length as the number of points in the system."
             )
+        print(dist.shape)
+        print(sigmas.shape)
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
             dist.astype(np.float64),

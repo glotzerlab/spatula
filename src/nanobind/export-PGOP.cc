@@ -18,7 +18,7 @@ using namespace nb::literals;
 namespace spatula {
 // using Vector3f = nb::ndarray<float, nb::numpy, nb::shape<3>>;
 using ArrayXXd = nb::ndarray<double, nb::numpy, nb::ndim<2>, nb::c_contig>;
-using ArrayXXXd = nb::ndarray<double, nb::numpy, nb::ndim<3>, nb::c_contig>;
+using ArrayXX4d = nb::ndarray<double, nb::numpy, nb::shape<-1, -1, 4>, nb::c_contig>;
 
 void export_pgop(nb::module_& m)
 {
@@ -34,7 +34,7 @@ void export_pgop(nb::module_& m)
         .def(
             "compute",
             [](const PGOP& pgop_instance,
-               const nb::ndarray<double, nb::ndim<2>, nb::c_contig> distances,
+               const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> distances,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> sigmas) {
@@ -58,7 +58,7 @@ void export_pgop(nb::module_& m)
                 //     .cast();
 
                 auto op_array = ArrayXXd(result.op.data(), {N_particles, N_symmetries});
-                auto rotations_array = ArrayXXd(result.op.data(), {N_particles, N_symmetries, 4});
+                auto rotations_array = ArrayXX4d(result.op.data(), {N_particles, N_symmetries, 4});
 
                 // Create nanobind ndarray for 'rotations'
                 // nb::ndarray<double, nb::ndim<3>, nb::c_contig> rotations_array(
