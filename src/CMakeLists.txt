@@ -2,6 +2,7 @@ list(APPEND spatula_sources
     "export-module.cc"
     "PGOP.cc"
     "BOOSOP.cc"
+    "data/Vec3.cc"
     "optimize/Optimize.cc"
     "optimize/RandomSearch.cc"
     "optimize/StepGradientDescent.cc"

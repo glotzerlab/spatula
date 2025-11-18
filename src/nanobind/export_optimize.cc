@@ -65,7 +65,7 @@ void export_step_gradient_descent(nb::module_& m)
 void export_union(nb::module_& m)
 {
     nb::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "Union")
-        .def_rw_static("with_step_gradient_descent",
+        .def_static("with_step_gradient_descent",
                     [](const std::shared_ptr<const Optimizer> initial_opt,
                        unsigned int max_iter,
                        double initial_jump,

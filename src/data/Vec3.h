@@ -1,9 +1,13 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
+#include <pybind11/pybind11.h>
+
 #pragma once
 
 namespace spatula { namespace data {
+
+namespace py = pybind11;
 
 /**
  * @brief Vec3 represents a point in 3d space and provides arithmetic operators for easy
@@ -74,4 +78,5 @@ template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b);
 /// Vec3 equality
 bool operator==(const Vec3& a, const Vec3& b);
 
+void export_Vec3(py::module& m);
 }} // namespace spatula::data

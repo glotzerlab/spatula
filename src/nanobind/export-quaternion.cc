@@ -22,10 +22,10 @@ void export_quaternion(nb::module_& m)
         .def(nb::init<const nb::object&>(),
              nb::arg("obj"),
              "Construct a Quaternion from a 4-element sequence like object.")
-        .def_rw("w", &Quaternion::w)
-        .def_rw("x", &Quaternion::x)
-        .def_rw("y", &Quaternion::y)
-        .def_rw("z", &Quaternion::z)
+        .def_readwrite("w", &Quaternion::w)
+        .def_readwrite("x", &Quaternion::x)
+        .def_readwrite("y", &Quaternion::y)
+        .def_readwrite("z", &Quaternion::z)
         .def("__repr__",
              [](const Quaternion& q) {
                  auto repr = std::ostringstream();
