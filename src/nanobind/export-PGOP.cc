@@ -19,21 +19,10 @@ namespace spatula {
 
 void export_pgop(nb::module_& m) {
     nb::class_<PGOP>(m, "PGOP")
-        .def(nb::init<const nb::list&,
+        .def(nb::init<const std::vector<std::vector<double>>&,
                       std::shared_ptr<optimize::Optimizer>&,
                       const unsigned int,
                       bool>(),
-             [](const nb::list& R_ij_list,
-                std::shared_ptr<optimize::Optimizer>& optimizer,
-                const unsigned int mode,
-                bool compute_per_operator) {
-            std::vector<std::vector<double>> R_ij;
-            R_ij.reserve(R_ij_list.size());
-            for (auto item : R_ij_list) {
-                R_ij.emplace_back(nb::cast<std::vector<double>>(item));
-            }
-            return new PGOP(R_ij, optimizer, mode, compute_per_operator);
-        },
              nb::arg("R_ij"),
              nb::arg("optimizer"),
              nb::arg("mode"),
