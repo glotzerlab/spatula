@@ -13,7 +13,7 @@ list(APPEND spatula_sources
     "optimize/Union.h" "optimize/Union.cc"
     "optimize/export_optimize.h" "optimize/export_optimize.cc"
     "util/Metrics.h"
-    "util/Util.h" "util/Util.cc"
+    "util/Util.h"
     "util/QlmEval.h" "util/QlmEval.cc"
     "util/export-threads.cc"
     "util/export-utils.cc"

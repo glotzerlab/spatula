@@ -8,6 +8,7 @@
 #include <iterator>
 #include <utility>
 #include <vector>
+#include <numeric> // Added for std::sqrt
 
 #include "../data/Vec3.h"
 
@@ -20,10 +21,18 @@ using vec3_iter = decltype(std::declval<std::vector<Vec3>>().begin());
 using cvec3_iter = decltype(std::declval<const std::vector<Vec3>>().begin());
 
 /// Compute and return the angle (in radians) between two vectors in 3D.
-double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x);
+inline double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
+{
+    return std::acos(ref_x.dot(x));
+}
 
 /// Rotate a single point x using rotation matrix R and place the result in x_prime.
-void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R);
+inline void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R)
+{
+    x_prime.x = R[0] * x.x + R[1] * x.y + R[2] * x.z;
+    x_prime.y = R[3] * x.x + R[4] * x.y + R[5] * x.z;
+    x_prime.z = R[6] * x.x + R[7] * x.y + R[8] * x.z;
+};
 
 /**
  * @brief Rotate an interator of points via the rotation matrix R.
@@ -37,10 +46,15 @@ void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R);
  * @param rotated_points_it iterator to the starting vector location to place rotated positions in.
  * @param R The rotation matrix given in row column order.
  */
-void rotate_matrix(cvec3_iter points_begin,
-                   cvec3_iter points_end,
-                   vec3_iter rotated_points_it,
-                   const std::vector<double>& R);
+inline void rotate_matrix(cvec3_iter points_begin,
+                          cvec3_iter points_end,
+                          vec3_iter rotated_points_it,
+                          const std::vector<double>& R)
+{
+    for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
+        single_rotate(*it, *rotated_points_it, R);
+    }
+}
 
 /**
  * @brief Convert a Vec3 representing an axis, angle rotation parametrization to a rotation matrix.
@@ -48,28 +62,30 @@ void rotate_matrix(cvec3_iter points_begin,
  * This method assumes that \f$ || v || = \theta \f$ and \f$ x = \frac{v}{||v||} \f$ where \f$ x \f$
  * is the axis of rotation.
  *
- * @param v the rotation coded according to the 3 vector axis angle parametrization.
+ * @param v The 3-vector to convert to a rotation matrix.
  */
-std::vector<double> to_rotation_matrix(const Vec3& v);
-
-/**
- * @brief Compute the rotation matrix for the given Euler angles in ??? convention.
- *
- * @param alpha Euler angle
- * @param beta Euler angle
- * @param gamma Euler angle
- * @returns the rotation matrix as a 1d vector.
- */
-std::vector<double> compute_rotation_matrix(double alpha, double beta, double gamma);
-
-/**
- * @brief Compute the rotation matrix for the given Euler angles provided by a vector in ???
- * convention.
- *
- * @param rotation a 3 sized vector which contains Euler angles.
- * @returns the rotation matrix as a 1d vector.
- */
-std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation);
+inline std::vector<double> to_rotation_matrix(const Vec3& v)
+{
+    const auto angle = v.norm();
+    if (std::abs(angle) < 1e-7) {
+        return std::vector<double> {{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}};
+    }
+    const auto axis = v / angle;
+    const double c {std::cos(angle)}, s {std::sin(angle)};
+    const double C = 1 - c;
+    const auto sv = axis * s;
+    return std::vector<double> {{
+        C * axis.x * axis.x + c,
+        C * axis.x * axis.y - sv.z,
+        C * axis.x * axis.z + sv.y,
+        C * axis.y * axis.x + sv.z,
+        C * axis.y * axis.y + c,
+        C * axis.y * axis.z - sv.x,
+        C * axis.z * axis.x - sv.y,
+        C * axis.z * axis.y + sv.x,
+        C * axis.z * axis.z + c,
+    }};
+}
 
 /**
  * @brief Returns a vector of Vec3 of normalized distances. Each point in distances is normalized
@@ -79,33 +95,53 @@ std::vector<double> compute_rotation_matrix(const std::vector<double>& rotation)
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
-std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t, size_t> slice);
+inline std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t, size_t> slice)
+{
+    auto normalized_distances = std::vector<Vec3>();
+    normalized_distances.reserve((slice.second - slice.first) / 3);
+    // In C++ 23 used strided view with a transform.
+    for (size_t i = slice.first; i < slice.second; i += 3) {
+        const auto point = Vec3(distances[i], distances[i + 1], distances[i + 2]);
+        const double norm = std::sqrt(point.dot(point));
+        if (norm == 0) {
+            normalized_distances.emplace_back(point);
+        } else {
+            normalized_distances.emplace_back(point / norm);
+        }
+    }
+    return normalized_distances;
+}
 
 /**
- * @brief Return a vector of linearly spaced points between start and end.
- *
- * @param start The starting value.
- * @param end The final or n-th + 1 value according to the value of include_end
- * @param n The number of points in the vector.
- * @param include_end Whether the last point is at or before @p end.
- */
-std::vector<double> linspace(double start, double end, unsigned int n, bool include_end = true);
-
-/**
- * @brief Given a WignerD matrix and spherical harmonic expansion coefficients \f$ Q_{m}^{l} \f$
- * compute the symmetrized expansion's coefficients.
- *
- * For reasons of performance this uses an existing vector's memory buffer to avoid memory
- * allocations.
+ * @brief Perform a symmetrization of a spherical harmonic expansion via a Wigner D matrix.
  *
  * @param qlms The spherical harmonic expansion coefficients.
- * @param D_ij The WignerD matrix for a given symmetry or point group.
- * @param sym_qlm_buf The vector to place the symmetrized expansion coefficients into. For best
- * performance the capacity should be the size of qlms.
- * @param max_l The maximum \f$ l \f$ present in @p D_ij and @p qlms.
+ * @param D_ij The Wigner D matrix to symmetrize Qlms by
+ * @param sym_qlm_buf The buffer/array to store the symmetrized Qlms
+ * @param max_l The max_l of the provided Qlms and D_ij. This is not strictly necessary, but it
+ * prevents the need to determine the max_l from the qlms vector or create a custom struct that
+ * stores this.
  */
-void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
-                    const std::vector<std::complex<double>>& D_ij,
-                    std::vector<std::complex<double>>& sym_qlm_buf,
-                    unsigned int max_l);
+inline void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
+                           const std::vector<std::complex<double>>& D_ij,
+                           std::vector<std::complex<double>>& sym_qlm_buf,
+                           unsigned int max_l)
+{
+    sym_qlm_buf.clear();
+    sym_qlm_buf.reserve(qlms.size());
+    size_t qlm_i {0};
+    size_t dij_index {0};
+    for (size_t l {0}; l < max_l + 1; ++l) {
+        const size_t max_m {2 * l + 1};
+        for (size_t m_prime {0}; m_prime < max_m; ++m_prime) {
+            std::complex<double> sym_qlm {0.0, 0.0};
+            for (size_t m {0}; m < max_m; ++m) {
+                sym_qlm += qlms[qlm_i + m] * D_ij[dij_index];
+                ++dij_index;
+            }
+            sym_qlm_buf.emplace_back(sym_qlm);
+        }
+        qlm_i += max_m;
+    }
+}
 }} // namespace spatula::util
