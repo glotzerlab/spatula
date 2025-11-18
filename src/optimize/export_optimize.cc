@@ -36,7 +36,7 @@ void export_no_optimization(py::module& m)
 
 void export_base_optimize(py::module& m)
 {
-    py::class_<Optimizer, PyOptimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
+    py::class_<Optimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
         .def("record_objective", &Optimizer::record_objective)
         .def_property_readonly("terminate", &Optimizer::terminate)
         .def_property_readonly("count", &Optimizer::getCount);
