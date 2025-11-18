@@ -12,57 +12,6 @@
 
 namespace spatula {
 
-NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
-                                   const int* neighbor_counts,
-                                   const double* weights,
-                                   const double* distance)
-    : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
-      m_neighbor_offsets()
-{
-    m_neighbor_offsets.reserve(m_N + 1);
-    m_neighbor_offsets.emplace_back(0);
-    std::partial_sum(m_neighbor_counts,
-                     m_neighbor_counts + m_N,
-                     std::back_inserter(m_neighbor_offsets));
-}
-
-LocalNeighborhoodBOOBOO NeighborhoodBOOs::getNeighborhoodBOO(size_t i) const
-{
-    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return LocalNeighborhoodBOOBOO(
-        util::normalize_distances(m_distances, std::make_pair(3 * start, 3 * end)),
-        std::vector(m_weights + start, m_weights + end));
-}
-
-std::vector<data::Vec3> NeighborhoodBOOs::getNormalizedDistances(size_t i) const
-{
-    const size_t start {3 * m_neighbor_offsets[i]}, end {3 * m_neighbor_offsets[i + 1]};
-    return util::normalize_distances(m_distances, std::make_pair(start, end));
-}
-
-std::vector<double> NeighborhoodBOOs::getWeights(size_t i) const
-{
-    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return std::vector(m_weights + start, m_weights + end);
-}
-
-int NeighborhoodBOOs::getNeighborCount(size_t i) const
-{
-    return m_neighbor_counts[i];
-}
-
-LocalNeighborhoodBOOBOO::LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_,
-                                                 std::vector<double>&& weights_)
-    : positions(positions_), weights(weights_), rotated_positions(positions)
-{
-}
-
-void LocalNeighborhoodBOOBOO::rotate(const data::Vec3& v)
-{
-    const auto R = util::to_rotation_matrix(v);
-    util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
-}
-
 BOOSOPStore::BOOSOPStore(size_t N_particles, size_t N_symmetries)
     : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
       rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
@@ -138,7 +87,7 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
                                         quad_positions.data(),
                                         quad_weights.data(),
                                         ylms.data());
-    const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
+    const auto neighborhoods = Neighborhoods(num_neighbors.size(),
                                                 num_neighbors.data(0),
                                                 weights.data(0),
                                                 distances.data(0));
@@ -152,7 +101,7 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
                 op_store.addNull(i);
                 continue;
             }
-            auto neighborhood = neighborhoods.getNeighborhoodBOO(i);
+            auto neighborhood = neighborhoods.getNeighborhood(i);
             const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf);
             op_store.addOp(i, particle_op_rot);
         }
@@ -183,7 +132,7 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
                                         quad_positions.data(),
                                         quad_weights.data(),
                                         ylms.data());
-    const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
+    const auto neighborhoods = Neighborhoods(num_neighbors.size(),
                                                 num_neighbors.data(0),
                                                 weights.data(0),
                                                 distances.data(0));
@@ -202,7 +151,7 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
                       }
                       continue;
                   }
-                  auto neighborhood = neighborhoods.getNeighborhoodBOO(i);
+                  auto neighborhood = neighborhoods.getNeighborhood(i);
                   for (size_t j {0}; j < m_n_symmetries; ++j) {
                       const auto rot = data::Quaternion(u_rotations(i, j, 0),
                                                         u_rotations(i, j, 1),
@@ -221,7 +170,7 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodBOOBOO& neighborhood,
+BOOSOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
 {
@@ -239,7 +188,7 @@ BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodBOOBOO& neighborhoo
 
 template<typename distribution_type>
 std::tuple<double, data::Quaternion>
-BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodBOOBOO& neighborhood,
+BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
                                             const std::vector<std::complex<double>>& D_ij,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
@@ -257,7 +206,7 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodBOOBOO& neighborhoo
 }
 
 template<typename distribution_type>
-double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodBOOBOO& neighborhood,
+double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhood& neighborhood,
                                                  const std::vector<std::complex<double>>& D_ij,
                                                  const util::QlmEval& qlm_eval,
                                                  util::QlmBuf& qlm_buf) const

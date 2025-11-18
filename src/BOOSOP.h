@@ -12,6 +12,7 @@
 #include <pybind11/stl.h>
 
 #include "data/Quaternion.h"
+#include "locality.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/QlmEval.h"
@@ -20,60 +21,6 @@
 namespace py = pybind11;
 
 namespace spatula {
-
-/**
- * @brief storage for neighbor positions, weights, and rotated positions.
- *
- * This struct is helpful is organizing operations on the BOD's neighbors when optimizing over
- * SO(3), by keeping all the data together.
- */
-struct LocalNeighborhoodBOOBOO {
-    LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
-
-    void rotate(const data::Vec3& q);
-
-    /// BOD neighbor bonds
-    const std::vector<data::Vec3> positions;
-    /// BOD neighbor weights
-    const std::vector<double> weights;
-    /// Storage for the current positions under a given rotation used in optimization.
-    std::vector<data::Vec3> rotated_positions;
-};
-
-/**
- * @brief Small helper class for storing and accessing neighbor list data from Python.
- *
- * Warning: This class consumes the raw arrays from Python and requires that these arrays outlive
- * class instances.
- */
-class NeighborhoodBOOs {
-    public:
-    NeighborhoodBOOs(size_t N,
-                     const int* neighbor_counts,
-                     const double* weights,
-                     const double* distance);
-
-    /// Get the neighbors for point i.
-    LocalNeighborhoodBOOBOO getNeighborhoodBOO(size_t i) const;
-    /// Get the normalized neighbor distance vectors for point i.
-    std::vector<data::Vec3> getNormalizedDistances(size_t i) const;
-    /// Get the neighbor weight for point i.
-    std::vector<double> getWeights(size_t i) const;
-    /// Get the number of neighbors for point i.
-    int getNeighborCount(size_t i) const;
-
-    private:
-    /// Number of points with neighbors
-    const size_t m_N;
-    /// The number of neighbors for each point
-    const int* m_neighbor_counts;
-    /// The distance vector of each neighbor
-    const double* m_distances;
-    /// The weights for each neighbor bond
-    const double* m_weights;
-    /// The offsets to index into the distances array
-    std::vector<size_t> m_neighbor_offsets;
-};
 
 /**
  * @brief Store for the optimal BOOSOP values and rotations
@@ -184,7 +131,7 @@ template<typename distribution_type> class BOOSOP {
      * specified point group symmetries.
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(LocalNeighborhoodBOOBOO& neighborhood,
+    compute_particle(LocalNeighborhood& neighborhood,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
 
@@ -202,7 +149,7 @@ template<typename distribution_type> class BOOSOP {
      * @returns the optimized BOOSOP value and the optimal rotation for the given symmetry.
      */
     std::tuple<double, data::Quaternion>
-    compute_symmetry(LocalNeighborhoodBOOBOO& neighborhood,
+    compute_symmetry(LocalNeighborhood& neighborhood,
                      const std::vector<std::complex<double>>& D_ij,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
@@ -222,7 +169,7 @@ template<typename distribution_type> class BOOSOP {
      *
      * @returns The BOOSOP value.
      */
-    double compute_BOOSOP(LocalNeighborhoodBOOBOO& neighborhood,
+    double compute_BOOSOP(LocalNeighborhood& neighborhood,
                           const std::vector<std::complex<double>>& D_ij,
                           const util::QlmEval& qlm_eval,
                           util::QlmBuf& qlm_buf) const;
