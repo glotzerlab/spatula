@@ -1,15 +1,20 @@
 list(APPEND spatula_sources
     "export-module.cc"
-    "PGOP.cc"
-    "BOOSOP.cc"
-    "data/Vec3.cc"
-    "optimize/Optimize.cc"
-    "optimize/RandomSearch.cc"
-    "optimize/StepGradientDescent.cc"
-    "optimize/NoOptimization.cc"
-    "optimize/Mesh.cc"
-    "optimize/Union.cc"
-    "util/QlmEval.cc"
+    "BondOrder.h"
+    "PGOP.h" "PGOP.cc"
+    "BOOSOP.h" "BOOSOP.cc"
+    "data/Vec3.h" "data/Vec3.cc"
+    "data/Quaternion.h" "data/Quaternion.cc"
+    "optimize/Optimize.h" "optimize/Optimize.cc"
+    "optimize/RandomSearch.h" "optimize/RandomSearch.cc"
+    "optimize/StepGradientDescent.h" "optimize/StepGradientDescent.cc"
+    "optimize/NoOptimization.h" "optimize/NoOptimization.cc"
+    "optimize/Mesh.h" "optimize/Mesh.cc"
+    "optimize/Union.h" "optimize/Union.cc"
+    "optimize/export_optimize.h" "optimize/export_optimize.cc"
+    "util/Metrics.h"
+    "util/Util.h"
+    "util/QlmEval.h" "util/QlmEval.cc"
     "util/export-utils.cc"
 )
 
@@ -20,7 +25,6 @@ set_target_properties(_spatula PROPERTIES
     CMAKE_CXX_STANDARD_REQUIRED True
     THREADS_PREFER_PTHREAD_FLAG ON
 )
-target_include_directories(_spatula PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/optimize)
 if (CMAKE_SYSTEM_NAME EQUAL "Linux")
     target_compile_options(_spatula PRIVATE -pthreads)
 endif (CMAKE_SYSTEM_NAME EQUAL "Linux")
