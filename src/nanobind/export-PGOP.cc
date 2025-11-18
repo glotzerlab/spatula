@@ -19,26 +19,30 @@ namespace spatula {
 
 void export_pgop(nb::module_& m) {
     nb::class_<PGOP>(m, "PGOP")
-        .def(nb::init([](const nb::list& R_ij_list,
-                         std::shared_ptr<optimize::Optimizer>& optimizer,
-                         const unsigned int mode,
-                         bool compute_per_operator) {
+        .def(nb::init<const nb::list&,
+                      std::shared_ptr<optimize::Optimizer>&,
+                      const unsigned int,
+                      bool>(),
+             [](const nb::list& R_ij_list,
+                std::shared_ptr<optimize::Optimizer>& optimizer,
+                const unsigned int mode,
+                bool compute_per_operator) {
             std::vector<std::vector<double>> R_ij;
             R_ij.reserve(R_ij_list.size());
             for (auto item : R_ij_list) {
                 R_ij.emplace_back(nb::cast<std::vector<double>>(item));
             }
             return new PGOP(R_ij, optimizer, mode, compute_per_operator);
-        }),
+        },
              nb::arg("R_ij"),
              nb::arg("optimizer"),
              nb::arg("mode"),
              nb::arg("compute_per_operator"))
         .def("compute", [](const PGOP& pgop_instance,
-                           const nb::ndarray<double, nb::shape<nb::any, 3>, nb::c_contig> distances,
-                           const nb::ndarray<double, nb::shape<nb::any>, nb::c_contig> weights,
-                           const nb::ndarray<int, nb::shape<nb::any>, nb::c_contig> num_neighbors,
-                           const nb::ndarray<double, nb::shape<nb::any>, nb::c_contig> sigmas) {
+                           const nb::ndarray<double, nb::ndim<2>, nb::c_contig> distances,
+                           const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
+                           const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
+                           const nb::ndarray<double, nb::ndim<1>, nb::c_contig> sigmas) {
             if (distances.shape(0) != weights.shape(0) ||
                 distances.shape(0) != num_neighbors.shape(0) ||
                 distances.shape(0) != sigmas.shape(0)) {
