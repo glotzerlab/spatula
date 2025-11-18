@@ -31,7 +31,7 @@ PGOP::PGOP(const py::list& R_ij,
     }
 }
 
-py::tuple PGOP::compute(const py::array_t<double> distances,
+PGOPStore PGOP::compute(const py::array_t<double> distances,
                         const py::array_t<double> weights,
                         const py::array_t<int> num_neighbors,
                         const py::array_t<double> sigmas) const
@@ -62,7 +62,7 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
               }
           };
     execute_func(loop_func, N_particles);
-    return op_store.getArrays();
+    return op_store;
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>

@@ -42,7 +42,7 @@ class PGOP {
      * @param num_neighboors An array of the number of neighbor for each point.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
+    PGOPStore compute(const py::array_t<double> distances,
                       const py::array_t<double> weights,
                       const py::array_t<int> num_neighbors,
                       const py::array_t<double> sigmas) const;

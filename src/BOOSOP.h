@@ -51,7 +51,7 @@ template<typename distribution_type> class BOOSOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
+    BOOSOPStore compute(const py::array_t<double> distances,
                       const py::array_t<double> weights,
                       const py::array_t<int> num_neighbors,
                       const unsigned int m,

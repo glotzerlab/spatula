@@ -30,7 +30,7 @@ BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
 
 // TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
-py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances,
+BOOSOPStore BOOSOP<distribution_type>::compute(const py::array_t<double> distances,
                                              const py::array_t<double> weights,
                                              const py::array_t<int> num_neighbors,
                                              const unsigned int m,
@@ -70,7 +70,7 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
         }
     };
     execute_func(loop_func, N_particles);
-    return op_store.getArrays();
+    return op_store;
 }
 
 template<typename distribution_type>
