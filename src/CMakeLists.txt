@@ -5,7 +5,6 @@ list(APPEND spatula_sources
     "BOOSOP.h" "BOOSOP.cc"
     "data/Vec3.h"
     "data/Quaternion.h"
-    # "data/export-quaternion.cc"
     "optimize/Optimize.h" "optimize/Optimize.cc"
     "optimize/RandomSearch.h" "optimize/RandomSearch.cc"
     "optimize/StepGradientDescent.h" "optimize/StepGradientDescent.cc"

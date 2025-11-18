@@ -7,14 +7,14 @@
 #include "PGOP.h"
 #include "data/Quaternion.h"
 #include "data/export-vec.cc"
-#include "data/export-quaternion.cc"
+// #include "data/export-quaternion.cc"
 #include "optimize/export_optimize.h"
 #include "util/export-utils.h"
 
 PYBIND11_MODULE(_spatula, m)
 {
     spatula::data::export_Vec3(m);
-    spatula::data::export_quaternion(m);
+    // spatula::data::export_quaternion(m);
     spatula::optimize::export_optimize(m);
     spatula::export_spatula(m);
     spatula::export_BOOSOP(m);

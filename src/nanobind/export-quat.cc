@@ -1,26 +1,27 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
-#include <pybind11/pybind11.h>
-#include <pybind11/operators.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/operators.h>
+#include <nanobind/stl/vector.h> // For std::vector
+#include <nanobind/stl/pair.h>   // For std::pair
+#include <nanobind/make_iterator.h> // For nb::make_iterator
 #include <sstream>
 #include <string>
 
-#include "Quaternion.h"
+#include "../data/Quaternion.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace spatula { namespace data {
 
-void export_quaternion(py::module& m)
-{
-    py::class_<Quaternion>(m, "Quaternion")
-        .def(py::init<double, double, double, double>())
-        .def_readwrite("w", &Quaternion::w)
-        .def_readwrite("x", &Quaternion::x)
-        .def_readwrite("y", &Quaternion::y)
-        .def_readwrite("z", &Quaternion::z)
+NB_MODULE(_spatula_quaternion, m) {
+    nb::class_<Quaternion>(m, "Quaternion")
+        .def(nb::init<double, double, double, double>())
+        .def_rw("w", &Quaternion::w)
+        .def_rw("x", &Quaternion::x)
+        .def_rw("y", &Quaternion::y)
+        .def_rw("z", &Quaternion::z)
         .def("__repr__",
              [](const Quaternion& q) {
                  auto repr = std::ostringstream();
@@ -34,19 +35,17 @@ void export_quaternion(py::module& m)
         .def("norm", &Quaternion::norm)
         .def("normalize", &Quaternion::normalize)
         .def("to_rotation_matrix", &Quaternion::to_rotation_matrix)
-        .def(py::self * py::self)
-        .def(py::self *= py::self)
+        .def(nb::self * nb::self)
+        .def(nb::self *= nb::self)
         .def_static(
             "from_object",
-            [](const py::object& obj) {
-                if (!py::hasattr(obj, "__len__")) {
-                    throw std::runtime_error("Quaternion object requires a 4 length sequence like object.");
+            [](nb::object obj) {
+                // Use nanobind's sequence protocol
+                nb::sequence seq = nb::cast<nb::sequence>(obj);
+                if (nb::len(seq) < 4) {
+                    throw nb::type_error("Quaternion object requires a 4 length sequence like object.");
                 }
-                if (py::len(obj) < 4) {
-                    throw std::runtime_error("Quaternion object requires a 4 length sequence like object.");
-                }
-                py::tuple t = py::tuple(obj);
-                return Quaternion(t[0].cast<double>(), t[1].cast<double>(), t[2].cast<double>(), t[3].cast<double>());
+                return Quaternion(nb::cast<double>(seq[0]), nb::cast<double>(seq[1]), nb::cast<double>(seq[2]), nb::cast<double>(seq[3]));
             },
             "Create a Quaternion from a 4-element sequence (w, x, y, z).");
 }
