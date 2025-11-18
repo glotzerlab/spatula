@@ -132,7 +132,7 @@ inline std::pair<Vec3, double> Quaternion::to_axis_angle() const
 
 inline Vec3 Quaternion::to_axis_angle_3D() const
 {
-    const auto axis_angle = to_axis_angle();
+    const std::pair<Vec3, double> axis_angle = to_axis_angle();
     return axis_angle.first * axis_angle.second;
 }
 

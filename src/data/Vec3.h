@@ -68,7 +68,7 @@ inline double Vec3::norm() const
 
 inline void Vec3::normalize()
 {
-    const auto n = norm();
+    const double n = norm();
     if (n == 0) {
         return;
     }

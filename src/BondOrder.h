@@ -193,8 +193,7 @@ template<typename distribution_type> class BondOrder {
     {
         double sum_correction = 0;
         // Get the unweighted contribution from each distribution lazily.
-        auto single_contributions = std::vector<double>();
-        single_contributions.resize(m_positions.size());
+        auto single_contributions = std::vector<double>(m_positions.size());
         std::transform(m_positions.cbegin(),
                        m_positions.cend(),
                        single_contributions.begin(),

@@ -22,7 +22,7 @@ struct LocalNeighborhood {
 
     void rotate(const data::Vec3& v)
     {
-        const auto R = util::to_rotation_matrix(v);
+        const std::vector<double> R = util::to_rotation_matrix(v);
         util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
     }
 

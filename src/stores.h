@@ -64,8 +64,8 @@ struct PGOPStore {
 
     void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
     {
-        const auto& values = std::get<0>(op_);
-        const auto& rots = std::get<1>(op_);
+        const std::vector<double>& values = std::get<0>(op_);
+        const std::vector<data::Quaternion>& rots = std::get<1>(op_);
         for (size_t j {0}; j < N_syms; ++j) {
             op[i * N_syms + j] = values[j];
             size_t rot_idx = i * N_syms * 4 + j * 4;

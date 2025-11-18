@@ -8,6 +8,7 @@
 
 #include "BOOSOP.h"
 #include "BondOrder.h"
+#include "locality.h"
 #include "util/Threads.h"
 
 namespace spatula {
@@ -62,7 +63,7 @@ BOOSOPStore BOOSOP<distribution_type>::compute(const py::array_t<double> distanc
                 op_store.addNull(i);
                 continue;
             }
-            auto neighborhood = neighborhoods.getNeighborhood(i);
+            LocalNeighborhood neighborhood = neighborhoods.getNeighborhood(i);
             const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf);
             op_store.addOp(i, particle_op_rot);
         }
