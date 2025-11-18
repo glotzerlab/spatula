@@ -28,13 +28,13 @@ void export_optimize(nb::module_& m)
 
 void export_mesh(nb::module_& m)
 {
-    nb::class_<Mesh, Optimizer, std::shared_ptr<Mesh>>(m, "Mesh").def(
+    nb::class_<Mesh, std::shared_ptr<Mesh>, Optimizer>(m, "Mesh").def(
         nb::init<const std::vector<data::Quaternion>&>());
 }
 
 void export_no_optimization(nb::module_& m)
 {
-    nb::class_<NoOptimization, Optimizer, std::shared_ptr<NoOptimization>>(m, "NoOptimization")
+    nb::class_<NoOptimization, std::shared_ptr<NoOptimization>, Optimizer>(m, "NoOptimization")
         .def(nb::init<const data::Vec3&>());
 }
 
@@ -48,7 +48,7 @@ void export_base_optimize(nb::module_& m)
 
 void export_random_search(nb::module_& m)
 {
-    nb::class_<RandomSearch, Optimizer, std::shared_ptr<RandomSearch>>(m, "RandomSearch")
+    nb::class_<RandomSearch, std::shared_ptr<RandomSearch>, Optimizer>(m, "RandomSearch")
         .def(nb::init<unsigned int, unsigned int>())
         .def_prop_rw("max_iter", &RandomSearch::getIterations, &RandomSearch::setIterations)
         .def_prop_rw("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
@@ -56,7 +56,7 @@ void export_random_search(nb::module_& m)
 
 void export_step_gradient_descent(nb::module_& m)
 {
-    nb::class_<StepGradientDescent, Optimizer, std::shared_ptr<StepGradientDescent>>(
+    nb::class_<StepGradientDescent, std::shared_ptr<StepGradientDescent>, Optimizer>(
         m,
         "StepGradientDescent")
         .def(nb::init<const data::Vec3&, unsigned int, double, double, double>());
@@ -64,7 +64,7 @@ void export_step_gradient_descent(nb::module_& m)
 
 void export_union(nb::module_& m)
 {
-    nb::class_<Union, Optimizer, std::shared_ptr<Union>>(m, "Union")
+    nb::class_<Union, std::shared_ptr<Union>, Optimizer>(m, "Union")
         .def_static("with_step_gradient_descent",
                     [](const std::shared_ptr<const Optimizer> initial_opt,
                        unsigned int max_iter,
