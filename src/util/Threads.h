@@ -80,6 +80,4 @@ class ThreadPool {
     BS::synced_stream m_out;
     BS::thread_pool m_pool;
 };
-
-void export_threads(py::module& m);
 }} // namespace spatula::util

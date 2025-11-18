@@ -8,7 +8,7 @@
 #include "data/Quaternion.h"
 #include "data/Vec3.h"
 #include "optimize/export_optimize.h"
-#include "util/Threads.h"
+#include "util/export-threads.h" // Changed from util/Threads.h
 #include "util/export-utils.h"
 
 PYBIND11_MODULE(_spatula, m)

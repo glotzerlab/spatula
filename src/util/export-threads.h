@@ -1,7 +1,10 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
-#include "Threads.h"
+#pragma once
+
+#include <pybind11/pybind11.h>
 
 namespace spatula { namespace util {
-}} // End namespace spatula::util
+void export_threads(pybind11::module& m);
+}} // namespace spatula::util
