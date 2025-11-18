@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <utility>
-#include <vector>
 #include <algorithm> // Added
 #include <cmath>     // Added
 #include <numeric>   // Added for std::reduce
+#include <utility>
+#include <vector>
 
 #include "data/Vec3.h"
 #include "util/Util.h" // Added for util::fast_angle_eucledian

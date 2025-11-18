@@ -1,8 +1,11 @@
+// Copyright (c) 2021-2025 The Regents of the University of Michigan
+// Part of spatula, released under the BSD 3-Clause License.
+
+#include <nanobind/make_iterator.h> // For nb::make_iterator
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
-#include <nanobind/stl/vector.h> // For std::vector
 #include <nanobind/stl/pair.h>   // For std::pair
-#include <nanobind/make_iterator.h> // For nb::make_iterator
+#include <nanobind/stl/vector.h> // For std::vector
 #include <sstream>
 #include <string>
 
@@ -12,7 +15,8 @@ namespace nb = nanobind;
 
 namespace spatula { namespace data {
 
-void bind_quaternion(nb::module_ &m) {
+void bind_quaternion(nb::module_& m)
+{
     nb::class_<Quaternion>(m, "Quaternion")
         .def(nb::init<double, double, double, double>())
         .def_rw("w", &Quaternion::w)
@@ -40,9 +44,13 @@ void bind_quaternion(nb::module_ &m) {
                 // Use nanobind's sequence protocol
                 nb::sequence seq = nb::cast<nb::sequence>(obj);
                 if (nb::len(seq) < 4) {
-                    throw nb::type_error("Quaternion object requires a 4 length sequence like object.");
+                    throw nb::type_error(
+                        "Quaternion object requires a 4 length sequence like object.");
                 }
-                return Quaternion(nb::cast<double>(seq[0]), nb::cast<double>(seq[1]), nb::cast<double>(seq[2]), nb::cast<double>(seq[3]));
+                return Quaternion(nb::cast<double>(seq[0]),
+                                  nb::cast<double>(seq[1]),
+                                  nb::cast<double>(seq[2]),
+                                  nb::cast<double>(seq[3]));
             },
             "Create a Quaternion from a 4-element sequence (w, x, y, z).");
 }

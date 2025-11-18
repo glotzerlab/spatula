@@ -3,10 +3,10 @@
 
 #pragma once
 
+#include "StepGradientDescent.h" // For StepGradientDescent in createFinalOptimizer
 #include <functional>
 #include <memory>
 #include <stdexcept> // For std::runtime_error
-#include "StepGradientDescent.h" // For StepGradientDescent in createFinalOptimizer
 
 #include "Optimize.h"
 
@@ -57,9 +57,15 @@ class Union : public Optimizer {
         m_point = getCurrentOptimizer().next_point();
     }
 
-    bool terminate() const override { return m_on_final_opt && getCurrentOptimizer().terminate(); }
+    bool terminate() const override
+    {
+        return m_on_final_opt && getCurrentOptimizer().terminate();
+    }
 
-    std::unique_ptr<Optimizer> clone() const override { return std::make_unique<Union>(*this); }
+    std::unique_ptr<Optimizer> clone() const override
+    {
+        return std::make_unique<Union>(*this);
+    }
 
     private:
     Optimizer& getCurrentOptimizer()

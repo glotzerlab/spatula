@@ -217,8 +217,6 @@ template<> inline Vec3& operator/=(Vec3& a, const Vec3& b)
     return a;
 }
 
-
-
 /// Vec3 equality
 inline bool operator==(const Vec3& a, const Vec3& b)
 {

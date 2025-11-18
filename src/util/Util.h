@@ -6,9 +6,9 @@
 #include <cmath>
 #include <complex>
 #include <iterator>
+#include <numeric> // Added for std::sqrt
 #include <utility>
 #include <vector>
-#include <numeric> // Added for std::sqrt
 
 #include "../data/Vec3.h"
 
@@ -95,7 +95,8 @@ inline std::vector<double> to_rotation_matrix(const Vec3& v)
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
-inline std::vector<Vec3> normalize_distances(const double* distances, std::pair<size_t, size_t> slice)
+inline std::vector<Vec3> normalize_distances(const double* distances,
+                                             std::pair<size_t, size_t> slice)
 {
     auto normalized_distances = std::vector<Vec3>();
     normalized_distances.reserve((slice.second - slice.first) / 3);

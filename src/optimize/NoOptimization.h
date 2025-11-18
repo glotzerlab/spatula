@@ -25,7 +25,10 @@ class NoOptimization : public Optimizer {
     }
 
     // The terminate method will immediately terminate the optimization after one step
-    bool terminate() const override { return m_terminate; }
+    bool terminate() const override
+    {
+        return m_terminate;
+    }
 
     // Clone function for Pybind11
     std::unique_ptr<Optimizer> clone() const override

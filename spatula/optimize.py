@@ -9,7 +9,7 @@ import numpy as np
 import scipy as sp
 from scipy.spatial.transform import Rotation
 
-from . import _spatula, _spatula_nb
+from . import _spatula_nb
 
 
 # Only here for typing/documentation purposes.
@@ -254,4 +254,3 @@ class NoOptimization(Optimizer):
         self._cpp = _spatula_nb.NoOptimization(
             _spatula_nb.Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D()
         )
-

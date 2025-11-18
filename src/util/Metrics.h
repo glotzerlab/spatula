@@ -4,8 +4,8 @@
 #pragma once
 
 #include <complex>
-#include <vector>
 #include <numeric> // Added for std::sqrt
+#include <vector>
 
 namespace spatula { namespace util {
 /**

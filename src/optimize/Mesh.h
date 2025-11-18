@@ -33,9 +33,10 @@ class Mesh : public Optimizer {
     Mesh(const std::vector<data::Quaternion>& points) : Optimizer(), m_points()
     {
         m_points.reserve(points.size());
-        std::transform(points.cbegin(), points.cend(), std::back_inserter(m_points), [](const auto& q) {
-            return q.to_axis_angle_3D();
-        });
+        std::transform(points.cbegin(),
+                       points.cend(),
+                       std::back_inserter(m_points),
+                       [](const auto& q) { return q.to_axis_angle_3D(); });
     }
 
     ~Mesh() override = default;
@@ -45,9 +46,15 @@ class Mesh : public Optimizer {
         m_point = m_points[std::min(m_points.size(), static_cast<size_t>(m_count))];
     }
 
-    bool terminate() const override { return m_count >= m_points.size(); }
+    bool terminate() const override
+    {
+        return m_count >= m_points.size();
+    }
 
-    std::unique_ptr<Optimizer> clone() const override { return std::make_unique<Mesh>(*this); }
+    std::unique_ptr<Optimizer> clone() const override
+    {
+        return std::make_unique<Mesh>(*this);
+    }
 
     private:
     /// The set of points to evaluate.

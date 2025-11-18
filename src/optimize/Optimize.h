@@ -7,9 +7,9 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <stdexcept> // For std::runtime_error
 #include <utility>
 #include <vector>
-#include <stdexcept> // For std::runtime_error
 
 #include "../data/Vec3.h"
 
@@ -42,8 +42,9 @@ class Optimizer {
      * @brief Create an Optimizer. The only thing this does is set up the bounds.
      */
     Optimizer()
-        : m_point(), m_objective(), m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<double>::max()),
-          m_count(0), m_need_objective(false)
+        : m_point(), m_objective(),
+          m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<double>::max()), m_count(0),
+          m_need_objective(false)
     {
     }
     virtual ~Optimizer() = default;
@@ -76,7 +77,10 @@ class Optimizer {
     virtual bool terminate() const = 0;
 
     /// Get the current best point and the value of the objective function at that point.
-    std::pair<data::Vec3, double> get_optimum() const { return m_best_point; }
+    std::pair<data::Vec3, double> get_optimum() const
+    {
+        return m_best_point;
+    }
 
     /// Create a clone of this optimizer
     virtual std::unique_ptr<Optimizer> clone() const = 0;
@@ -84,7 +88,10 @@ class Optimizer {
     /// Set the next point to compute the objective for to m_point.
     virtual void internal_next_point() = 0;
 
-    unsigned int getCount() const { return m_count; }
+    unsigned int getCount() const
+    {
+        return m_count;
+    }
 
     protected:
     /// The current point to evaluate the objective function for.
