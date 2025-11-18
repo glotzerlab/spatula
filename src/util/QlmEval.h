@@ -8,13 +8,13 @@
 #include <iterator>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 
 #include "../BondOrder.h"
 #include "Util.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace spatula { namespace util {
 // TODO: pass normalization factor not m for generalizing.
@@ -37,9 +37,9 @@ class QlmEval {
      * ordering of the first dimension is in accending order of \f$ l \f$ and \f$ m \f$.
      */
     QlmEval(unsigned int m,
-            const py::array_t<double> positions,
-            const py::array_t<double> weights,
-            const py::array_t<std::complex<double>> ylms)
+            const nb::ndarray<double, nb::shape<nb::any, 3>, nb::c_contig> positions,
+            const nb::ndarray<double, nb::shape<nb::any>, nb::c_contig> weights,
+            const nb::ndarray<std::complex<double>, nb::shape<nb::any, nb::any>, nb::c_contig> ylms)
         : m_n_lms(ylms.shape(0)), m_max_l(0), m_n_points(ylms.shape(1)), m_positions(),
           m_weighted_ylms()
     {
@@ -60,10 +60,9 @@ class QlmEval {
             }
             m_weighted_ylms.emplace_back(ylm);
         }
-        const auto u_positions = positions.unchecked<2>();
         m_positions.reserve(positions.shape(0));
         for (size_t i {0}; i < static_cast<size_t>(positions.shape(0)); ++i) {
-            m_positions.emplace_back(u_positions.data(i, 0));
+            m_positions.emplace_back(positions.data(i, 0));
         }
     }
 
