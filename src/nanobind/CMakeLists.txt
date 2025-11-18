@@ -4,6 +4,7 @@ nanobind_add_module(_spatula_nb
     export-quat.cc
     export-optimizer.cc
     export-utils.cc
+    export-stores.cc
 )
 
 target_include_directories(_spatula_nb PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../util)

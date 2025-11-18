@@ -7,6 +7,7 @@
 
 #include "export-optimizer.h"
 #include "export-quat.h" // Include the new header
+#include "export-stores.h"
 #include "export-threads.h"
 #include "export-utils.h"
 
@@ -20,4 +21,5 @@ NB_MODULE(_spatula_nb, m)
     spatula::data::bind_quaternion(m); // Call the bind_quaternion function
     spatula::optimize::export_optimizers(m);
     spatula::util::export_util(m);
+    spatula::export_stores(m);
 }

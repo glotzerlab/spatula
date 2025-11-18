@@ -6,7 +6,6 @@
 #include "BOOSOP.h"
 #include "PGOP.h"
 #include "data/Quaternion.h"
-#include "export-stores.h"
 // #include "data/export-quaternion.cc"
 
 PYBIND11_MODULE(_spatula, m)
@@ -14,5 +13,4 @@ PYBIND11_MODULE(_spatula, m)
     // spatula::data::export_quaternion(m);
     spatula::export_spatula(m);
     spatula::export_BOOSOP(m);
-    spatula::export_stores(m);
 }
