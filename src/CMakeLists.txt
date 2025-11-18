@@ -15,7 +15,6 @@ list(APPEND spatula_sources
     "util/Metrics.h" "util/Metrics.cc"
     "util/Util.h" "util/Util.cc"
     "util/QlmEval.h" "util/QlmEval.cc"
-    "util/Threads.h"
     "util/export-threads.cc"
     "util/export-utils.cc"
 )
