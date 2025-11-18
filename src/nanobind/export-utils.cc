@@ -4,9 +4,11 @@
 #include "export-utils.h"
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/complex.h>
 #include <nanobind/stl/vector.h>
 
 #include "../data/Vec3.h"
+#include "../util/Metrics.h"
 #include "../util/Util.h"
 
 namespace nb = nanobind;
@@ -26,5 +28,9 @@ void export_util(nb::module_& m)
               return x_prime;
           },
           nb::arg("x"), nb::arg("R"), "Rotate a point by a rotation matrix.");
+
+    m.def("covariance",
+          &spatula::util::covariance,
+          "Compute the Pearson correlation between two spherical harmonic expansions.");
 }
 }} // namespace spatula::util
