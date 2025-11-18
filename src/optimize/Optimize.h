@@ -73,4 +73,27 @@ class Optimizer {
     /// A flag for which operation, next_point or record_objective, is allowed.
     bool m_need_objective;
 };
+
+/**
+ * @brief Trampoline class for exposing Optimizer in Python.
+ *
+ * This shouldn't actually be used to extend the class but we need this to pass Optimizers through
+ * from Python.
+ */
+class PyOptimizer : public Optimizer {
+    public:
+    using Optimizer::Optimizer;
+
+    ~PyOptimizer() override = default;
+
+    /// Get the next point to compute the objective for.
+    void internal_next_point() override;
+    /// Record the objective function's value for the last querried point.
+    void record_objective(double) override;
+    /// Returns whether or not convergence or termination conditions have been met.
+    bool terminate() const override;
+
+    /// Create a clone of this optimizer
+    virtual std::unique_ptr<Optimizer> clone() const override;
+};
 }} // namespace spatula::optimize
