@@ -18,10 +18,10 @@ void export_stores(nb::module_& m) {
         .def(nb::init<size_t, size_t>(),
              nb::arg("N_particles"), nb::arg("N_symmetries"))
         .def_prop_ro("op", [](BOOSOPStore& s) {
-            return nb::ndarray<double>(s.op.data(), {(ssize_t)s.m_n_particles, (ssize_t)s.N_syms}, nb::cast(s));
+            return nb::ndarray<double>(s.op.data(), std::vector<ssize_t>{(ssize_t)s.m_n_particles, (ssize_t)s.N_syms}, nb::cast(s));
         })
         .def_prop_ro("rotations", [](BOOSOPStore& s) {
-            return nb::ndarray<double>(s.rotations.data(), {(ssize_t)s.m_n_particles, (ssize_t)s.N_syms, (ssize_t)4}, nb::cast(s));
+            return nb::ndarray<double>(s.rotations.data(), std::vector<ssize_t>{(ssize_t)s.m_n_particles, (ssize_t)s.N_syms, (ssize_t)4}, nb::cast(s));
         })
         .def("addOp", &BOOSOPStore::addOp,
              nb::arg("i"), nb::arg("op_"))
@@ -32,10 +32,10 @@ void export_stores(nb::module_& m) {
         .def(nb::init<size_t, size_t>(),
              nb::arg("N_particles"), nb::arg("N_symmetries"))
         .def_prop_ro("op", [](PGOPStore& s) {
-            return nb::ndarray<double>(s.op.data(), {(ssize_t)s.m_n_particles, (ssize_t)s.N_syms}, nb::cast(s));
+            return nb::ndarray<double>(s.op.data(), std::vector<ssize_t>{(ssize_t)s.m_n_particles, (ssize_t)s.N_syms}, nb::cast(s));
         })
         .def_prop_ro("rotations", [](PGOPStore& s) {
-            return nb::ndarray<double>(s.rotations.data(), {(ssize_t)s.m_n_particles, (ssize_t)s.N_syms, (ssize_t)4}, nb::cast(s));
+            return nb::ndarray<double>(s.rotations.data(), std::vector<ssize_t>{(ssize_t)s.m_n_particles, (ssize_t)s.N_syms, (ssize_t)4}, nb::cast(s));
         })
         .def("addOp", &PGOPStore::addOp,
              nb::arg("i"), nb::arg("op_"))
