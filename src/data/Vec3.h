@@ -50,23 +50,23 @@ struct Vec3 {
     const double& operator[](size_t i) const;
 };
 
-Vec3::Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
+inline Vec3::Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
 
-Vec3::Vec3(const double* point) : x(point[0]), y(point[1]), z(point[2]) { }
+inline Vec3::Vec3(const double* point) : x(point[0]), y(point[1]), z(point[2]) { }
 
-Vec3::Vec3() : x(0.0), y(0.0), z(0.0) { }
+inline Vec3::Vec3() : x(0.0), y(0.0), z(0.0) { }
 
-double Vec3::dot(const Vec3& b) const
+inline double Vec3::dot(const Vec3& b) const
 {
     return x * b.x + y * b.y + z * b.z;
 }
 
-double Vec3::norm() const
+inline double Vec3::norm() const
 {
     return std::sqrt(x * x + y * y + z * z);
 }
 
-void Vec3::normalize()
+inline void Vec3::normalize()
 {
     const auto n = norm();
     if (n == 0) {
@@ -78,12 +78,12 @@ void Vec3::normalize()
     z *= inv_norm;
 }
 
-Vec3 Vec3::cross(const Vec3& a) const
+inline Vec3 Vec3::cross(const Vec3& a) const
 {
     return Vec3(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
 }
 
-double& Vec3::operator[](const size_t i)
+inline double& Vec3::operator[](const size_t i)
 {
     if (i == 0) {
         return x;
@@ -94,7 +94,7 @@ double& Vec3::operator[](const size_t i)
     return z;
 }
 
-const double& Vec3::operator[](size_t i) const
+inline const double& Vec3::operator[](size_t i) const
 {
     if (i == 0) {
         return x;
@@ -106,51 +106,51 @@ const double& Vec3::operator[](size_t i) const
 }
 
 /// Vec3 addition.
-template<typename number_type> Vec3 operator+(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator+(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x + b, a.y + b, a.z + b);
 }
 
 /// Vec3 subtraction.
-template<typename number_type> Vec3 operator-(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator-(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x - b, a.y - b, a.z - b);
 }
 
 /// Vec3 multiplication.
-template<typename number_type> Vec3 operator*(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator*(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x * b, a.y * b, a.z * b);
 }
 
 /// Vec3 division.
-template<typename number_type> Vec3 operator/(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator/(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x / b, a.y / b, a.z / b);
 }
 
-template<> Vec3 operator+(const Vec3& a, const Vec3& b)
+template<> inline Vec3 operator+(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-template<> Vec3 operator-(const Vec3& a, const Vec3& b)
+template<> inline Vec3 operator-(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-template<> Vec3 operator*(const Vec3& a, const Vec3& b)
+template<> inline Vec3 operator*(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-template<> Vec3 operator/(const Vec3& a, const Vec3& b)
+template<> inline Vec3 operator/(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x / b.x, a.y / b.y, a.z / b.z);
 }
 
 /// Vec3 inplace addition.
-template<typename number_type> Vec3& operator+=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator+=(Vec3& a, const number_type& b)
 {
     a.x += b;
     a.y += b;
@@ -159,7 +159,7 @@ template<typename number_type> Vec3& operator+=(Vec3& a, const number_type& b)
 }
 
 /// Vec3 inplace subtraction.
-template<typename number_type> Vec3& operator-=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator-=(Vec3& a, const number_type& b)
 {
     a.x -= b;
     a.y -= b;
@@ -168,7 +168,7 @@ template<typename number_type> Vec3& operator-=(Vec3& a, const number_type& b)
 }
 
 /// Vec3 inplace multiplication.
-template<typename number_type> Vec3& operator*=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator*=(Vec3& a, const number_type& b)
 {
     a.x *= b;
     a.y *= b;
@@ -177,7 +177,7 @@ template<typename number_type> Vec3& operator*=(Vec3& a, const number_type& b)
 }
 
 /// Vec3 inplace division.
-template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator/=(Vec3& a, const number_type& b)
 {
     a.x /= b;
     a.y /= b;
@@ -185,7 +185,7 @@ template<typename number_type> Vec3& operator/=(Vec3& a, const number_type& b)
     return a;
 }
 
-template<> Vec3& operator+=(Vec3& a, const Vec3& b)
+template<> inline Vec3& operator+=(Vec3& a, const Vec3& b)
 {
     a.x += b.x;
     a.y += b.y;
@@ -193,7 +193,7 @@ template<> Vec3& operator+=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> Vec3& operator-=(Vec3& a, const Vec3& b)
+template<> inline Vec3& operator-=(Vec3& a, const Vec3& b)
 {
     a.x -= b.x;
     a.y -= b.y;
@@ -201,7 +201,7 @@ template<> Vec3& operator-=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> Vec3& operator*=(Vec3& a, const Vec3& b)
+template<> inline Vec3& operator*=(Vec3& a, const Vec3& b)
 {
     a.x *= b.x;
     a.y *= b.y;
@@ -209,7 +209,7 @@ template<> Vec3& operator*=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> Vec3& operator/=(Vec3& a, const Vec3& b)
+template<> inline Vec3& operator/=(Vec3& a, const Vec3& b)
 {
     a.x /= b.x;
     a.y /= b.y;
@@ -217,17 +217,10 @@ template<> Vec3& operator/=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template Vec3 operator+(const Vec3& a, const double& b);
-template Vec3 operator-(const Vec3& a, const double& b);
-template Vec3 operator*(const Vec3& a, const double& b);
-template Vec3 operator/(const Vec3& a, const double& b);
-template Vec3& operator+=(Vec3& a, const double& b);
-template Vec3& operator-=(Vec3& a, const double& b);
-template Vec3& operator*=(Vec3& a, const double& b);
-template Vec3& operator/=(Vec3& a, const double& b);
+
 
 /// Vec3 equality
-bool operator==(const Vec3& a, const Vec3& b)
+inline bool operator==(const Vec3& a, const Vec3& b)
 {
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
