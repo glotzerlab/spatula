@@ -9,12 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-
 #include "../data/Vec3.h"
-
-namespace py = pybind11;
 
 namespace spatula { namespace util {
 
@@ -113,6 +108,4 @@ void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
                     const std::vector<std::complex<double>>& D_ij,
                     std::vector<std::complex<double>>& sym_qlm_buf,
                     unsigned int max_l);
-
-void export_util(py::module& m);
 }} // namespace spatula::util
