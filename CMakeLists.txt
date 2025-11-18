@@ -13,6 +13,8 @@ endif (UNIX)
 
 
 find_package(pybind11 CONFIG REQUIRED)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(nanobind CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/dependencies)
 add_subdirectory(src)
