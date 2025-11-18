@@ -3,6 +3,7 @@ nanobind_add_module(_spatula_nb
     export-threads.cc
     export_optimize.cc
     export-quaternion.cc
+    export-Vec3.cc
 )
 
 target_include_directories(_spatula_nb PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../util)

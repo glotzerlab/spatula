@@ -10,7 +10,6 @@
 
 PYBIND11_MODULE(_spatula, m)
 {
-    spatula::data::export_Vec3(m);
     spatula::export_spatula(m);
     spatula::export_BOOSOP(m);
     spatula::util::export_util(m);
