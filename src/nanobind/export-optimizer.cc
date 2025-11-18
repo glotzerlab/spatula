@@ -65,6 +65,8 @@ void export_optimizers(nb::module_& m)
             "learning_rate"_a,
             "tol"_a);
 
-    nb::class_<NoOptimization, Optimizer>(m, "NoOptimization").def(nb::init<const data::Vec3&>());
+    nb::class_<NoOptimization, Optimizer>(m, "NoOptimization")
+        .def(nb::init<>())
+        .def(nb::init<const data::Vec3&>());
 }
 }} // namespace spatula::optimize

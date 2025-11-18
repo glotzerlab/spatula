@@ -251,6 +251,4 @@ class NoOptimization(Optimizer):
 
     def __init__(self):
         """Create a NoOptimization object."""
-        self._cpp = _spatula_nb.NoOptimization(
-            _spatula_nb.Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D()
-        )
+        self._cpp = _spatula_nb.NoOptimization()

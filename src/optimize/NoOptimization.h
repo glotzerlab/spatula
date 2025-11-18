@@ -4,40 +4,35 @@
 #pragma once
 
 #include "Optimize.h"
-#include <memory>
+#include "../data/Quaternion.h"
+#include "../data/Vec3.h"
 
 namespace spatula { namespace optimize {
 
-class NoOptimization : public Optimizer {
-    public:
-    NoOptimization(const data::Vec3& initial_point) : Optimizer()
+class NoOptimization : public Optimizer
+{
+public:
+    NoOptimization()
     {
-        // Set the initial point
-        m_point = initial_point;
-        m_terminate = false; // Start off not terminated
+        m_best_point.first = data::Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D();
     }
 
-    // Implements internal_next_point but does nothing
-    void internal_next_point() override
+    NoOptimization(const data::Vec3& initial_point)
     {
-        // Perform one step (which does nothing) and set the termination flag
-        m_terminate = true;
+        m_best_point.first = initial_point;
     }
 
-    // The terminate method will immediately terminate the optimization after one step
     bool terminate() const override
     {
-        return m_terminate;
+        return true;
     }
 
-    // Clone function for Pybind11
     std::unique_ptr<Optimizer> clone() const override
     {
         return std::make_unique<NoOptimization>(*this);
     }
 
-    private:
-    // Flag to terminate the optimization
-    bool m_terminate;
+    void internal_next_point() override { }
 };
+
 }} // namespace spatula::optimize
