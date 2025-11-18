@@ -6,7 +6,6 @@
 #include <functional>
 #include <memory>
 #include <stdexcept> // For std::runtime_error
-#include <pybind11/stl.h> // For std::shared_ptr in pybind11
 #include "StepGradientDescent.h" // For StepGradientDescent in createFinalOptimizer
 
 #include "Optimize.h"

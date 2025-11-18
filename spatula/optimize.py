@@ -32,7 +32,7 @@ class RandomSearch(Optimizer):
             Defaults to 42.
 
         """
-        self._cpp = _spatula.RandomSearch(max_iter, seed)
+        self._cpp = _spatula_nb.RandomSearch(max_iter, seed)
 
 
 class StepGradientDescent(Optimizer):
@@ -90,7 +90,7 @@ class StepGradientDescent(Optimizer):
             below ``tol``. Defaults to 1e-6.
 
         """
-        self._cpp = _spatula.StepGradientDescent(
+        self._cpp = _spatula_nb.StepGradientDescent(
             _spatula_nb.Quaternion(*initial_point).to_axis_angle_3D(),
             max_iter,
             initial_jump,
@@ -240,7 +240,7 @@ class Union(Optimizer):
 
         """
         instance = cls()
-        instance._cpp = _spatula.Union.with_step_gradient_descent(
+        instance._cpp = _spatula_nb.Union.with_step_gradient_descent(
             optimizer._cpp, max_iter, initial_jump, learning_rate, tol
         )
         return instance
@@ -251,6 +251,7 @@ class NoOptimization(Optimizer):
 
     def __init__(self):
         """Create a NoOptimization object."""
-        self._cpp = _spatula.NoOptimization(
+        self._cpp = _spatula_nb.NoOptimization(
             _spatula_nb.Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D()
         )
+

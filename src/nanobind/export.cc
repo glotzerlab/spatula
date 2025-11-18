@@ -17,5 +17,5 @@ NB_MODULE(_spatula_nb, m) {
 
     spatula::util::export_threads(m);
     spatula::data::bind_quaternion(m); // Call the bind_quaternion function
-    spatula::optimize::export_mesh(m);
+    spatula::optimize::export_optimizers(m);
 }

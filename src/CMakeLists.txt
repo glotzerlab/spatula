@@ -11,7 +11,6 @@ list(APPEND spatula_sources
     "optimize/NoOptimization.h"
     "optimize/Mesh.h"
     "optimize/Union.h"
-    "optimize/export_optimize.h" "optimize/export_optimize.cc"
     "util/Metrics.h"
     "util/Util.h"
     "util/QlmEval.h" "util/QlmEval.cc"
