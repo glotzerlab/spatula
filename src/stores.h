@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <limits>
 #include <tuple>
 #include <vector>
-#include <limits>
 
 #include "data/Quaternion.h"
 
@@ -13,9 +13,7 @@ namespace spatula {
 
 struct BOOSOPStore {
     BOOSOPStore(size_t N_particles, size_t N_symmetries)
-        : N_syms(N_symmetries),
-          m_n_particles(N_particles),
-          op(N_particles * N_symmetries),
+        : N_syms(N_symmetries), m_n_particles(N_particles), op(N_particles * N_symmetries),
           rotations(N_particles * N_symmetries * 4)
     {
     }
@@ -54,9 +52,7 @@ struct BOOSOPStore {
 
 struct PGOPStore {
     PGOPStore(size_t N_particles, size_t N_symmetries)
-        : N_syms(N_symmetries),
-          m_n_particles(N_particles),
-          op(N_particles * N_symmetries),
+        : N_syms(N_symmetries), m_n_particles(N_particles), op(N_particles * N_symmetries),
           rotations(N_particles * N_symmetries * 4)
     {
     }

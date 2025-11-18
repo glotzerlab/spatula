@@ -31,16 +31,14 @@ BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
 // TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
 BOOSOPStore BOOSOP<distribution_type>::compute(const py::array_t<double> distances,
-                                             const py::array_t<double> weights,
-                                             const py::array_t<int> num_neighbors,
-                                             const unsigned int m,
-                                             const py::array_t<std::complex<double>> ylms,
-                                             const py::array_t<double> quad_positions,
-                                             const py::array_t<double> quad_weights) const
+                                               const py::array_t<double> weights,
+                                               const py::array_t<int> num_neighbors,
+                                               const unsigned int m,
+                                               const py::array_t<std::complex<double>> ylms,
+                                               const py::array_t<double> quad_positions,
+                                               const py::array_t<double> quad_weights) const
 {
-    if (ylms.shape(1) != quad_positions.shape(0)
-        || ylms.shape(1) != quad_weights.shape(0))
-    {
+    if (ylms.shape(1) != quad_positions.shape(0) || ylms.shape(1) != quad_weights.shape(0)) {
         throw std::invalid_argument(
             "Shape mismatch between ylms, quad_positions, and quad_weights");
     }
@@ -51,9 +49,9 @@ BOOSOPStore BOOSOP<distribution_type>::compute(const py::array_t<double> distanc
                                         quad_weights.data(),
                                         ylms.data());
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
-                                                num_neighbors.data(0),
-                                                weights.data(0),
-                                                distances.data(0));
+                                             num_neighbors.data(0),
+                                             weights.data(0),
+                                             distances.data(0));
     const size_t N_particles = num_neighbors.size();
     auto op_store = BOOSOPStore(N_particles, m_n_symmetries);
     const auto loop_func = [&op_store, &neighborhoods, &qlm_eval, this](const size_t start,
@@ -83,9 +81,7 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
                                                       const py::array_t<double> quad_positions,
                                                       const py::array_t<double> quad_weights) const
 {
-    if (ylms.shape(1) != quad_positions.shape(0)
-        || ylms.shape(1) != quad_weights.shape(0))
-    {
+    if (ylms.shape(1) != quad_positions.shape(0) || ylms.shape(1) != quad_weights.shape(0)) {
         throw std::invalid_argument(
             "Shape mismatch between ylms, quad_positions, and quad_weights");
     }
@@ -96,9 +92,9 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
                                         quad_weights.data(),
                                         ylms.data());
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
-                                                num_neighbors.data(0),
-                                                weights.data(0),
-                                                distances.data(0));
+                                             num_neighbors.data(0),
+                                             weights.data(0),
+                                             distances.data(0));
     const size_t N_particles = num_neighbors.size();
     py::array_t<double> op_store(std::vector<size_t> {N_particles, m_n_symmetries});
     auto u_op_store = op_store.mutable_unchecked<2>();

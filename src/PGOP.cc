@@ -25,11 +25,8 @@ PGOPStore PGOP::compute(size_t N_particles,
                         const int* num_neighbors_data,
                         const double* sigmas_data) const
 {
-    const auto neighborhoods = Neighborhoods(N_particles,
-                                             num_neighbors_data,
-                                                                                         weights_data,
-                                             distances_data,
-                                             sigmas_data);
+    const auto neighborhoods
+        = Neighborhoods(N_particles, num_neighbors_data, weights_data, distances_data, sigmas_data);
     auto total_number_of_op_to_store = m_n_symmetries;
     if (m_compute_per_operator) {
         for (const auto& R_ij : m_Rij) {

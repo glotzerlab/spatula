@@ -52,12 +52,12 @@ template<typename distribution_type> class BOOSOP {
      *
      */
     BOOSOPStore compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
-                      const unsigned int m,
-                      const py::array_t<std::complex<double>> ylms,
-                      const py::array_t<double> quad_positions,
-                      const py::array_t<double> quad_weights) const;
+                        const py::array_t<double> weights,
+                        const py::array_t<int> num_neighbors,
+                        const unsigned int m,
+                        const py::array_t<std::complex<double>> ylms,
+                        const py::array_t<double> quad_positions,
+                        const py::array_t<double> quad_weights) const;
 
     /**
      * @brief Compute BOOSOP at given rotations for each point.

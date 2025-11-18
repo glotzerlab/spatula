@@ -31,7 +31,8 @@ class QlmEval {
      * @param n_lms The number of spherical harmonic moments.
      * @param positions_data pointer to an array of positions of shape \f$ (N_{quad}, 3) \f$.
      * @param weights_data pointer to an array of quadrature weights of shape \f$ (N_{quad}) \f$.
-     * @param ylms_data pointer to an array of spherical harmonics of shape \f$ (N_{lm}, N_{quad}) \f$.
+     * @param ylms_data pointer to an array of spherical harmonics of shape \f$ (N_{lm}, N_{quad})
+     * \f$.
      */
     QlmEval(unsigned int m,
             size_t n_points,
@@ -39,8 +40,7 @@ class QlmEval {
             const double* positions_data,
             const double* weights_data,
             const std::complex<double>* ylms_data)
-        : m_n_lms(n_lms), m_max_l(0), m_n_points(n_points), m_positions(),
-          m_weighted_ylms()
+        : m_n_lms(n_lms), m_max_l(0), m_n_points(n_points), m_positions(), m_weighted_ylms()
     {
         unsigned int count = 1;
         while (count != m_n_lms) {
@@ -53,8 +53,7 @@ class QlmEval {
             auto ylm = std::vector<std::complex<double>>();
             ylm.reserve(m_n_points);
             for (size_t i {0}; i < m_n_points; ++i) {
-                ylm.emplace_back(normalization * weights_data[i]
-                                 * ylms_data[lm * m_n_points + i]);
+                ylm.emplace_back(normalization * weights_data[i] * ylms_data[lm * m_n_points + i]);
             }
             m_weighted_ylms.emplace_back(ylm);
         }
@@ -108,7 +107,8 @@ class QlmEval {
                            size_t i = 0;
                            // Attempt to unroll loop for improved performance.
                            for (; i + 10 < w_ylm.size(); i += 10) {
-                               // Simple summation seems to work here unlike in the BondOrder<> classes.
+                               // Simple summation seems to work here unlike in the BondOrder<>
+                               // classes.
                                dot += B_quad[i] * w_ylm[i] + B_quad[i + 1] * w_ylm[i + 1]
                                       + B_quad[i + 2] * w_ylm[i + 2] + B_quad[i + 3] * w_ylm[i + 3]
                                       + B_quad[i + 4] * w_ylm[i + 4] + B_quad[i + 5] * w_ylm[i + 5]

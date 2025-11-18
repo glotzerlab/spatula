@@ -5,8 +5,8 @@
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/vector.h>
 
-#include "export-optimizer.h"
 #include "export-PGOP.h"
+#include "export-optimizer.h"
 #include "export-quat.h" // Include the new header
 #include "export-stores.h"
 #include "export-threads.h"
