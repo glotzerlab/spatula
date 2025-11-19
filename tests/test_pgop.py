@@ -12,7 +12,7 @@ import spatula
 
 RTOL = 1e-4
 
-n_dict = {
+N_DICT = {
     3: "Triangular",
     4: "Square",
     5: "Pentagonal",
@@ -24,7 +24,7 @@ n_dict = {
 }
 
 
-pgop_dict = {}
+PGOP_DICT = {}
 
 
 spatula.util.set_num_threads(1)
@@ -953,7 +953,7 @@ SHAPE_SYMMETRIES = {
                 [0.7071067811865476, 0.7071067811865476, -0.2928932188134525],
             ],
         ),
-        f"PrismAntiprismFamily.{n_dict[3]} Antiprism",
+        f"PrismAntiprismFamily.{N_DICT[3]} Antiprism",
     ],
     "D4d": [
         (
@@ -984,7 +984,7 @@ SHAPE_SYMMETRIES = {
                 [2.167800, -0.897900, -0.447000],
             ],
         ),
-        f"PrismAntiprismFamily.{n_dict[4]} Antiprism",
+        f"PrismAntiprismFamily.{N_DICT[4]} Antiprism",
     ],
     "D5d": [
         (
@@ -1019,7 +1019,7 @@ SHAPE_SYMMETRIES = {
                 [-0.38196601125010515, -1.0, 0.0],
             ],
         ),
-        f"PrismAntiprismFamily.{n_dict[5]} Antiprism",
+        f"PrismAntiprismFamily.{N_DICT[5]} Antiprism",
     ],
     "D6d": [
         (
@@ -1041,7 +1041,7 @@ SHAPE_SYMMETRIES = {
                 [-0.5176380902050415, -0.8965754721680536, -0.16210935083709735],
             ],
         ),
-        f"PrismAntiprismFamily.{n_dict[6]} Antiprism",
+        f"PrismAntiprismFamily.{N_DICT[6]} Antiprism",
     ],
     "T": [
         (
@@ -1371,7 +1371,7 @@ SHAPE_SYMMETRIES = {
 SHAPE_SYMMETRIES.update({f"C{n}v": [get_pyramid(n)] for n in range(4, 8)})
 SHAPE_SYMMETRIES.update(
     {
-        f"D{n}h": [get_bipyramid(n), f"PrismAntiprismFamily.{n_dict[n]} Prism"]
+        f"D{n}h": [get_bipyramid(n), f"PrismAntiprismFamily.{N_DICT[n]} Prism"]
         for n in range(3, 7)
     }
 )
@@ -1380,7 +1380,7 @@ CUTOFF = 0.99
 
 RNG = np.random.default_rng(seed=42)
 
-methods_dict = {}
+METHODS_DICT = {}
 
 # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
 # close to one as well.
@@ -1421,15 +1421,15 @@ def make_method(symmetries, optimizer, optype):
         symmetry = symmetries[0]
     else:
         return make_compute_object(symmetries, optimizer, optype)
-    if symmetry not in methods_dict:
-        methods_dict[symmetry] = {}
-    if optype not in methods_dict[symmetry]:
-        methods_dict[symmetry][optype] = {}
-    if optimizer.__hash__() not in methods_dict[symmetry][optype]:
-        methods_dict[symmetry][optype][optimizer.__hash__()] = make_compute_object(
+    if symmetry not in METHODS_DICT:
+        METHODS_DICT[symmetry] = {}
+    if optype not in METHODS_DICT[symmetry]:
+        METHODS_DICT[symmetry][optype] = {}
+    if optimizer.__hash__() not in METHODS_DICT[symmetry][optype]:
+        METHODS_DICT[symmetry][optype][optimizer.__hash__()] = make_compute_object(
             symmetries, optimizer, optype
         )
-    return methods_dict[symmetry][optype][optimizer.__hash__()]
+    return METHODS_DICT[symmetry][optype][optimizer.__hash__()]
 
 
 def generate_quaternions(n=1):
@@ -1665,9 +1665,9 @@ def test_bcc_with_multiple_incorrect_symmetries_operator_calc():
     )
 
 
-symmetries_subgroup_d5d = ["D5d", "S10", "C2h", "C5v", "D5", "C5", "C2", "Ci", "Cs"]
-n_values = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-vertices_multisim = np.asarray(
+SYMMETRIES_SUBGROUP_D5D = ["D5d", "S10", "C2h", "C5v", "D5", "C5", "C2", "Ci", "Cs"]
+N_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+VERTICES_MULTISIM = np.asarray(
     [
         [0.6180339887498949, 0.0, 1.0],
         [0.6180339887498949, 0.0, -1.0],
@@ -1683,12 +1683,12 @@ vertices_multisim = np.asarray(
 )
 
 
-@pytest.mark.parametrize("n, mode", [(n, mode) for n in n_values for mode in MODES])
+@pytest.mark.parametrize("n, mode", [(n, mode) for n in N_VALUES for mode in MODES])
 def test_increasing_number_of_symmetries(n, mode):
     symmetries_to_compute = []
-    for sym in symmetries_subgroup_d5d[:n]:
+    for sym in SYMMETRIES_SUBGROUP_D5D[:n]:
         symmetries_to_compute.append(sym)
-    system, nlist = get_shape_sys_nlist(vertices_multisim)
+    system, nlist = get_shape_sys_nlist(VERTICES_MULTISIM)
     op = compute_pgop_check_all_order_values(
         system, symmetries_to_compute, mode, nlist, None, qp=np.zeros((1, 3))
     )
@@ -1699,7 +1699,7 @@ def test_increasing_number_of_symmetries(n, mode):
 
 
 # propello tetrahedron vertices
-vertices_for_testing = np.asarray(
+VERTICES_FOR_TESTING = np.asarray(
     [
         [0.5097553324933856, 0.13968058199610653, 1.0],
         [0.5097553324933856, -0.13968058199610653, -1.0],
@@ -1727,7 +1727,7 @@ def test_orientations(mode, symmetries):
     # random orientation
     rot = scipy.spatial.transform.Rotation.random(random_state=RNG)
     # compute new vertices
-    rotated_vertices = rot.apply(vertices_for_testing)
+    rotated_vertices = rot.apply(VERTICES_FOR_TESTING)
     system, nlist = get_shape_sys_nlist(rotated_vertices)
     op_opt = compute_op_result(
         symmetries, OPTIMIZER, mode, system, nlist, None, np.zeros((1, 3))
@@ -1746,7 +1746,7 @@ def test_orientations(mode, symmetries):
         np.testing.assert_allclose(order, op_no_opt.order[0], rtol=RTOL)
 
 
-optimizers_to_test = [
+OPTIMIZERS_TO_TEST = [
     (
         "Union_descent_random",
         spatula.optimize.Union.with_step_gradient_descent(
@@ -1775,8 +1775,8 @@ optimizers_to_test = [
 # parametrize over all optimizers and all modes
 @pytest.mark.parametrize(
     "optim_name, optim",
-    optimizers_to_test,
-    ids=[name for name, _ in optimizers_to_test],
+    OPTIMIZERS_TO_TEST,
+    ids=[name for name, _ in OPTIMIZERS_TO_TEST],
 )
 @pytest.mark.parametrize("mode", modedict_types)
 def test_optimization_classes(optim_name, optim, mode):
@@ -1785,7 +1785,7 @@ def test_optimization_classes(optim_name, optim, mode):
         optim = spatula.optimize.RandomSearch(
             max_iter=20_000, seed=RNG.integers(0, 100000)
         )
-    system, nlist = get_shape_sys_nlist(vertices_for_testing)
+    system, nlist = get_shape_sys_nlist(VERTICES_FOR_TESTING)
     op = compute_op_result(["T"], optim, mode, system, nlist, None, np.zeros((1, 3)))
     print(op.order)
     assert op.order[0] > CUTOFF
@@ -1863,7 +1863,7 @@ def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
     np.testing.assert_array_less(opgop_compute.order[0], 1.0 + RTOL)
 
 
-non_shape_symmetries = {
+NON_SHAPE_SYMMETRIES = {
     "O": ["PlatonicFamily.Tetrahedron", "PlatonicFamily.Icosahedron"],
     "Oh": ["PlatonicFamily.Tetrahedron", "PlatonicFamily.Icosahedron"],
     "T": [get_pyramid(5), get_bipyramid(5)],
@@ -1872,7 +1872,7 @@ non_shape_symmetries = {
 }
 # Symmetries are carefully chosen here as due to rotations and partial ordering
 # meeting the threshold can be difficult here.
-cyclic_non_symmetry = {
+CYCLIC_NON_SYMMETRY = {
     2: 3,
     3: 4,
     4: 5,
@@ -1885,19 +1885,19 @@ cyclic_non_symmetry = {
     11: 5,
     12: 5,
 }
-non_shape_symmetries.update(
-    {f"C{i}": [f"RegularNGonFamily.{cyclic_non_symmetry[i]}"] for i in range(3, 13)}
+NON_SHAPE_SYMMETRIES.update(
+    {f"C{i}": [f"RegularNGonFamily.{CYCLIC_NON_SYMMETRY[i]}"] for i in range(3, 13)}
 )
-non_shape_symmetries.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
+NON_SHAPE_SYMMETRIES.update({f"D{i}": [get_pyramid(i)] for i in range(3, 13)})
 
-cutin = 0.92
+CUT_IN = 0.92
 
 
 @pytest.mark.parametrize(
     "symmetry, shape, vertices, optype",
     (
         (sym, shape, vertices, optype)
-        for sym, shapes in non_shape_symmetries.items()
+        for sym, shapes in NON_SHAPE_SYMMETRIES.items()
         for shape, vertices in map(parse_shape_values, shapes)
         for optype in ["boosop", "full", "boo"]
     ),
@@ -1910,6 +1910,6 @@ def test_no_symmetries(symmetry, shape, vertices, optype):
         optype=optype,
         sigma=None,
         cutoff_operator="<",
-        cutoff_value=cutin,
+        cutoff_value=CUT_IN,
     )
-    assert op.order[0] < cutin
+    assert op.order[0] < CUT_IN
