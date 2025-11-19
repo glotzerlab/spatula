@@ -10,6 +10,8 @@ iniconfig==2.3.0
     # via pytest
 more-itertools==10.8.0
     # via parsnip-cif
+nanobind==2.9.2
+    # via -r .github/workflows/requirements-test.in
 ninja==1.13.0
     # via -r .github/workflows/requirements-test.in
 numpy==2.3.4
