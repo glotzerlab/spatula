@@ -12,6 +12,7 @@ dependencies:
   - h5py==3.11.0
   - sphinx==7.3.7
   - pybind11==2.13.4
+  - nanobind==2.9.2
   - gxx==12.3.0
   - gcc==12.3.0
   - h5py==3.11.0
