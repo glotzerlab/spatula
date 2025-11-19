@@ -3,7 +3,7 @@ nanobind_add_module(_spatula_nb
     export-threads.cc
     export-quat.cc
     export-optimizer.cc
-    export-stores.cc
+    # export-stores.cc
     export-PGOP.cc
     ../PGOP.cc
 )
