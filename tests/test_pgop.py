@@ -1789,12 +1789,11 @@ optimizers_to_test = [
     ids=[name for name, _ in optimizers_to_test],
 )
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=reruns)
 def test_optimization_classes(optim_name, optim, mode):
     # this is so that rerun gets a new random seed
     if "Random" in optim_name:
         optim = spatula.optimize.RandomSearch(
-            max_iter=10_000, seed=RNG.integers(0, 100000)
+            max_iter=20_000, seed=RNG.integers(0, 100000)
         )
     system, nlist = get_shape_sys_nlist(vertices_for_testing)
     op = compute_op_result(["T"], optim, mode, system, nlist, None, np.zeros((1, 3)))
