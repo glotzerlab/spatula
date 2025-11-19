@@ -58,7 +58,8 @@ void export_pgop(nb::module_& m)
                 //     .cast();
 
                 auto op_array = ArrayXXd(result.op.data(), {N_particles, N_symmetries});
-                auto rotations_array = ArrayXX4d(result.op.data(), {N_particles, N_symmetries, 4});
+                auto rotations_array
+                    = ArrayXX4d(result.rotations.data(), {N_particles, N_symmetries, 4});
 
                 // Create nanobind ndarray for 'rotations'
                 // nb::ndarray<double, nb::ndim<3>, nb::c_contig> rotations_array(
