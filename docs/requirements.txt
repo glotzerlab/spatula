@@ -77,6 +77,8 @@ matplotlib-inline==0.2.1
     # via ipython
 mistune==3.1.4
     # via nbconvert
+nanobind==2.9.2
+    # via nanobind
 nbclient==0.10.2
     # via nbconvert
 nbconvert==7.16.6

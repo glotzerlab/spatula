@@ -2,6 +2,7 @@ ninja
 cmake
 coxeter
 pybind11
+nanobind
 freud-analysis
 numpy
 pytest
