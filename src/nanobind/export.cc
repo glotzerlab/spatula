@@ -7,9 +7,9 @@
 
 #include "../util/Metrics.h" // Relative path to Metrics.h
 #include "export-optimize.h"
+#include "export-pgop.h"
 #include "export-quaternion.h"
 #include "export-threads.h"
-#include "export-pgop.h"
 
 namespace nb = nanobind;
 
