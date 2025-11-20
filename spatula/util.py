@@ -8,7 +8,7 @@ import operator
 
 import numpy as np
 
-from . import _spatula, freud, _spatula_nb
+from . import _spatula_nb, freud
 
 PI_2 = np.pi / 2
 PI_4 = np.pi / 4

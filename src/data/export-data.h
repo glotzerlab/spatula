@@ -8,4 +8,3 @@ namespace spatula { namespace data {
 void export_data(pybind11::module& m);
 void export_quaternion(pybind11::module& m);
 }} // namespace spatula::data
-

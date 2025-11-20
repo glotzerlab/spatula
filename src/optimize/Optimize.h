@@ -44,8 +44,9 @@ class Optimizer {
      * @brief Create an Optimizer. The only thing this does is set up the bounds.
      */
     Optimizer()
-        : m_point(), m_objective(), m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<double>::max()),
-          m_count(0), m_need_objective(false)
+        : m_point(), m_objective(),
+          m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<double>::max()), m_count(0),
+          m_need_objective(false)
     {
     }
     virtual ~Optimizer() = default;

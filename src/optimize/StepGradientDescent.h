@@ -42,9 +42,9 @@ class StepGradientDescent : public Optimizer {
                         double learning_rate,
                         double tol)
         : Optimizer(), m_max_iter(max_iter), m_initial_jump(initial_jump),
-          m_learning_rate(learning_rate), m_tol(tol), m_stage(StepGradientDescent::Stage::INITIALIZE),
-          m_dim_starting_objective(0.0), m_terminate(false), m_current_dim(0), m_last_objective(0.0),
-          m_delta(0.0)
+          m_learning_rate(learning_rate), m_tol(tol),
+          m_stage(StepGradientDescent::Stage::INITIALIZE), m_dim_starting_objective(0.0),
+          m_terminate(false), m_current_dim(0), m_last_objective(0.0), m_delta(0.0)
     {
         m_point = initial_point.to_axis_angle_3D();
     }

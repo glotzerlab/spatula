@@ -6,8 +6,8 @@
 #include <memory>
 #include <random>
 
-#include "Optimize.h"
 #include "../data/Quaternion.h"
+#include "Optimize.h"
 
 namespace spatula { namespace optimize {
 
