@@ -1,7 +1,6 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
-#include <cassert>
 #include <cmath>
 #include <iterator>
 #include <string>
@@ -19,7 +18,6 @@ NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
     : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
       m_neighbor_offsets()
 {
-    assert(0);
     m_neighbor_offsets.reserve(m_N + 1);
     m_neighbor_offsets.emplace_back(0);
     std::partial_sum(m_neighbor_counts,
