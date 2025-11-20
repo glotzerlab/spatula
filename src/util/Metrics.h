@@ -6,6 +6,7 @@
 #include <complex>
 #include <numeric> // Added for std::sqrt
 #include <vector>
+#include "../data/Vec3.h" // Added for data::Vec3
 
 namespace spatula { namespace util {
 /**
