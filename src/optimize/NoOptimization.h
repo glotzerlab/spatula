@@ -1,13 +1,14 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
+#include "../data/Quaternion.h"
 #include "Optimize.h"
 
 namespace spatula { namespace optimize {
 
 class NoOptimization : public Optimizer {
     public:
-    NoOptimization(const data::Vec3& initial_point);
+    NoOptimization(const data::Quaternion& initial_point);
 
     // Implements internal_next_point but does nothing
     void internal_next_point() override;

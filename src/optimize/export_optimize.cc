@@ -31,7 +31,7 @@ void export_mesh(py::module& m)
 void export_no_optimization(py::module& m)
 {
     py::class_<NoOptimization, Optimizer, std::shared_ptr<NoOptimization>>(m, "NoOptimization")
-        .def(py::init<const data::Vec3&>());
+        .def(py::init<const data::Quaternion&>());
 }
 
 void export_base_optimize(py::module& m)
@@ -55,7 +55,7 @@ void export_step_gradient_descent(py::module& m)
     py::class_<StepGradientDescent, Optimizer, std::shared_ptr<StepGradientDescent>>(
         m,
         "StepGradientDescent")
-        .def(py::init<const data::Vec3&, unsigned int, double, double, double>());
+        .def(py::init<const data::Quaternion&, unsigned int, double, double, double>());
 }
 
 void export_union(py::module& m)

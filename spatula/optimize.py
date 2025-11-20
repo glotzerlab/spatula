@@ -91,7 +91,7 @@ class StepGradientDescent(Optimizer):
 
         """
         self._cpp = _spatula.StepGradientDescent(
-            _spatula.Quaternion(initial_point).to_axis_angle_3D(),
+            _spatula.Quaternion(initial_point),
             max_iter,
             initial_jump,
             learning_rate,
@@ -252,5 +252,5 @@ class NoOptimization(Optimizer):
     def __init__(self):
         """Create a NoOptimization object."""
         self._cpp = _spatula.NoOptimization(
-            _spatula.Quaternion((1, 0, 0, 0)).to_axis_angle_3D()
+            _spatula.Quaternion((1, 0, 0, 0))
         )

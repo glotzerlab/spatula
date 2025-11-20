@@ -1,11 +1,12 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
+#include "../data/Quaternion.h"
 #include "StepGradientDescent.h"
 
 namespace spatula { namespace optimize {
 
-StepGradientDescent::StepGradientDescent(const data::Vec3& initial_point,
+StepGradientDescent::StepGradientDescent(const data::Quaternion& initial_point,
                                          unsigned int max_iter,
                                          double initial_jump,
                                          double learning_rate,
@@ -15,7 +16,7 @@ StepGradientDescent::StepGradientDescent(const data::Vec3& initial_point,
       m_dim_starting_objective(0.0), m_terminate(false), m_current_dim(0), m_last_objective(0.0),
       m_delta(0.0)
 {
-    m_point = initial_point;
+    m_point = initial_point.to_axis_angle_3D();
 }
 
 bool StepGradientDescent::terminate() const

@@ -5,6 +5,7 @@
 
 #include <random>
 
+#include "../data/Quaternion.h"
 #include "Optimize.h"
 
 namespace spatula { namespace optimize {
@@ -35,7 +36,7 @@ class StepGradientDescent : public Optimizer {
      * @param learning_rate The learning rate for the gradient descent in the search stage.
      * @param tol The amount of improvement required to continue optimizing rather than terminating.
      */
-    StepGradientDescent(const data::Vec3& initial_point,
+    StepGradientDescent(const data::Quaternion& initial_point,
                         unsigned int max_iter,
                         double initial_jump,
                         double learning_rate,
