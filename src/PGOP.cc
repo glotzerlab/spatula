@@ -34,17 +34,18 @@ PGOP::PGOP(const py::list& R_ij,
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP::compute(const py::array_t<double> distances,
-              const py::array_t<double> weights,
-              const py::array_t<int> num_neighbors,
-              const py::array_t<double> sigmas) const
+PGOP::compute(const double* distances,
+              const double* weights,
+              const int* num_neighbors,
+              const double* sigmas,
+              const size_t N_particles_in_neighbors) const
 {
-    const auto neighborhoods = Neighborhoods(num_neighbors.size(),
-                                             num_neighbors.data(0),
-                                             weights.data(0),
-                                             distances.data(0),
-                                             sigmas.data(0));
-    const size_t N_particles = num_neighbors.size();
+    const auto neighborhoods = Neighborhoods(N_particles_in_neighbors,
+                                             num_neighbors,
+                                             weights,
+                                             distances,
+                                             sigmas);
+    const size_t N_particles = N_particles_in_neighbors;
     size_t ops_per_particle = m_n_symmetries;
     if (m_compute_per_operator) {
         for (const auto& R_ij : m_Rij) {

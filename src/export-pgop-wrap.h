@@ -24,7 +24,11 @@ py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
                             const py::array_t<double> sigmas)
 {
     // Call the C++ compute method
-    auto results_tuple = pgop_instance.compute(distances, weights, num_neighbors, sigmas);
+    auto results_tuple = pgop_instance.compute(distances.data(0),
+                                               weights.data(0),
+                                               num_neighbors.data(0),
+                                               sigmas.data(0),
+                                               num_neighbors.size());
 
     // Extract the std::vectors from the tuple
     const auto& op_values = std::get<0>(results_tuple);
