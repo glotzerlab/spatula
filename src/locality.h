@@ -16,6 +16,18 @@
 namespace spatula {
 
 // From BOOSOP.cc
+class LocalNeighborhoodBOOBOO
+{
+  public:
+    LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
+
+    void rotate(const data::Vec3& v);
+
+    std::vector<data::Vec3> positions;
+    std::vector<double> weights;
+    std::vector<data::Vec3> rotated_positions;
+};
+
 class NeighborhoodBOOs
 {
   public:
@@ -37,19 +49,22 @@ class NeighborhoodBOOs
     std::vector<size_t> m_neighbor_offsets;
 };
 
-class LocalNeighborhoodBOOBOO
+// From PGOP.cc
+class LocalNeighborhood
 {
   public:
-    LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
+    LocalNeighborhood(std::vector<data::Vec3>&& positions_,
+                      std::vector<double>&& weights_,
+                      std::vector<double>&& sigmas_);
 
     void rotate(const data::Vec3& v);
 
     std::vector<data::Vec3> positions;
     std::vector<double> weights;
+    std::vector<double> sigmas;
     std::vector<data::Vec3> rotated_positions;
 };
 
-// From PGOP.cc
 class Neighborhoods
 {
   public:
@@ -73,20 +88,18 @@ class Neighborhoods
     std::vector<size_t> m_neighbor_offsets;
 };
 
-class LocalNeighborhood
+// Implementations for LocalNeighborhoodBOOBOO
+inline LocalNeighborhoodBOOBOO::LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_,
+                                                        std::vector<double>&& weights_)
+    : positions(positions_), weights(weights_), rotated_positions(positions)
 {
-  public:
-    LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                      std::vector<double>&& weights_,
-                      std::vector<double>&& sigmas_);
+}
 
-    void rotate(const data::Vec3& v);
-
-    std::vector<data::Vec3> positions;
-    std::vector<double> weights;
-    std::vector<double> sigmas;
-    std::vector<data::Vec3> rotated_positions;
-};
+inline void LocalNeighborhoodBOOBOO::rotate(const data::Vec3& v)
+{
+    const auto R = util::to_rotation_matrix(v);
+    util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
+}
 
 // Implementations for NeighborhoodBOOs
 inline NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
@@ -128,14 +141,15 @@ inline int NeighborhoodBOOs::getNeighborCount(size_t i) const
     return m_neighbor_counts[i];
 }
 
-// Implementations for LocalNeighborhoodBOOBOO
-inline LocalNeighborhoodBOOBOO::LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_,
-                                                        std::vector<double>&& weights_)
-    : positions(positions_), weights(weights_), rotated_positions(positions)
+// Implementations for LocalNeighborhood
+inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
+                                            std::vector<double>&& weights_,
+                                            std::vector<double>&& sigmas_)
+    : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
 {
 }
 
-inline void LocalNeighborhoodBOOBOO::rotate(const data::Vec3& v)
+inline void LocalNeighborhood::rotate(const data::Vec3& v)
 {
     const auto R = util::to_rotation_matrix(v);
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
@@ -189,22 +203,8 @@ inline std::vector<double> Neighborhoods::getSigmas(size_t i) const
 }
 
 inline int Neighborhoods::getNeighborCount(size_t i) const
-    {
-        return m_neighbor_counts[i];
-    }
-
-// Implementations for LocalNeighborhood
-inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                                            std::vector<double>&& weights_,
-                                            std::vector<double>&& sigmas_)
-    : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
 {
-}
-
-inline void LocalNeighborhood::rotate(const data::Vec3& v)
-{
-    const auto R = util::to_rotation_matrix(v);
-    util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
+    return m_neighbor_counts[i];
 }
 
 // Global functions from PGOP.cc
