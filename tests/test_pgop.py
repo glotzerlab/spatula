@@ -1532,7 +1532,6 @@ def compute_pgop_crystal(crystal_type, symmetry, mode, nlist, sigma=None, qp=Non
 # Define a parameter for different unit cells and corresponding parameters
 @pytest.mark.parametrize("crystal_type", crystal_systems)
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=reruns)
 def test_simple_crystals(crystal_type, mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs[crystal_type]}
     op_pg = compute_pgop_crystal(crystal_type, ["Oh"], mode, qargs, None)
@@ -1540,7 +1539,6 @@ def test_simple_crystals(crystal_type, mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=reruns)
 def test_qargs_query_pt(mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
     _, points = crystals_dict["sc"]
@@ -1551,7 +1549,6 @@ def test_qargs_query_pt(mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=reruns)
 def test_neighbor_list_query_pt(mode):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
@@ -1564,7 +1561,6 @@ def test_neighbor_list_query_pt(mode):
 
 
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=reruns)
 def test_neighbor_list_only(mode):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
@@ -1577,7 +1573,6 @@ def test_neighbor_list_only(mode):
 
 @pytest.mark.parametrize("mode", ["full", "boo"])
 @pytest.mark.parametrize("sigma", [0.2, [0.2] * (3 * 3 * 3)])
-@pytest.mark.flaky(reruns=reruns)
 def test_sigma_inputs(mode, sigma):
     box, points = crystals_dict["sc"]
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
@@ -1596,7 +1591,6 @@ sigma_values = {
 
 
 @pytest.mark.parametrize("mode", modes)
-@pytest.mark.flaky(reruns=reruns)
 def test_bcc_with_multiple_correct_symmetries(mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
     correct_symmetries = ["Oh", "D2", "D4"]
@@ -1605,7 +1599,6 @@ def test_bcc_with_multiple_correct_symmetries(mode):
 
 
 @pytest.mark.parametrize("mode", modes)
-@pytest.mark.flaky(reruns=reruns)
 def test_bcc_with_multiple_incorrect_symmetries(mode):
     cutoff = 0.8
     box, points = crystals_dict["bcc"]
@@ -1668,7 +1661,6 @@ vertices_multisim = np.asarray(
 
 
 @pytest.mark.parametrize("n, mode", [(n, mode) for n in n_values for mode in modes])
-@pytest.mark.flaky(reruns=reruns)
 def test_increasing_number_of_symmetries(n, mode):
     symmetries_to_compute = []
     for sym in symmetries_subgroup_d5d[:n]:
@@ -1708,7 +1700,6 @@ vertices_for_testing = np.asarray(
 
 @pytest.mark.parametrize("mode", modedict_types)
 @pytest.mark.parametrize("symmetries", [["T"], ["T", "Th"]])
-@pytest.mark.flaky(reruns=reruns)
 def test_orientations(mode, symmetries):
     # random orientation
     rot = scipy.spatial.transform.Rotation.random(random_state=rng)
@@ -1763,7 +1754,6 @@ optimizers_to_test = [
     ids=[name for name, _ in optimizers_to_test],
 )
 @pytest.mark.parametrize("mode", modedict_types)
-@pytest.mark.flaky(reruns=reruns)
 def test_optimization_classes(optim_name, optim, mode):
     # this is so that rerun gets a new random seed
     if "Random" in optim_name:
@@ -1788,7 +1778,6 @@ def test_optimization_classes(optim_name, optim, mode):
     ),
     ids=_id_func,
 )
-@pytest.mark.flaky(reruns=reruns)
 def test_symmetries_polyhedra(symmetry, shape, vertices, quaternion, mode):
     rotation = scipy.spatial.transform.Rotation.from_quat(quaternion)
     rotated_vertices = rotation.apply(vertices)
@@ -1810,7 +1799,6 @@ def test_symmetries_polyhedra(symmetry, shape, vertices, quaternion, mode):
     ),
     ids=_id_func,
 )
-@pytest.mark.flaky(reruns=reruns)
 def test_radially_imperfect_symmetry_polyhedra(symmetry, shape, vertices):
     vertices = np.asarray(vertices)
     # randomly scale the distance of a random set of vertices for a number between 1.01
@@ -1883,7 +1871,6 @@ cutin = 0.92
     ),
     ids=_id_func,
 )
-@pytest.mark.flaky(reruns=reruns)
 def test_no_symmetries(symmetry, shape, vertices, optype):
     op = compute_pgop_polyhedron(
         symmetry=[symmetry],
