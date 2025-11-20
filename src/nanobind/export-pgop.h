@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
+#include <nanobind/stl/shared_ptr.h>
 // #include <pybind11/numpy.h>
 // #include <pybind11/pybind11.h>
 // #include <pybind11/stl.h>
@@ -37,14 +38,14 @@ void wrap_pgop_compute(const PGOP& pgop_instance,
                                                num_neighbors.size());
 
     // Extract the std::vectors from the tuple
-    const auto& op_values = std::get<0>(results_tuple);
-    const auto& rotation_values = std::get<1>(results_tuple);
+    [[maybe_unused]] const auto& op_values = std::get<0>(results_tuple);
+    [[maybe_unused]] const auto& rotation_values = std::get<1>(results_tuple);
 
     // Determine sizes for py::array_t
     // N_particles can be inferred from num_neighbors.size()
-    const size_t N_particles = num_neighbors.size();
+    // const size_t N_particles = num_neighbors.size();
     // ops_per_particle can be inferred from op_values.size() / N_particles
-    const size_t ops_per_particle = op_values.empty() ? 0 : op_values.size() / N_particles;
+    // const size_t ops_per_particle = op_values.empty() ? 0 : op_values.size() / N_particles;
 
     // Convert std::vector<double> to py::array_t<double>
     // py::array_t<double> result_ops_py;
@@ -76,40 +77,29 @@ void wrap_pgop_compute(const PGOP& pgop_instance,
 
 void export_spatula(nb::module_& m)
 {
-    nb::class_<PGOP>(m, "PGOP").def(nb::init([](const nb::ndarray<>& R_ij,
-                                                std::shared_ptr<optimize::Optimizer>& optimizer,
-                                                const unsigned int mode,
-                                                bool compute_per_operator) {
-                                        std::vector<double> R_ij_data_vec;
-                                        std::vector<size_t> R_ij_sizes_vec;
-                                        size_t n_symmetries = R_ij.size(); // TODO: incorrect
+    nb::class_<PGOP>(m, "PGOP").def(
+        "__init__",
+        [](nb::ndarray<double, nb::c_contig, nb::device::cpu> R_ij,
+           size_t n_symmetries) { //,
+                                  // std::shared_ptr<optimize::Optimizer> optimizer,
+                                  // unsigned int mode,
+                                  // bool compute_per_operator) {
+            // Check dimensions if PGOP expects a specific rank, e.g., 2D
+            // if (R_ij.ndim() != 2) throw std::runtime_error("R_ij must be 2-dimensional");
 
-                                        for (size_t i = 0; i < R_ij.shape(0); ++i) {
-                                            for (size_t j = 0; j < R_ij.shape(1); ++j) {
-                                                for (size_t k = 0; k < R_ij.shape(2);
-                                                     ++k) { // 9 elements for
-                                                    R_ij_data_vec.push_back(R_ij.view(i, j, k));
-                                                }
-                                            }
-                                        }
-                                        return std::make_unique<PGOP>(R_ij_data_vec.data(),
-                                                                      R_ij_sizes_vec.data(),
-                                                                      n_symmetries,
-                                                                      optimizer,
-                                                                      mode,
-                                                                      compute_per_operator);
-                                    }),
-                                    "R_ij"_a,
-                                    "optimizer"_a,
-                                    "mode"_a,
-                                    "compute_per_operator"_a);
-    // .def("compute",
-    //      &wrap_pgop_compute,
-    //      py::arg("distances"),
-    //      py::arg("weights"),
-    //      py::arg("num_neighbors"),
-    //      py::arg("sigmas"),
-    //      "Compute PGOP values and rotations for a set of points.");
+            return PGOP(R_ij.data(), // const double* R_ij_data
+                        R_ij.size(), // const size_t R_ij_sizes
+                        n_symmetries);
+            // n_symmetries,
+            // optimizer,
+            // mode,
+            // compute_per_operator);
+        });
+    // nb::arg("R_ij"),
+    // nb::arg("n_symmetries"),
+    // nb::arg("n_symmetries"));
+    // nb::arg("optimizer"),
+    // nb::arg("mode"),
+    // nb::arg("compute_per_operator") = false);
 }
-
 } // End namespace spatula

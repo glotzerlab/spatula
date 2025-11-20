@@ -13,24 +13,26 @@
 namespace spatula {
 
 PGOP::PGOP(const double* R_ij_data,
-           const size_t* R_ij_sizes,
-           size_t n_symmetries,
-           std::shared_ptr<optimize::Optimizer>& optimizer,
-           const unsigned int mode,
-           bool compute_per_operator)
-    : m_n_symmetries(n_symmetries), m_Rij(), m_optimize(optimizer), m_mode(mode),
-      m_compute_per_operator(compute_per_operator)
+           const size_t R_ij_size,
+           // const size_t R_ij_size,
+           size_t n_symmetries)
+    // std::shared_ptr<optimize::Optimizer>& optimizer,
+    // const unsigned int mode,
+    // bool compute_per_operator)
+    // : m_n_symmetries(n_symmetries), m_Rij(), m_optimize(optimizer), m_mode(mode),
+    //   m_compute_per_operator(compute_per_operator)
+    : m_n_symmetries(n_symmetries), m_Rij()
 {
     m_Rij.reserve(m_n_symmetries);
     size_t current_data_offset = 0;
     for (size_t i = 0; i < m_n_symmetries; ++i) {
         std::vector<double> vec;
-        vec.reserve(R_ij_sizes[i]);
-        for (size_t j = 0; j < R_ij_sizes[i]; ++j) {
+        vec.reserve(R_ij_size);
+        for (size_t j = 0; j < R_ij_size; ++j) {
             vec.push_back(R_ij_data[current_data_offset + j]);
         }
         m_Rij.emplace_back(std::move(vec));
-        current_data_offset += R_ij_sizes[i];
+        current_data_offset += R_ij_size;
     }
 }
 

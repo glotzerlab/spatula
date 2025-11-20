@@ -22,12 +22,10 @@ namespace spatula {
  */
 class PGOP {
     public:
-    PGOP(const double* R_ij_data,
-         const size_t* R_ij_sizes,
-         size_t n_symmetries,
-         std::shared_ptr<optimize::Optimizer>& optimizer,
-         const unsigned int mode,
-         bool compute_per_operator);
+    PGOP(const double* R_ij_data, const size_t R_ij_size, size_t n_symmetries);
+    // std::shared_ptr<optimize::Optimizer>& optimizer,
+    // const unsigned int mode,
+    // bool compute_per_operator);
 
     /**
      * @brief Root function for computing PGOP for a set of points.
@@ -91,7 +89,7 @@ class PGOP {
 
     /// The number of symmetries that PGOP is being computed for.
     unsigned int m_n_symmetries;
-    /// The Wigner D matrices for each point group symmetry
+    /// The Cartesian matrices for each point group symmetry
     std::vector<std::vector<double>> m_Rij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
