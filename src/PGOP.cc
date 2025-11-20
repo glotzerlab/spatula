@@ -41,11 +41,8 @@ PGOP::compute(const double* distances,
               const double* sigmas,
               const size_t N_particles_in_neighbors) const
 {
-    const auto neighborhoods = Neighborhoods(N_particles_in_neighbors,
-                                             num_neighbors,
-                                             weights,
-                                             distances,
-                                             sigmas);
+    const auto neighborhoods
+        = Neighborhoods(N_particles_in_neighbors, num_neighbors, weights, distances, sigmas);
     const size_t N_particles = N_particles_in_neighbors;
     size_t ops_per_particle = m_n_symmetries;
     if (m_compute_per_operator) {
@@ -185,6 +182,5 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
         pool.wait_for_tasks();
     }
 }
-
 
 } // End namespace spatula

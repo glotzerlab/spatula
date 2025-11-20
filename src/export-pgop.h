@@ -85,9 +85,12 @@ void export_spatula_class(py::module& m, const std::string& name)
                          R_ij_data_vec.push_back(inner_list[j].cast<double>());
                      }
                  }
-                 return std::make_unique<PGOP>(
-                     R_ij_data_vec.data(), R_ij_sizes_vec.data(), n_symmetries, optimizer, mode,
-                     compute_per_operator);
+                 return std::make_unique<PGOP>(R_ij_data_vec.data(),
+                                               R_ij_sizes_vec.data(),
+                                               n_symmetries,
+                                               optimizer,
+                                               mode,
+                                               compute_per_operator);
              }),
              py::arg("R_ij"),
              py::arg("optimizer"),

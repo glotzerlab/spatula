@@ -107,7 +107,4 @@ class PGOP {
     bool m_compute_per_operator;
 };
 
-
-
-
 } // End namespace spatula
