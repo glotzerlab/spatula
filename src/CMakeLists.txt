@@ -1,4 +1,5 @@
 list(APPEND spatula_sources
+    "nanobind/export-pgop-wrap.h"
     "export-module.cc"
     "BondOrder.h"
     "PGOP.h" "PGOP.cc"

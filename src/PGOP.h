@@ -102,10 +102,11 @@ class PGOP {
      * @param num_neighboors An array of the number of neighbor for each point.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
-                      const py::array_t<double> sigmas) const;
+    std::tuple<std::vector<double>, std::vector<data::Quaternion>>
+    compute(const py::array_t<double> distances,
+            const py::array_t<double> weights,
+            const py::array_t<int> num_neighbors,
+            const py::array_t<double> sigmas) const;
 
     private:
     /**

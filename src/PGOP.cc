@@ -97,10 +97,11 @@ PGOP::PGOP(const py::list& R_ij,
     }
 }
 
-py::tuple PGOP::compute(const py::array_t<double> distances,
-                        const py::array_t<double> weights,
-                        const py::array_t<int> num_neighbors,
-                        const py::array_t<double> sigmas) const
+std::tuple<std::vector<double>, std::vector<data::Quaternion>>
+PGOP::compute(const py::array_t<double> distances,
+              const py::array_t<double> weights,
+              const py::array_t<int> num_neighbors,
+              const py::array_t<double> sigmas) const
 {
     const auto neighborhoods = Neighborhoods(num_neighbors.size(),
                                              num_neighbors.data(0),
@@ -144,26 +145,7 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
           };
     execute_func(loop_func, N_particles);
 
-    // Convert std::vector<double> to py::array_t<double>
-    py::array_t<double> result_ops_py;
-    result_ops_py.resize(std::vector<ssize_t>{static_cast<ssize_t>(N_particles), static_cast<ssize_t>(ops_per_particle)});
-    std::copy(op_values.begin(), op_values.end(), result_ops_py.mutable_data());
-
-    // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops, 4)
-    std::vector<double> flat_rotation_components;
-    flat_rotation_components.reserve(rotation_values.size() * 4);
-    for (const auto& q : rotation_values) {
-        flat_rotation_components.push_back(q.w);
-        flat_rotation_components.push_back(q.x);
-        flat_rotation_components.push_back(q.y);
-        flat_rotation_components.push_back(q.z);
-    }
-
-    py::array_t<double> result_rots_py;
-    result_rots_py.resize(std::vector<ssize_t>{static_cast<ssize_t>(N_particles), static_cast<ssize_t>(ops_per_particle), 4});
-    std::copy(flat_rotation_components.begin(), flat_rotation_components.end(), result_rots_py.mutable_data());
-
-    return py::make_tuple(result_ops_py, result_rots_py);
+    return std::make_tuple(op_values, rotation_values);
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
@@ -305,14 +287,20 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
     }
 }
 
-void export_spatula(py::module& m)
+
+
+#include "nanobind/export-pgop-wrap.h" // For wrap_pgop_compute
+
+void export_spatula(pybind11::module& m)
 {
-    py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::list&,
+    pybind11::class_<PGOP>(m, "PGOP")
+        .def(pybind11::init<const pybind11::list&,
                       std::shared_ptr<optimize::Optimizer>&,
                       const unsigned int,
                       bool>())
-        .def("compute", &PGOP::compute);
+        .def("compute",
+             &::spatula::spatula::wrap_pgop_compute,
+             "Compute PGOP values and rotations for a set of points.");
 }
 
 } // End namespace spatula
