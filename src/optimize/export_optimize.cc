@@ -71,7 +71,7 @@ void export_union(py::module& m)
                             initial_opt,
                             [max_iter, initial_jump, learning_rate, tol](const Optimizer& opt) {
                                 return std::make_unique<StepGradientDescent>(
-                                    opt.get_optimum().first,
+                                    data::Quaternion(opt.get_optimum().first),
                                     max_iter,
                                     initial_jump,
                                     learning_rate,
