@@ -19,65 +19,9 @@ namespace py = pybind11;
 
 namespace spatula {
 
-/**
- * @brief storage for neighbor positions, weights, and rotated positions.
- *
- * This struct is helpful is organizing operations on the BOD's neighbors when optimizing over
- * SO(3), by keeping all the data together.
- */
-struct LocalNeighborhood {
-    LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                      std::vector<double>&& weights_,
-                      std::vector<double>&& sigmas_);
 
-    void rotate(const data::Vec3& q);
 
-    /// neighbor bonds
-    const std::vector<data::Vec3> positions;
-    /// neighbor weights
-    const std::vector<double> weights;
-    const std::vector<double> sigmas;
-    /// Storage for the current positions under a given rotation used in optimization.
-    std::vector<data::Vec3> rotated_positions;
-};
 
-/**
- * @brief Small helper class for storing and accessing neighbor list data from Python.
- *
- * Warning: This class consumes the raw arrays from Python and requires that these arrays outlive
- * class instances.
- */
-class Neighborhoods {
-    public:
-    Neighborhoods(size_t N,
-                  const int* neighbor_counts,
-                  const double* weights,
-                  const double* distance,
-                  const double* sigmas);
-
-    /// Get the neighbors for point i.
-    LocalNeighborhood getNeighborhood(size_t i) const;
-    /// Get the neighbor weight for point i.
-    std::vector<double> getWeights(size_t i) const;
-    /// Get the sigmas for each neighbor bond
-    std::vector<double> getSigmas(size_t i) const;
-    /// Get the number of neighbors for point i.
-    int getNeighborCount(size_t i) const;
-
-    private:
-    /// Number of points with neighbors
-    const size_t m_N;
-    /// The number of neighbors for each point
-    const int* m_neighbor_counts;
-    /// The distance vector of each neighbor
-    const double* m_distances;
-    /// The weights for each neighbor bond
-    const double* m_weights;
-    /// The sigmas for each neighbor bond
-    const double* m_sigmas;
-    /// The offsets to index into the distances array
-    std::vector<size_t> m_neighbor_offsets;
-};
 
 
 
