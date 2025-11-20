@@ -10,7 +10,6 @@
 
 PYBIND11_MODULE(_spatula, m)
 {
-    spatula::data::export_quaternion(m);
     spatula::optimize::export_optimize(m);
     spatula::export_spatula(m);
     spatula::export_BOOSOP(m);
