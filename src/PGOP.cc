@@ -74,42 +74,7 @@ void LocalNeighborhood::rotate(const data::Vec3& v)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
-PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
-{
-}
 
-void PGOPStore::addOp(size_t i,
-                      const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
-{
-    const auto& values = std::get<0>(op_);
-    const auto& rots = std::get<1>(op_);
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
-    }
-}
-
-void PGOPStore::addNull(size_t i)
-{
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = std::numeric_limits<double>::quiet_NaN(); // Set NaN
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
-    }
-}
-
-py::tuple PGOPStore::getArrays()
-{
-    return py::make_tuple(op, rotations);
-}
 
 PGOP::PGOP(const py::list& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
@@ -143,27 +108,62 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
                                              distances.data(0),
                                              sigmas.data(0));
     const size_t N_particles = num_neighbors.size();
-    auto total_number_of_op_to_store = m_n_symmetries;
+    size_t ops_per_particle = m_n_symmetries;
     if (m_compute_per_operator) {
         for (const auto& R_ij : m_Rij) {
-            total_number_of_op_to_store += R_ij.size() / 9;
+            ops_per_particle += R_ij.size() / 9;
         }
     }
-    auto op_store = PGOPStore(N_particles, total_number_of_op_to_store);
+
+    std::vector<double> op_values(N_particles * ops_per_particle);
+    std::vector<data::Quaternion> rotation_values(N_particles * ops_per_particle);
+
     const auto loop_func
-        = [&op_store, &neighborhoods, this](const size_t start, const size_t stop) {
-              for (size_t i = start; i < stop; ++i) {
+        = [&](const size_t start_idx, const size_t stop_idx) {
+              for (size_t i = start_idx; i < stop_idx; ++i) {
+                  const size_t current_particle_offset = i * ops_per_particle;
                   if (neighborhoods.getNeighborCount(i) == 0) {
-                      op_store.addNull(i);
+                      for (size_t j {0}; j < ops_per_particle; ++j) {
+                          op_values[current_particle_offset + j]
+                              = std::numeric_limits<double>::quiet_NaN();
+                          rotation_values[current_particle_offset + j] = data::Quaternion(1, 0, 0, 0);
+                      }
                       continue;
                   }
                   auto neighborhood = neighborhoods.getNeighborhood(i);
                   const auto particle_op_rot = this->compute_particle(neighborhood);
-                  op_store.addOp(i, particle_op_rot);
+
+                  const auto& particle_ops = std::get<0>(particle_op_rot);
+                  const auto& particle_rots = std::get<1>(particle_op_rot);
+
+                  for (size_t j = 0; j < ops_per_particle; ++j) {
+                      op_values[current_particle_offset + j] = particle_ops[j];
+                      rotation_values[current_particle_offset + j] = particle_rots[j];
+                  }
               }
           };
     execute_func(loop_func, N_particles);
-    return op_store.getArrays();
+
+    // Convert std::vector<double> to py::array_t<double>
+    py::array_t<double> result_ops_py;
+    result_ops_py.resize(std::vector<ssize_t>{static_cast<ssize_t>(N_particles), static_cast<ssize_t>(ops_per_particle)});
+    std::copy(op_values.begin(), op_values.end(), result_ops_py.mutable_data());
+
+    // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops, 4)
+    std::vector<double> flat_rotation_components;
+    flat_rotation_components.reserve(rotation_values.size() * 4);
+    for (const auto& q : rotation_values) {
+        flat_rotation_components.push_back(q.w);
+        flat_rotation_components.push_back(q.x);
+        flat_rotation_components.push_back(q.y);
+        flat_rotation_components.push_back(q.z);
+    }
+
+    py::array_t<double> result_rots_py;
+    result_rots_py.resize(std::vector<ssize_t>{static_cast<ssize_t>(N_particles), static_cast<ssize_t>(ops_per_particle), 4});
+    std::copy(flat_rotation_components.begin(), flat_rotation_components.end(), result_rots_py.mutable_data());
+
+    return py::make_tuple(result_ops_py, result_rots_py);
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
