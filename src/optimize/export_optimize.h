@@ -29,6 +29,42 @@ inline void export_no_optimization(py::module& m)
         .def(py::init<const data::Quaternion&>());
 }
 
+
+/**
+ * @brief Trampoline class for exposing Optimizer in Python.
+ *
+ * This shouldn't actually be used to extend the class but we need this to pass Optimizers through
+ * from Python.
+ */
+class PyOptimizer : public Optimizer {
+    public:
+    using Optimizer::Optimizer;
+
+    ~PyOptimizer() override = default;
+
+    /// Get the next point to compute the objective for.
+    void internal_next_point() override
+    {
+        PYBIND11_OVERRIDE_PURE(void, Optimizer, internal_next_point);
+    }
+    /// Record the objective function's value for the last querried point.
+    void record_objective(double objective) override
+    {
+        PYBIND11_OVERRIDE(void, Optimizer, record_objective, objective);
+    }
+    /// Returns whether or not convergence or termination conditions have been met.
+    bool terminate() const override
+    {
+        PYBIND11_OVERRIDE_PURE(bool, Optimizer, terminate);
+    }
+
+    /// Create a clone of this optimizer
+    virtual std::unique_ptr<Optimizer> clone() const override
+    {
+        return std::make_unique<PyOptimizer>(*this);
+    }
+};
+
 inline void export_base_optimize(py::module& m)
 {
     py::class_<Optimizer, PyOptimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
