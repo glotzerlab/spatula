@@ -7,7 +7,7 @@
 #include "BOOSOP.h"
 #include "PGOP.h"
 #include "data/Quaternion.h"
-#include "nanobind/export-pgop-wrap.h"
+#include "export-pgop-wrap.h"
 
 PYBIND11_MODULE(_spatula, m)
 {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "../PGOP.h"
+#include "PGOP.h"
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>

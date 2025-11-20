@@ -191,7 +191,7 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
 
 
 
-#include "nanobind/export-pgop-wrap.h" // For wrap_pgop_compute
+#include "export-pgop-wrap.h" // For wrap_pgop_compute
 
 void export_spatula(pybind11::module& m)
 {
