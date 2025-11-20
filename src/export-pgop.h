@@ -67,18 +67,45 @@ py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
     return py::make_tuple(result_ops_py, result_rots_py);
 }
 
-void export_spatula_class(py::module& m, const std::string& name);
+void export_spatula_class(py::module& m, const std::string& name)
+{
+    pybind11::class_<PGOP>(m, name.c_str())
+        .def(pybind11::init([](const pybind11::list& R_ij,
+                               std::shared_ptr<optimize::Optimizer>& optimizer,
+                               const unsigned int mode,
+                               bool compute_per_operator) {
+                 std::vector<double> R_ij_data_vec;
+                 std::vector<size_t> R_ij_sizes_vec;
+                 size_t n_symmetries = R_ij.size();
+
+                 for (size_t i = 0; i < n_symmetries; ++i) {
+                     py::list inner_list = R_ij[i].cast<py::list>();
+                     R_ij_sizes_vec.push_back(inner_list.size());
+                     for (size_t j = 0; j < inner_list.size(); ++j) {
+                         R_ij_data_vec.push_back(inner_list[j].cast<double>());
+                     }
+                 }
+                 return std::make_unique<PGOP>(
+                     R_ij_data_vec.data(), R_ij_sizes_vec.data(), n_symmetries, optimizer, mode,
+                     compute_per_operator);
+             }),
+             py::arg("R_ij"),
+             py::arg("optimizer"),
+             py::arg("mode"),
+             py::arg("compute_per_operator"),
+             "Constructor for PGOP")
+        .def("compute",
+             &wrap_pgop_compute,
+             py::arg("distances"),
+             py::arg("weights"),
+             py::arg("num_neighbors"),
+             py::arg("sigmas"),
+             "Compute PGOP values and rotations for a set of points.");
+}
 
 void export_spatula(pybind11::module& m)
 {
-    pybind11::class_<PGOP>(m, "PGOP")
-        .def(pybind11::init<const pybind11::list&,
-                            std::shared_ptr<optimize::Optimizer>&,
-                            const unsigned int,
-                            bool>())
-        .def("compute",
-             &wrap_pgop_compute,
-             "Compute PGOP values and rotations for a set of points.");
+    export_spatula_class(m, "PGOP");
 }
 
 } // End namespace spatula
