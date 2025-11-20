@@ -32,7 +32,7 @@ class RandomSearch(Optimizer):
             Defaults to 42.
 
         """
-        self._cpp = _spatula.RandomSearch(max_iter, seed)
+        self._cpp = _spatula_nb.RandomSearch(max_iter, seed)
 
 
 class StepGradientDescent(Optimizer):
@@ -90,7 +90,7 @@ class StepGradientDescent(Optimizer):
             below ``tol``. Defaults to 1e-6.
 
         """
-        self._cpp = _spatula.StepGradientDescent(
+        self._cpp = _spatula_nb.StepGradientDescent(
             _spatula_nb.Quaternion(*initial_point),
             max_iter,
             initial_jump,
@@ -129,7 +129,7 @@ class Mesh(Optimizer):
             The rotaional quaternions to test.
 
         """
-        self._cpp = _spatula.Mesh([_spatula_nb.Quaternion(*p) for p in points])
+        self._cpp = _spatula_nb.Mesh([_spatula_nb.Quaternion(*p) for p in points])
 
     @classmethod
     def from_grid(cls, n_axes=75, n_angles=10):
@@ -240,7 +240,7 @@ class Union(Optimizer):
 
         """
         instance = cls()
-        instance._cpp = _spatula.Union.with_step_gradient_descent(
+        instance._cpp = _spatula_nb.Union.with_step_gradient_descent(
             optimizer._cpp, max_iter, initial_jump, learning_rate, tol
         )
         return instance
@@ -251,4 +251,4 @@ class NoOptimization(Optimizer):
 
     def __init__(self):
         """Create a NoOptimization object."""
-        self._cpp = _spatula.NoOptimization(_spatula_nb.Quaternion(1, 0, 0, 0))
+        self._cpp = _spatula_nb.NoOptimization(_spatula_nb.Quaternion(1, 0, 0, 0))
