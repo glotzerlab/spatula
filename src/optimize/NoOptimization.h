@@ -29,7 +29,6 @@ class NoOptimization : public Optimizer {
         return m_terminate;
     }
 
-    // Clone function for Pybind11
     std::unique_ptr<Optimizer> clone() const override
     {
         return std::make_unique<NoOptimization>(*this);
