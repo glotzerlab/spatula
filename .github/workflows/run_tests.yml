@@ -49,7 +49,7 @@ jobs:
           uv pip install . --no-build-isolation --no-deps --system -v
       - name: Run Tests (Unix/macOS)
         if: runner.os != 'Windows'
-        run: pytest tests/ -v
+        run: pytest tests/ -v -x # TODO: temporary
       - name: Run Tests (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
