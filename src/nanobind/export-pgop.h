@@ -14,6 +14,7 @@
 
 // namespace py = pybind11;
 namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace spatula {
 
@@ -75,34 +76,33 @@ void wrap_pgop_compute(const PGOP& pgop_instance,
 
 void export_spatula(nb::module_& m)
 {
-    nb::class_<PGOP>(m, "PGOP").def(
-        pybind11::init([](const pybind11::list& R_ij,
-                          std::shared_ptr<optimize::Optimizer>& optimizer,
-                          const unsigned int mode,
-                          bool compute_per_operator) {
-            std::vector<double> R_ij_data_vec;
-            std::vector<size_t> R_ij_sizes_vec;
-            size_t n_symmetries = R_ij.size();
+    nb::class_<PGOP>(m, "PGOP").def(nb::init([](const nb::ndarray<>& R_ij,
+                                                std::shared_ptr<optimize::Optimizer>& optimizer,
+                                                const unsigned int mode,
+                                                bool compute_per_operator) {
+                                        std::vector<double> R_ij_data_vec;
+                                        std::vector<size_t> R_ij_sizes_vec;
+                                        size_t n_symmetries = R_ij.size(); // TODO: incorrect
 
-            for (size_t i = 0; i < n_symmetries; ++i) {
-                py::list inner_list = R_ij[i].cast<py::list>();
-                R_ij_sizes_vec.push_back(inner_list.size());
-                for (size_t j = 0; j < inner_list.size(); ++j) {
-                    R_ij_data_vec.push_back(inner_list[j].cast<double>());
-                }
-            }
-            return std::make_unique<PGOP>(R_ij_data_vec.data(),
-                                          R_ij_sizes_vec.data(),
-                                          n_symmetries,
-                                          optimizer,
-                                          mode,
-                                          compute_per_operator);
-        }),
-        py::arg("R_ij"),
-        py::arg("optimizer"),
-        py::arg("mode"),
-        py::arg("compute_per_operator"),
-        "Constructor for PGOP");
+                                        for (size_t i = 0; i < R_ij.shape(0); ++i) {
+                                            for (size_t j = 0; j < R_ij.shape(1); ++j) {
+                                                for (size_t k = 0; k < R_ij.shape(2);
+                                                     ++k) { // 9 elements for
+                                                    R_ij_data_vec.push_back(R_ij.view(i, j, k));
+                                                }
+                                            }
+                                        }
+                                        return std::make_unique<PGOP>(R_ij_data_vec.data(),
+                                                                      R_ij_sizes_vec.data(),
+                                                                      n_symmetries,
+                                                                      optimizer,
+                                                                      mode,
+                                                                      compute_per_operator);
+                                    }),
+                                    "R_ij"_a,
+                                    "optimizer"_a,
+                                    "mode"_a,
+                                    "compute_per_operator"_a);
     // .def("compute",
     //      &wrap_pgop_compute,
     //      py::arg("distances"),
