@@ -8,7 +8,7 @@
 #include "BOOSOP.h"
 #include "BondOrder.h"
 #include "util/Threads.h"
-#include "locality.h" // New include for locality classes
+#include "locality.h"
 
 namespace spatula {
 

@@ -11,11 +11,10 @@
 
 #include "data/Quaternion.h"
 #include "data/Vec3.h"
-#include "util/Util.h" // For normalize_distances and to_rotation_matrix, rotate_matrix
+#include "util/Util.h"
 
 namespace spatula {
 
-// From BOOSOP.cc
 class LocalNeighborhoodBOOBOO
 {
   public:
@@ -49,7 +48,6 @@ class NeighborhoodBOOs
     std::vector<size_t> m_neighbor_offsets;
 };
 
-// From PGOP.cc
 class LocalNeighborhood
 {
   public:
@@ -88,7 +86,6 @@ class Neighborhoods
     std::vector<size_t> m_neighbor_offsets;
 };
 
-// Implementations for LocalNeighborhoodBOOBOO
 inline LocalNeighborhoodBOOBOO::LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_,
                                                         std::vector<double>&& weights_)
     : positions(positions_), weights(weights_), rotated_positions(positions)
@@ -101,7 +98,6 @@ inline void LocalNeighborhoodBOOBOO::rotate(const data::Vec3& v)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
-// Implementations for NeighborhoodBOOs
 inline NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
                                           const int* neighbor_counts,
                                           const double* weights,
@@ -141,7 +137,6 @@ inline int NeighborhoodBOOs::getNeighborCount(size_t i) const
     return m_neighbor_counts[i];
 }
 
-// Implementations for LocalNeighborhood
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                                             std::vector<double>&& weights_,
                                             std::vector<double>&& sigmas_)
@@ -155,7 +150,6 @@ inline void LocalNeighborhood::rotate(const data::Vec3& v)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
-// Implementations for Neighborhoods
 inline Neighborhoods::Neighborhoods(size_t N,
                                     const int* neighbor_counts,
                                     const double* weights,

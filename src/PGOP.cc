@@ -7,7 +7,7 @@
 
 #include "PGOP.h"
 #include "util/Threads.h"
-#include "util/Metrics.h" // New include for Bhattacharyya coefficients
+#include "util/Metrics.h"
 #include "locality.h"
 
 namespace spatula {
