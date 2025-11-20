@@ -91,7 +91,7 @@ class StepGradientDescent(Optimizer):
 
         """
         self._cpp = _spatula.StepGradientDescent(
-            _spatula_nb.Quaternion(initial_point),
+            _spatula_nb.Quaternion(*initial_point),
             max_iter,
             initial_jump,
             learning_rate,
@@ -129,7 +129,7 @@ class Mesh(Optimizer):
             The rotaional quaternions to test.
 
         """
-        self._cpp = _spatula.Mesh([_spatula_nb.Quaternion(p) for p in points])
+        self._cpp = _spatula.Mesh([_spatula_nb.Quaternion(*p) for p in points])
 
     @classmethod
     def from_grid(cls, n_axes=75, n_angles=10):
@@ -251,4 +251,4 @@ class NoOptimization(Optimizer):
 
     def __init__(self):
         """Create a NoOptimization object."""
-        self._cpp = _spatula.NoOptimization(_spatula_nb.Quaternion((1, 0, 0, 0)))
+        self._cpp = _spatula.NoOptimization(_spatula_nb.Quaternion(1, 0, 0, 0))
