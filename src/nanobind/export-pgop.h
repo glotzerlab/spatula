@@ -5,29 +5,32 @@
 
 #include "PGOP.h"
 
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace spatula {
 
 /**
- * @brief Wrapper function to call PGOP::compute and convert its std::tuple output to py::tuple.
+ * @brief Wrapper function to call PGOP::compute and convert its std::tuple output to nb::tuple.
  * This function is used for exposing the compute method to Python.
  */
 py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
-                            const py::array_t<double> distances,
-                            const py::array_t<double> weights,
-                            const py::array_t<int> num_neighbors,
-                            const py::array_t<double> sigmas)
+                            const nb::ndarray<double>& distances,
+                            const nb::ndarray<double>& weights,
+                            const nb::ndarray<int>& num_neighbors,
+                            const nb::ndarray<double>& sigmas)
 {
     // Call the C++ compute method
-    auto results_tuple = pgop_instance.compute(distances.data(0),
-                                               weights.data(0),
-                                               num_neighbors.data(0),
-                                               sigmas.data(0),
+    auto results_tuple = pgop_instance.compute(distances.data(),
+                                               weights.data(),
+                                               num_neighbors.data(),
+                                               sigmas.data(),
                                                num_neighbors.size());
 
     // Extract the std::vectors from the tuple
