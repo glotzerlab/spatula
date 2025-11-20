@@ -7,6 +7,7 @@
 
 #include "PGOP.h"
 #include "util/Threads.h"
+#include "util/Metrics.h" // New include for Bhattacharyya coefficients
 #include "locality.h"
 
 namespace spatula {
@@ -155,12 +156,12 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
             for (size_t m {0}; m < positions.size(); ++m) {
                 double BC = 0;
                 if (m_mode == 0) {
-                    BC = compute_Bhattacharyya_coefficient_gaussian(positions[m],
+                    BC = util::compute_Bhattacharyya_coefficient_gaussian(positions[m],
                                                                     symmetrized_position,
                                                                     sigmas[j],
                                                                     sigmas[m]);
                 } else {
-                    BC = compute_Bhattacharyya_coefficient_fisher(positions[m],
+                    BC = util::compute_Bhattacharyya_coefficient_fisher(positions[m],
                                                                   symmetrized_position,
                                                                   sigmas[j],
                                                                   sigmas[m]);
