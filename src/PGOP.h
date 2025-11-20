@@ -14,6 +14,7 @@
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/Util.h"
+#include "locality.h" // Include locality.h for LocalNeighborhood
 
 namespace py = pybind11;
 

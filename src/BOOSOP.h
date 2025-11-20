@@ -16,6 +16,7 @@
 #include "util/Metrics.h"
 #include "util/QlmEval.h"
 #include "util/Util.h"
+#include "locality.h" // Include locality.h for LocalNeighborhoodBOOBOO
 
 namespace py = pybind11;
 
