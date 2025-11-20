@@ -6,7 +6,8 @@
 import freud
 
 from . import bond_order, integrate, optimize, representations, sph_harm, util
-from .pgop import BOOSOP, PGOP
+from .boosop import BOOSOP
+from .pgop import PGOP
 
 __all__ = [
     "bond_order",
