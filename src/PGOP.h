@@ -6,17 +6,11 @@
 #include <tuple>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include "data/Quaternion.h"
 #include "locality.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/Util.h"
-
-namespace py = pybind11;
 
 namespace spatula {
 

@@ -3,15 +3,16 @@
 
 #pragma once
 
-#include "PGOP.h"
+#include "../PGOP.h"
 
+#include <cstddef>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+// #include <pybind11/numpy.h>
+// #include <pybind11/pybind11.h>
+// #include <pybind11/stl.h>
 
-namespace py = pybind11;
+// namespace py = pybind11;
 namespace nb = nanobind;
 
 namespace spatula {
@@ -20,11 +21,12 @@ namespace spatula {
  * @brief Wrapper function to call PGOP::compute and convert its std::tuple output to nb::tuple.
  * This function is used for exposing the compute method to Python.
  */
-py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
-                            const nb::ndarray<double>& distances,
-                            const nb::ndarray<double>& weights,
-                            const nb::ndarray<int>& num_neighbors,
-                            const nb::ndarray<double>& sigmas)
+// nb::tuple wrap_pgop_compute(const PGOP& pgop_instance,
+void wrap_pgop_compute(const PGOP& pgop_instance,
+                       const nb::ndarray<double, nb::shape<-1, 3>>& distances,
+                       const nb::ndarray<double, nb::shape<-1>>& weights,
+                       const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
+                       const nb::ndarray<double, nb::shape<-1>>& sigmas)
 {
     // Call the C++ compute method
     auto results_tuple = pgop_instance.compute(distances.data(),
@@ -44,10 +46,10 @@ py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
     const size_t ops_per_particle = op_values.empty() ? 0 : op_values.size() / N_particles;
 
     // Convert std::vector<double> to py::array_t<double>
-    py::array_t<double> result_ops_py;
-    result_ops_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
-                                               static_cast<ssize_t>(ops_per_particle)});
-    std::copy(op_values.begin(), op_values.end(), result_ops_py.mutable_data());
+    // py::array_t<double> result_ops_py;
+    // result_ops_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
+    // static_cast<ssize_t>(ops_per_particle)});
+    // std::copy(op_values.begin(), op_values.end(), result_ops_py.mutable_data());
 
     // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops, 4)
     std::vector<double> flat_rotation_components;
@@ -59,59 +61,55 @@ py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
         flat_rotation_components.push_back(q.z);
     }
 
-    py::array_t<double> result_rots_py;
-    result_rots_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
-                                                static_cast<ssize_t>(ops_per_particle),
-                                                4});
-    std::copy(flat_rotation_components.begin(),
-              flat_rotation_components.end(),
-              result_rots_py.mutable_data());
+    // TODO: WIP: how to port with 0 copy?
+    // py::array_t<double> result_rots_py;
+    // result_rots_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
+    // static_cast<ssize_t>(ops_per_particle), 4
+    // });
+    // std::copy(flat_rotation_components.begin(),
+    // flat_rotation_components.end(),
+    // result_rots_py.mutable_data());
 
-    return py::make_tuple(result_ops_py, result_rots_py);
-}
+    // return nb::make_tuple(result_ops_py, result_rots_py);
+} // namespace spatula
 
-void export_spatula_class(py::module& m, const std::string& name)
+void export_spatula(nb::module_& m)
 {
-    pybind11::class_<PGOP>(m, name.c_str())
-        .def(pybind11::init([](const pybind11::list& R_ij,
-                               std::shared_ptr<optimize::Optimizer>& optimizer,
-                               const unsigned int mode,
-                               bool compute_per_operator) {
-                 std::vector<double> R_ij_data_vec;
-                 std::vector<size_t> R_ij_sizes_vec;
-                 size_t n_symmetries = R_ij.size();
+    nb::class_<PGOP>(m, "PGOP").def(
+        pybind11::init([](const pybind11::list& R_ij,
+                          std::shared_ptr<optimize::Optimizer>& optimizer,
+                          const unsigned int mode,
+                          bool compute_per_operator) {
+            std::vector<double> R_ij_data_vec;
+            std::vector<size_t> R_ij_sizes_vec;
+            size_t n_symmetries = R_ij.size();
 
-                 for (size_t i = 0; i < n_symmetries; ++i) {
-                     py::list inner_list = R_ij[i].cast<py::list>();
-                     R_ij_sizes_vec.push_back(inner_list.size());
-                     for (size_t j = 0; j < inner_list.size(); ++j) {
-                         R_ij_data_vec.push_back(inner_list[j].cast<double>());
-                     }
-                 }
-                 return std::make_unique<PGOP>(R_ij_data_vec.data(),
-                                               R_ij_sizes_vec.data(),
-                                               n_symmetries,
-                                               optimizer,
-                                               mode,
-                                               compute_per_operator);
-             }),
-             py::arg("R_ij"),
-             py::arg("optimizer"),
-             py::arg("mode"),
-             py::arg("compute_per_operator"),
-             "Constructor for PGOP")
-        .def("compute",
-             &wrap_pgop_compute,
-             py::arg("distances"),
-             py::arg("weights"),
-             py::arg("num_neighbors"),
-             py::arg("sigmas"),
-             "Compute PGOP values and rotations for a set of points.");
-}
-
-void export_spatula(pybind11::module& m)
-{
-    export_spatula_class(m, "PGOP");
+            for (size_t i = 0; i < n_symmetries; ++i) {
+                py::list inner_list = R_ij[i].cast<py::list>();
+                R_ij_sizes_vec.push_back(inner_list.size());
+                for (size_t j = 0; j < inner_list.size(); ++j) {
+                    R_ij_data_vec.push_back(inner_list[j].cast<double>());
+                }
+            }
+            return std::make_unique<PGOP>(R_ij_data_vec.data(),
+                                          R_ij_sizes_vec.data(),
+                                          n_symmetries,
+                                          optimizer,
+                                          mode,
+                                          compute_per_operator);
+        }),
+        py::arg("R_ij"),
+        py::arg("optimizer"),
+        py::arg("mode"),
+        py::arg("compute_per_operator"),
+        "Constructor for PGOP");
+    // .def("compute",
+    //      &wrap_pgop_compute,
+    //      py::arg("distances"),
+    //      py::arg("weights"),
+    //      py::arg("num_neighbors"),
+    //      py::arg("sigmas"),
+    //      "Compute PGOP values and rotations for a set of points.");
 }
 
 } // End namespace spatula

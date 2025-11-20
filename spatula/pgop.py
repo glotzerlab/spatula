@@ -464,6 +464,7 @@ class PGOP:
                 "sigmas must be a float, a list of floats or an array of floats "
                 "with the same length as the number of points in the system."
             )
+        print(dist.shape)
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
             dist, neighbors.weights, neighbors.neighbor_counts, sigmas
