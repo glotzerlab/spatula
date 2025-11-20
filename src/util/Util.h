@@ -91,7 +91,7 @@ inline std::vector<double> to_rotation_matrix(const Vec3& v)
  * @brief Returns a vector of Vec3 of normalized distances. Each point in distances is normalized
  * and converted to a Vec3
  *
- * @param distances a NumPy array wrapped by Pybind11 of points in 3D space.
+ * @param distances A Raw pointer to an array of doubles interpreted as Vec3.
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
