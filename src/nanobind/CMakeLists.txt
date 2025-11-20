@@ -3,7 +3,7 @@ nanobind_add_module(_spatula_nb
     export-threads.cc
 )
 
-target_include_directories(_spatula_nb PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../util ${CMAKE_CURRENT_SOURCE_DIR}/../data)
+target_include_directories(_spatula_nb PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../util ${CMAKE_CURRENT_SOURCE_DIR}/../data ${CMAKE_CURRENT_SOURCE_DIR}/../optimize)
 
 set_target_properties(_spatula_nb PROPERTIES
     CXX_STANDARD 17
