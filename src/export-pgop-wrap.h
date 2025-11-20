@@ -38,7 +38,8 @@ py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
 
     // Convert std::vector<double> to py::array_t<double>
     py::array_t<double> result_ops_py;
-    result_ops_py.resize(std::vector<ssize_t>{static_cast<ssize_t>(N_particles), static_cast<ssize_t>(ops_per_particle)});
+    result_ops_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
+                                               static_cast<ssize_t>(ops_per_particle)});
     std::copy(op_values.begin(), op_values.end(), result_ops_py.mutable_data());
 
     // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops, 4)
@@ -52,8 +53,12 @@ py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
     }
 
     py::array_t<double> result_rots_py;
-    result_rots_py.resize(std::vector<ssize_t>{static_cast<ssize_t>(N_particles), static_cast<ssize_t>(ops_per_particle), 4});
-    std::copy(flat_rotation_components.begin(), flat_rotation_components.end(), result_rots_py.mutable_data());
+    result_rots_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
+                                                static_cast<ssize_t>(ops_per_particle),
+                                                4});
+    std::copy(flat_rotation_components.begin(),
+              flat_rotation_components.end(),
+              result_rots_py.mutable_data());
 
     return py::make_tuple(result_ops_py, result_rots_py);
 }

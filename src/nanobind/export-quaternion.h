@@ -3,14 +3,14 @@
 
 #pragma once
 
+#include "../data/Quaternion.h"
+#include <nanobind/make_iterator.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
-#include <nanobind/make_iterator.h>
+#include <nanobind/stl/pair.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
-#include <nanobind/stl/pair.h>
 #include <sstream>
-#include "../data/Quaternion.h"
 
 namespace nb = nanobind;
 
@@ -31,8 +31,11 @@ inline void export_quaternion(nb::module_& m)
         .def("norm", &Quaternion::norm)
         .def("normalize", &Quaternion::normalize)
         .def("to_rotation_matrix", &Quaternion::to_rotation_matrix)
-        .def("__mul__", [](const Quaternion &a, const Quaternion &b) { return a * b; })
-        .def("__imul__", [](Quaternion &a, const Quaternion &b) { a *= b; return a; });
+        .def("__mul__", [](const Quaternion& a, const Quaternion& b) { return a * b; })
+        .def("__imul__", [](Quaternion& a, const Quaternion& b) {
+            a *= b;
+            return a;
+        });
 }
 
 }} // namespace spatula::data

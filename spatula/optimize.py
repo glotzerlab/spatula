@@ -9,7 +9,7 @@ import numpy as np
 import scipy as sp
 from scipy.spatial.transform import Rotation
 
-from . import _spatula, _spatula_nb
+from . import _spatula_nb
 
 
 # Only here for typing/documentation purposes.

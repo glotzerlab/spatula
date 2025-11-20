@@ -14,8 +14,7 @@ QlmEval::QlmEval(unsigned int m,
                  const std::complex<double>* ylms,
                  size_t n_quad_points,
                  size_t n_lms)
-    : m_n_lms(n_lms), m_max_l(0), m_n_points(n_quad_points), m_positions(),
-      m_weighted_ylms()
+    : m_n_lms(n_lms), m_max_l(0), m_n_points(n_quad_points), m_positions(), m_weighted_ylms()
 {
     unsigned int count = 1;
     while (count != m_n_lms) {
@@ -34,7 +33,7 @@ QlmEval::QlmEval(unsigned int m,
     }
     m_positions.reserve(n_quad_points);
     for (size_t i {0}; i < n_quad_points; ++i) {
-        m_positions.emplace_back(&positions[i*3]);
+        m_positions.emplace_back(&positions[i * 3]);
     }
 }
 

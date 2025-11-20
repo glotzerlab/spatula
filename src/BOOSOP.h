@@ -12,19 +12,15 @@
 #include <pybind11/stl.h>
 
 #include "data/Quaternion.h"
+#include "locality.h" // Include locality.h for LocalNeighborhoodBOOBOO
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/QlmEval.h"
 #include "util/Util.h"
-#include "locality.h" // Include locality.h for LocalNeighborhoodBOOBOO
 
 namespace py = pybind11;
 
 namespace spatula {
-
-
-
-
 
 /**
  * @brief Store for the optimal BOOSOP values and rotations

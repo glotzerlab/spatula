@@ -6,13 +6,11 @@
 #include <string>
 
 #include "PGOP.h"
-#include "util/Threads.h"
-#include "util/Metrics.h"
 #include "locality.h"
+#include "util/Metrics.h"
+#include "util/Threads.h"
 
 namespace spatula {
-
-
 
 PGOP::PGOP(const py::list& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
@@ -57,30 +55,29 @@ PGOP::compute(const py::array_t<double> distances,
     std::vector<double> op_values(N_particles * ops_per_particle);
     std::vector<data::Quaternion> rotation_values(N_particles * ops_per_particle);
 
-    const auto loop_func
-        = [&](const size_t start_idx, const size_t stop_idx) {
-              for (size_t i = start_idx; i < stop_idx; ++i) {
-                  const size_t current_particle_offset = i * ops_per_particle;
-                  if (neighborhoods.getNeighborCount(i) == 0) {
-                      for (size_t j {0}; j < ops_per_particle; ++j) {
-                          op_values[current_particle_offset + j]
-                              = std::numeric_limits<double>::quiet_NaN();
-                          rotation_values[current_particle_offset + j] = data::Quaternion(1, 0, 0, 0);
-                      }
-                      continue;
-                  }
-                  auto neighborhood = neighborhoods.getNeighborhood(i);
-                  const auto particle_op_rot = this->compute_particle(neighborhood);
+    const auto loop_func = [&](const size_t start_idx, const size_t stop_idx) {
+        for (size_t i = start_idx; i < stop_idx; ++i) {
+            const size_t current_particle_offset = i * ops_per_particle;
+            if (neighborhoods.getNeighborCount(i) == 0) {
+                for (size_t j {0}; j < ops_per_particle; ++j) {
+                    op_values[current_particle_offset + j]
+                        = std::numeric_limits<double>::quiet_NaN();
+                    rotation_values[current_particle_offset + j] = data::Quaternion(1, 0, 0, 0);
+                }
+                continue;
+            }
+            auto neighborhood = neighborhoods.getNeighborhood(i);
+            const auto particle_op_rot = this->compute_particle(neighborhood);
 
-                  const auto& particle_ops = std::get<0>(particle_op_rot);
-                  const auto& particle_rots = std::get<1>(particle_op_rot);
+            const auto& particle_ops = std::get<0>(particle_op_rot);
+            const auto& particle_rots = std::get<1>(particle_op_rot);
 
-                  for (size_t j = 0; j < ops_per_particle; ++j) {
-                      op_values[current_particle_offset + j] = particle_ops[j];
-                      rotation_values[current_particle_offset + j] = particle_rots[j];
-                  }
-              }
-          };
+            for (size_t j = 0; j < ops_per_particle; ++j) {
+                op_values[current_particle_offset + j] = particle_ops[j];
+                rotation_values[current_particle_offset + j] = particle_rots[j];
+            }
+        }
+    };
     execute_func(loop_func, N_particles);
 
     return std::make_tuple(op_values, rotation_values);
@@ -131,8 +128,6 @@ std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighbo
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
-
-
 double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<double>& R_ij) const
 {
     const auto positions = neighborhood.rotated_positions;
@@ -157,14 +152,14 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<dou
                 double BC = 0;
                 if (m_mode == 0) {
                     BC = util::compute_Bhattacharyya_coefficient_gaussian(positions[m],
-                                                                    symmetrized_position,
-                                                                    sigmas[j],
-                                                                    sigmas[m]);
+                                                                          symmetrized_position,
+                                                                          sigmas[j],
+                                                                          sigmas[m]);
                 } else {
                     BC = util::compute_Bhattacharyya_coefficient_fisher(positions[m],
-                                                                  symmetrized_position,
-                                                                  sigmas[j],
-                                                                  sigmas[m]);
+                                                                        symmetrized_position,
+                                                                        sigmas[j],
+                                                                        sigmas[m]);
                 }
                 if (BC > max_res)
                     max_res = BC;
@@ -189,17 +184,15 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
     }
 }
 
-
-
 #include "export-pgop-wrap.h" // For wrap_pgop_compute
 
 void export_spatula(pybind11::module& m)
 {
     pybind11::class_<PGOP>(m, "PGOP")
         .def(pybind11::init<const pybind11::list&,
-                      std::shared_ptr<optimize::Optimizer>&,
-                      const unsigned int,
-                      bool>())
+                            std::shared_ptr<optimize::Optimizer>&,
+                            const unsigned int,
+                            bool>())
         .def("compute",
              &::spatula::spatula::wrap_pgop_compute,
              "Compute PGOP values and rotations for a set of points.");

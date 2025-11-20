@@ -6,9 +6,9 @@
 #include <nanobind/stl/vector.h>
 
 #include "../util/Metrics.h" // Relative path to Metrics.h
-#include "export-threads.h"
-#include "export-quaternion.h"
 #include "export-optimize.h"
+#include "export-quaternion.h"
+#include "export-threads.h"
 
 namespace nb = nanobind;
 

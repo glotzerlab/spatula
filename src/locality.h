@@ -15,9 +15,8 @@
 
 namespace spatula {
 
-class LocalNeighborhoodBOOBOO
-{
-  public:
+class LocalNeighborhoodBOOBOO {
+    public:
     LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
 
     void rotate(const data::Vec3& v);
@@ -27,9 +26,8 @@ class LocalNeighborhoodBOOBOO
     std::vector<data::Vec3> rotated_positions;
 };
 
-class NeighborhoodBOOs
-{
-  public:
+class NeighborhoodBOOs {
+    public:
     NeighborhoodBOOs(size_t N,
                      const int* neighbor_counts,
                      const double* weights,
@@ -40,7 +38,7 @@ class NeighborhoodBOOs
     std::vector<double> getWeights(size_t i) const;
     int getNeighborCount(size_t i) const;
 
-  private:
+    private:
     const size_t m_N;
     const int* m_neighbor_counts;
     const double* m_distances;
@@ -48,9 +46,8 @@ class NeighborhoodBOOs
     std::vector<size_t> m_neighbor_offsets;
 };
 
-class LocalNeighborhood
-{
-  public:
+class LocalNeighborhood {
+    public:
     LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                       std::vector<double>&& weights_,
                       std::vector<double>&& sigmas_);
@@ -63,9 +60,8 @@ class LocalNeighborhood
     std::vector<data::Vec3> rotated_positions;
 };
 
-class Neighborhoods
-{
-  public:
+class Neighborhoods {
+    public:
     Neighborhoods(size_t N,
                   const int* neighbor_counts,
                   const double* weights,
@@ -77,7 +73,7 @@ class Neighborhoods
     std::vector<double> getSigmas(size_t i) const;
     int getNeighborCount(size_t i) const;
 
-  private:
+    private:
     const size_t m_N;
     const int* m_neighbor_counts;
     const double* m_distances;
@@ -200,7 +196,5 @@ inline int Neighborhoods::getNeighborCount(size_t i) const
 {
     return m_neighbor_counts[i];
 }
-
-
 
 } // namespace spatula

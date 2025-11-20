@@ -11,20 +11,14 @@
 #include <pybind11/stl.h>
 
 #include "data/Quaternion.h"
+#include "locality.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/Util.h"
-#include "locality.h"
 
 namespace py = pybind11;
 
 namespace spatula {
-
-
-
-
-
-
 
 /**
  * @brief Central class, computes PGOP for provided points.
