@@ -67,4 +67,18 @@ py::tuple wrap_pgop_compute(const PGOP& pgop_instance,
     return py::make_tuple(result_ops_py, result_rots_py);
 }
 
+void export_spatula_class(py::module& m, const std::string& name);
+
+void export_spatula(pybind11::module& m)
+{
+    pybind11::class_<PGOP>(m, "PGOP")
+        .def(pybind11::init<const pybind11::list&,
+                            std::shared_ptr<optimize::Optimizer>&,
+                            const unsigned int,
+                            bool>())
+        .def("compute",
+             &wrap_pgop_compute,
+             "Compute PGOP values and rotations for a set of points.");
+}
+
 } // End namespace spatula

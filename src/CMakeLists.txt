@@ -1,5 +1,5 @@
 list(APPEND spatula_sources
-    "export-pgop-wrap.h"
+    "export-pgop.h"
     "export-module.cc"
     "BondOrder.h"
     "PGOP.h" "PGOP.cc"

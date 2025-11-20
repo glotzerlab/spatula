@@ -185,18 +185,8 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
     }
 }
 
-#include "export-pgop-wrap.h" // For wrap_pgop_compute
+#include "export-pgop.h" // For wrap_pgop_compute and export_spatula
 
-void export_spatula(pybind11::module& m)
-{
-    pybind11::class_<PGOP>(m, "PGOP")
-        .def(pybind11::init<const pybind11::list&,
-                            std::shared_ptr<optimize::Optimizer>&,
-                            const unsigned int,
-                            bool>())
-        .def("compute",
-             &::spatula::spatula::wrap_pgop_compute,
-             "Compute PGOP values and rotations for a set of points.");
-}
+
 
 } // End namespace spatula

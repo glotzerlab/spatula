@@ -105,7 +105,7 @@ class PGOP {
     bool m_compute_per_operator;
 };
 
-void export_spatula_class(py::module& m, const std::string& name);
 
-void export_spatula(py::module& m);
+
+
 } // End namespace spatula

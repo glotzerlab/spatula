@@ -6,7 +6,7 @@
 #include "BOOSOP.h"
 #include "PGOP.h"
 #include "data/Quaternion.h"
-#include "export-pgop-wrap.h"
+#include "export-pgop.h"
 
 PYBIND11_MODULE(_spatula, m)
 {
