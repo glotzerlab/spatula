@@ -9,10 +9,12 @@
 
 namespace spatula { namespace util {
 QlmEval::QlmEval(unsigned int m,
-                 const py::array_t<double> positions,
-                 const py::array_t<double> weights,
-                 const py::array_t<std::complex<double>> ylms)
-    : m_n_lms(ylms.shape(0)), m_max_l(0), m_n_points(ylms.shape(1)), m_positions(),
+                 const double* positions,
+                 const double* weights,
+                 const std::complex<double>* ylms,
+                 size_t n_quad_points,
+                 size_t n_lms)
+    : m_n_lms(n_lms), m_max_l(0), m_n_points(n_quad_points), m_positions(),
       m_weighted_ylms()
 {
     unsigned int count = 1;
@@ -21,21 +23,18 @@ QlmEval::QlmEval(unsigned int m,
         count += 2 * m_max_l + 1;
     }
     m_weighted_ylms.reserve(m_n_lms);
-    const auto unchecked_ylms = ylms.unchecked<2>();
-    const auto u_weights = static_cast<const double*>(weights.data());
     const double normalization = 1.0 / (4.0 * static_cast<double>(m));
     for (size_t lm {0}; lm < m_n_lms; ++lm) {
         auto ylm = std::vector<std::complex<double>>();
         ylm.reserve(m_n_points);
         for (size_t i {0}; i < m_n_points; ++i) {
-            ylm.emplace_back(normalization * u_weights[i] * unchecked_ylms(lm, i));
+            ylm.emplace_back(normalization * weights[i] * ylms[lm * m_n_points + i]);
         }
         m_weighted_ylms.emplace_back(ylm);
     }
-    const auto u_positions = positions.unchecked<2>();
-    m_positions.reserve(positions.shape(0));
-    for (size_t i {0}; i < static_cast<size_t>(positions.shape(0)); ++i) {
-        m_positions.emplace_back(u_positions.data(i, 0));
+    m_positions.reserve(n_quad_points);
+    for (size_t i {0}; i < n_quad_points; ++i) {
+        m_positions.emplace_back(&positions[i*3]);
     }
 }
 

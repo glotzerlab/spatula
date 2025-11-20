@@ -1,6 +1,7 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
+#include <cassert>
 #include <cmath>
 #include <iterator>
 #include <string>
@@ -18,6 +19,7 @@ NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
     : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
       m_neighbor_offsets()
 {
+    assert(0);
     m_neighbor_offsets.reserve(m_N + 1);
     m_neighbor_offsets.emplace_back(0);
     std::partial_sum(m_neighbor_counts,
@@ -125,7 +127,12 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
                                              const py::array_t<double> quad_positions,
                                              const py::array_t<double> quad_weights) const
 {
-    const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
+    const auto qlm_eval = util::QlmEval(m,
+                                        quad_positions.data(),
+                                        quad_weights.data(),
+                                        ylms.data(),
+                                        quad_positions.shape(0),
+                                        ylms.shape(0));
     const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
                                                 num_neighbors.data(0),
                                                 weights.data(0),
@@ -159,7 +166,12 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
                                                       const py::array_t<double> quad_positions,
                                                       const py::array_t<double> quad_weights) const
 {
-    const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
+    const auto qlm_eval = util::QlmEval(m,
+                                        quad_positions.data(),
+                                        quad_weights.data(),
+                                        ylms.data(),
+                                        quad_positions.shape(0),
+                                        ylms.shape(0));
     const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
                                                 num_neighbors.data(0),
                                                 weights.data(0),
