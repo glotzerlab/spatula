@@ -12,7 +12,7 @@ import numpy as np
 import spatula._spatula
 
 from . import freud, representations
-from .boosop import _get_neighbors  # Import BOOSOP from the new file
+from .boosop import _get_neighbors
 
 
 class PGOP:
