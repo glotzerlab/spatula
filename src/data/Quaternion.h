@@ -83,8 +83,6 @@ struct Quaternion {
         y *= inv_norm;
         z *= inv_norm;
     }
-    /// Get the recipical of the quaterion q * (-1 / ||q||^2)
-    Quaternion recipical() const;
     /// Convert quaternion to a 3x3 rotation matrix
     std::vector<double> to_rotation_matrix() const {
         // Necessary if not unit quaternion. Otherwise it is just 2 / 1 = 2.
