@@ -4,7 +4,7 @@
 #pragma once
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/memory.h>
+// #include <nanobind/stl/memory.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
@@ -21,8 +21,7 @@ namespace spatula { namespace optimize {
 
 inline void export_mesh(nb::module_& m)
 {
-    nb::class_<Mesh, Optimizer>(m, "Mesh").def(
-        nb::init<const std::vector<data::Quaternion>&>());
+    nb::class_<Mesh, Optimizer>(m, "Mesh").def(nb::init<const std::vector<data::Quaternion>&>());
 }
 
 inline void export_no_optimization(nb::module_& m)
@@ -30,7 +29,6 @@ inline void export_no_optimization(nb::module_& m)
     nb::class_<NoOptimization, Optimizer>(m, "NoOptimization")
         .def(nb::init<const data::Quaternion&>());
 }
-
 
 /**
  * @brief Trampoline class for exposing Optimizer in Python.
@@ -85,9 +83,7 @@ inline void export_random_search(nb::module_& m)
 
 inline void export_step_gradient_descent(nb::module_& m)
 {
-    nb::class_<StepGradientDescent, Optimizer>(
-        m,
-        "StepGradientDescent")
+    nb::class_<StepGradientDescent, Optimizer>(m, "StepGradientDescent")
         .def(nb::init<const data::Quaternion&, unsigned int, double, double, double>());
 }
 
@@ -122,3 +118,4 @@ inline void export_optimize(nb::module_& m)
     export_union(m);
     export_no_optimization(m);
 }
+}} // namespace spatula::optimize
