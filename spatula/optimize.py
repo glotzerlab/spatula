@@ -245,7 +245,12 @@ class Mesh(Optimizer):
 
     @classmethod
     def from_hyperdodecahedron(cls):
-        """Create a Mesh optimizer from the 600 vertices of the hyperdodecahedron."""
+        """Create a Mesh optimizer from the 600 vertices of the hyperdodecahedron.
+
+        This is the largest uniform mesh on the 3-sphere, and guarantees a solution
+        within ~15.5° of the global optimum. For larger or smaller grids, refer to
+        ``~.from_grid`` and ``~.from_lattice``.
+        """
         # Construction based on https://www.qfbox.info/4d/120-cell
         return cls(_hyperdodecahedron())
 
