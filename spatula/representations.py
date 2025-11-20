@@ -921,12 +921,15 @@ def compute_Cartesian_Representation_for_octahedral_family(  # noqa N802
 
     """
     operations = _rotation_operations_for_polyhedral_point_groups_cart("O")
+
     if modifier == "h":
         inversion_operation = inversion_cart()
         for operation in operations.copy():
             operations.append(np.dot(operation, inversion_operation))
+        print("Operations after hing", np.shape(operations))
         return operations
     elif modifier is None:
+        print("Operations no hing", np.shape(operations))
         return operations
     else:
         return None
@@ -2032,6 +2035,10 @@ class CartesianRepMatrix:
         self._matrices = (
             compute_Cartesian_Representation_matrix_for_a_given_point_group(point_group)
         )
+
+    def __repr__(self):
+        """Represent the matrices in string form."""
+        return f"{np.array(self.matrices).round(8)}\nShape: {np.shape(self.matrices)}"
 
     @property
     def point_group(self) -> str:
