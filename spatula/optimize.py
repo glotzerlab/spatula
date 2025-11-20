@@ -3,6 +3,7 @@
 
 """Classes to optimize over SO(3) for `spatula.PGOP`."""
 
+import itertools
 from importlib.resources import as_file, files
 
 import numpy as np
@@ -56,6 +57,71 @@ def _quaternion_fibonacci_lattice(n):
     result = np.empty((4, n))
     result[...] = r0 * np.sin(α), r0 * np.cos(α), r1 * np.sin(β), r1 * np.cos(β)
     return result.T
+
+
+def _quaternion_outer_product(qi, qj):
+    """Compute the outer product of two sets of quaternions."""
+    qi = np.asarray(qi)[:, None, :]
+    qj = np.asarray(qj)[None, :, :]
+
+    # Determine broadcast shape (N, M, 4)
+    output = np.empty(np.broadcast(qi, qj).shape)
+
+    # Scalar part: w1*w2 - dot(v1, v2)
+    output[..., 0] = qi[..., 0] * qj[..., 0] - np.sum(
+        qi[..., 1:] * qj[..., 1:],
+        axis=-1,
+    )
+
+    # Vector part: w1*v2 + w2*v1 + cross(v1, v2)
+    # Note: axis=-1 is default for cross; slicing preserves the last dim as 3
+    output[..., 1:] = (
+        qi[..., 0, np.newaxis] * qj[..., 1:]
+        + qj[..., 0, np.newaxis] * qi[..., 1:]
+        + np.cross(qi[..., 1:], qj[..., 1:])
+    )
+
+    # Flatten (N, M, 4) -> (N*M, 4)
+    return output.reshape(-1, 4)
+
+
+def _hyperdodecahedron():
+    """Create a Mesh optimizer from the 600 vertices of the hyperdodecahedron."""
+    # Construction based on https://www.qfbox.info/4d/120-cell
+    φ = GOLDEN_RATIO
+    base_coords = [
+        [2, 2, 0, 0],
+        [np.sqrt(5), 1, 1, 1],
+        [φ, φ, φ, φ**-2],
+        [φ**2, φ**-1, φ**-1, φ**-1],
+    ]
+
+    even_coords = [
+        [φ**2, φ**-2, 1, 0],
+        [np.sqrt(5), φ**-1, φ, 0],
+        [2, 1, φ, φ**-1],
+    ]
+
+    # Generate all vertices from base_coords
+    vertices = [
+        tuple(s * sign for s, sign in zip(perm, signs))
+        for coords in base_coords
+        for perm in itertools.permutations(coords)
+        for signs in itertools.product([-1, 1], repeat=len(perm))
+    ]
+
+    # Generate all vertices from even_coords with even permutations only
+    perms = np.array([*itertools.permutations([0, 1, 2, 3])])
+    even_perms = [p for p in perms if np.linalg.det(np.eye(4, dtype=int)[p]) > 0]
+
+    vertices += [
+        tuple(coord * sign for coord, sign in zip(np.array(coords)[list(p)], signs))
+        for coords in even_coords
+        for p in even_perms
+        for signs in itertools.product([-1, 1], repeat=len(coords))
+    ]
+
+    return np.unique(vertices, axis=0) / np.sqrt(8)
 
 
 # Only here for typing/documentation purposes.
@@ -178,8 +244,14 @@ class Mesh(Optimizer):
         self._cpp = _spatula.Mesh([_spatula.Quaternion(p) for p in points])
 
     @classmethod
+    def from_hyperdodecahedron(cls):
+        """Create a Mesh optimizer from the 600 vertices of the hyperdodecahedron."""
+        # Construction based on https://www.qfbox.info/4d/120-cell
+        return cls(_hyperdodecahedron())
+
+    @classmethod
     def from_grid(cls, n_axes=75, n_angles=10):
-        r"""Create a Mesh optimizer that tests rotations on a uniform grid.
+        r"""Create a Mesh optimizer that tests rotations on a mostly uniform grid.
 
         The axes are chosen by the numerical solutions to the Tammes problem and
         angles by equadistant rotations according to the Haar measure.

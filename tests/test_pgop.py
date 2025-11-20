@@ -1894,3 +1894,44 @@ def test_no_symmetries(symmetry, shape, vertices, optype):
         cutoff_value=cutin,
     )
     assert op.order[0] < cutin
+
+
+def test_mesh_120cell():
+    mesh = spatula.optimize._hyperdodecahedron()
+    # assert mesh.shape == (600, 4)
+    inner_product = mesh @ mesh.T
+
+    np.testing.assert_allclose(np.diag(inner_product), 1.0)
+    np.fill_diagonal(inner_product, np.nan)
+
+    # Verify our center of mass is the origin
+    np.testing.assert_allclose(np.nanmean(mesh, axis=0), 0, atol=1e-14)
+
+    # Verify our covariance matrix is balanced and diagonal. Each element is 600 / 4
+    np.testing.assert_allclose((mesh.T @ mesh), np.eye(4) * 150, atol=1e-14)
+
+    # Odd moments should be zero
+    for k in range(3, 11, 2):
+        np.testing.assert_allclose(
+            np.mean(np.pow(mesh, k), axis=0), 0, atol=1e-14, err_msg=f"k={k}\n"
+        )
+
+    # Verify antipodal distances are -1
+    np.testing.assert_allclose(np.nanmin(inner_product, axis=1), -1.0)
+    inner_product[np.isclose(inner_product, -1)] = np.nan
+
+    expected_nearest_dot_product = (1 + 3 * np.sqrt(5)) / 8.0
+
+    # Count how many times the nearest neighbor dot product occurs for a single vertex
+    coordination_counts = np.sum(
+        np.isclose(inner_product, expected_nearest_dot_product, atol=1e-14), axis=1
+    )
+    np.testing.assert_allclose(coordination_counts, 4)
+
+    # Largest dot product = smallest angular separation
+    np.testing.assert_allclose(
+        np.nanmax(inner_product, axis=1), expected_nearest_dot_product, atol=1e-14
+    )
+    np.testing.assert_allclose(
+        np.nanmin(inner_product, axis=1), -expected_nearest_dot_product, atol=1e-14
+    )
