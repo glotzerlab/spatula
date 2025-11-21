@@ -14,12 +14,14 @@ namespace spatula {
 
 PGOP::PGOP([[maybe_unused]] const std::vector<const double*> R_ij_data,
            const size_t n_symmetries,
-           [[maybe_unused]] std::shared_ptr<optimize::Optimizer>& optimizer)
+           std::shared_ptr<optimize::Optimizer>& optimizer,
+           std::vector<size_t> group_sizes)
     // const unsigned int mode,
     // bool compute_per_operator)
     // : m_n_symmetries(n_symmetries), m_Rij(), m_optimize(optimizer), m_mode(mode),
     //   m_compute_per_operator(compute_per_operator)
-    : m_n_symmetries(n_symmetries), m_Rij(R_ij_data)
+    : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_optimize(optimizer),
+      m_group_sizes(group_sizes)
 {
     // size_t current_data_offset = 0;
     // for (size_t i = 0; i < m_n_symmetries; ++i) {
