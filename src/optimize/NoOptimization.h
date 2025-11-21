@@ -1,29 +1,37 @@
 // Copyright (c) 2021-2025 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
-#include "Optimize.h"
+#pragma once
 
-#include <pybind11/pybind11.h>
+#include "../data/Quaternion.h"
+#include "../data/Vec3.h"
+#include "Optimize.h"
 
 namespace spatula { namespace optimize {
 
 class NoOptimization : public Optimizer {
     public:
-    NoOptimization(const data::Vec3& initial_point);
+    NoOptimization()
+    {
+        m_best_point.first = data::Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D();
+    }
 
-    // Implements internal_next_point but does nothing
-    void internal_next_point() override;
+    NoOptimization(const data::Vec3& initial_point)
+    {
+        m_best_point.first = initial_point;
+    }
 
-    // The terminate method will immediately terminate the optimization after one step
-    bool terminate() const override;
+    bool terminate() const override
+    {
+        return true;
+    }
 
-    // Clone function for Pybind11
-    std::unique_ptr<Optimizer> clone() const override;
+    std::unique_ptr<Optimizer> clone() const override
+    {
+        return std::make_unique<NoOptimization>(*this);
+    }
 
-    private:
-    // Flag to terminate the optimization
-    bool m_terminate;
+    void internal_next_point() override { }
 };
 
-void export_no_optimization(py::module& m);
 }} // namespace spatula::optimize

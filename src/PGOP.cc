@@ -10,139 +10,23 @@
 
 namespace spatula {
 
-Neighborhoods::Neighborhoods(size_t N,
-                             const int* neighbor_counts,
-                             const double* weights,
-                             const double* distance,
-                             const double* sigmas)
-    : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
-      m_sigmas {sigmas}, m_neighbor_offsets()
-{
-    m_neighbor_offsets.reserve(m_N + 1);
-    m_neighbor_offsets.emplace_back(0);
-    std::partial_sum(m_neighbor_counts,
-                     m_neighbor_counts + m_N,
-                     std::back_inserter(m_neighbor_offsets));
-}
-
-LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
-{
-    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-
-    // Create a vector of Vec3 to store the positions (3 coordinates for each Vec3)
-    std::vector<data::Vec3> neighborhood_positions;
-    neighborhood_positions.reserve(end - start);
-
-    for (size_t j = start; j < end; ++j) {
-        // Each Vec3 contains 3 consecutive elements from m_distances
-        neighborhood_positions.emplace_back(
-            data::Vec3 {m_distances[3 * j], m_distances[3 * j + 1], m_distances[3 * j + 2]});
-    }
-
-    return LocalNeighborhood(std::move(neighborhood_positions),
-                             std::vector(m_weights + start, m_weights + end),
-                             std::vector(m_sigmas + start, m_sigmas + end));
-}
-
-std::vector<double> Neighborhoods::getWeights(size_t i) const
-{
-    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return std::vector(m_weights + start, m_weights + end);
-}
-
-std::vector<double> Neighborhoods::getSigmas(size_t i) const
-{
-    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return std::vector(m_sigmas + start, m_sigmas + end);
-}
-
-int Neighborhoods::getNeighborCount(size_t i) const
-{
-    return m_neighbor_counts[i];
-}
-
-LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                                     std::vector<double>&& weights_,
-                                     std::vector<double>&& sigmas_)
-    : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
-{
-}
-
-void LocalNeighborhood::rotate(const data::Vec3& v)
-{
-    const auto R = util::to_rotation_matrix(v);
-    util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
-}
-
-PGOPStore::PGOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
-{
-}
-
-void PGOPStore::addOp(size_t i,
-                      const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
-{
-    const auto& values = std::get<0>(op_);
-    const auto& rots = std::get<1>(op_);
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
-    }
-}
-
-void PGOPStore::addNull(size_t i)
-{
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = std::numeric_limits<double>::quiet_NaN(); // Set NaN
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
-    }
-}
-
-py::tuple PGOPStore::getArrays()
-{
-    return py::make_tuple(op, rotations);
-}
-
-PGOP::PGOP(const py::list& R_ij,
+PGOP::PGOP(const std::vector<std::vector<double>>& R_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            const unsigned int mode,
            bool compute_per_operator)
-    : m_n_symmetries(R_ij.size()), m_Rij(), m_optimize(optimizer), m_mode(mode),
+    : m_n_symmetries(R_ij.size()), m_Rij(R_ij), m_optimize(optimizer), m_mode(mode),
       m_compute_per_operator(compute_per_operator)
 {
-    m_Rij.reserve(m_n_symmetries);
-    for (size_t i = 0; i < m_n_symmetries; ++i) {
-        py::list inner_list = R_ij[i].cast<py::list>();
-        std::vector<double> vec;
-        vec.reserve(inner_list.size());
-
-        for (size_t j = 0; j < inner_list.size(); ++j) {
-            vec.push_back(inner_list[j].cast<double>());
-        }
-
-        m_Rij.emplace_back(std::move(vec));
-    }
 }
 
-py::tuple PGOP::compute(const py::array_t<double> distances,
-                        const py::array_t<double> weights,
-                        const py::array_t<int> num_neighbors,
-                        const py::array_t<double> sigmas) const
+PGOPStore PGOP::compute(size_t N_particles,
+                        const double* distances_data,
+                        const double* weights_data,
+                        const int* num_neighbors_data,
+                        const double* sigmas_data) const
 {
-    const auto neighborhoods = Neighborhoods(num_neighbors.size(),
-                                             num_neighbors.data(0),
-                                             weights.data(0),
-                                             distances.data(0),
-                                             sigmas.data(0));
-    const size_t N_particles = num_neighbors.size();
+    const auto neighborhoods
+        = Neighborhoods(N_particles, num_neighbors_data, weights_data, distances_data, sigmas_data);
     auto total_number_of_op_to_store = m_n_symmetries;
     if (m_compute_per_operator) {
         for (const auto& R_ij : m_Rij) {
@@ -163,7 +47,7 @@ py::tuple PGOP::compute(const py::array_t<double> distances,
               }
           };
     execute_func(loop_func, N_particles);
-    return op_store.getArrays();
+    return op_store;
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
@@ -304,16 +188,6 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
         pool.push_loop(0, N, func, 2 * pool.get_thread_count());
         pool.wait_for_tasks();
     }
-}
-
-void export_spatula(py::module& m)
-{
-    py::class_<PGOP>(m, "PGOP")
-        .def(py::init<const py::list&,
-                      std::shared_ptr<optimize::Optimizer>&,
-                      const unsigned int,
-                      bool>())
-        .def("compute", &PGOP::compute);
 }
 
 } // End namespace spatula

@@ -342,7 +342,7 @@ class PGOP:
             msg = f"Mode '{mode}' is not valid (valid params: {{'full', 'boo'}})"
             raise ValueError(msg)
         self._mode = mode
-        self._cpp = spatula._spatula.PGOP(
+        self._cpp = spatula._spatula_nb.PGOP(
             matrices,
             optimizer._cpp,
             m_mode,
@@ -395,21 +395,20 @@ class PGOP:
         dist, neighbors = _get_neighbors(system, neighbors, query_points)
         if isinstance(sigmas, (float, int)):
             sigmas = np.full(
-                neighbors.num_points * neighbors.num_query_points,
+                neighbors.num_query_points,
                 sigmas,
-                dtype=np.float32,
+                dtype=np.float64,
             )
         elif isinstance(sigmas, (np.ndarray, list)):
-            if len(sigmas) != neighbors.num_points:
+            if len(sigmas) != neighbors.num_query_points:
                 raise ValueError(
                     "sigmas must be a float, a list of floats or an array of floats "
-                    "with the same length as the number of points in the system."
+                    "with the same length as the number of query points in the system."
                 )
-            sigmas = np.array(
-                [sigmas[i] for i in neighbors.point_indices], dtype=np.float32
-            )
+            sigmas = np.array(sigmas, dtype=np.float64)
         elif sigmas is None:
             distances = np.linalg.norm(dist, axis=1)
+
             # filter distances that are smaller then 0.001 of mean distance
             filter = distances > 0.001 * np.mean(distances)
             if self.mode == "full":
@@ -455,9 +454,9 @@ class PGOP:
                 # again 25% height of max fisher distribution height
                 sigma = np.log(0.25) / (np.cos(min_angular_dist * 0.5) - 1)
             sigmas = np.full(
-                neighbors.num_points * neighbors.num_query_points,
+                neighbors.num_query_points,
                 sigma,
-                dtype=np.float32,
+                dtype=np.float64,
             )
         else:
             raise ValueError(
@@ -466,7 +465,10 @@ class PGOP:
             )
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
-            dist, neighbors.weights, neighbors.neighbor_counts, sigmas
+            dist.astype(np.float64),
+            neighbors.weights.astype(np.float64),
+            neighbors.neighbor_counts.astype(np.int32),
+            sigmas.astype(np.float64),
         )
 
     @property
