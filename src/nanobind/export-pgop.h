@@ -79,7 +79,7 @@ void export_spatula(nb::module_& m)
 {
     nb::class_<PGOP>(m, "PGOP").def(
         "__init__",
-        [](nb::ndarray<double, nb::c_contig, nb::device::cpu> R_ij,
+        [](nb::ndarray<double, nb::c_contig> R_ij,
            size_t n_symmetries) { //,
                                   // std::shared_ptr<optimize::Optimizer> optimizer,
                                   // unsigned int mode,
