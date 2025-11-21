@@ -10,11 +10,6 @@
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/vector.h>
-// #include <pybind11/numpy.h>
-// #include <pybind11/pybind11.h>
-// #include <pybind11/stl.h>
-
-// namespace py = pybind11;
 namespace nb = nanobind;
 using namespace nb::literals;
 
@@ -82,11 +77,12 @@ void export_spatula(nb::module_& m)
         "__init__",
         [](PGOP* self, const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list) {
             std::vector<const double*> ptrs(R_ij_list.size());
-            // ptrs.reserve(R_ij_list.size());
             for (auto& arr : R_ij_list)
                 ptrs.push_back(arr.data());
             new (self) PGOP(ptrs, R_ij_list.size());
-        });
+        },
+        // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
+        nb::keep_alive<1, 2>());
     // nb::arg("R_ij"),
     // nb::arg("n_symmetries"),
     // nb::arg("n_symmetries"));
