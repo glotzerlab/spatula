@@ -20,8 +20,8 @@ PGOP::PGOP([[maybe_unused]] const std::vector<const double*> R_ij_data,
     // bool compute_per_operator)
     // : m_n_symmetries(n_symmetries), m_Rij(), m_optimize(optimizer), m_mode(mode),
     //   m_compute_per_operator(compute_per_operator)
-    : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_optimize(optimizer),
-      m_group_sizes(group_sizes)
+    : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(group_sizes),
+      m_optimize(optimizer)
 {
     // size_t current_data_offset = 0;
     // for (size_t i = 0; i < m_n_symmetries; ++i) {
@@ -47,9 +47,12 @@ PGOP::compute(const double* distances,
     const size_t N_particles = N_particles_in_neighbors;
     size_t ops_per_particle = m_n_symmetries;
     if (m_compute_per_operator) {
-        for (const auto& R_ij : m_Rij) {
-            ops_per_particle += R_ij.size() / 9;
+        for (const size_t group_size : m_group_sizes) {
+            ops_per_particle += group_size / 9;
         }
+        // for (const auto& R_ij : m_Rij) {
+        //     ops_per_particle += R_ij.size() / 9;
+        // }
     }
 
     std::vector<double> op_values(N_particles * ops_per_particle);
@@ -86,10 +89,14 @@ PGOP::compute(const double* distances,
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
 {
+    // Optimized PGOP value for each group
     auto spatula = std::vector<double>();
-    auto rotations = std::vector<data::Quaternion>();
     spatula.reserve(m_Rij.size());
+
+    // Store the single, optimal quaternion for each group
+    auto rotations = std::vector<data::Quaternion>();
     rotations.reserve(m_Rij.size());
+    // Loop over the point groups
     for (const auto& R_ij : m_Rij) {
         // make a copy of the neighborhood to avoid modifying the original
         auto neighborhood = neighborhood_original;
@@ -114,7 +121,7 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
 }
 
 std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighborhood,
-                                                      const std::vector<double>& R_ij) const
+                                                      const double* R_ij) const
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
@@ -128,7 +135,7 @@ std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighbo
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
-double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::vector<double>& R_ij) const
+double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const double* R_ij) const
 {
     const auto positions = neighborhood.rotated_positions;
     const auto sigmas = neighborhood.sigmas;
