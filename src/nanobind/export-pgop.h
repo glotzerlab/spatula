@@ -106,10 +106,19 @@ void export_spatula(nb::module_& m)
             // nb::arg("n_symmetries"));
             // nb::arg("optimizer"),
             nb::arg("optimizer"))
-        .def("compute", [](data::Quaternion& a, const data::Quaternion& b) {
-            a *= b;
-            return a;
-        });
+        .def(
+            "compute",
+            []( /// TODO
+                [[maybe_unused]] const nb::ndarray<double, nb::shape<-1, 3>>& distances,
+                [[maybe_unused]] const nb::ndarray<double, nb::shape<-1>>& weights,
+                [[maybe_unused]] const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
+                [[maybe_unused]] const nb::ndarray<double, nb::shape<-1>>& sigmas
+
+            ) {},
+            // nb::arg("distances"),
+            nb::arg("weights"),
+            nb::arg("neighbor_counts"),
+            nb::arg("sigmas"));
     // nb::arg("mode"),
     // nb::arg("compute_per_operator") = false);
 }
