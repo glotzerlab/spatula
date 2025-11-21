@@ -96,7 +96,7 @@ void export_spatula(nb::module_& m)
                 return v;
             }();
 
-            new (self) PGOP(ptrs, R_ij_list.size(), optimizer);
+            new (self) PGOP(ptrs, R_ij_list.size(), optimizer, lengths);
         },
         // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
         nb::keep_alive<1, 2>());

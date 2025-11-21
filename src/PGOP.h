@@ -24,7 +24,8 @@ class PGOP {
     public:
     PGOP(const std::vector<const double*> R_ij_data,
          const size_t n_symmetries,
-         std::shared_ptr<optimize::Optimizer>& optimizer);
+         std::shared_ptr<optimize::Optimizer>& optimizer,
+         const std::vector<size_t> group_sizes);
     // const unsigned int mode,
     // bool compute_per_operator);
 
@@ -91,7 +92,7 @@ class PGOP {
     /// The number of symmetries that PGOP is being computed for.
     const unsigned int m_n_symmetries;
     /// The Cartesian matrices for each point group symmetry
-    const std::vector<const double *> m_Rij;
+    const std::vector<const double*> m_Rij;
     /// The number of elements in each group // TODO: divided by 9!
     const std::vector<size_t> m_group_sizes;
     /// Optimizer to find the optimal rotation for each point and symmetry.
