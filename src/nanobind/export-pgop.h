@@ -75,7 +75,9 @@ void export_spatula(nb::module_& m)
 {
     nb::class_<PGOP>(m, "PGOP").def(
         "__init__",
-        [](PGOP* self, const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list) {
+        [](PGOP* self,
+           const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list,
+           std::shared_ptr<optimize::Optimizer>& optimizer) {
             // Save a vector of pointers to each group's data
             const std::vector<const double*> ptrs = [&]() {
                 std::vector<const double*> v;
@@ -94,7 +96,7 @@ void export_spatula(nb::module_& m)
                 return v;
             }();
 
-            new (self) PGOP(ptrs, R_ij_list.size());
+            new (self) PGOP(ptrs, R_ij_list.size(), optimizer);
         },
         // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
         nb::keep_alive<1, 2>());
