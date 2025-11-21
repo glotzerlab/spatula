@@ -80,12 +80,12 @@ void export_spatula(nb::module_& m)
 {
     nb::class_<PGOP>(m, "PGOP").def(
         "__init__",
-        [](const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list) {
+        [](PGOP* self, const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list) {
             std::vector<const double*> ptrs(R_ij_list.size());
             // ptrs.reserve(R_ij_list.size());
             for (auto& arr : R_ij_list)
                 ptrs.push_back(arr.data());
-            return PGOP(ptrs, R_ij_list.size());
+            new (self) PGOP(ptrs, R_ij_list.size());
         });
     // nb::arg("R_ij"),
     // nb::arg("n_symmetries"),
