@@ -73,38 +73,43 @@ void wrap_pgop_compute(const PGOP& pgop_instance,
 
 void export_spatula(nb::module_& m)
 {
-    nb::class_<PGOP>(m, "PGOP").def(
-        "__init__",
-        [](PGOP* self,
-           const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list,
-           std::shared_ptr<optimize::Optimizer>& optimizer) {
-            // Save a vector of pointers to each group's data
-            const std::vector<const double*> ptrs = [&]() {
-                std::vector<const double*> v;
-                v.reserve(R_ij_list.size());
-                for (const auto& arr : R_ij_list)
-                    v.push_back(arr.data());
-                return v;
-            }();
+    nb::class_<PGOP>(m, "PGOP")
+        .def(
+            "__init__",
+            [](PGOP* self,
+               const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list,
+               std::shared_ptr<optimize::Optimizer>& optimizer) {
+                // Save a vector of pointers to each group's data
+                const std::vector<const double*> ptrs = [&]() {
+                    std::vector<const double*> v;
+                    v.reserve(R_ij_list.size());
+                    for (const auto& arr : R_ij_list)
+                        v.push_back(arr.data());
+                    return v;
+                }();
 
-            // Initialize our vector of group sizes (9 * G)
-            const std::vector<size_t> group_sizes = [&]() {
-                std::vector<size_t> v;
-                v.reserve(R_ij_list.size());
-                for (const auto& arr : R_ij_list)
-                    v.push_back(arr.size());
-                return v;
-            }();
+                // Initialize our vector of group sizes (9 * G)
+                const std::vector<size_t> group_sizes = [&]() {
+                    std::vector<size_t> v;
+                    v.reserve(R_ij_list.size());
+                    for (const auto& arr : R_ij_list)
+                        v.push_back(arr.size());
+                    return v;
+                }();
 
-            new (self) PGOP(ptrs, R_ij_list.size(), optimizer, group_sizes);
-        },
-        // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
-        nb::keep_alive<1, 2>(),
-        nb::arg("R_ij"),
-        // nb::arg("n_symmetries"),
-        // nb::arg("n_symmetries"));
-        // nb::arg("optimizer"),
-        nb::arg("optimizer"));
+                new (self) PGOP(ptrs, R_ij_list.size(), optimizer, group_sizes);
+            },
+            // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
+            nb::keep_alive<1, 2>(),
+            nb::arg("R_ij"),
+            // nb::arg("n_symmetries"),
+            // nb::arg("n_symmetries"));
+            // nb::arg("optimizer"),
+            nb::arg("optimizer"))
+        .def("compute", [](data::Quaternion& a, const data::Quaternion& b) {
+            a *= b;
+            return a;
+        });
     // nb::arg("mode"),
     // nb::arg("compute_per_operator") = false);
 }
