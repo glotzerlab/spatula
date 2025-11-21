@@ -12,8 +12,8 @@
 
 namespace spatula {
 
-PGOP::PGOP([[maybe_unused]] std::vector<const double*> R_ij_data,
-           [[maybe_unused]] size_t n_symmetries)
+PGOP::PGOP([[maybe_unused]] const std::vector<const double*> R_ij_data,
+           [[maybe_unused]] const size_t n_symmetries)
     // std::shared_ptr<optimize::Optimizer>& optimizer,
     // const unsigned int mode,
     // bool compute_per_operator)

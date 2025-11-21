@@ -76,9 +76,24 @@ void export_spatula(nb::module_& m)
     nb::class_<PGOP>(m, "PGOP").def(
         "__init__",
         [](PGOP* self, const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list) {
-            std::vector<const double*> ptrs(R_ij_list.size());
-            for (auto& arr : R_ij_list)
-                ptrs.push_back(arr.data());
+            // Save a vector of pointers to each group's data
+            const std::vector<const double*> ptrs = [&]() {
+                std::vector<const double*> v;
+                v.reserve(R_ij_list.size());
+                for (const auto& arr : R_ij_list)
+                    v.push_back(arr.data());
+                return v;
+            }();
+
+            // Initialize our vector of group sizes (9 * G)
+            const std::vector<size_t> lengths = [&]() {
+                std::vector<size_t> v;
+                v.reserve(R_ij_list.size());
+                for (const auto& arr : R_ij_list)
+                    v.push_back(arr.size());
+                return v;
+            }();
+
             new (self) PGOP(ptrs, R_ij_list.size());
         },
         // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
