@@ -99,11 +99,12 @@ void export_spatula(nb::module_& m)
             new (self) PGOP(ptrs, R_ij_list.size(), optimizer, group_sizes);
         },
         // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
-        nb::keep_alive<1, 2>());
-    // nb::arg("R_ij"),
-    // nb::arg("n_symmetries"),
-    // nb::arg("n_symmetries"));
-    // nb::arg("optimizer"),
+        nb::keep_alive<1, 2>(),
+        nb::arg("R_ij"),
+        // nb::arg("n_symmetries"),
+        // nb::arg("n_symmetries"));
+        // nb::arg("optimizer"),
+        nb::arg("optimizer"));
     // nb::arg("mode"),
     // nb::arg("compute_per_operator") = false);
 }
