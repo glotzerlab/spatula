@@ -5,6 +5,7 @@
 #include <memory>
 #include <tuple>
 #include <vector>
+#include <span>
 
 #include "data/Quaternion.h"
 #include "locality.h"
@@ -80,7 +81,7 @@ class PGOP {
      *
      * @returns The PGOP value.
      */
-    double compute_pgop(LocalNeighborhood& neighborhood, const double* R_ij) const;
+    double compute_pgop(LocalNeighborhood& neighborhood, const std::span<const double, 9> R_ij) const;
 
     /**
      * Helper function to better handle both single threaded and multithreaded behavior. In single

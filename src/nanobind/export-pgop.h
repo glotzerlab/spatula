@@ -88,7 +88,7 @@ void export_spatula(nb::module_& m)
             }();
 
             // Initialize our vector of group sizes (9 * G)
-            const std::vector<size_t> lengths = [&]() {
+            const std::vector<size_t> group_sizes = [&]() {
                 std::vector<size_t> v;
                 v.reserve(R_ij_list.size());
                 for (const auto& arr : R_ij_list)
@@ -96,7 +96,7 @@ void export_spatula(nb::module_& m)
                 return v;
             }();
 
-            new (self) PGOP(ptrs, R_ij_list.size(), optimizer, lengths);
+            new (self) PGOP(ptrs, R_ij_list.size(), optimizer, group_sizes);
         },
         // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
         nb::keep_alive<1, 2>());

@@ -14,7 +14,7 @@ target_include_directories(
 )
 
 set_target_properties(_spatula_nb PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CMAKE_CXX_STANDARD_REQUIRED True
 )
 if (UNIX)
