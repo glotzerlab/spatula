@@ -89,9 +89,9 @@ class PGOP {
     void execute_func(std::function<void(size_t, size_t)> func, size_t N) const;
 
     /// The number of symmetries that PGOP is being computed for.
-    unsigned int m_n_symmetries;
+    const unsigned int m_n_symmetries;
     /// The Cartesian matrices for each point group symmetry
-    std::vector<std::vector<double>> m_Rij;
+    const std::vector<const double *> m_Rij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
     /// The mode of the PGOP computation.
