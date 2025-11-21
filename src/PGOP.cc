@@ -12,10 +12,8 @@
 
 namespace spatula {
 
-PGOP::PGOP(const double* R_ij_data,
-           const size_t R_ij_size,
-           // const size_t R_ij_size,
-           size_t n_symmetries)
+PGOP::PGOP([[maybe_unused]] std::vector<const double*> R_ij_data,
+           [[maybe_unused]] size_t n_symmetries)
     // std::shared_ptr<optimize::Optimizer>& optimizer,
     // const unsigned int mode,
     // bool compute_per_operator)
@@ -24,16 +22,16 @@ PGOP::PGOP(const double* R_ij_data,
     : m_n_symmetries(n_symmetries), m_Rij()
 {
     m_Rij.reserve(m_n_symmetries);
-    size_t current_data_offset = 0;
-    for (size_t i = 0; i < m_n_symmetries; ++i) {
-        std::vector<double> vec;
-        vec.reserve(R_ij_size);
-        for (size_t j = 0; j < R_ij_size; ++j) {
-            vec.push_back(R_ij_data[current_data_offset + j]);
-        }
-        m_Rij.emplace_back(std::move(vec));
-        current_data_offset += R_ij_size;
-    }
+    // size_t current_data_offset = 0;
+    // for (size_t i = 0; i < m_n_symmetries; ++i) {
+    //     std::vector<double> vec;
+    //     vec.reserve(R_ij_size);
+    //     for (size_t j = 0; j < R_ij_size; ++j) {
+    //         vec.push_back(R_ij_data[current_data_offset + j]);
+    //     }
+    //     m_Rij.emplace_back(std::move(vec));
+    //     current_data_offset += R_ij_size;
+    // }
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>

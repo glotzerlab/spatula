@@ -22,7 +22,7 @@ namespace spatula {
  */
 class PGOP {
     public:
-    PGOP(const double* R_ij_data, const size_t R_ij_size, size_t n_symmetries);
+    PGOP(std::vector<const double*> R_ij_data, size_t n_symmetries);
     // std::shared_ptr<optimize::Optimizer>& optimizer,
     // const unsigned int mode,
     // bool compute_per_operator);

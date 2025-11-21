@@ -9,6 +9,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/vector.h>
 // #include <pybind11/numpy.h>
 // #include <pybind11/pybind11.h>
 // #include <pybind11/stl.h>
@@ -79,21 +80,12 @@ void export_spatula(nb::module_& m)
 {
     nb::class_<PGOP>(m, "PGOP").def(
         "__init__",
-        [](nb::ndarray<double, nb::c_contig> R_ij,
-           size_t n_symmetries) { //,
-                                  // std::shared_ptr<optimize::Optimizer> optimizer,
-                                  // unsigned int mode,
-                                  // bool compute_per_operator) {
-            // Check dimensions if PGOP expects a specific rank, e.g., 2D
-            // if (R_ij.ndim() != 2) throw std::runtime_error("R_ij must be 2-dimensional");
-
-            return PGOP(R_ij.data(), // const double* R_ij_data
-                        R_ij.size(), // const size_t R_ij_sizes
-                        n_symmetries);
-            // n_symmetries,
-            // optimizer,
-            // mode,
-            // compute_per_operator);
+        [](const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list) {
+            std::vector<const double*> ptrs(R_ij_list.size());
+            // ptrs.reserve(R_ij_list.size());
+            for (auto& arr : R_ij_list)
+                ptrs.push_back(arr.data());
+            return PGOP(ptrs, R_ij_list.size());
         });
     // nb::arg("R_ij"),
     // nb::arg("n_symmetries"),
