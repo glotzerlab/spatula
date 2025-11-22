@@ -90,7 +90,7 @@ class PGOP:
             matrices,
             optimizer._cpp,
             m_mode,
-            # compute_per_operator_values_for_final_orientation,
+            compute_per_operator_values_for_final_orientation,
         )
         self._order = None
         self._rotations = None

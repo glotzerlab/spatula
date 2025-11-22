@@ -27,8 +27,8 @@ class PGOP {
          const size_t n_symmetries,
          std::shared_ptr<optimize::Optimizer>& optimizer,
          const std::vector<size_t> group_sizes,
-         unsigned int mode);
-    // bool compute_per_operator);
+         unsigned int mode,
+         bool compute_per_operator);
 
     /**
      * @brief Root function for computing PGOP for a set of points.

@@ -33,7 +33,8 @@ void export_spatula(nb::module_& m)
             [](PGOP* self,
                const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list,
                std::shared_ptr<optimize::Optimizer>& optimizer,
-               unsigned int m_mode) {
+               unsigned int m_mode,
+               bool compute_per_operator) {
                 // Save a vector of pointers to each group's data
                 const std::vector<const double*> ptrs = [&]() {
                     std::vector<const double*> v;
@@ -52,7 +53,12 @@ void export_spatula(nb::module_& m)
                     return v;
                 }();
 
-                new (self) PGOP(ptrs, R_ij_list.size(), optimizer, group_sizes, m_mode);
+                new (self) PGOP(ptrs,
+                                R_ij_list.size(),
+                                optimizer,
+                                group_sizes,
+                                m_mode,
+                                compute_per_operator);
             },
             // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
             nb::keep_alive<1, 2>(),
@@ -60,7 +66,9 @@ void export_spatula(nb::module_& m)
             // nb::arg("n_symmetries"),
             // nb::arg("n_symmetries"));
             // nb::arg("optimizer"),
-            nb::arg("optimizer"),nb::arg("m_mode"))
+            nb::arg("optimizer"),
+            nb::arg("m_mode"),
+            nb::arg("compute_per_operator"))
         .def(
             "compute",
             []( /// TODO
