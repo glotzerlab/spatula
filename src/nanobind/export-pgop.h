@@ -115,7 +115,20 @@ void export_spatula(nb::module_& m)
                 [[maybe_unused]] const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
                 [[maybe_unused]] const nb::ndarray<double, nb::shape<-1>>& sigmas
 
-            ) {},
+            ) {
+                auto results_tuple = self->compute(distances.data(),
+                                                   weights.data(),
+                                                   num_neighbors.data(),
+                                                   sigmas.data(),
+                                                   num_neighbors.size());
+                // Extract the std::vectors from the tuple
+                const auto& [op_values, rotation_values] = results_tuple;
+                // const auto& op_values = std::get<0>(results_tuple);
+                // const auto& rotation_values = std::get<1>(results_tuple);
+                // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops,
+                // 4)
+                return nb::make_tuple(op_values, rotation_values);
+            },
             nb::arg("distances"),
             nb::arg("weights"),
             nb::arg("neighbor_counts"),
