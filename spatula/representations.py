@@ -926,10 +926,8 @@ def compute_Cartesian_Representation_for_octahedral_family(  # noqa N802
         inversion_operation = inversion_cart()
         for operation in operations.copy():
             operations.append(np.dot(operation, inversion_operation))
-        print("Operations after hing", np.shape(operations))
         return operations
     elif modifier is None:
-        print("Operations no hing", np.shape(operations))
         return operations
     else:
         return None

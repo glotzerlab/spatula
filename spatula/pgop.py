@@ -86,7 +86,6 @@ class PGOP:
             msg = f"Mode '{mode}' is not valid (valid params: {{'full', 'boo'}})"
             raise ValueError(msg)
         self._mode = mode
-        print(type(matrices), np.array(matrices).shape)
         self._cpp = spatula._spatula_nb.PGOP(
             matrices,
             optimizer._cpp,
