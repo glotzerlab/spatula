@@ -21,16 +21,6 @@ PGOP::PGOP(const std::vector<const double*> R_ij_data,
     : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(group_sizes),
       m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
 {
-    // size_t current_data_offset = 0;
-    // for (size_t i = 0; i < m_n_symmetries; ++i) {
-    //     std::vector<double> vec;
-    //     vec.reserve(R_ij_size);
-    //     for (size_t j = 0; j < R_ij_size; ++j) {
-    //         vec.push_back(R_ij_data[current_data_offset + j]);
-    //     }
-    //     m_Rij.emplace_back(std::move(vec));
-    //     current_data_offset += R_ij_size;
-    // }
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
@@ -48,9 +38,6 @@ PGOP::compute(const double* distances,
         for (const size_t group_size : m_group_sizes) {
             ops_per_particle += group_size / 9;
         }
-        // for (const auto& R_ij : m_Rij) {
-        //     ops_per_particle += R_ij.size() / 9;
-        // }
     }
 
     std::vector<double> op_values(N_particles * ops_per_particle);

@@ -63,9 +63,6 @@ void export_spatula(nb::module_& m)
             // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
             nb::keep_alive<1, 2>(),
             nb::arg("R_ij"),
-            // nb::arg("n_symmetries"),
-            // nb::arg("n_symmetries"));
-            // nb::arg("optimizer"),
             nb::arg("optimizer"),
             nb::arg("m_mode"),
             nb::arg("compute_per_operator"))
