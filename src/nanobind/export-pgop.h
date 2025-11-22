@@ -22,8 +22,8 @@ static_assert(std::is_standard_layout_v<spatula::data::Quaternion>,
 static_assert(sizeof(spatula::data::Quaternion) == 4 * sizeof(double),
               "Quaternion struct has unexpected padding!");
 
-    // return nb::make_tuple(result_ops_py, result_rots_py);
-} // namespace spatula
+using QuaternionArrayXd = nb::ndarray<double, nb::numpy, nb::shape<-1, 4>>;
+using NBArrayXd = nb::ndarray<double, nb::numpy, nb::shape<-1>>;
 
 void export_spatula(nb::module_& m)
 {
@@ -63,11 +63,11 @@ void export_spatula(nb::module_& m)
         .def(
             "compute",
             []( /// TODO
-                [[maybe_unused]] PGOP* self,
-                [[maybe_unused]] const nb::ndarray<double, nb::shape<-1, 3>>& distances,
-                [[maybe_unused]] const nb::ndarray<double, nb::shape<-1>>& weights,
-                [[maybe_unused]] const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
-                [[maybe_unused]] const nb::ndarray<double, nb::shape<-1>>& sigmas
+                PGOP* self,
+                const nb::ndarray<double, nb::shape<-1, 3>>& distances,
+                const nb::ndarray<double, nb::shape<-1>>& weights,
+                const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
+                const nb::ndarray<double, nb::shape<-1>>& sigmas
 
             ) {
                 auto results_tuple = self->compute(distances.data(),
@@ -81,7 +81,20 @@ void export_spatula(nb::module_& m)
                 // const auto& rotation_values = std::get<1>(results_tuple);
                 // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops,
                 // 4)
-                return nb::make_tuple(op_values, rotation_values);
+                // size_t return_quats_shape[2] = {rotation_values.size(), 4};
+                static_assert(alignof(decltype(rotation_values[0])) == alignof(double), "...");
+                // SAFETY: We validate the alignment, size, and layout of quaternions
+                double* raw_quaternions = reinterpret_cast<double*>(
+                    const_cast<spatula::data::Quaternion*>(rotation_values.data()));
+                return nb::make_tuple( // NBArrayXd(op_values.data()).cast(),
+                    NBArrayXd(const_cast<double*>(op_values.data()),
+                              1,
+                              std::array<size_t, 1> {op_values.size()}.data()),
+                    QuaternionArrayXd(raw_quaternions,
+                                      2,
+                                      std::array<size_t, 2> {rotation_values.size(), 4}.data()
+                                      // owner    TODO: segfault?
+                                      ));
             },
             nb::arg("distances"),
             nb::arg("weights"),
