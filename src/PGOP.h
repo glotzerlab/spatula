@@ -26,8 +26,8 @@ class PGOP {
     PGOP(const std::vector<const double*> R_ij_data,
          const size_t n_symmetries,
          std::shared_ptr<optimize::Optimizer>& optimizer,
-         const std::vector<size_t> group_sizes);
-    // const unsigned int mode,
+         const std::vector<size_t> group_sizes,
+         unsigned int mode);
     // bool compute_per_operator);
 
     /**

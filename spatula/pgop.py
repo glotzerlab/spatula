@@ -89,7 +89,7 @@ class PGOP:
         self._cpp = spatula._spatula_nb.PGOP(
             matrices,
             optimizer._cpp,
-            # m_mode,
+            m_mode,
             # compute_per_operator_values_for_final_orientation,
         )
         self._order = None
