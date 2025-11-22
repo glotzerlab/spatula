@@ -25,3 +25,4 @@ dependencies:
   - sphinxcontrib-qthelp==1.0.7
   - sphinxcontrib-serializinghtml==1.1.10
   - nbsphinx==0.9.6
+  - nanobind==2.9.2
