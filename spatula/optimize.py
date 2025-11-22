@@ -320,4 +320,4 @@ class NoOptimization(Optimizer):
 
     def __init__(self):
         """Create a NoOptimization object."""
-        self._cpp = _spatula_nb.NoOptimization(_spatula_nb.Quaternion(1, 0, 0, 0))
+        self._cpp = _spatula_nb.NoOptimization()

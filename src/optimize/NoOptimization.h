@@ -8,10 +8,10 @@ namespace spatula { namespace optimize {
 
 class NoOptimization : public Optimizer {
     public:
-    NoOptimization(const data::Quaternion& initial_point) : Optimizer()
+    NoOptimization() : Optimizer()
     {
         // Set the initial point
-        m_point = initial_point.to_axis_angle_3D();
+        m_point = data::Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D();
         m_terminate = false; // Start off not terminated
     }
 
