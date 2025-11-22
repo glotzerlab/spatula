@@ -15,58 +15,12 @@ using namespace nb::literals;
 
 namespace spatula {
 
-/**
- * @brief Wrapper function to call PGOP::compute and convert its std::tuple output to nb::tuple.
- * This function is used for exposing the compute method to Python.
- */
-// nb::tuple wrap_pgop_compute(const PGOP& pgop_instance,
-void wrap_pgop_compute(const PGOP& pgop_instance,
-                       const nb::ndarray<double, nb::shape<-1, 3>>& distances,
-                       const nb::ndarray<double, nb::shape<-1>>& weights,
-                       const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
-                       const nb::ndarray<double, nb::shape<-1>>& sigmas)
-{
-    // Call the C++ compute method
-    auto results_tuple = pgop_instance.compute(distances.data(),
-                                               weights.data(),
-                                               num_neighbors.data(),
-                                               sigmas.data(),
-                                               num_neighbors.size());
-
-    // Extract the std::vectors from the tuple
-    [[maybe_unused]] const auto& op_values = std::get<0>(results_tuple);
-    [[maybe_unused]] const auto& rotation_values = std::get<1>(results_tuple);
-
-    // Determine sizes for py::array_t
-    // N_particles can be inferred from num_neighbors.size()
-    // const size_t N_particles = num_neighbors.size();
-    // ops_per_particle can be inferred from op_values.size() / N_particles
-    // const size_t ops_per_particle = op_values.empty() ? 0 : op_values.size() / N_particles;
-
-    // Convert std::vector<double> to py::array_t<double>
-    // py::array_t<double> result_ops_py;
-    // result_ops_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
-    // static_cast<ssize_t>(ops_per_particle)});
-    // std::copy(op_values.begin(), op_values.end(), result_ops_py.mutable_data());
-
-    // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops, 4)
-    std::vector<double> flat_rotation_components;
-    flat_rotation_components.reserve(rotation_values.size() * 4);
-    for (const auto& q : rotation_values) {
-        flat_rotation_components.push_back(q.w);
-        flat_rotation_components.push_back(q.x);
-        flat_rotation_components.push_back(q.y);
-        flat_rotation_components.push_back(q.z);
-    }
-
-    // TODO: WIP: how to port with 0 copy?
-    // py::array_t<double> result_rots_py;
-    // result_rots_py.resize(std::vector<ssize_t> {static_cast<ssize_t>(N_particles),
-    // static_cast<ssize_t>(ops_per_particle), 4
-    // });
-    // std::copy(flat_rotation_components.begin(),
-    // flat_rotation_components.end(),
-    // result_rots_py.mutable_data());
+// We reinterpret_cast an array of quaternions to pass to numpy without copying.
+// These are a few sanity checks to make sure this is safe.
+static_assert(std::is_standard_layout_v<spatula::data::Quaternion>,
+              "Quaternion is not standard layout!");
+static_assert(sizeof(spatula::data::Quaternion) == 4 * sizeof(double),
+              "Quaternion struct has unexpected padding!");
 
     // return nb::make_tuple(result_ops_py, result_rots_py);
 } // namespace spatula
