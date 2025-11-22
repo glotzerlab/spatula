@@ -23,7 +23,7 @@ static_assert(sizeof(spatula::data::Quaternion) == 4 * sizeof(double),
               "Quaternion struct has unexpected padding!");
 
 using QuaternionArrayXd = nb::ndarray<double, nb::numpy, nb::shape<-1, 4>>;
-using NBArrayXd = nb::ndarray<double, nb::numpy, nb::shape<-1>>;
+using NBArrayXXd = nb::ndarray<double, nb::numpy, nb::shape<-1, -1>>;
 
 void export_spatula(nb::module_& m)
 {
@@ -77,24 +77,7 @@ void export_spatula(nb::module_& m)
                                                    num_neighbors.size());
                 // Extract the std::vectors from the tuple
                 const auto& [op_values, rotation_values] = results_tuple;
-                // const auto& op_values = std::get<0>(results_tuple);
-                // const auto& rotation_values = std::get<1>(results_tuple);
-                // Convert std::vector<data::Quaternion> to py::array_t<double> with shape (N, ops,
-                // 4)
-                // size_t return_quats_shape[2] = {rotation_values.size(), 4};
-                static_assert(alignof(decltype(rotation_values[0])) == alignof(double), "...");
-                // SAFETY: We validate the alignment, size, and layout of quaternions
-                double* raw_quaternions = reinterpret_cast<double*>(
-                    const_cast<spatula::data::Quaternion*>(rotation_values.data()));
-                return nb::make_tuple( // NBArrayXd(op_values.data()).cast(),
-                    NBArrayXd(const_cast<double*>(op_values.data()),
-                              1,
-                              std::array<size_t, 1> {op_values.size()}.data()),
-                    QuaternionArrayXd(raw_quaternions,
-                                      2,
-                                      std::array<size_t, 2> {rotation_values.size(), 4}.data()
-                                      // owner    TODO: segfault?
-                                      ));
+                return nb::make_tuple(op_values, rotation_values);
             },
             nb::arg("distances"),
             nb::arg("weights"),

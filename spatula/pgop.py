@@ -216,6 +216,8 @@ class PGOP:
             neighbors.neighbor_counts.astype(np.int32),
             sigmas.astype(np.float64),
         )
+        self._order = np.asarray(self._order).reshape(-1, len(self.symmetries))
+        self._rotations = np.asarray(self._rotations)
 
     @property
     def order(self) -> np.ndarray:

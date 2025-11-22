@@ -12,7 +12,7 @@
 
 namespace spatula {
 
-PGOP::PGOP([[maybe_unused]] const std::vector<const double*> R_ij_data,
+PGOP::PGOP(const std::vector<const double*> R_ij_data,
            const size_t n_symmetries,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            std::vector<size_t> group_sizes)
