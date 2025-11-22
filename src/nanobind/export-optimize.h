@@ -4,6 +4,7 @@
 #pragma once
 
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/tuple.h>
@@ -28,7 +29,12 @@ void export_optimize(nb::module_& m)
         .def_prop_ro("terminate", &Optimizer::terminate)
         .def_prop_ro("count", &Optimizer::getCount);
 
-    nb::class_<Mesh, Optimizer>(m, "Mesh").def(nb::init<const std::vector<data::Quaternion>&>());
+    nb::class_<Mesh, Optimizer>(m, "Mesh").def(
+        "__init__",
+        [](Mesh* self,
+           nb::ndarray<double, nb::shape<-1, 4>, nb::c_contig, nb::device::cpu> points) {
+            new (self) Mesh(points.data(), points.shape(0));
+        });
 
     nb::class_<RandomSearch, Optimizer>(m, "RandomSearch")
         .def(nb::init<unsigned int, unsigned int>(), "max_iter"_a, "seed"_a)
@@ -36,25 +42,29 @@ void export_optimize(nb::module_& m)
         .def_prop_rw("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
 
     nb::class_<StepGradientDescent, Optimizer>(m, "StepGradientDescent")
-        .def("__init__", [](StepGradientDescent* self, nb::tuple initial_point,
-                           unsigned int max_iter,
-                           double initial_jump,
-                           double learning_rate,
-                           double tol) {
-        if (initial_point.size() != 4) {
-            throw std::invalid_argument("initial_point must be a tuple of 4 floats (w, x, y, z)");
-        }
-        const data::Quaternion q(nb::cast<double>(initial_point[0]),
-                                 nb::cast<double>(initial_point[1]),
-                                 nb::cast<double>(initial_point[2]),
-                                 nb::cast<double>(initial_point[3]));
-        new (self) StepGradientDescent(q, max_iter, initial_jump, learning_rate, tol);
-             },
-             "initial_point"_a,
-             "max_iter"_a,
-             "initial_jump"_a,
-             "learning_rate"_a,
-             "tol"_a);
+        .def(
+            "__init__",
+            [](StepGradientDescent* self,
+               nb::tuple initial_point,
+               unsigned int max_iter,
+               double initial_jump,
+               double learning_rate,
+               double tol) {
+                if (initial_point.size() != 4) {
+                    throw std::invalid_argument(
+                        "initial_point must be a tuple of 4 floats (w, x, y, z)");
+                }
+                const data::Quaternion q(nb::cast<double>(initial_point[0]),
+                                         nb::cast<double>(initial_point[1]),
+                                         nb::cast<double>(initial_point[2]),
+                                         nb::cast<double>(initial_point[3]));
+                new (self) StepGradientDescent(q, max_iter, initial_jump, learning_rate, tol);
+            },
+            "initial_point"_a,
+            "max_iter"_a,
+            "initial_jump"_a,
+            "learning_rate"_a,
+            "tol"_a);
 
     nb::class_<Union, Optimizer>(m, "Union")
         .def_static(

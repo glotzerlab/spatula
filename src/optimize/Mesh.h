@@ -30,13 +30,17 @@ class Mesh : public Optimizer {
      *
      * @param points The points to test. Expected sizes are \f$ (N_{brute}, N_{dim} \f$.
      */
-    Mesh(const std::vector<data::Quaternion>& points) : Optimizer(), m_points()
+    Mesh(const double* points, size_t n_points) : Optimizer(), m_points()
     {
-        m_points.reserve(points.size());
-        std::transform(points.cbegin(),
-                       points.cend(),
-                       std::back_inserter(m_points),
-                       [](const auto& q) { return q.to_axis_angle_3D(); });
+        m_points.reserve(n_points);
+        for (size_t i = 0; i < n_points; ++i)
+        {
+            const data::Quaternion q(points[i * 4 + 0],
+                                     points[i * 4 + 1],
+                                     points[i * 4 + 2],
+                                     points[i * 4 + 3]);
+            m_points.push_back(q.to_axis_angle_3D());
+        }
     }
 
     ~Mesh() override = default;
