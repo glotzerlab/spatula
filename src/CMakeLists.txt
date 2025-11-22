@@ -1,27 +1,27 @@
 list(APPEND spatula_sources
     "export-module.cc"
-    "BondOrder.h" "BondOrder.cc"
+    "BondOrder.h"
     "PGOP.h" "PGOP.cc"
     "BOOSOP.h" "BOOSOP.cc"
-    "data/Vec3.h" "data/Vec3.cc"
-    "data/Quaternion.h" "data/Quaternion.cc"
-    "optimize/Optimize.h" "optimize/Optimize.cc"
-    "optimize/RandomSearch.h" "optimize/RandomSearch.cc"
-    "optimize/StepGradientDescent.h" "optimize/StepGradientDescent.cc"
-    "optimize/NoOptimization.h" "optimize/NoOptimization.cc"
-    "optimize/Mesh.h" "optimize/Mesh.cc"
-    "optimize/Union.h" "optimize/Union.cc"
-    "optimize/export_optimize.h" "optimize/export_optimize.cc"
-    "util/Metrics.h" "util/Metrics.cc"
-    "util/Util.h" "util/Util.cc"
+    "locality.h"
+    "data/Vec3.h"
+    "data/Quaternion.h"
+    "optimize/Optimize.h"
+    "optimize/RandomSearch.h"
+    "optimize/StepGradientDescent.h"
+    "optimize/NoOptimization.h"
+    "optimize/Mesh.h"
+    "optimize/Union.h"
+
+    "util/Metrics.h"
+    "util/Util.h"
     "util/QlmEval.h" "util/QlmEval.cc"
-    "util/Threads.h" "util/Threads.cc"
 )
 
 pybind11_add_module(_spatula ${spatula_sources})
 
 set_target_properties(_spatula PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CMAKE_CXX_STANDARD_REQUIRED True
     THREADS_PREFER_PTHREAD_FLAG ON
 )

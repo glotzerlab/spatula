@@ -7,60 +7,10 @@
 
 #include "BOOSOP.h"
 #include "BondOrder.h"
+#include "locality.h"
 #include "util/Threads.h"
 
 namespace spatula {
-
-NeighborhoodBOOs::NeighborhoodBOOs(size_t N,
-                                   const int* neighbor_counts,
-                                   const double* weights,
-                                   const double* distance)
-    : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
-      m_neighbor_offsets()
-{
-    m_neighbor_offsets.reserve(m_N + 1);
-    m_neighbor_offsets.emplace_back(0);
-    std::partial_sum(m_neighbor_counts,
-                     m_neighbor_counts + m_N,
-                     std::back_inserter(m_neighbor_offsets));
-}
-
-LocalNeighborhoodBOOBOO NeighborhoodBOOs::getNeighborhoodBOO(size_t i) const
-{
-    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return LocalNeighborhoodBOOBOO(
-        util::normalize_distances(m_distances, std::make_pair(3 * start, 3 * end)),
-        std::vector(m_weights + start, m_weights + end));
-}
-
-std::vector<data::Vec3> NeighborhoodBOOs::getNormalizedDistances(size_t i) const
-{
-    const size_t start {3 * m_neighbor_offsets[i]}, end {3 * m_neighbor_offsets[i + 1]};
-    return util::normalize_distances(m_distances, std::make_pair(start, end));
-}
-
-std::vector<double> NeighborhoodBOOs::getWeights(size_t i) const
-{
-    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return std::vector(m_weights + start, m_weights + end);
-}
-
-int NeighborhoodBOOs::getNeighborCount(size_t i) const
-{
-    return m_neighbor_counts[i];
-}
-
-LocalNeighborhoodBOOBOO::LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_,
-                                                 std::vector<double>&& weights_)
-    : positions(positions_), weights(weights_), rotated_positions(positions)
-{
-}
-
-void LocalNeighborhoodBOOBOO::rotate(const data::Vec3& v)
-{
-    const auto R = util::to_rotation_matrix(v);
-    util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
-}
 
 BOOSOPStore::BOOSOPStore(size_t N_particles, size_t N_symmetries)
     : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
@@ -125,7 +75,12 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
                                              const py::array_t<double> quad_positions,
                                              const py::array_t<double> quad_weights) const
 {
-    const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
+    const auto qlm_eval = util::QlmEval(m,
+                                        quad_positions.data(),
+                                        quad_weights.data(),
+                                        ylms.data(),
+                                        quad_positions.shape(0),
+                                        ylms.shape(0));
     const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
                                                 num_neighbors.data(0),
                                                 weights.data(0),
@@ -159,7 +114,12 @@ py::array_t<double> BOOSOP<distribution_type>::refine(const py::array_t<double> 
                                                       const py::array_t<double> quad_positions,
                                                       const py::array_t<double> quad_weights) const
 {
-    const auto qlm_eval = util::QlmEval(m, quad_positions, quad_weights, ylms);
+    const auto qlm_eval = util::QlmEval(m,
+                                        quad_positions.data(),
+                                        quad_weights.data(),
+                                        ylms.data(),
+                                        quad_positions.shape(0),
+                                        ylms.shape(0));
     const auto neighborhoods = NeighborhoodBOOs(num_neighbors.size(),
                                                 num_neighbors.data(0),
                                                 weights.data(0),
@@ -264,6 +224,10 @@ void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)>
 
 template class BOOSOP<UniformDistribution>;
 template class BOOSOP<FisherDistribution>;
+
+// Explicit template instantiations for BondOrder
+template class BondOrder<UniformDistribution>;
+template class BondOrder<FisherDistribution>;
 
 template<typename distribution_type>
 void export_BOOSOP_class(py::module& m, const std::string& name)
