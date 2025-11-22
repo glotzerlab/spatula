@@ -109,7 +109,7 @@ void export_spatula(nb::module_& m)
         .def(
             "compute",
             []( /// TODO
-                // PGOP* self,
+                [[maybe_unused]] PGOP* self,
                 [[maybe_unused]] const nb::ndarray<double, nb::shape<-1, 3>>& distances,
                 [[maybe_unused]] const nb::ndarray<double, nb::shape<-1>>& weights,
                 [[maybe_unused]] const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
@@ -119,7 +119,6 @@ void export_spatula(nb::module_& m)
             nb::arg("distances"),
             nb::arg("weights"),
             nb::arg("neighbor_counts"),
-            // nb::arg("neighbor_counts"));
             nb::arg("sigmas"));
     // nb::arg("mode"),
     // nb::arg("compute_per_operator") = false);

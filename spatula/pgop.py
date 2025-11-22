@@ -212,9 +212,10 @@ class PGOP:
         print(dist.shape)
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
-            dist,
-            neighbors.weights,
-            neighbors.neighbor_counts.astype(np.int32),  # , sigmas
+            dist.astype(np.float64),
+            neighbors.weights.astype(np.float64),
+            neighbors.neighbor_counts.astype(np.int32),
+            sigmas.astype(np.float64),
         )
 
     @property
