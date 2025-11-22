@@ -6,6 +6,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
 #include <nanobind/stl/unique_ptr.h>
 #include <nanobind/stl/vector.h>
 
@@ -35,7 +36,20 @@ void export_optimize(nb::module_& m)
         .def_prop_rw("seed", &RandomSearch::getSeed, &RandomSearch::setSeed);
 
     nb::class_<StepGradientDescent, Optimizer>(m, "StepGradientDescent")
-        .def(nb::init<const data::Quaternion&, unsigned int, double, double, double>(),
+        .def("__init__", [](StepGradientDescent* self, nb::tuple initial_point,
+                           unsigned int max_iter,
+                           double initial_jump,
+                           double learning_rate,
+                           double tol) {
+        if (initial_point.size() != 4) {
+            throw std::invalid_argument("initial_point must be a tuple of 4 floats (w, x, y, z)");
+        }
+        const data::Quaternion q(nb::cast<double>(initial_point[0]),
+                                 nb::cast<double>(initial_point[1]),
+                                 nb::cast<double>(initial_point[2]),
+                                 nb::cast<double>(initial_point[3]));
+        new (self) StepGradientDescent(q, max_iter, initial_jump, learning_rate, tol);
+             },
              "initial_point"_a,
              "max_iter"_a,
              "initial_jump"_a,
