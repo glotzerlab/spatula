@@ -6,6 +6,5 @@ freud-analysis
 nanobind
 numpy
 pytest
-pytest-rerunfailures
 scikit-build-core
 scipy
