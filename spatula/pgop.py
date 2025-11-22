@@ -64,7 +64,6 @@ class PGOP:
             the representations.matrices, order for second point group symmetry, etc.
 
         """
-        print(symmetries)
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
         self._symmetries = symmetries
@@ -208,7 +207,6 @@ class PGOP:
                 "sigmas must be a float, a list of floats or an array of floats "
                 "with the same length as the number of points in the system."
             )
-        print(dist.shape)
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
             dist.astype(np.float64),
@@ -217,7 +215,7 @@ class PGOP:
             sigmas.astype(np.float64),
         )
         self._order = np.asarray(self._order).reshape(-1, len(self.symmetries))
-        self._rotations = np.asarray(self._rotations)
+        self._rotations = np.asarray([[q.w, q.x, q.y, q.z] for q in self._rotations])
 
     @property
     def order(self) -> np.ndarray:
