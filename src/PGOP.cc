@@ -108,15 +108,14 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
     return std::make_tuple(std::move(spatula), std::move(rotations));
 }
 
-std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighborhood,
-                                                      const double* R_ij,
-                                                      size_t group_idx) const
+std::tuple<double, data::Vec3>
+PGOP::compute_symmetry(LocalNeighborhood& neighborhood, const double* R_ij, size_t group_idx) const
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
         neighborhood.rotate(opt->next_point());
-        const auto particle_op = compute_pgop(
-            neighborhood, std::span<const double>(R_ij, m_group_sizes[group_idx]));
+        const auto particle_op
+            = compute_pgop(neighborhood, std::span<const double>(R_ij, m_group_sizes[group_idx]));
         opt->record_objective(-particle_op);
     }
     const auto optimum = opt->get_optimum();
@@ -125,8 +124,7 @@ std::tuple<double, data::Vec3> PGOP::compute_symmetry(LocalNeighborhood& neighbo
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
-double PGOP::compute_pgop(LocalNeighborhood& neighborhood,
-                          const std::span<const double> R_ij) const
+double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::span<const double> R_ij) const
 {
     const auto positions = neighborhood.rotated_positions;
     const auto sigmas = neighborhood.sigmas;
