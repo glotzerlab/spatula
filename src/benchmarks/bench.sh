@@ -25,11 +25,16 @@ cd - > /dev/null # Go back to src/benchmarks
 # 2. Build the benchmark.
 # -----------------------
 echo "Building benchmark..."
-g++ -std=c++17 -isystem "$BENCHMARK_CLONE_DIR/include" \
+g++ -std=c++17 -isystem "$BENCHMARK_CLONE_DIR/include" -I./src \
   -L"$BENCHMARK_CLONE_DIR/build/src" -lbenchmark -lpthread \
-  src/benchmarks/Metrics.cpp -o metrics_benchmark
+  src/benchmarks/metrics.cc -o metrics_benchmark
+g++ -std=c++17 -isystem "$BENCHMARK_CLONE_DIR/include" -I./src \
+  -L"$BENCHMARK_CLONE_DIR/build/src" -lbenchmark -lpthread \
+  src/benchmarks/optimizers.cc -o optimizers_benchmark
 
 # 3. Run the benchmark.
 # ---------------------
-echo "Running benchmark..."
+echo "Running metrics benchmark..."
 ./metrics_benchmark
+echo "Running optimizers benchmark..."
+./optimizers_benchmark
