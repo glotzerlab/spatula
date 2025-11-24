@@ -6,6 +6,7 @@
 #include <span>
 #include <tuple>
 #include <vector>
+#include <functional>
 
 #include "data/Quaternion.h"
 #include "locality.h"
