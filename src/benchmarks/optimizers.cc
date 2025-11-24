@@ -9,9 +9,10 @@
 #include "../optimize/RandomSearch.h"
 
 // Objective function for the optimizers to work on.
+// This is a placeholder, so we make it fast
 static double objective_function(const spatula::data::Vec3& p)
 {
-    return sin(p.x) + cos(p.y) + sin(p.z);
+    return 0.0;
 }
 
 // Benchmark for RandomSearch optimizer
