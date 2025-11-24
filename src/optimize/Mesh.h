@@ -33,8 +33,7 @@ class Mesh : public Optimizer {
     Mesh(const double* points, size_t n_points) : Optimizer(), m_points()
     {
         m_points.reserve(n_points);
-        for (size_t i = 0; i < n_points; ++i)
-        {
+        for (size_t i = 0; i < n_points; ++i) {
             const data::Quaternion q(points[i * 4 + 0],
                                      points[i * 4 + 1],
                                      points[i * 4 + 2],
