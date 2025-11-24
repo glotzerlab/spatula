@@ -18,14 +18,12 @@ static double objective_function(const spatula::data::Vec3& p)
 static void BM_RandomSearchOptimizer(benchmark::State& state)
 {
     long unsigned int seed = 12345;
-    for (auto _ : state)
-    {
+    for (auto _ : state) {
         state.PauseTiming();
         spatula::optimize::RandomSearch optimizer(state.range(0), seed);
         state.ResumeTiming();
 
-        while (!optimizer.terminate())
-        {
+        while (!optimizer.terminate()) {
             spatula::data::Vec3 p = optimizer.next_point();
             optimizer.record_objective(objective_function(p));
         }
@@ -33,7 +31,10 @@ static void BM_RandomSearchOptimizer(benchmark::State& state)
         benchmark::DoNotOptimize(optimizer.get_optimum());
     }
 }
-BENCHMARK(BM_RandomSearchOptimizer)->RangeMultiplier(10)->Range(10, 10000);
+BENCHMARK(BM_RandomSearchOptimizer)
+    ->RangeMultiplier(10)
+    ->Range(10, 10000)
+    ->Unit(benchmark::kMicrosecond);
 
 // Benchmark for Mesh optimizer
 static void BM_MeshOptimizer(benchmark::State& state)
@@ -44,10 +45,8 @@ static void BM_MeshOptimizer(benchmark::State& state)
 
     const auto num_points = state.range(0);
     std::vector<double> points(num_points * 4);
-    for (long i = 0; i < num_points; ++i)
-    {
-        spatula::data::Quaternion q(
-            distrib(gen), distrib(gen), distrib(gen), distrib(gen));
+    for (long i = 0; i < num_points; ++i) {
+        spatula::data::Quaternion q(distrib(gen), distrib(gen), distrib(gen), distrib(gen));
         q.normalize();
         points[i * 4 + 0] = q.w;
         points[i * 4 + 1] = q.x;
@@ -55,19 +54,16 @@ static void BM_MeshOptimizer(benchmark::State& state)
         points[i * 4 + 3] = q.z;
     }
 
-    for (auto _ : state)
-    {
+    for (auto _ : state) {
         spatula::optimize::Mesh optimizer(points.data(), num_points);
 
-        while (!optimizer.terminate())
-        {
+        while (!optimizer.terminate()) {
             spatula::data::Vec3 p = optimizer.next_point();
             optimizer.record_objective(objective_function(p));
         }
-        // To prevent the loop from being optimized away
         benchmark::DoNotOptimize(optimizer.get_optimum());
     }
 }
-BENCHMARK(BM_MeshOptimizer)->RangeMultiplier(10)->Range(10, 10000);
+BENCHMARK(BM_MeshOptimizer)->RangeMultiplier(10)->Range(10, 10000)->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_MAIN();
