@@ -215,21 +215,11 @@ class PGOP:
             neighbors.neighbor_counts.astype(np.int32),
             sigmas.astype(np.float64),
         )
-        self._order = (
-            np.asarray(self._order).reshape(
-                neighbors.num_query_points,
-                -1,
-                # *(
-                #     [len(self.symmetries)]
-                #     if not self._compute_per_operator
-                #     else [-1, len(self.symmetries)]
-                # ),
-            )
-            # .squeeze(axis=1)
-        )  # .reshape(-1, len(self.symmetries))
-        # if self._order.shape[1] == 1:
-        #     self._order = self._order.squeeze(axis=1)
-        self._rotations = np.asarray(self._rotations)
+        # We receive the data from c++ as flat lists -- make arrays and unpack.
+        self._order = np.asarray(self._order).reshape(neighbors.num_query_points, -1)
+        self._rotations = np.asarray(self._rotations).reshape(
+            neighbors.num_query_points, -1, 4
+        )
 
     @property
     def order(self) -> np.ndarray:
