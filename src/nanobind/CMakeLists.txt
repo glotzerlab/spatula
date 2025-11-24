@@ -21,7 +21,7 @@ if (UNIX)
     target_compile_options(_spatula_nb PRIVATE -Werror -Wall -Wextra)
 endif (UNIX)
 if (MSVC)
-    target_compile_options(_spatula_nb_metrics PRIVATE /Wall  /permissive-)
+    target_compile_options(_spatula_nb PRIVATE /Wall  /permissive-)
 endif (MSVC)
 target_compile_definitions(_spatula_nb PRIVATE VERSION_INFO=${VERSION_INFO})
 
