@@ -5,10 +5,9 @@
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/vector.h>
 
-#include "../util/Metrics.h" // Relative path to Metrics.h
+#include "../util/Metrics.h"
 #include "export-optimize.h"
 #include "export-pgop.h"
-#include "export-quaternion.h"
 #include "export-threads.h"
 
 namespace nb = nanobind;
@@ -23,6 +22,5 @@ NB_MODULE(_spatula_nb, m)
 
     spatula::export_spatula(m);
     spatula::util::export_threads(m);
-    spatula::data::export_quaternion(m);
     spatula::optimize::export_optimize(m);
 }

@@ -8,22 +8,13 @@
 #include <cstddef>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
+#include <nanobind/stl/list.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/vector.h>
 namespace nb = nanobind;
 using namespace nb::literals;
 
 namespace spatula {
-
-// We reinterpret_cast an array of quaternions to pass to numpy without copying.
-// These are a few sanity checks to make sure this is safe.
-static_assert(std::is_standard_layout_v<spatula::data::Quaternion>,
-              "Quaternion is not standard layout!");
-static_assert(sizeof(spatula::data::Quaternion) == 4 * sizeof(double),
-              "Quaternion struct has unexpected padding!");
-
-using QuaternionArrayXd = nb::ndarray<double, nb::numpy, nb::shape<-1, 4>>;
-using NBArrayXXd = nb::ndarray<double, nb::numpy, nb::shape<-1, -1>>;
 
 void export_spatula(nb::module_& m)
 {
@@ -83,7 +74,14 @@ void export_spatula(nb::module_& m)
                                                    num_neighbors.size());
                 // Extract the std::vectors from the tuple
                 const auto& [op_values, rotation_values] = results_tuple;
-                return nb::make_tuple(op_values, rotation_values);
+
+                // Convert std::vector<Quaternion> to nb::list of tuples
+                nb::list py_rotations;
+                for (const auto& q : rotation_values) {
+                    py_rotations.append(nb::make_tuple(q.w, q.x, q.y, q.z));
+                }
+
+                return nb::make_tuple(op_values, py_rotations);
             },
             nb::arg("distances"),
             nb::arg("weights"),

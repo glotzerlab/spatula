@@ -215,7 +215,7 @@ class PGOP:
             sigmas.astype(np.float64),
         )
         self._order = np.asarray(self._order).reshape(-1, len(self.symmetries))
-        self._rotations = np.asarray([[q.w, q.x, q.y, q.z] for q in self._rotations])
+        self._rotations = np.asarray(self._rotations)
 
     @property
     def order(self) -> np.ndarray:
