@@ -4,6 +4,7 @@
 #pragma once
 #include "locality.h"
 #include "util/Metrics.h"
+#include <algorithm>
 #include <span>
 
 namespace spatula { namespace computes {
@@ -28,13 +29,12 @@ double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<co
             // compute overlap with every point in the positions
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
-                double BC = 0;
-                BC = util::compute_Bhattacharyya_coefficient_gaussian(positions[m],
-                                                                      symmetrized_position,
-                                                                      sigmas[j],
-                                                                      sigmas[m]);
-                if (BC > max_res)
-                    max_res = BC;
+                max_res = std::max(
+                    max_res,
+                    util::compute_Bhattacharyya_coefficient_gaussian(positions[m],
+                                                                     symmetrized_position,
+                                                                     sigmas[j],
+                                                                     sigmas[m]));
             }
             overlap += max_res;
         }
