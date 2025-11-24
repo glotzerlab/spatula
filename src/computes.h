@@ -18,7 +18,7 @@ double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<co
     // matrix. Each matrix should be applied to each point in positions.
     for (size_t i {0}; i < R_ij.size(); i += 9) {
         data::RotationMatrix R;
-        std::copy(R_ij.data() + i, R_ij.data() + i + 9, R.begin());
+        std::copy_n(R_ij.data() + i, 9, R.begin());
 
         // loop over positions
         for (size_t j {0}; j < positions.size(); ++j) {
