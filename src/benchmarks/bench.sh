@@ -1,28 +1,33 @@
 #!/bin/bash
-# This script should be run from its containing directory: src/benchmarks/
+# This script should be run from the project root
 set -e
+
+BENCHMARK_DIR="includes"
+mkdir -p $BENCHMARK_DIR
+BENCHMARK_CLONE_DIR="$BENCHMARK_DIR/benchmark"
 
 # 1. Install Google Benchmark.
 # ---------------------------
 # Check if Google Benchmark is already installed.
-if [ ! -d "benchmark" ]; then
+if [ ! -d "$BENCHMARK_CLONE_DIR" ]; then
     # Clone the Google Benchmark repository.
     echo "Downloading Google Benchmark..."
-    git clone https://github.com/google/benchmark.git
-    # Build Google Benchmark.
-    cd benchmark
-    cmake -E make_directory "build"
-    cmake -E chdir "build" cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON ../
-    cmake --build "build" --config Release
-    cd ..
+    git clone https://github.com/google/benchmark.git "$BENCHMARK_CLONE_DIR"
 fi
+
+# Build Google Benchmark.
+cd "$BENCHMARK_CLONE_DIR"
+cmake -E make_directory "build"
+cmake -E chdir "build" cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON ../
+cmake --build "build" --config Release
+cd - > /dev/null # Go back to src/benchmarks
 
 # 2. Build the benchmark.
 # -----------------------
 echo "Building benchmark..."
-g++ -std=c++17 -isystem benchmark/include \
-  -Lbenchmark/build/src -lbenchmark -lpthread \
-  Metrics.cpp -o metrics_benchmark
+g++ -std=c++17 -isystem "$BENCHMARK_CLONE_DIR/include" \
+  -L"$BENCHMARK_CLONE_DIR/build/src" -lbenchmark -lpthread \
+  src/benchmarks/Metrics.cpp -o metrics_benchmark
 
 # 3. Run the benchmark.
 # ---------------------
