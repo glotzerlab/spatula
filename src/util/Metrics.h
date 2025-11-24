@@ -53,6 +53,18 @@ inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& posit
     return lead_term * std::sqrt(lead_term)
            * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
 }
+inline double
+compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                                 const data::Vec3& symmetrized_position,
+                                                 double sigma,
+                                                 double sigma_symmetrized)
+{
+    // 1. compute the distance between the two vectors (symmetrized_position
+    //    and positions[m])
+    auto r_pos = symmetrized_position - position;
+    // Reduced equation when sigma == sigma_symmetrized
+    return r_pos.dot(r_pos) / (8.0 * (sigma * sigma_symmetrized));
+}
 
 inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
                                                        const data::Vec3& symmetrized_position,

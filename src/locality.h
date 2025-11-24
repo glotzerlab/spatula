@@ -3,7 +3,10 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cmath>
+#include <functional>
+#include <iostream>
 #include <iterator>
 #include <numeric>
 #include <string>
@@ -54,10 +57,15 @@ class LocalNeighborhood {
 
     void rotate(const data::Vec3& v);
 
+    bool constantSigmas() const;
+
     std::vector<data::Vec3> positions;
     std::vector<double> weights;
     std::vector<double> sigmas;
     std::vector<data::Vec3> rotated_positions;
+
+    private:
+    bool m_constant_sigmas = false;
 };
 
 class Neighborhoods {
@@ -138,6 +146,15 @@ inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_
                                             std::vector<double>&& sigmas_)
     : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
 {
+    // Verify whether all sigma values are equivalent
+    m_constant_sigmas
+        = std::adjacent_find(sigmas.cbegin(), sigmas.cend(), std::not_equal_to<double>())
+          == sigmas.cend();
+}
+
+inline bool LocalNeighborhood::constantSigmas() const
+{
+    return m_constant_sigmas;
 }
 
 inline void LocalNeighborhood::rotate(const data::Vec3& v)

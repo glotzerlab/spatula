@@ -6,6 +6,7 @@
 #include "locality.h"
 #include "util/Metrics.h"
 #include <algorithm>
+#include <cmath>
 #include <span>
 
 namespace spatula { namespace computes {
@@ -37,6 +38,43 @@ double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<co
                                                                      sigmas[m]));
             }
             overlap += max_res;
+        }
+    }
+    // cast to double to avoid integer division
+    const auto normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
+    return overlap / normalization;
+}
+
+double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
+                                  const std::span<const double> R_ij)
+{
+    const auto positions = neighborhood.rotated_positions;
+    const auto sigmas = neighborhood.sigmas;
+    double overlap = 0.0;
+    // loop over the R_ij. Each 3x3 segment is a symmetry operation
+    // matrix. Each matrix should be applied to each point in positions.
+    for (size_t i {0}; i < R_ij.size(); i += 9) {
+        data::RotationMatrix R;
+        std::copy_n(R_ij.data() + i, 9, R.begin());
+
+        // loop over positions
+        for (size_t j {0}; j < positions.size(); ++j) {
+            const auto& p = positions[j];
+            // symmetrized position is obtained by multiplying the operator with the position
+            const auto symmetrized_position = R.rotate(p);
+
+            // compute overlap with every point in the positions
+            double max_res = std::numeric_limits<double>::infinity();
+            for (size_t m {0}; m < positions.size(); ++m) {
+                // max(exp(-x)) == min(x)
+                max_res = std::min(
+                    max_res,
+                    util::compute_log_m_Bhattacharyya_coefficient_gaussian(positions[m],
+                                                                           symmetrized_position,
+                                                                           sigmas[j],
+                                                                           sigmas[m]));
+            }
+            overlap += std::exp(-max_res);
         }
     }
     // cast to double to avoid integer division
