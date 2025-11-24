@@ -101,8 +101,10 @@ class PGOP {
     std::shared_ptr<const optimize::Optimizer> m_optimize;
     /// The mode of the PGOP computation.
     unsigned int m_mode;
-    // Whether to compute the PGOP for each operator.
+    /// Whether to compute the PGOP for each operator.
     bool m_compute_per_operator;
+    /// The function defining our overlap metric
+    double (*bc_func_)(const data::Vec3&, const data::Vec3&, double, double);
 };
 
 } // End namespace spatula
