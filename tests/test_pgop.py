@@ -1653,6 +1653,7 @@ def test_bcc_with_multiple_incorrect_symmetries_operator_calc():
     op_pg.compute((box, points), None, qargs)
 
     # PGOP ignores identity and doesn't count it, so you have N less symmetry ops!!!
+    assert np.asarray(op_pg.order).shape == (len(points), len_oh_sym + len_d3h_sym)
     np.testing.assert_array_equal(
         op_pg.order.shape, (len(points), len_oh_sym + len_d3h_sym)
     )
