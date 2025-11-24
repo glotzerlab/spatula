@@ -2,6 +2,7 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #pragma once
+#include "data/RotationMatrix.h"
 #include "locality.h"
 #include "util/Metrics.h"
 #include <algorithm>
@@ -16,16 +17,15 @@ double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<co
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
     for (size_t i {0}; i < R_ij.size(); i += 9) {
+        data::RotationMatrix R;
+        std::copy(R_ij.data() + i, R_ij.data() + i + 9, R.begin());
+
         // loop over positions
         for (size_t j {0}; j < positions.size(); ++j) {
+            const auto& p = positions[j];
             // symmetrized position is obtained by multiplying the operator with the position
-            auto symmetrized_position = data::Vec3(0, 0, 0);
-            // create 3x3 double loop for matrix vector multiplication
-            for (size_t k {0}; k < 3; ++k) {
-                for (size_t l {0}; l < 3; ++l) {
-                    symmetrized_position[k] += R_ij[i + k * 3 + l] * positions[j][l];
-                }
-            }
+            const auto symmetrized_position = R.rotate(p);
+
             // compute overlap with every point in the positions
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {

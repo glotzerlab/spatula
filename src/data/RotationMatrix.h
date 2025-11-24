@@ -3,6 +3,16 @@
 
 #pragma once
 
+#include "Vec3.h"
 #include <array>
 
-using RotationMatrix = std::array<double, 9>;
+namespace spatula { namespace data {
+struct RotationMatrix : std::array<double, 9> {
+    inline Vec3 rotate(Vec3 vec) const
+    {
+        return Vec3((*this)[0] * vec[0] + (*this)[1] * vec[1] + (*this)[2] * vec[2],
+                    (*this)[3] * vec[0] + (*this)[4] * vec[1] + (*this)[5] * vec[2],
+                    (*this)[6] * vec[0] + (*this)[7] * vec[1] + (*this)[8] * vec[2]);
+    }
+};
+}} // namespace spatula::data
