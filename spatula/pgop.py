@@ -68,7 +68,7 @@ class PGOP:
             raise ValueError("symmetries must be an iterable of str instances.")
         self._symmetries = symmetries
         # computing the PGOP
-        self._optmizer = optimizer
+        self._optimizer = optimizer
         matrices = []
         for point_group in self._symmetries:
             pg = representations.CartesianRepMatrix(point_group)
@@ -85,6 +85,7 @@ class PGOP:
             msg = f"Mode '{mode}' is not valid (valid params: {{'full', 'boo'}})"
             raise ValueError(msg)
         self._mode = mode
+        self._compute_per_operator = compute_per_operator_values_for_final_orientation
         self._cpp = spatula._spatula_nb.PGOP(
             matrices,
             optimizer._cpp,
@@ -214,7 +215,20 @@ class PGOP:
             neighbors.neighbor_counts.astype(np.int32),
             sigmas.astype(np.float64),
         )
-        self._order = np.asarray(self._order).reshape(-1, len(self.symmetries))
+        self._order = (
+            np.asarray(self._order).reshape(
+                neighbors.num_query_points,
+                -1,
+                # *(
+                #     [len(self.symmetries)]
+                #     if not self._compute_per_operator
+                #     else [-1, len(self.symmetries)]
+                # ),
+            )
+            # .squeeze(axis=1)
+        )  # .reshape(-1, len(self.symmetries))
+        # if self._order.shape[1] == 1:
+        #     self._order = self._order.squeeze(axis=1)
         self._rotations = np.asarray(self._rotations)
 
     @property
