@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include "../data/RotationMatrix.h"
 #include "../data/Vec3.h"
 
 namespace spatula { namespace util {
@@ -27,7 +28,7 @@ inline double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
 }
 
 /// Rotate a single point x using rotation matrix R and place the result in x_prime.
-inline void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double>& R)
+inline void single_rotate(const Vec3& x, Vec3& x_prime, const RotationMatrix& R)
 {
     x_prime.x = R[0] * x.x + R[1] * x.y + R[2] * x.z;
     x_prime.y = R[3] * x.x + R[4] * x.y + R[5] * x.z;
@@ -49,7 +50,7 @@ inline void single_rotate(const Vec3& x, Vec3& x_prime, const std::vector<double
 inline void rotate_matrix(cvec3_iter points_begin,
                           cvec3_iter points_end,
                           vec3_iter rotated_points_it,
-                          const std::vector<double>& R)
+                          const RotationMatrix& R)
 {
     for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
         single_rotate(*it, *rotated_points_it, R);
@@ -64,17 +65,17 @@ inline void rotate_matrix(cvec3_iter points_begin,
  *
  * @param v The 3-vector to convert to a rotation matrix.
  */
-inline std::vector<double> to_rotation_matrix(const Vec3& v)
+inline RotationMatrix to_rotation_matrix(const Vec3& v)
 {
     const auto angle = v.norm();
     if (std::abs(angle) < 1e-7) {
-        return std::vector<double> {{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}};
+        return RotationMatrix {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
     }
     const auto axis = v / angle;
     const double c {std::cos(angle)}, s {std::sin(angle)};
     const double C = 1 - c;
     const auto sv = axis * s;
-    return std::vector<double> {{
+    return RotationMatrix {
         C * axis.x * axis.x + c,
         C * axis.x * axis.y - sv.z,
         C * axis.x * axis.z + sv.y,
@@ -84,7 +85,7 @@ inline std::vector<double> to_rotation_matrix(const Vec3& v)
         C * axis.z * axis.x - sv.y,
         C * axis.z * axis.y + sv.x,
         C * axis.z * axis.z + c,
-    }};
+    };
 }
 
 /**

@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "RotationMatrix.h"
 #include "Vec3.h"
 
 namespace spatula { namespace data {
@@ -67,26 +68,26 @@ struct Quaternion {
         z *= inv_norm;
     }
     /// Convert quaternion to a 3x3 rotation matrix
-    std::vector<double> to_rotation_matrix() const
+    RotationMatrix to_rotation_matrix() const
     {
         // Necessary if not unit quaternion. Otherwise it is just 2 / 1 = 2.
         const double denominator = w * w + x * x + y * y + z * z;
         if (denominator == 0) {
-            return std::vector<double> {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+            return RotationMatrix {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
         }
         const double s = 2 / denominator;
         const double xs {x * s}, ys {y * s}, zs {z * s};
         const double wx {w * xs}, wy {w * ys}, wz {w * zs}, xx {x * xs}, xy {x * ys}, xz {x * zs},
             yy {y * ys}, yz {y * zs}, zz {z * zs};
-        return std::vector<double> {1 - yy - zz,
-                                    xy - wz,
-                                    xz + wy,
-                                    xy + wz,
-                                    1 - xx - zz,
-                                    yz - wx,
-                                    xz - wy,
-                                    yz + wx,
-                                    1 - xx - yy};
+        return RotationMatrix {1 - yy - zz,
+                               xy - wz,
+                               xz + wy,
+                               xy + wz,
+                               1 - xx - zz,
+                               yz - wx,
+                               xz - wy,
+                               yz + wx,
+                               1 - xx - yy};
     }
     /// Convert quaternion to its axis angle representation
     std::pair<Vec3, double> to_axis_angle() const
