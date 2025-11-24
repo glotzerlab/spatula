@@ -12,6 +12,8 @@ more-itertools==10.8.0
     # via parsnip-cif
 ninja==1.13.0
     # via -r .github/workflows/requirements-test.in
+nanobind==2.9.2
+    # via -r .github/workflows/requirements-test.in
 numpy==2.3.5
     # via
     #   -r .github/workflows/requirements-test.in
