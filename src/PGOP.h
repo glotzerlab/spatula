@@ -68,7 +68,8 @@ class PGOP {
      * @returns the optimized PGOP value and the optimal rotation for the given symmetry.
      */
     std::tuple<double, data::Vec3> compute_symmetry(LocalNeighborhood& neighborhood,
-                                                    const double* R_ij) const;
+                                                    const double* R_ij,
+                                                    size_t group_idx) const;
 
     /**
      * @brief Compute the PGOP for a set point group symmetry and rotation.
@@ -82,7 +83,7 @@ class PGOP {
      * @returns The PGOP value.
      */
     double compute_pgop(LocalNeighborhood& neighborhood,
-                        const std::span<const double, 9> R_ij) const;
+                        const std::span<const double> R_ij) const;
 
     /**
      * Helper function to better handle both single threaded and multithreaded behavior. In single
