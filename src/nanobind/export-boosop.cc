@@ -19,6 +19,7 @@
 #include "export-boosop.h"
 
 namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace spatula {
 
@@ -28,22 +29,29 @@ template<typename distribution_type>
 void export_BOOSOP_class(nb::module_& m, const std::string& name)
 {
     nb::class_<BOOSOP<distribution_type>>(m, name.c_str())
-        .def(nb::init([](const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> D_ij_py,
-                         std::shared_ptr<optimize::Optimizer>& optimizer,
-                         typename distribution_type::param_type distribution_params) {
-            const size_t n_symmetries = D_ij_py.shape(0);
-            const size_t n_mlms = D_ij_py.shape(1);
-            std::vector<std::vector<std::complex<double>>> D_ij;
-            D_ij.reserve(n_symmetries);
+        .def("__init__",
+             [](BOOSOP<distribution_type>* self,
+                const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> D_ij_py,
+                std::shared_ptr<optimize::Optimizer>& optimizer,
+                typename distribution_type::param_type distribution_params) {
+                 const size_t n_symmetries = D_ij_py.shape(0);
+                 const size_t n_mlms = D_ij_py.shape(1);
+                 std::vector<std::vector<std::complex<double>>> D_ij;
+                 D_ij.reserve(n_symmetries);
 
-            for (size_t i {0}; i < n_symmetries; ++i)
-            {
-                D_ij.emplace_back(std::vector<std::complex<double>>(
-                    D_ij_py.data() + i * n_mlms, D_ij_py.data() + (i + 1) * n_mlms));
-            }
+                 for (size_t i {0}; i < n_symmetries; ++i)
+                 {
+                     D_ij.emplace_back(std::vector<std::complex<double>>(
+                         D_ij_py.data() + i * n_mlms, D_ij_py.data() + (i + 1) * n_mlms));
+                 }
 
-            return new BOOSOP<distribution_type>(D_ij, optimizer, distribution_params);
-        }))
+                 new (self)
+                     BOOSOP<distribution_type>(D_ij, optimizer, distribution_params);
+             },
+             nb::keep_alive<1, 2>(),
+             "D_ij"_a,
+             "optimizer"_a,
+             "distribution_params"_a)
         .def("compute",
              [](const BOOSOP<distribution_type>& self,
                 const nb::ndarray<double, nb::ndim<1>, nb::c_contig> distances,
@@ -66,30 +74,14 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
 
                  const auto& op_values = std::get<0>(result_tuple);
                  const auto& rotation_values = std::get<1>(result_tuple);
-                 const size_t N_particles = num_neighbors.shape(0);
-                 const size_t n_symmetries = op_values.size() / N_particles;
 
-                 size_t op_shape[] = {N_particles, n_symmetries};
-                 nb::ndarray<double> op_arr(op_values.data(), 2, op_shape);
-
-                 size_t rot_shape[] = {N_particles, n_symmetries, 4};
-                 nb::ndarray<double> rot_arr(nullptr, 3, rot_shape);
-
-                 auto rot_ptr = rot_arr.template mutable_unchecked<3>();
-
-                 for (size_t i = 0; i < N_particles; ++i)
+                 nb::list py_rotations;
+                 for (const auto& q : rotation_values)
                  {
-                     for (size_t j = 0; j < n_symmetries; ++j)
-                     {
-                         const auto& rot = rotation_values[i * n_symmetries + j];
-                         rot_ptr(i, j, 0) = rot.w;
-                         rot_ptr(i, j, 1) = rot.x;
-                         rot_ptr(i, j, 2) = rot.y;
-                         rot_ptr(i, j, 3) = rot.z;
-                     }
+                     py_rotations.append(nb::make_tuple(q.w, q.x, q.y, q.z));
                  }
 
-                 return nb::make_tuple(op_arr, rot_arr);
+                 return nb::make_tuple(nb::cast(op_values), py_rotations);
              })
         .def("refine",
              [](const BOOSOP<distribution_type>& self,
@@ -113,12 +105,7 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
                                                   quad_positions.shape(0),
                                                   quad_weights.data());
 
-                 const size_t N_particles = num_neighbors.shape(0);
-                 const size_t n_symmetries = op_values_vec.size() / N_particles;
-                 size_t op_shape[] = {N_particles, n_symmetries};
-                 nb::ndarray<double> op_store(op_values_vec.data(), 2, op_shape);
-
-                 return op_store;
+                 return nb::cast(op_values_vec);
              });
 }
 } // namespace
