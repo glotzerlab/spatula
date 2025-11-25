@@ -23,7 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-        - base: ubuntu-latest
+        - base: ubuntu
+          version: 24.04
           arch: 'x86_64'
         - base: windows
           version: 2025
