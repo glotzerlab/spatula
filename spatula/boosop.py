@@ -235,6 +235,12 @@ class BOOSOP:
                 quad_positions,
                 quad_weights,
             )
+            self._order = np.asarray(self._order).reshape(
+                neighbors.num_query_points, -1
+            )
+            self._rotations = np.asarray(self._rotations).reshape(
+                neighbors.num_query_points, -1, 4
+            )
 
     def _ylms(self, l, m):
         """Return the spherical harmonics at the Gauss-Legrende points.

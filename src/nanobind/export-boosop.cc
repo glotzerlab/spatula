@@ -92,30 +92,39 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
             nb::arg("ylms"),
             nb::arg("quad_positions"),
             nb::arg("quad_weights"))
-        .def("refine",
-             [](const BOOSOP<distribution_type>& self,
-                const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> distances,
-                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> rotations,
-                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
-                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
-                const unsigned int m,
-                const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> ylms,
-                const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> quad_positions,
-                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> quad_weights) {
-                 auto op_values_vec = self.refine(distances.data(),
-                                                  rotations.data(),
-                                                  weights.data(),
-                                                  num_neighbors.data(),
-                                                  num_neighbors.shape(0),
-                                                  m,
-                                                  ylms.data(),
-                                                  ylms.shape(0),
-                                                  quad_positions.data(),
-                                                  quad_positions.shape(0),
-                                                  quad_weights.data());
+        .def(
+            "refine",
+            [](const BOOSOP<distribution_type>& self,
+               const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> distances,
+               const nb::ndarray<double, nb::ndim<1>, nb::c_contig> rotations,
+               const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
+               const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
+               const unsigned int m,
+               const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> ylms,
+               const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> quad_positions,
+               const nb::ndarray<double, nb::ndim<1>, nb::c_contig> quad_weights) {
+                auto op_values_vec = self.refine(distances.data(),
+                                                 rotations.data(),
+                                                 weights.data(),
+                                                 num_neighbors.data(),
+                                                 num_neighbors.shape(0),
+                                                 m,
+                                                 ylms.data(),
+                                                 ylms.shape(0),
+                                                 quad_positions.data(),
+                                                 quad_positions.shape(0),
+                                                 quad_weights.data());
 
-                 return nb::cast(op_values_vec);
-             });
+                return nb::cast(op_values_vec);
+            },
+            nb::arg("distances"),
+            nb::arg("rotations"),
+            nb::arg("weights"),
+            nb::arg("num_neighbors"),
+            nb::arg("m"),
+            nb::arg("ylms"),
+            nb::arg("quad_positions"),
+            nb::arg("quad_weights"));
 }
 } // namespace
 
