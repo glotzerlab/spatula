@@ -132,9 +132,6 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::span<const
         if (neighborhood.constantSigmas()) {
             return computes::compute_pgop_gaussian_fast(neighborhood, R_ij);
         }
-        // std::cout << "NOT CONSTANT" << std::endl;
-        throw std::runtime_error("bbbb");
-
         return computes::compute_pgop_gaussian(neighborhood, R_ij);
     } else
         return computes::compute_pgop_fisher(neighborhood, R_ij);
