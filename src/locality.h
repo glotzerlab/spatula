@@ -17,12 +17,12 @@ namespace spatula {
 
 class LocalNeighborhoodBOOBOO {
     public:
-    LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
+    LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_, std::span<const double> weights_);
 
     void rotate(const data::Vec3& v);
 
     std::vector<data::Vec3> positions;
-    std::vector<double> weights;
+    std::span<const double> weights;
     std::vector<data::Vec3> rotated_positions;
 };
 
@@ -88,7 +88,7 @@ class Neighborhoods {
 };
 
 inline LocalNeighborhoodBOOBOO::LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_,
-                                                        std::vector<double>&& weights_)
+                                                        std::span<const double> weights_)
     : positions(positions_), weights(weights_), rotated_positions(positions)
 {
 }
@@ -118,7 +118,7 @@ inline LocalNeighborhoodBOOBOO NeighborhoodBOOs::getNeighborhoodBOO(size_t i) co
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     return LocalNeighborhoodBOOBOO(
         util::normalize_distances(m_distances, std::make_pair(3 * start, 3 * end)),
-        std::vector(m_weights + start, m_weights + end));
+        std::span(m_weights + start, end - start));
 }
 
 inline std::vector<data::Vec3> NeighborhoodBOOs::getNormalizedDistances(size_t i) const

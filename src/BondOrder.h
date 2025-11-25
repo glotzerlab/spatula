@@ -6,6 +6,7 @@
 #include <algorithm> // Added
 #include <cmath>     // Added
 #include <numeric>   // Added for std::reduce
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -164,20 +165,20 @@ template<typename distribution_type> class BondOrder {
      * @param weights The weights to use for each position. Should be the same size as positions.
      */
     inline BondOrder(distribution_type dist,
-                     const std::vector<data::Vec3>& positions,
-                     const std::vector<double>& weights)
+                     std::span<const data::Vec3> positions,
+                     std::span<const double> weights)
         : m_dist(dist), m_positions(positions), m_weights(weights),
-          m_normalization(1 / std::reduce(m_weights.begin(), m_weights.end()))
+          m_normalization(1.0 / std::reduce(m_weights.begin(), m_weights.end()))
     {
     }
 
     // Assumes points are on the unit sphere
-    inline std::vector<double> operator()(const std::vector<data::Vec3>& points) const
+    inline std::vector<double> operator()(std::span<const data::Vec3> points) const
     {
         auto bo = std::vector<double>();
         bo.reserve(points.size());
-        std::transform(points.cbegin(),
-                       points.cend(),
+        std::transform(points.begin(),
+                       points.end(),
                        std::back_inserter(bo),
                        [this](const auto& point) { return this->single_call(point); });
         return bo;
@@ -195,8 +196,8 @@ template<typename distribution_type> class BondOrder {
         // Get the unweighted contribution from each distribution lazily.
         auto single_contributions = std::vector<double>();
         single_contributions.resize(m_positions.size());
-        std::transform(m_positions.cbegin(),
-                       m_positions.cend(),
+        std::transform(m_positions.begin(),
+                       m_positions.end(),
                        single_contributions.begin(),
                        [this, &point](const auto& p) -> double {
                            if constexpr (distribution_type::use_theta) {
@@ -226,9 +227,9 @@ template<typename distribution_type> class BondOrder {
     /// The distribution to use for all provided neighbor vectors.
     distribution_type m_dist;
     /// The normalized neighbor vectors for the bond order diagram.
-    const std::vector<data::Vec3>& m_positions;
+    std::span<const data::Vec3> m_positions;
     /// The weights for the points on the bond order diagram.
-    const std::vector<double>& m_weights;
+    std::span<const double> m_weights;
     /// The normalization constant @c 1 / std::reduce(m_weights).
     double m_normalization;
 };
