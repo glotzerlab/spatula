@@ -7,7 +7,15 @@
 #include <array>
 
 namespace spatula { namespace data {
+/**
+ * @brief Class provides helper methods for dealing with rotation matrices.
+ *
+ * spatula uses rotation matrices for high-throughput rotation of points.
+ */
 struct RotationMatrix : std::array<double, 9> {
+    /**
+     * @brief Rotate a Vec3 by a matrix R, returning a new vector.
+     */
     inline Vec3 rotate(Vec3 vec) const
     {
         return Vec3((*this)[0] * vec[0] + (*this)[1] * vec[1] + (*this)[2] * vec[2],
