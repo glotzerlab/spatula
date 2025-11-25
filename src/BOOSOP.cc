@@ -12,20 +12,6 @@
 
 namespace spatula {
 
-// Copyright (c) 2021-2025 The Regents of the University of Michigan
-// Part of spatula, released under the BSD 3-Clause License.
-
-#include <cmath>
-#include <iterator>
-#include <string>
-
-#include "BOOSOP.h"
-#include "BondOrder.h"
-#include "locality.h"
-#include "util/Threads.h"
-
-namespace spatula {
-
 template<typename distribution_type>
 BOOSOP<distribution_type>::BOOSOP(
     const std::vector<std::vector<std::complex<double>>>& D_ij,
@@ -133,4 +119,79 @@ std::vector<double> BOOSOP<distribution_type>::refine(const double* distances,
     };
     execute_func(loop_func, N_particles);
     return op_store;
-}} // namespace spatula
+}
+
+template<typename distribution_type>
+std::tuple<std::vector<double>, std::vector<data::Quaternion>>
+BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodBOOBOO& neighborhood,
+                                            const util::QlmEval& qlm_eval,
+                                            util::QlmBuf& qlm_buf) const
+{
+    auto BOOSOP = std::vector<double>();
+    auto rotations = std::vector<data::Quaternion>();
+    BOOSOP.reserve(m_Dij.size());
+    rotations.reserve(m_Dij.size());
+    for (const auto& D_ij : m_Dij) {
+        const auto result = compute_symmetry(neighborhood, D_ij, qlm_eval, qlm_buf);
+        BOOSOP.emplace_back(std::get<0>(result));
+        rotations.emplace_back(std::get<1>(result));
+    }
+    return std::make_tuple(std::move(BOOSOP), std::move(rotations));
+}
+
+template<typename distribution_type>
+std::tuple<double, data::Quaternion>
+BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodBOOBOO& neighborhood,
+                                            const std::vector<std::complex<double>>& D_ij,
+                                            const util::QlmEval& qlm_eval,
+                                            util::QlmBuf& qlm_buf) const
+{
+    auto opt = m_optimize->clone();
+    while (!opt->terminate()) {
+        neighborhood.rotate(opt->next_point());
+        const auto particle_op = compute_BOOSOP(neighborhood, D_ij, qlm_eval, qlm_buf);
+        opt->record_objective(-particle_op);
+    }
+    // TODO currently optimum.first can be empty resulting in a SEGFAULT. This only happens in badly
+    // formed arguments (particles with no neighbors), but can occur.
+    const auto optimum = opt->get_optimum();
+    return std::make_tuple(-optimum.second, optimum.first);
+}
+
+template<typename distribution_type>
+double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodBOOBOO& neighborhood,
+                                                 const std::vector<std::complex<double>>& D_ij,
+                                                 const util::QlmEval& qlm_eval,
+                                                 util::QlmBuf& qlm_buf) const
+{
+    const auto bond_order = BondOrder<distribution_type>(m_distribution,
+                                                         neighborhood.rotated_positions,
+                                                         neighborhood.weights);
+    // compute spherical harmonic values in-place (qlm_buf.qlms)
+    qlm_eval.eval<distribution_type>(bond_order, qlm_buf.qlms);
+    util::symmetrize_qlm(qlm_buf.qlms, D_ij, qlm_buf.sym_qlms, qlm_eval.getMaxL());
+    return util::covariance(qlm_buf.qlms, qlm_buf.sym_qlms);
+}
+
+template<typename distribution_type>
+void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)> func,
+                                             size_t N) const
+{
+    // Enable py-spy profiling through serial mode.
+    if (util::ThreadPool::get().get_num_threads() == 1) {
+        util::ThreadPool::get().serial_compute<void, size_t>(0, N, func);
+    } else {
+        auto& pool = util::ThreadPool::get().get_pool();
+        pool.push_loop(0, N, func, 2 * pool.get_thread_count());
+        pool.wait_for_tasks();
+    }
+}
+
+template class BOOSOP<UniformDistribution>;
+template class BOOSOP<FisherDistribution>;
+
+// Explicit template instantiations for BondOrder
+template class BondOrder<UniformDistribution>;
+template class BondOrder<FisherDistribution>;
+
+} // namespace spatula

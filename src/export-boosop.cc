@@ -88,7 +88,41 @@ void export_BOOSOP_class(py::module& m, const std::string& name)
 
                  return py::make_tuple(op_arr, rot_arr);
              })
-        .def("refine", &BOOSOP<distribution_type>::refine);
+        .def("refine",
+             [](const BOOSOP<distribution_type>& self,
+                const py::array_t<double> distances,
+                const py::array_t<double> rotations,
+                const py::array_t<double> weights,
+                const py::array_t<int> num_neighbors,
+                const unsigned int m,
+                const py::array_t<std::complex<double>> ylms,
+                const py::array_t<double> quad_positions,
+                const py::array_t<double> quad_weights) {
+                 auto op_values_vec = self.refine(distances.data(0),
+                                                    rotations.data(0),
+                                                    weights.data(0),
+                                                    num_neighbors.data(0),
+                                                    num_neighbors.size(),
+                                                    m,
+                                                    ylms.data(0),
+                                                    ylms.shape(0),
+                                                    quad_positions.data(0),
+                                                    quad_positions.shape(0),
+                                                    quad_weights.data(0));
+
+                 const size_t N_particles = num_neighbors.size();
+                 const size_t n_symmetries = op_values_vec.size() / N_particles;
+                 py::array_t<double> op_store({N_particles, n_symmetries});
+                 auto u_op_store = op_store.mutable_unchecked<2>();
+                 for (size_t i = 0; i < N_particles; ++i)
+                 {
+                     for (size_t j = 0; j < n_symmetries; ++j)
+                     {
+                         u_op_store(i, j) = op_values_vec[i * n_symmetries + j];
+                     }
+                 }
+                 return op_store;
+             });
 }
 } // namespace
 
