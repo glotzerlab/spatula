@@ -6,9 +6,4 @@
 #include "BOOSOP.h"
 #include "PGOP.h"
 #include "data/Quaternion.h"
-#include "export-boosop.h"
 
-PYBIND11_MODULE(_spatula, m)
-{
-    spatula::export_BOOSOP(m);
-}
