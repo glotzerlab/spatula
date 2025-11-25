@@ -5,7 +5,6 @@
 #include "../data/Vec3.h"
 #include <benchmark/benchmark.h>
 
-#include <complex>
 #include <random>
 #include <vector>
 
