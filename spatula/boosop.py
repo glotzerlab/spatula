@@ -217,6 +217,10 @@ class BOOSOP:
             quad_positions,
             quad_weights,
         )
+        self._order = np.asarray(self._order).reshape(neighbors.num_query_points, -1)
+        self._rotations = np.asarray(self._rotations).reshape(
+            neighbors.num_query_points, -1, 4
+        )
         if refine:
             quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
                 m=refine_m, weights=True, cartesian=True
