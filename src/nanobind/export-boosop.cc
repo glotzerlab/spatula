@@ -85,7 +85,6 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
 
                 return nb::make_tuple(nb::cast(op_values), py_rotations);
             },
-            nb::arg("self"),
             nb::arg("distances"),
             nb::arg("weights"),
             nb::arg("num_neighbors"),
