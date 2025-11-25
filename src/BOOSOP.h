@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "data/Quaternion.h"
-#include "locality.h" // Include locality.h for LocalNeighborhoodBOOBOO
+#include "locality.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/QlmEval.h"

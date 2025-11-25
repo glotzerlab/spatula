@@ -6,7 +6,6 @@
 #include <cmath>
 #include <complex>
 #include <iterator>
-#include <numeric> // Added for std::sqrt
 #include <utility>
 #include <vector>
 
