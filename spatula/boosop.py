@@ -11,7 +11,7 @@ import warnings
 
 import numpy as np
 
-import spatula._spatula
+import spatula._spatula_nb
 
 from . import freud, integrate, representations, sph_harm, util
 
@@ -112,10 +112,12 @@ class BOOSOP:
             dist_param = kappa
         elif dist == "uniform":
             dist_param = max_theta
-        try:
-            cls_ = getattr(spatula._spatula, "BOOSOP" + dist.title())
-        except AttributeError as err:
-            raise ValueError(f"Distribution {dist} not supported.") from err
+        if "Uniform" in dist.title():
+            cls_ = spatula._spatula_nb.BOOSOPUniform
+        elif "Fisher" in dist.title():
+            cls_ = spatula._spatula_nb.BOOSOPFisher
+        else:
+            raise ValueError(f"Distribution {dist} not supported.")
         matrices = []
         for point_group in self._symmetries:
             matrices.append(

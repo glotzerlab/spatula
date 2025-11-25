@@ -9,7 +9,7 @@ particle's neighborhood or its local bond orientation order diagram.
 
 import numpy as np
 
-import spatula._spatula
+import spatula._spatula_nb
 
 from . import freud, representations
 from .boosop import _get_neighbors
