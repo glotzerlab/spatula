@@ -6,4 +6,3 @@
 #include "BOOSOP.h"
 #include "PGOP.h"
 #include "data/Quaternion.h"
-

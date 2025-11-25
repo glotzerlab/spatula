@@ -6,9 +6,9 @@
 #include <nanobind/stl/vector.h>
 
 #include "../util/Metrics.h"
+#include "export-boosop.h"
 #include "export-optimize.h"
 #include "export-pgop.h"
-#include "export-boosop.h"
 #include "export-threads.h"
 
 namespace nb = nanobind;

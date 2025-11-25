@@ -2,7 +2,7 @@ list(APPEND spatula_sources
     "BondOrder.h"
     "PGOP.h" "PGOP.cc"
     "BOOSOP.h" "BOOSOP.cc"
-    
+
     "locality.h"
     "data/Vec3.h"
     "data/Quaternion.h"

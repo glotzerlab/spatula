@@ -165,4 +165,3 @@ template<typename distribution_type> class BOOSOP {
 };
 
 } // End namespace spatula
-

@@ -29,29 +29,29 @@ template<typename distribution_type>
 void export_BOOSOP_class(nb::module_& m, const std::string& name)
 {
     nb::class_<BOOSOP<distribution_type>>(m, name.c_str())
-        .def("__init__",
-             [](BOOSOP<distribution_type>* self,
-                const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> D_ij_py,
-                std::shared_ptr<optimize::Optimizer>& optimizer,
-                typename distribution_type::param_type distribution_params) {
-                 const size_t n_symmetries = D_ij_py.shape(0);
-                 const size_t n_mlms = D_ij_py.shape(1);
-                 std::vector<std::vector<std::complex<double>>> D_ij;
-                 D_ij.reserve(n_symmetries);
+        .def(
+            "__init__",
+            [](BOOSOP<distribution_type>* self,
+               const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> D_ij_py,
+               std::shared_ptr<optimize::Optimizer>& optimizer,
+               typename distribution_type::param_type distribution_params) {
+                const size_t n_symmetries = D_ij_py.shape(0);
+                const size_t n_mlms = D_ij_py.shape(1);
+                std::vector<std::vector<std::complex<double>>> D_ij;
+                D_ij.reserve(n_symmetries);
 
-                 for (size_t i {0}; i < n_symmetries; ++i)
-                 {
-                     D_ij.emplace_back(std::vector<std::complex<double>>(
-                         D_ij_py.data() + i * n_mlms, D_ij_py.data() + (i + 1) * n_mlms));
-                 }
+                for (size_t i {0}; i < n_symmetries; ++i) {
+                    D_ij.emplace_back(
+                        std::vector<std::complex<double>>(D_ij_py.data() + i * n_mlms,
+                                                          D_ij_py.data() + (i + 1) * n_mlms));
+                }
 
-                 new (self)
-                     BOOSOP<distribution_type>(D_ij, optimizer, distribution_params);
-             },
-             nb::keep_alive<1, 2>(),
-             "D_ij"_a,
-             "optimizer"_a,
-             "distribution_params"_a)
+                new (self) BOOSOP<distribution_type>(D_ij, optimizer, distribution_params);
+            },
+            nb::keep_alive<1, 2>(),
+            "D_ij"_a,
+            "optimizer"_a,
+            "distribution_params"_a)
         .def("compute",
              [](const BOOSOP<distribution_type>& self,
                 const nb::ndarray<double, nb::ndim<1>, nb::c_contig> distances,
@@ -76,8 +76,7 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
                  const auto& rotation_values = std::get<1>(result_tuple);
 
                  nb::list py_rotations;
-                 for (const auto& q : rotation_values)
-                 {
+                 for (const auto& q : rotation_values) {
                      py_rotations.append(nb::make_tuple(q.w, q.x, q.y, q.z));
                  }
 
