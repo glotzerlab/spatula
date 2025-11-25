@@ -2,7 +2,6 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #include <algorithm>
-#include <cmath>
 #include <iterator>
 
 #include "QlmEval.h"
