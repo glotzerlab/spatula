@@ -84,15 +84,15 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
                 }
 
                 return nb::make_tuple(nb::cast(op_values), py_rotations);
-            })
-        // nb::arg("self"),
-        // nb::arg("distances"),
-        // nb::arg("weights"),
-        // nb::arg("num_neighbors"),
-        // nb::arg("m"),
-        // nb::arg("ylms"),
-        // nb::arg("quad_positions"),
-        // nb::arg("quad_weights"))
+            },
+            nb::arg("self"),
+            nb::arg("distances"),
+            nb::arg("weights"),
+            nb::arg("num_neighbors"),
+            nb::arg("m"),
+            nb::arg("ylms"),
+            nb::arg("quad_positions"),
+            nb::arg("quad_weights"))
         .def("refine",
              [](const BOOSOP<distribution_type>& self,
                 const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> distances,
