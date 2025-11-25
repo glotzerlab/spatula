@@ -202,12 +202,6 @@ class BOOSOP:
         quad_positions, quad_weights = integrate.gauss_legendre_quad_points(
             m=m, weights=True, cartesian=True
         )
-        print(dist.shape, dist.dtype)
-        print(neighbors.weights.shape, neighbors.weights.dtype)
-        print(neighbors.neighbor_counts.shape, neighbors.neighbor_counts.dtype)
-        print(m, type(m))
-        x = np.conj(self._ylms(l, m))
-        print(x.shape, x.dtype)
         self._order, self._rotations = self._cpp.compute(
             dist.astype(np.float64),
             neighbors.weights.astype(np.float64),
