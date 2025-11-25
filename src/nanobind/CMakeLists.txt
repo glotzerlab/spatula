@@ -4,6 +4,7 @@ nanobind_add_module(_spatula_nb
     export-boosop.cc
     ../BOOSOP.cc
     ../PGOP.cc
+    ../util/QlmEval.cc
 )
 
 target_include_directories(
