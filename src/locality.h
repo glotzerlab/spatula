@@ -4,15 +4,11 @@
 #pragma once
 
 #include <algorithm>
-#include <cmath>
 #include <functional>
-#include <iostream>
 #include <iterator>
 #include <numeric>
-#include <string>
 #include <vector>
 
-#include "data/Quaternion.h"
 #include "data/Vec3.h"
 #include "util/Util.h"
 
