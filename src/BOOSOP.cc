@@ -13,6 +13,21 @@
 namespace spatula {
 
 template<typename distribution_type>
+BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
+                                  std::shared_ptr<optimize::Optimizer>& optimizer,
+                                  typename distribution_type::param_type distribution_params)
+    : m_distribution(distribution_params), m_n_symmetries(D_ij.shape(0)), m_Dij(),
+      m_optimize(optimizer)
+{
+    m_Dij.reserve(m_n_symmetries);
+    const auto u_D_ij = D_ij.unchecked<2>();
+    const size_t n_mlms = D_ij.shape(1);
+    for (size_t i {0}; i < m_n_symmetries; ++i) {
+        m_Dij.emplace_back(
+            std::vector<std::complex<double>>(u_D_ij.data(i, 0), u_D_ij.data(i, 0) + n_mlms));
+    }
+}
+template<typename distribution_type>
 py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances,
                                              const py::array_t<double> weights,
                                              const py::array_t<int> num_neighbors,
