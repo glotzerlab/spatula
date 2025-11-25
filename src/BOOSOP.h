@@ -2,14 +2,11 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #pragma once
+
+#include <complex>
 #include <memory>
 #include <tuple>
 #include <vector>
-
-#include <complex>
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include "data/Quaternion.h"
 #include "locality.h" // Include locality.h for LocalNeighborhoodBOOBOO
@@ -18,11 +15,7 @@
 #include "util/QlmEval.h"
 #include "util/Util.h"
 
-namespace py = pybind11;
-
 namespace spatula {
-
-
 
 /**
  * @brief Central class, computes BOOSOP for provided points.
@@ -32,7 +25,7 @@ namespace spatula {
  */
 template<typename distribution_type> class BOOSOP {
     public:
-    BOOSOP(const py::array_t<std::complex<double>> D_ij,
+    BOOSOP(const std::vector<std::vector<std::complex<double>>>& D_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            typename distribution_type::param_type distribution_params);
 
@@ -52,13 +45,17 @@ template<typename distribution_type> class BOOSOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
-                      const unsigned int m,
-                      const py::array_t<std::complex<double>> ylms,
-                      const py::array_t<double> quad_positions,
-                      const py::array_t<double> quad_weights) const;
+    std::tuple<std::vector<double>, std::vector<data::Quaternion>>
+    compute(const double* distances,
+            const double* weights,
+            const int* num_neighbors,
+            size_t N_particles,
+            const unsigned int m,
+            const std::complex<double>* ylms,
+            size_t ylms_shape_0,
+            const double* quad_positions,
+            size_t quad_positions_shape_0,
+            const double* quad_weights) const;
 
     /**
      * @brief Compute BOOSOP at given rotations for each point.
@@ -80,14 +77,17 @@ template<typename distribution_type> class BOOSOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    py::array_t<double> refine(const py::array_t<double> distances,
-                               const py::array_t<double> rotations,
-                               const py::array_t<double> weights,
-                               const py::array_t<int> num_neighbors,
+    std::vector<double> refine(const double* distances,
+                               const double* rotations,
+                               const double* weights,
+                               const int* num_neighbors,
+                               size_t N_particles,
                                const unsigned int m,
-                               const py::array_t<std::complex<double>> ylms,
-                               const py::array_t<double> quad_positions,
-                               const py::array_t<double> quad_weights) const;
+                               const std::complex<double>* ylms,
+                               size_t ylms_shape_0,
+                               const double* quad_positions,
+                               size_t quad_positions_shape_0,
+                               const double* quad_weights) const;
 
     private:
     /**
@@ -164,8 +164,5 @@ template<typename distribution_type> class BOOSOP {
     std::shared_ptr<const optimize::Optimizer> m_optimize;
 };
 
-template<typename distribution_type>
-void export_BOOSOP_class(py::module& m, const std::string& name);
-
-void export_BOOSOP(py::module& m);
 } // End namespace spatula
+
