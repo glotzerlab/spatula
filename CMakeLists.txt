@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.15...3.30)
 project(spatula)
 
+if (CMAKE_VERSION VERSION_LESS 3.18)
+  set(DEV_MODULE Development)
+else()
+  set(DEV_MODULE Development.Module)
+endif()
+
 set(DEFAULT_BUILD_TYPE Release)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE})
@@ -12,8 +18,7 @@ if (UNIX)
 endif (UNIX)
 
 
-
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(Python COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
 find_package(nanobind CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/dependencies)
