@@ -4,8 +4,6 @@
 #pragma once
 
 #include <cmath>
-#include <sstream>
-#include <string>
 
 namespace spatula { namespace data {
 
