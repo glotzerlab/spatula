@@ -1,7 +1,8 @@
 nanobind_add_module(_spatula_nb
     export.cc
     export-threads.cc
-    
+    export-boosop.cc
+    ../BOOSOP.cc
     ../PGOP.cc
 )
 

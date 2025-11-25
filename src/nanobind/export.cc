@@ -8,6 +8,7 @@
 #include "../util/Metrics.h"
 #include "export-optimize.h"
 #include "export-pgop.h"
+#include "export-boosop.h"
 #include "export-threads.h"
 
 namespace nb = nanobind;
@@ -20,6 +21,7 @@ NB_MODULE(_spatula_nb, m)
           &spatula::util::covariance,
           "Compute the Pearson correlation between two spherical harmonic expansions.");
 
+    spatula::export_BOOSOP(m);
     spatula::export_spatula(m);
     spatula::util::export_threads(m);
     spatula::optimize::export_optimize(m);
