@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <random>
-
 #include "../data/Quaternion.h"
 #include "Optimize.h"
 
