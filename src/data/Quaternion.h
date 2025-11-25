@@ -4,10 +4,7 @@
 #pragma once
 
 #include <cmath>
-#include <sstream>
-#include <string>
 #include <utility>
-#include <vector>
 
 #include "RotationMatrix.h"
 #include "Vec3.h"
