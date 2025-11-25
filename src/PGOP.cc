@@ -2,15 +2,10 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #include <cmath>
-#include <iostream>
-#include <iterator>
-#include <stdexcept>
-#include <string>
 
 #include "PGOP.h"
 #include "computes.h"
 #include "locality.h"
-#include "util/Metrics.h"
 #include "util/Threads.h"
 
 namespace spatula {
