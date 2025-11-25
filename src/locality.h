@@ -7,6 +7,7 @@
 #include <functional>
 #include <iterator>
 #include <numeric>
+#include <span>
 #include <vector>
 
 #include "data/Vec3.h"
@@ -34,7 +35,7 @@ class NeighborhoodBOOs {
 
     LocalNeighborhoodBOOBOO getNeighborhoodBOO(size_t i) const;
     std::vector<data::Vec3> getNormalizedDistances(size_t i) const;
-    std::vector<double> getWeights(size_t i) const;
+    std::span<const double> getWeights(size_t i) const;
     int getNeighborCount(size_t i) const;
 
     private:
@@ -48,16 +49,16 @@ class NeighborhoodBOOs {
 class LocalNeighborhood {
     public:
     LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                      std::vector<double>&& weights_,
-                      std::vector<double>&& sigmas_);
+                      std::span<const double> weights_,
+                      std::span<const double> sigmas_);
 
     void rotate(const data::Vec3& v);
 
     bool constantSigmas() const;
 
     std::vector<data::Vec3> positions;
-    std::vector<double> weights;
-    std::vector<double> sigmas;
+    std::span<const double> weights;
+    std::span<const double> sigmas;
     std::vector<data::Vec3> rotated_positions;
 
     private:
@@ -73,8 +74,8 @@ class Neighborhoods {
                   const double* sigmas);
 
     LocalNeighborhood getNeighborhood(size_t i) const;
-    std::vector<double> getWeights(size_t i) const;
-    std::vector<double> getSigmas(size_t i) const;
+    std::span<const double> getWeights(size_t i) const;
+    std::span<const double> getSigmas(size_t i) const;
     int getNeighborCount(size_t i) const;
 
     private:
@@ -126,10 +127,10 @@ inline std::vector<data::Vec3> NeighborhoodBOOs::getNormalizedDistances(size_t i
     return util::normalize_distances(m_distances, std::make_pair(start, end));
 }
 
-inline std::vector<double> NeighborhoodBOOs::getWeights(size_t i) const
+inline std::span<const double> NeighborhoodBOOs::getWeights(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return std::vector(m_weights + start, m_weights + end);
+    return std::span(m_weights + start, end - start);
 }
 
 inline int NeighborhoodBOOs::getNeighborCount(size_t i) const
@@ -138,14 +139,14 @@ inline int NeighborhoodBOOs::getNeighborCount(size_t i) const
 }
 
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                                            std::vector<double>&& weights_,
-                                            std::vector<double>&& sigmas_)
+                                            std::span<const double> weights_,
+                                            std::span<const double> sigmas_)
     : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
 {
     // Verify whether all sigma values are equivalent
     m_constant_sigmas
-        = std::adjacent_find(sigmas.cbegin(), sigmas.cend(), std::not_equal_to<double>())
-          == sigmas.cend();
+        = std::adjacent_find(sigmas.begin(), sigmas.end(), std::not_equal_to<double>())
+          == sigmas.end();
 }
 
 inline bool LocalNeighborhood::constantSigmas() const
@@ -180,7 +181,8 @@ inline LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
 
     // Create a vector of Vec3 to store the positions (3 coordinates for each Vec3)
     std::vector<data::Vec3> neighborhood_positions;
-    neighborhood_positions.reserve(end - start);
+    const size_t num_neighbors = end - start;
+    neighborhood_positions.reserve(num_neighbors);
 
     for (size_t j = start; j < end; ++j) {
         // Each Vec3 contains 3 consecutive elements from m_distances
@@ -189,20 +191,20 @@ inline LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
     }
 
     return LocalNeighborhood(std::move(neighborhood_positions),
-                             std::vector(m_weights + start, m_weights + end),
-                             std::vector(m_sigmas + start, m_sigmas + end));
+                             std::span(m_weights + start, num_neighbors),
+                             std::span(m_sigmas + start, num_neighbors));
 }
 
-inline std::vector<double> Neighborhoods::getWeights(size_t i) const
+inline std::span<const double> Neighborhoods::getWeights(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return std::vector(m_weights + start, m_weights + end);
+    return std::span(m_weights + start, end - start);
 }
 
-inline std::vector<double> Neighborhoods::getSigmas(size_t i) const
+inline std::span<const double> Neighborhoods::getSigmas(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
-    return std::vector(m_sigmas + start, m_sigmas + end);
+    return std::span(m_sigmas + start, end - start);
 }
 
 inline int Neighborhoods::getNeighborCount(size_t i) const
