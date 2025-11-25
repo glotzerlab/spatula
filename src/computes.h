@@ -3,6 +3,7 @@
 
 #pragma once
 #include "data/RotationMatrix.h"
+#include "data/Vec3.h"
 #include "locality.h"
 #include "util/Metrics.h"
 #include <algorithm>
@@ -49,6 +50,8 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
                                   const std::span<const double> R_ij)
 {
     const auto positions = neighborhood.rotated_positions;
+    // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
+    // called when all sigmas are constant. As such, we can precompute the denominator
     const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
@@ -59,9 +62,9 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
 
         // loop over positions
         for (size_t j {0}; j < positions.size(); ++j) {
-            const auto& p = positions[j];
+            const data::Vec3& p = positions[j];
             // symmetrized position is obtained by multiplying the operator with the position
-            const auto symmetrized_position = R.rotate(p);
+            const data::Vec3 symmetrized_position = R.rotate(p);
 
             // compute overlap with every point in the positions
             double max_res = std::numeric_limits<double>::infinity();
