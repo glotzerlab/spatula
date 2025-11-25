@@ -34,10 +34,9 @@ void export_BOOSOP_class(py::module& m, const std::string& name)
             std::vector<std::vector<std::complex<double>>> D_ij;
             D_ij.reserve(n_symmetries);
 
-            for (size_t i {0}; i < n_symmetries; ++i)
-            {
-                D_ij.emplace_back(std::vector<std::complex<double>>(
-                    u_D_ij.data(i, 0), u_D_ij.data(i, 0) + n_mlms));
+            for (size_t i {0}; i < n_symmetries; ++i) {
+                D_ij.emplace_back(std::vector<std::complex<double>>(u_D_ij.data(i, 0),
+                                                                    u_D_ij.data(i, 0) + n_mlms));
             }
 
             return new BOOSOP<distribution_type>(D_ij, optimizer, distribution_params);
@@ -68,15 +67,13 @@ void export_BOOSOP_class(py::module& m, const std::string& name)
                  const size_t n_symmetries = op_values.size() / N_particles;
 
                  py::array_t<double> op_arr({N_particles, n_symmetries});
-                 py::array_t<double> rot_arr({N_particles, n_symmetries, 4});
+                 py::array_t<double> rot_arr(std::vector<size_t>({N_particles, n_symmetries, 4}));
 
                  auto op_ptr = op_arr.mutable_unchecked<2>();
                  auto rot_ptr = rot_arr.mutable_unchecked<3>();
 
-                 for (size_t i = 0; i < N_particles; ++i)
-                 {
-                     for (size_t j = 0; j < n_symmetries; ++j)
-                     {
+                 for (size_t i = 0; i < N_particles; ++i) {
+                     for (size_t j = 0; j < n_symmetries; ++j) {
                          op_ptr(i, j) = op_values[i * n_symmetries + j];
                          const auto& rot = rotation_values[i * n_symmetries + j];
                          rot_ptr(i, j, 0) = rot.w;
@@ -99,25 +96,23 @@ void export_BOOSOP_class(py::module& m, const std::string& name)
                 const py::array_t<double> quad_positions,
                 const py::array_t<double> quad_weights) {
                  auto op_values_vec = self.refine(distances.data(0),
-                                                    rotations.data(0),
-                                                    weights.data(0),
-                                                    num_neighbors.data(0),
-                                                    num_neighbors.size(),
-                                                    m,
-                                                    ylms.data(0),
-                                                    ylms.shape(0),
-                                                    quad_positions.data(0),
-                                                    quad_positions.shape(0),
-                                                    quad_weights.data(0));
+                                                  rotations.data(0),
+                                                  weights.data(0),
+                                                  num_neighbors.data(0),
+                                                  num_neighbors.size(),
+                                                  m,
+                                                  ylms.data(0),
+                                                  ylms.shape(0),
+                                                  quad_positions.data(0),
+                                                  quad_positions.shape(0),
+                                                  quad_weights.data(0));
 
                  const size_t N_particles = num_neighbors.size();
                  const size_t n_symmetries = op_values_vec.size() / N_particles;
                  py::array_t<double> op_store({N_particles, n_symmetries});
                  auto u_op_store = op_store.mutable_unchecked<2>();
-                 for (size_t i = 0; i < N_particles; ++i)
-                 {
-                     for (size_t j = 0; j < n_symmetries; ++j)
-                     {
+                 for (size_t i = 0; i < N_particles; ++i) {
+                     for (size_t j = 0; j < n_symmetries; ++j) {
                          u_op_store(i, j) = op_values_vec[i * n_symmetries + j];
                      }
                  }
