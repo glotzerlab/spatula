@@ -49,7 +49,7 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
                                   const std::span<const double> R_ij)
 {
     const auto positions = neighborhood.rotated_positions;
-    const auto sigmas = neighborhood.sigmas;
+    const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
@@ -66,15 +66,11 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
             // compute overlap with every point in the positions
             double max_res = std::numeric_limits<double>::infinity();
             for (size_t m {0}; m < positions.size(); ++m) {
+                data::Vec3 diff = positions[m] - symmetrized_position;
                 // max(exp(-x)) == min(x)
-                max_res = std::min(
-                    max_res,
-                    util::compute_log_m_Bhattacharyya_coefficient_gaussian(positions[m],
-                                                                           symmetrized_position,
-                                                                           sigmas[j],
-                                                                           sigmas[m]));
+                max_res = std::min(max_res, diff.dot(diff));
             }
-            overlap += std::exp(-max_res);
+            overlap += std::exp(-max_res * denom);
         }
     }
     // cast to double to avoid integer division
