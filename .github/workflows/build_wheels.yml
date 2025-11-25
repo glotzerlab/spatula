@@ -23,8 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-        - base: ubuntu
-          version: 24.04
+        - base: ubuntu-latest
           arch: 'x86_64'
         - base: windows
           version: 2025
@@ -53,7 +52,6 @@ jobs:
         env:
           CIBW_BUILD: "${{ matrix.python.version }}-*"
           CIBW_TEST_REQUIRES: pytest==8.4.2 numpy==${{ matrix.python.oldest_numpy }} pytest-rerunfailures==16.0.1 coxeter==0.10.0
-          CIBW_BEFORE_BUILD_LINUX: "apt-get update && apt-get install -y python$(python -c 'import sys; print(f\"{sys.version_info.major}.{sys.version_info.minor}\")')-dev"
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
