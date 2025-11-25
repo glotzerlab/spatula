@@ -12,60 +12,6 @@
 
 namespace spatula {
 
-BOOSOPStore::BOOSOPStore(size_t N_particles, size_t N_symmetries)
-    : N_syms(N_symmetries), op(std::vector<size_t> {N_particles, N_symmetries}),
-      rotations(std::vector<size_t> {N_particles, N_symmetries, 4}),
-      u_op(op.mutable_unchecked<2>()), u_rotations(rotations.mutable_unchecked<3>())
-{
-}
-
-void BOOSOPStore::addOp(size_t i,
-                        const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_)
-{
-    const auto& values = std::get<0>(op_);
-    const auto& rots = std::get<1>(op_);
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = values[j];
-        u_rotations(i, j, 0) = rots[j].w;
-        u_rotations(i, j, 1) = rots[j].x;
-        u_rotations(i, j, 2) = rots[j].y;
-        u_rotations(i, j, 3) = rots[j].z;
-    }
-}
-
-void BOOSOPStore::addNull(size_t i)
-{
-    for (size_t j {0}; j < N_syms; ++j) {
-        u_op(i, j) = 0;
-        u_rotations(i, j, 0) = 1;
-        u_rotations(i, j, 1) = 0;
-        u_rotations(i, j, 2) = 0;
-        u_rotations(i, j, 3) = 0;
-    }
-}
-
-py::tuple BOOSOPStore::getArrays()
-{
-    return py::make_tuple(op, rotations);
-}
-
-template<typename distribution_type>
-BOOSOP<distribution_type>::BOOSOP(const py::array_t<std::complex<double>> D_ij,
-                                  std::shared_ptr<optimize::Optimizer>& optimizer,
-                                  typename distribution_type::param_type distribution_params)
-    : m_distribution(distribution_params), m_n_symmetries(D_ij.shape(0)), m_Dij(),
-      m_optimize(optimizer)
-{
-    m_Dij.reserve(m_n_symmetries);
-    const auto u_D_ij = D_ij.unchecked<2>();
-    const size_t n_mlms = D_ij.shape(1);
-    for (size_t i {0}; i < m_n_symmetries; ++i) {
-        m_Dij.emplace_back(
-            std::vector<std::complex<double>>(u_D_ij.data(i, 0), u_D_ij.data(i, 0) + n_mlms));
-    }
-}
-
-// TODO there is also a bug with self-neighbors.
 template<typename distribution_type>
 py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances,
                                              const py::array_t<double> weights,
@@ -86,22 +32,47 @@ py::tuple BOOSOP<distribution_type>::compute(const py::array_t<double> distances
                                                 weights.data(0),
                                                 distances.data(0));
     const size_t N_particles = num_neighbors.size();
-    auto op_store = BOOSOPStore(N_particles, m_n_symmetries);
-    const auto loop_func = [&op_store, &neighborhoods, &qlm_eval, this](const size_t start,
-                                                                        const size_t stop) {
+
+    py::array_t<double> op(std::vector<size_t> {N_particles, m_n_symmetries});
+    py::array_t<double> rotations(std::vector<size_t> {N_particles, m_n_symmetries, 4});
+    auto u_op = op.mutable_unchecked<2>();
+    auto u_rotations = rotations.mutable_unchecked<3>();
+
+    const auto loop_func = [&u_op, &u_rotations, &neighborhoods, &qlm_eval, this](
+        const size_t start, const size_t stop) {
         auto qlm_buf = util::QlmBuf(qlm_eval.getNlm());
-        for (size_t i = start; i < stop; ++i) {
-            if (neighborhoods.getNeighborCount(i) == 0) {
-                op_store.addNull(i);
+        for (size_t i = start; i < stop; ++i)
+        {
+            if (neighborhoods.getNeighborCount(i) == 0)
+            {
+                for (size_t j {0}; j < m_n_symmetries; ++j)
+                {
+                    u_op(i, j) = 0;
+                    u_rotations(i, j, 0) = 1;
+                    u_rotations(i, j, 1) = 0;
+                    u_rotations(i, j, 2) = 0;
+                    u_rotations(i, j, 3) = 0;
+                }
                 continue;
             }
             auto neighborhood = neighborhoods.getNeighborhoodBOO(i);
-            const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf);
-            op_store.addOp(i, particle_op_rot);
+            const auto particle_op_rot
+                = this->compute_particle(neighborhood, qlm_eval, qlm_buf);
+
+            const auto& values = std::get<0>(particle_op_rot);
+            const auto& rots = std::get<1>(particle_op_rot);
+            for (size_t j {0}; j < m_n_symmetries; ++j)
+            {
+                u_op(i, j) = values[j];
+                u_rotations(i, j, 0) = rots[j].w;
+                u_rotations(i, j, 1) = rots[j].x;
+                u_rotations(i, j, 2) = rots[j].y;
+                u_rotations(i, j, 3) = rots[j].z;
+            }
         }
     };
     execute_func(loop_func, N_particles);
-    return op_store.getArrays();
+    return py::make_tuple(op, rotations);
 }
 
 template<typename distribution_type>
