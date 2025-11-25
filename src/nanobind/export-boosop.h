@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace spatula {
-void export_BOOSOP(py::module& m);
+void export_BOOSOP(nb::module_& m);
 } // namespace spatula
