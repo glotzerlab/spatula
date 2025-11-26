@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "../data/Vec3.h" // Added for data::Vec3
+#include "../data/Vec3.h"
 #include <complex>
-#include <numeric> // Added for std::sqrt
+#include <numeric>
 #include <vector>
 
 namespace spatula { namespace util {

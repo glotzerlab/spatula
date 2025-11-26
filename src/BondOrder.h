@@ -3,24 +3,21 @@
 
 #pragma once
 
-#include <algorithm> // Added
-#include <cmath>     // Added
-#include <numeric>   // Added for std::reduce
+#include <algorithm>
+#include <cmath>
+#include <numeric>
 #include <span>
 #include <utility>
 #include <vector>
 
 #include "data/Vec3.h"
-#include "util/Util.h" // Added for util::fast_angle_eucledian
+#include "util/Util.h"
 
 #ifdef _MSC_VER
 #define M_PI 3.14159265358979323846
 #endif
 
 namespace spatula {
-// Model concept to show expected interface. We cannot use C++20 for now so we have commented it
-// out.
-
 /**
  * @brief Concept to show the necessary interface for a spherical surface distribution. Given the
  * performance critical nature of the evaluation the bond order diagram, we should use concepts and

@@ -59,12 +59,11 @@ void export_spatula(nb::module_& m)
             nb::arg("compute_per_operator"))
         .def(
             "compute",
-            []( /// TODO
-                PGOP* self,
-                const nb::ndarray<double, nb::shape<-1, 3>>& distances,
-                const nb::ndarray<double, nb::shape<-1>>& weights,
-                const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
-                const nb::ndarray<double, nb::shape<-1>>& sigmas
+            [](PGOP* self,
+               const nb::ndarray<double, nb::shape<-1, 3>>& distances,
+               const nb::ndarray<double, nb::shape<-1>>& weights,
+               const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
+               const nb::ndarray<double, nb::shape<-1>>& sigmas
 
             ) {
                 auto results_tuple = self->compute(distances.data(),
