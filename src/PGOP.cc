@@ -29,7 +29,7 @@ PGOP::compute(const double* distances,
               const size_t N_particles_in_neighbors) const
 {
     const auto neighborhoods
-        = Neighborhoods(N_particles_in_neighbors, num_neighbors, weights, distances, sigmas);
+        = Neighborhoods(N_particles_in_neighbors, num_neighbors, weights, distances, false, sigmas);
     const size_t N_particles = N_particles_in_neighbors;
     size_t ops_per_particle = m_n_symmetries;
     if (m_compute_per_operator) {

@@ -36,7 +36,7 @@ BOOSOP<distribution_type>::compute(const double* distances,
                                         ylms,
                                         quad_positions_shape_0,
                                         ylms_shape_0);
-    const auto neighborhoods = NeighborhoodBOOs(N_particles, num_neighbors, weights, distances);
+    const auto neighborhoods = Neighborhoods(N_particles, num_neighbors, weights, distances, true);
 
     std::vector<double> op_values(N_particles * m_n_symmetries);
     std::vector<data::Quaternion> rotation_values(N_particles * m_n_symmetries);
@@ -52,7 +52,7 @@ BOOSOP<distribution_type>::compute(const double* distances,
                 }
                 continue;
             }
-            auto neighborhood = neighborhoods.getNeighborhoodBOO(i);
+            auto neighborhood = neighborhoods.getNeighborhood(i);
             const auto particle_op_rot = this->compute_particle(neighborhood, qlm_eval, qlm_buf);
 
             const auto& values = std::get<0>(particle_op_rot);
@@ -86,7 +86,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const double* distances,
                                         ylms,
                                         quad_positions_shape_0,
                                         ylms_shape_0);
-    const auto neighborhoods = NeighborhoodBOOs(N_particles, num_neighbors, weights, distances);
+    const auto neighborhoods = Neighborhoods(N_particles, num_neighbors, weights, distances, true);
     std::vector<double> op_store(N_particles * m_n_symmetries);
 
     const auto loop_func = [&](const size_t start, const size_t stop) {
@@ -98,7 +98,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const double* distances,
                 }
                 continue;
             }
-            auto neighborhood = neighborhoods.getNeighborhoodBOO(i);
+            auto neighborhood = neighborhoods.getNeighborhood(i);
             for (size_t j {0}; j < m_n_symmetries; ++j) {
                 const size_t rot_idx = (i * m_n_symmetries + j) * 4;
                 const auto rot = data::Quaternion(rotations[rot_idx],
@@ -118,7 +118,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const double* distances,
 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodBOOBOO& neighborhood,
+BOOSOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
 {
@@ -136,7 +136,7 @@ BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodBOOBOO& neighborhoo
 
 template<typename distribution_type>
 std::tuple<double, data::Quaternion>
-BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodBOOBOO& neighborhood,
+BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
                                             const std::vector<std::complex<double>>& D_ij,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
@@ -154,7 +154,7 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodBOOBOO& neighborhoo
 }
 
 template<typename distribution_type>
-double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodBOOBOO& neighborhood,
+double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhood& neighborhood,
                                                  const std::vector<std::complex<double>>& D_ij,
                                                  const util::QlmEval& qlm_eval,
                                                  util::QlmBuf& qlm_buf) const
