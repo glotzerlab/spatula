@@ -37,17 +37,17 @@ struct Vec3 {
      *
      * @param b the point to compute the dot product of.
      */
-    double dot(const Vec3& b) const
+    inline double dot(const Vec3& b) const
     {
         return x * b.x + y * b.y + z * b.z;
     }
 
-    double norm() const
+    inline double norm() const
     {
         return std::sqrt(x * x + y * y + z * z);
     }
 
-    void normalize()
+    inline void normalize()
     {
         const auto n = norm();
         if (n == 0) {
@@ -59,12 +59,12 @@ struct Vec3 {
         z *= inv_norm;
     }
 
-    Vec3 cross(const Vec3& a) const
+    inline Vec3 cross(const Vec3& a) const
     {
         return Vec3(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
     }
 
-    double& operator[](const size_t i)
+    inline double& operator[](const size_t i)
     {
         if (i == 0) {
             return x;
@@ -75,7 +75,7 @@ struct Vec3 {
         return z;
     }
 
-    const double& operator[](size_t i) const
+    inline const double& operator[](size_t i) const
     {
         if (i == 0) {
             return x;
