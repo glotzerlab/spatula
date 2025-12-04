@@ -32,6 +32,8 @@ def run_benchmark(symmetry, n_orientations=50, n_repeats=10, mode="full"):
         The number of random orientations to sample. Defaults to 100.
     n_repeats : int, optional
         The number of times to repeat the benchmark. Defaults to 10.
+    mode: {"boo", "full"}, optional
+        The mode for the PGOP compute. Defaults to "full".
 
     """
     print(f"--- Benchmarking {symmetry} symmetry ---")
