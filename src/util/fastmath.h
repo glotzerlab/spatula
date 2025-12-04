@@ -2,6 +2,7 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #pragma once
+#include <bit>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
