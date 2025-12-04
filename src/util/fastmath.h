@@ -4,6 +4,7 @@
 #pragma once
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 
 namespace spatula { namespace util {
 inline double fast_sinhc_approx(double x)
