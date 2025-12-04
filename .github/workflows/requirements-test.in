@@ -1,10 +1,9 @@
 ninja
 cmake
 coxeter
-pybind11
 freud-analysis
+nanobind
 numpy
 pytest
-pytest-rerunfailures
 scikit-build-core
 scipy

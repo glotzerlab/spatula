@@ -2,107 +2,20 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #pragma once
+
+#include <complex>
 #include <memory>
 #include <tuple>
 #include <vector>
 
-#include <complex>
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include "data/Quaternion.h"
+#include "locality.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/QlmEval.h"
 #include "util/Util.h"
 
-namespace py = pybind11;
-
 namespace spatula {
-
-/**
- * @brief storage for neighbor positions, weights, and rotated positions.
- *
- * This struct is helpful is organizing operations on the BOD's neighbors when optimizing over
- * SO(3), by keeping all the data together.
- */
-struct LocalNeighborhoodBOOBOO {
-    LocalNeighborhoodBOOBOO(std::vector<data::Vec3>&& positions_, std::vector<double>&& weights_);
-
-    void rotate(const data::Vec3& q);
-
-    /// BOD neighbor bonds
-    const std::vector<data::Vec3> positions;
-    /// BOD neighbor weights
-    const std::vector<double> weights;
-    /// Storage for the current positions under a given rotation used in optimization.
-    std::vector<data::Vec3> rotated_positions;
-};
-
-/**
- * @brief Small helper class for storing and accessing neighbor list data from Python.
- *
- * Warning: This class consumes the raw arrays from Python and requires that these arrays outlive
- * class instances.
- */
-class NeighborhoodBOOs {
-    public:
-    NeighborhoodBOOs(size_t N,
-                     const int* neighbor_counts,
-                     const double* weights,
-                     const double* distance);
-
-    /// Get the neighbors for point i.
-    LocalNeighborhoodBOOBOO getNeighborhoodBOO(size_t i) const;
-    /// Get the normalized neighbor distance vectors for point i.
-    std::vector<data::Vec3> getNormalizedDistances(size_t i) const;
-    /// Get the neighbor weight for point i.
-    std::vector<double> getWeights(size_t i) const;
-    /// Get the number of neighbors for point i.
-    int getNeighborCount(size_t i) const;
-
-    private:
-    /// Number of points with neighbors
-    const size_t m_N;
-    /// The number of neighbors for each point
-    const int* m_neighbor_counts;
-    /// The distance vector of each neighbor
-    const double* m_distances;
-    /// The weights for each neighbor bond
-    const double* m_weights;
-    /// The offsets to index into the distances array
-    std::vector<size_t> m_neighbor_offsets;
-};
-
-/**
- * @brief Store for the optimal BOOSOP values and rotations
- *
- * This simplifies the setting of the results from the optimization, and the use of numpy arrays in
- * the code.
- */
-struct BOOSOPStore {
-    BOOSOPStore(size_t N_particles, size_t N_symmetries);
-    /// Number of point group symmetries to compute
-    size_t N_syms;
-    /// The optimized value of BOOSOP for each point group
-    py::array_t<double> op;
-    /// The optimal rotations used to obtain the maximum BOOSOP as quaternions.
-    py::array_t<double> rotations;
-
-    /// Add a single point's set of BOOSOP and rotation values
-    void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
-    /// Store 0's for point i. This is used when no neighbors for a point exist.
-    void addNull(size_t i);
-    /// Return a tuple of the two arrays op and rotations.
-    py::tuple getArrays();
-
-    private:
-    /// Fast access to op
-    py::detail::unchecked_mutable_reference<double, 2> u_op;
-    /// Fast access to rotations
-    py::detail::unchecked_mutable_reference<double, 3> u_rotations;
-};
 
 /**
  * @brief Central class, computes BOOSOP for provided points.
@@ -112,7 +25,7 @@ struct BOOSOPStore {
  */
 template<typename distribution_type> class BOOSOP {
     public:
-    BOOSOP(const py::array_t<std::complex<double>> D_ij,
+    BOOSOP(const std::vector<std::vector<std::complex<double>>>& D_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            typename distribution_type::param_type distribution_params);
 
@@ -132,13 +45,17 @@ template<typename distribution_type> class BOOSOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
-                      const unsigned int m,
-                      const py::array_t<std::complex<double>> ylms,
-                      const py::array_t<double> quad_positions,
-                      const py::array_t<double> quad_weights) const;
+    std::tuple<std::vector<double>, std::vector<data::Quaternion>>
+    compute(const double* distances,
+            const double* weights,
+            const int* num_neighbors,
+            size_t N_particles,
+            const unsigned int m,
+            const std::complex<double>* ylms,
+            size_t ylms_shape_0,
+            const double* quad_positions,
+            size_t quad_positions_shape_0,
+            const double* quad_weights) const;
 
     /**
      * @brief Compute BOOSOP at given rotations for each point.
@@ -160,14 +77,17 @@ template<typename distribution_type> class BOOSOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    py::array_t<double> refine(const py::array_t<double> distances,
-                               const py::array_t<double> rotations,
-                               const py::array_t<double> weights,
-                               const py::array_t<int> num_neighbors,
+    std::vector<double> refine(const double* distances,
+                               const double* rotations,
+                               const double* weights,
+                               const int* num_neighbors,
+                               size_t N_particles,
                                const unsigned int m,
-                               const py::array_t<std::complex<double>> ylms,
-                               const py::array_t<double> quad_positions,
-                               const py::array_t<double> quad_weights) const;
+                               const std::complex<double>* ylms,
+                               size_t ylms_shape_0,
+                               const double* quad_positions,
+                               size_t quad_positions_shape_0,
+                               const double* quad_weights) const;
 
     private:
     /**
@@ -184,7 +104,7 @@ template<typename distribution_type> class BOOSOP {
      * specified point group symmetries.
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(LocalNeighborhoodBOOBOO& neighborhood,
+    compute_particle(LocalNeighborhood& neighborhood,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
 
@@ -202,7 +122,7 @@ template<typename distribution_type> class BOOSOP {
      * @returns the optimized BOOSOP value and the optimal rotation for the given symmetry.
      */
     std::tuple<double, data::Quaternion>
-    compute_symmetry(LocalNeighborhoodBOOBOO& neighborhood,
+    compute_symmetry(LocalNeighborhood& neighborhood,
                      const std::vector<std::complex<double>>& D_ij,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
@@ -222,7 +142,7 @@ template<typename distribution_type> class BOOSOP {
      *
      * @returns The BOOSOP value.
      */
-    double compute_BOOSOP(LocalNeighborhoodBOOBOO& neighborhood,
+    double compute_BOOSOP(LocalNeighborhood& neighborhood,
                           const std::vector<std::complex<double>>& D_ij,
                           const util::QlmEval& qlm_eval,
                           util::QlmBuf& qlm_buf) const;
@@ -244,8 +164,4 @@ template<typename distribution_type> class BOOSOP {
     std::shared_ptr<const optimize::Optimizer> m_optimize;
 };
 
-template<typename distribution_type>
-void export_BOOSOP_class(py::module& m, const std::string& name);
-
-void export_BOOSOP(py::module& m);
 } // End namespace spatula

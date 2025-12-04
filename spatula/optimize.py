@@ -9,7 +9,7 @@ import numpy as np
 import scipy as sp
 from scipy.spatial.transform import Rotation
 
-from . import _spatula
+from . import _spatula_nb
 
 """The Golden ratio, 1.61803398875..."""
 GOLDEN_RATIO = (1 + np.sqrt(5)) / 2
@@ -78,7 +78,7 @@ class RandomSearch(Optimizer):
             Defaults to 42.
 
         """
-        self._cpp = _spatula.RandomSearch(max_iter, seed)
+        self._cpp = _spatula_nb.RandomSearch(max_iter, seed)
 
 
 class StepGradientDescent(Optimizer):
@@ -136,8 +136,8 @@ class StepGradientDescent(Optimizer):
             below ``tol``. Defaults to 1e-6.
 
         """
-        self._cpp = _spatula.StepGradientDescent(
-            _spatula.Quaternion(initial_point).to_axis_angle_3D(),
+        self._cpp = _spatula_nb.StepGradientDescent(
+            tuple(initial_point),
             max_iter,
             initial_jump,
             learning_rate,
@@ -175,7 +175,7 @@ class Mesh(Optimizer):
             The rotaional quaternions to test.
 
         """
-        self._cpp = _spatula.Mesh([_spatula.Quaternion(p) for p in points])
+        self._cpp = _spatula_nb.Mesh(np.asarray(points, dtype=np.float64, order="C"))
 
     @classmethod
     def from_grid(cls, n_axes=75, n_angles=10):
@@ -309,7 +309,7 @@ class Union(Optimizer):
 
         """
         instance = cls()
-        instance._cpp = _spatula.Union.with_step_gradient_descent(
+        instance._cpp = _spatula_nb.Union.with_step_gradient_descent(
             optimizer._cpp, max_iter, initial_jump, learning_rate, tol
         )
         return instance
@@ -320,6 +320,4 @@ class NoOptimization(Optimizer):
 
     def __init__(self):
         """Create a NoOptimization object."""
-        self._cpp = _spatula.NoOptimization(
-            _spatula.Quaternion((1, 0, 0, 0)).to_axis_angle_3D()
-        )
+        self._cpp = _spatula_nb.NoOptimization()

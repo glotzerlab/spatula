@@ -16,7 +16,7 @@ The current data files are
 
 ## Native Extensions
 We use C++, located in `src/` to perform the computational complex parts of spatula.
-Furthermore, we use `pybind11 <https://pybind11.readthedocs.io/en/stable/>__` to link our C++ code to the CPython interpreter.
+Furthermore, we use `nanobind <https://nanobind.readthedocs.io/en/latest/>__` to link our C++ code to the CPython interpreter.
 
 ## C++ Structure
 The code is broken into a few small sections

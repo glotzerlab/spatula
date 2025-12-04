@@ -9,3 +9,5 @@ build
 compile_commands.json
 *.egg-info
 dist
+/includes/
+metrics_benchmark
