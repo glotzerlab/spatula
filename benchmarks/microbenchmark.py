@@ -21,7 +21,7 @@ spatula.util.set_num_threads(1)
 SHAPE = coxeter.families.PlatonicFamily.get_shape("Icosahedron")
 
 
-def run_benchmark(symmetry, n_orientations=50, n_repeats=10):
+def run_benchmark(symmetry, n_orientations=50, n_repeats=10, mode="full"):
     """Run the benchmark for a given symmetry.
 
     Parameters
@@ -50,7 +50,7 @@ def run_benchmark(symmetry, n_orientations=50, n_repeats=10):
     # )
 
     # Create the PGOP object
-    pgop = spatula.PGOP(symmetries=[symmetry], optimizer=optimizer)
+    pgop = spatula.PGOP(symmetries=[symmetry], optimizer=optimizer, mode=mode)
 
     # Generate random rotations outside the benchmark loop
     random_rotations = Rotation.random(n_orientations, random_state=42)
@@ -69,7 +69,7 @@ def run_benchmark(symmetry, n_orientations=50, n_repeats=10):
             system = (box, rotated_points)
             pgop.compute(
                 system,
-                sigmas=0.075,
+                sigmas=0.075 if pgop.mode != "boo" else 177.77,
                 neighbors={"r_max": r_max, "exclude_ii": True},
                 query_points=[[0, 0, 0]],
             )
@@ -112,10 +112,16 @@ def main():
         default=symmetries_list,
         help=f"One or more symmetries to benchmark. Defaults to all: {symmetries_list}",
     )
+    parser.add_argument(
+        "--mode",
+        choices=["boo", "full"],
+        default="full",
+        help="Symmetry mode. Default is 'full'.",
+    )
     args = parser.parse_args()
 
     for symmetry in args.symmetries:
-        run_benchmark(symmetry)
+        run_benchmark(symmetry, mode=args.mode)
 
 
 if __name__ == "__main__":
