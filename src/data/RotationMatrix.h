@@ -22,8 +22,7 @@ struct RotationMatrix : std::array<double, 9> {
 #ifdef _MSC_VER // MSVC
     __declspec(dllexport)
 #endif
-    inline Vec3
-    rotate(Vec3 vec) const
+    inline Vec3 rotate(Vec3 vec) const
     {
         return Vec3((*this)[0] * vec[0] + (*this)[1] * vec[1] + (*this)[2] * vec[2],
                     (*this)[3] * vec[0] + (*this)[4] * vec[1] + (*this)[5] * vec[2],
