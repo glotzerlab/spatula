@@ -8,7 +8,6 @@
 #include "util/Metrics.h"
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 #include <span>
 
 namespace spatula { namespace computes {
