@@ -93,7 +93,7 @@ def run_benchmark(symmetry, n_orientations=50, n_repeats=10, mode="full"):
     mean_pgop = np.mean(pgop_values)
     std_pgop = np.std(pgop_values)
 
-    print(f"  PGOP: {mean_pgop:.4f} ± {std_pgop:.4f} (mean ± std. dev.)")
+    print(f"  PGOP: {mean_pgop:.8f} ± {std_pgop:.8f} (mean ± std. dev.)")
     print(
         f"  Time: {mean_time_per_q * 1000:.2f} μs ± "
         f"{std_time_per_q * 1000:.2f} per trial"
