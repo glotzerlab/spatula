@@ -80,7 +80,6 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
     const auto normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
 }
-
 double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 {
     const auto positions = neighborhood.rotated_positions;
@@ -99,14 +98,50 @@ double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<cons
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
                 double BC = 0;
-                BC = util::compute_Bhattacharyya_coefficient_fisher(positions[m],
-                                                                    symmetrized_position,
-                                                                    sigmas[j],
-                                                                    sigmas[m]);
+                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized(positions[m],
+                                                                               symmetrized_position,
+                                                                               sigmas[j],
+                                                                               sigmas[m]);
                 if (BC > max_res)
                     max_res = BC;
             }
             overlap += max_res;
+        }
+    }
+    // cast to double to avoid integer division
+    const auto normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
+    return overlap / normalization;
+}
+
+double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
+{
+    const auto positions = neighborhood.rotated_positions;
+    const double kappa = neighborhood.sigmas[0];
+    const double prefix_term = 2.0 * kappa / std::sinh(kappa);
+    double overlap = 0.0;
+    // loop over the R_ij. Each 3x3 segment is a symmetry operation
+    // matrix. Each matrix should be applied to each point in positions.
+    for (size_t i {0}; i < R_ij.size(); i += 9) {
+        data::RotationMatrix R;
+        std::copy_n(R_ij.data() + i, 9, R.begin());
+        // loop over positions
+        for (size_t j {0}; j < positions.size(); ++j) {
+            // symmetrized position is obtained by multiplying the operator with the position
+            const data::Vec3 symmetrized_position = R.rotate(positions[j]);
+            // Clamp lower bound to -1.0 in case our projection underflowed
+            double max_proj = -1.0;
+            for (size_t m {0}; m < positions.size(); ++m) {
+                auto position = positions[m];
+                double proj = position.dot(symmetrized_position);
+                max_proj = std::max(proj, max_proj);
+            }
+            double inner_term = std::sqrt(2.0 * kappa * kappa * (1.0 + max_proj));
+            // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
+            if (inner_term > 1e-6) {
+                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
+            } else {
+                overlap += prefix_term * 0.5;
+            }
         }
     }
     // cast to double to avoid integer division
