@@ -114,39 +114,45 @@ double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<cons
     return overlap / normalization;
 }
 
-inline double fast_exp_accurate(double x)
-{
-    // exp(x) = 2^k * exp(r)
-    // k = round(x / ln2)
-    const double ln2_inv = 1.44269504088896340735992468100189213;
-    const double ln2_hi = 0.693147180559945309417232121458176568;
-    const double ln2_lo = 1.9082149292705877e-10;
-
-    double k_float = std::round(x * ln2_inv);
-    int k = static_cast<int>(k_float);
-
-    double r = x - k_float * ln2_hi;
-    r -= k_float * ln2_lo; // Correction for higher precision
-
-    // Polynomial Approximation for exp(r) on [-0.5, 0.5] (degree 4 taylor-remex)
-    double p = 1.0 / 24.0;
-    p = p * r + 1.0 / 6.0;
-    p = p * r + 0.5;
-    p = p * r + 1.0;
-
-    // return 2^k * p
-    uint64_t ki = static_cast<uint64_t>(k + 1023) << 52;
-    double two_to_k;
-    // memcpy to avoid strict aliasing violation
-    std::memcpy(&two_to_k, &ki, sizeof(double));
-
-    return p * two_to_k;
-}
-
 inline double fast_sinhc_approx(double x)
 {
-    // sinh(x/2)*x approx exp(x/2) / (2x)
-    return fast_exp_accurate(0.5 * x) / (2.0 * x);
+    // Cody-Waite Constants
+    constexpr double half_ln2_inv = 0.72134752044448170367996234050095; // 0.5 / ln(2)
+
+    // High bits of ln(2), with trailing zeros for exact multiplication.
+    constexpr double ln2_hi = 0.693147180369123816490;
+
+    // "missing" low bits for ln2
+    constexpr double ln2_lo = 1.90821492927058770002e-10;
+
+    // Range Reduction: k_float = round(x/2 / ln2)
+    double k_float = std::round(x * half_ln2_inv);
+    int k = static_cast<int>(k_float);
+
+    // r = (x/2) - k * ln2. We compute this as: r = 0.5 * x - k * ln2_hi - k * ln2_lo
+    double r = 0.5 * x - k_float * ln2_hi;
+    r -= k_float * ln2_lo;
+
+    // Polynomial Approximation (Degree 5 Remez, should be within ~ 5e-7)
+    constexpr double c5 = 1.0 / 120.0;
+    constexpr double c4 = 1.0 / 24.0;
+    constexpr double c3 = 1.0 / 6.0;
+    constexpr double c2 = 0.5;
+
+    // Evaluate (c4 + r*c5) and (c2 + r*c3) simultaneously (hopefully)
+    double term_54 = c4 + r * c5;
+    double term_32 = c2 + r * c3;
+
+    // Evaluate the polynomial expansion
+    double r_sq = r * r;
+    double p = (1.0 + r) + r_sq * (term_32 + r_sq * term_54);
+
+    // Reconstruction: 2^k * p / (2x), with a bias adjustment 1023 -> 1022 to halve x
+    uint64_t ki = static_cast<uint64_t>(k + 1022) << 52;
+    double scale_factor;
+    std::memcpy(&scale_factor, &ki, sizeof(double));
+
+    return p * (scale_factor / x);
 }
 
 double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
@@ -172,15 +178,15 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
                 max_proj = std::max(proj, max_proj);
             }
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
-            // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
-            // if (inner_term > 36.5) { // error < 1e-16
-            if (inner_term > 1e-6) { // error < 1e-16
-                // overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
-                // overlap += prefix_term * std::exp(inner_term * 0.5) / (2.0 * inner_term);
+
+            if (inner_term > 16.0) { // error < 5e-7
                 overlap += prefix_term * fast_sinhc_approx(inner_term);
-                // } else if (inner_term > 1e-6) {
-                //     overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
+                // overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
+            } else if (inner_term > 1e-6) {
+                // Use full-precision sinh to avoid errors when x is small
+                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else {
+                // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
                 overlap += prefix_term * 0.5;
             }
         }
