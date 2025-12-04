@@ -11,6 +11,7 @@
 
 #include "../data/RotationMatrix.h"
 #include "../data/Vec3.h"
+#include "fastmath.h"
 
 namespace spatula { namespace util {
 
