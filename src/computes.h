@@ -8,6 +8,7 @@
 #include "util/Metrics.h"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <span>
 
 namespace spatula { namespace computes {
@@ -113,6 +114,41 @@ double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<cons
     return overlap / normalization;
 }
 
+inline double fast_exp_accurate(double x)
+{
+    // exp(x) = 2^k * exp(r)
+    // k = round(x / ln2)
+    const double ln2_inv = 1.44269504088896340735992468100189213;
+    const double ln2_hi = 0.693147180559945309417232121458176568;
+    const double ln2_lo = 1.9082149292705877e-10;
+
+    double k_float = std::round(x * ln2_inv);
+    int k = static_cast<int>(k_float);
+
+    double r = x - k_float * ln2_hi;
+    r -= k_float * ln2_lo; // Correction for higher precision
+
+    // Polynomial Approximation for exp(r) on [-0.5, 0.5] (degree 4 taylor-remex)
+    double p = 1.0 / 24.0;
+    p = p * r + 1.0 / 6.0;
+    p = p * r + 0.5;
+    p = p * r + 1.0;
+
+    // return 2^k * p
+    uint64_t ki = static_cast<uint64_t>(k + 1023) << 52;
+    double two_to_k;
+    // memcpy to avoid strict aliasing violation
+    std::memcpy(&two_to_k, &ki, sizeof(double));
+
+    return p * two_to_k;
+}
+
+inline double fast_sinhc_approx(double x)
+{
+    // sinh(x/2)*x approx exp(x/2) / (2x)
+    return fast_exp_accurate(0.5 * x) / (2.0 * x);
+}
+
 double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 {
     const auto positions = neighborhood.rotated_positions;
@@ -121,8 +157,8 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
+    data::RotationMatrix R;
     for (size_t i {0}; i < R_ij.size(); i += 9) {
-        data::RotationMatrix R;
         std::copy_n(R_ij.data() + i, 9, R.begin());
         // loop over positions
         for (size_t j {0}; j < positions.size(); ++j) {
@@ -135,10 +171,15 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
                 double proj = position.dot(symmetrized_position);
                 max_proj = std::max(proj, max_proj);
             }
-            double inner_term = std::sqrt(2.0 * kappa * kappa * (1.0 + max_proj));
+            double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
             // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
-            if (inner_term > 1e-6) {
-                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
+            // if (inner_term > 36.5) { // error < 1e-16
+            if (inner_term > 1e-6) { // error < 1e-16
+                // overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
+                // overlap += prefix_term * std::exp(inner_term * 0.5) / (2.0 * inner_term);
+                overlap += prefix_term * fast_sinhc_approx(inner_term);
+                // } else if (inner_term > 1e-6) {
+                //     overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else {
                 overlap += prefix_term * 0.5;
             }
