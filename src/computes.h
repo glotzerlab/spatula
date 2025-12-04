@@ -13,7 +13,7 @@
 namespace spatula { namespace computes {
 double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 {
-    const auto positions = neighborhood.rotated_positions;
+    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
@@ -49,7 +49,7 @@ double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<co
 double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
                                   const std::span<const double> R_ij)
 {
-    const auto positions = neighborhood.rotated_positions;
+    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
     const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
@@ -82,7 +82,7 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
 }
 double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 {
-    const auto positions = neighborhood.rotated_positions;
+    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
@@ -115,7 +115,7 @@ double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<cons
 
 double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 {
-    const auto positions = neighborhood.rotated_positions;
+    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const double kappa = neighborhood.sigmas[0];
     const double prefix_term = 2.0 * kappa / std::sinh(kappa);
     double overlap = 0.0;
