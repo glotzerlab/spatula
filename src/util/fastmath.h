@@ -42,8 +42,7 @@ inline double fast_sinhc_approx(double x)
 
     // Reconstruction: 2^k * p / (2x), with a bias adjustment 1023 -> 1022 to halve x
     uint64_t ki = static_cast<uint64_t>(k + 1022) << 52;
-    double scale_factor;
-    std::memcpy(&scale_factor, &ki, sizeof(double));
+    double scale_factor = std::bit_cast<double, uint64_t>(ki);
 
     return p * (scale_factor / x);
 }
