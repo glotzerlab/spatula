@@ -13,10 +13,16 @@ namespace spatula { namespace data {
  * spatula uses rotation matrices for high-throughput rotation of points.
  */
 struct RotationMatrix : std::array<double, 9> {
-    /**
-     * @brief Rotate a Vec3 by a matrix R, returning a new vector.
-     */
-    __attribute__((always_inline)) __attribute__((visibility("default"))) inline Vec3
+/**
+ * @brief Rotate a Vec3 by a matrix R, returning a new vector.
+ */
+#ifdef __GNUC__ // GCC, Clang
+    __attribute__((always_inline)) __attribute__((visibility("default")))
+#endif
+#ifdef _MSC_VER // MSVC
+    __declspec(dllexport)
+#endif
+    inline Vec3
     rotate(Vec3 vec) const
     {
         return Vec3((*this)[0] * vec[0] + (*this)[1] * vec[1] + (*this)[2] * vec[2],
