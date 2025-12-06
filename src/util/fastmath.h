@@ -97,7 +97,7 @@ inline double fast_sinhc_approx(double x)
     double r = 0.5 * x - k_float * ln2_hi;
     r -= k_float * ln2_lo;
 
-    // Polynomial Approximation (Degree 5 Remez, should be within ~ 5e-7)
+    // Polynomial Approximation (Degree 5 Taylor, seems to be within ~ 5e-7)
     constexpr double c5 = 1.0 / 120.0;
     constexpr double c4 = 1.0 / 24.0;
     constexpr double c3 = 1.0 / 6.0;
@@ -174,7 +174,7 @@ inline float64x2_t fast_sinhc_approx(float64x2_t x)
     float64x2_t r = vmlsq_f64(vmulq_f64(x, vdupq_n_f64(0.5)), k_float, ln2_hi);
     r = vmlsq_f64(r, k_float, ln2_lo);
 
-    // Polynomial Approximation (Degree 5 Remez, should be within ~ 5e-7)
+    // Polynomial Approximation (Degree 5 taylor, should be within ~ 5e-7)
     const float64x2_t c5 = vdupq_n_f64(1.0 / 120.0);
     const float64x2_t c4 = vdupq_n_f64(1.0 / 24.0);
     const float64x2_t c3 = vdupq_n_f64(1.0 / 6.0);
@@ -218,7 +218,7 @@ inline float64x2_t fast_exp_approx(float64x2_t x)
     float64x2_t r = vmlsq_f64(x, k_float, ln2_hi);
     r = vmlsq_f64(r, k_float, ln2_lo);
 
-    // Polynomial Approximation (Degree 5 Remez, should be within ~ 5e-7)
+    // Polynomial Approximation (Degree 5 taylor, should be within ~ 5e-7)
     const float64x2_t c5 = vdupq_n_f64(1.0 / 120.0);
     const float64x2_t c4 = vdupq_n_f64(1.0 / 24.0);
     const float64x2_t c3 = vdupq_n_f64(1.0 / 6.0);
