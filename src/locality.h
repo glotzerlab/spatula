@@ -10,6 +10,7 @@
 #include <span>
 #include <vector>
 
+#include "data/RotationMatrix.h"
 #include "data/Vec3.h"
 #include "util/Util.h"
 
@@ -85,7 +86,7 @@ inline bool LocalNeighborhood::constantSigmas() const
 
 inline void LocalNeighborhood::rotate(const data::Vec3& v)
 {
-    const auto R = util::to_rotation_matrix(v);
+    const auto R = data::RotationMatrix::from_vec3(v);
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
