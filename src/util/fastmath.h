@@ -156,16 +156,14 @@ inline double fast_exp_approx(double x)
 #if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
 inline float64x2_t fast_exp_approx_simd(float64x2_t x)
 {
-    // constexpr double ln2 = 0.69314718055994530941723;
-    // constexpr double ln2_recip = 1.44269504088896340;
-    const float64x2_t ln2 = vdupq_n_f64(0.69314718055994530941723);
+    const float64x2_t neg_ln2 = vdupq_n_f64(-0.69314718055994530941723);
     const float64x2_t ln2_recip = vdupq_n_f64(1.44269504088896340);
 
     // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
     float64x2_t k = vrndnq_f64(vmulq_f64(x, ln2_recip));
 
     // FMA Cody-Waite Range reduction, skipping the low correction.
-    float64x2_t r = vfmaq_f64(x, k, vnegq_f64(ln2));
+    float64x2_t r = vfmaq_f64(x, k, neg_ln2);
 
     // Degree 5 Remez approximation from Sollya, using Estrin's method
     // p = (p0 := g + f * r) + r^2 * ((p1 := d + c * r) + r^2 * (p2 := b + a * r))
@@ -184,14 +182,11 @@ inline float64x2_t fast_exp_approx_simd(float64x2_t x)
     float64x2_t p1_2 = vfmaq_f64(p1, r_sq, p2);
     float64x2_t p = vfmaq_f64(p0, r_sq, p1_2);
 
-    // Reconstruction: 2^k * p / (2x)
-    int64x2_t k_i = vcvtq_s64_f64(k); // f64 -> i64
+    // Reconstruction: 2^k * p / (2x) = (k as i64 << 52)
+    int64x2_t k_shifted = vshlq_n_s64(vcvtq_s64_f64(k), 52);
 
-    // Add bias (1023), shift into correct positoin, then rescale
-    k_i = vaddq_s64(k_i, vdupq_n_s64(1023));
-    uint64x2_t ki_u = vshlq_n_u64(vreinterpretq_u64_s64(k_i), 52);
-    float64x2_t scale_factor = vreinterpretq_f64_u64(ki_u);
-    return vmulq_f64(p, scale_factor);
+    // Integer add to combine exponents, effectively computing p * 2^k
+    return vreinterpretq_f64_s64(vaddq_s64(vreinterpretq_s64_f64(p), k_shifted));
 }
 
 #endif
