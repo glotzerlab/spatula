@@ -16,7 +16,7 @@
 namespace spatula { namespace computes {
 double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 {
-    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
@@ -55,7 +55,7 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
 #if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
     return compute_pgop_gaussian_fast_neon(neighborhood, R_ij);
 #else
-    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
     const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);

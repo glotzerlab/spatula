@@ -18,7 +18,7 @@ namespace spatula { namespace computes {
 double compute_pgop_gaussian_fast_neon(LocalNeighborhood& neighborhood,
                                        const std::span<const double> R_ij)
 {
-    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
     const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
@@ -82,7 +82,7 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
                                      const std::span<const double> R_ij)
 
 {
-    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const double kappa = neighborhood.sigmas[0];
 
     const float64x2_t fast_path_lower_bound = vdupq_n_f64(24.0);
