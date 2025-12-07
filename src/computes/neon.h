@@ -103,21 +103,20 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
         size_t j = 0;
         for (; j + 1 < positions.size(); j += 2) {
             // symmetrized position is obtained by multiplying the operator with the position
-
-            const data::Vec3 s_p_0 = R.rotate(positions[j]);
-            const data::Vec3 s_p_1 = R.rotate(positions[j + 1]);
+            const data::Vec3 sym_point_0 = R.rotate(positions[j]);
+            const data::Vec3 sym_point_1 = R.rotate(positions[j + 1]);
             // compute overlap with every point in the positions
             float64x2_t max_proj_vec = vdupq_n_f64(-1.0);
-            const float64x2_t s_x = {s_p_0.x, s_p_1.x};
-            const float64x2_t s_y = {s_p_0.y, s_p_1.y};
-            const float64x2_t s_z = {s_p_0.z, s_p_1.z};
+            const float64x2_t symmetrized_x = {sym_point_0.x, sym_point_1.x};
+            const float64x2_t symmetrized_y = {sym_point_0.y, sym_point_1.y};
+            const float64x2_t symmetrized_z = {sym_point_0.z, sym_point_1.z};
             for (size_t m = 0; m < positions.size(); ++m) {
-                const float64x2_t p_x = vdupq_n_f64(positions[m].x);
-                const float64x2_t p_y = vdupq_n_f64(positions[m].y);
-                const float64x2_t p_z = vdupq_n_f64(positions[m].z);
-                float64x2_t proj_vec = vmulq_f64(p_x, s_x);
-                proj_vec = vfmaq_f64(proj_vec, p_y, s_y);
-                proj_vec = vfmaq_f64(proj_vec, p_z, s_z);
+                const float64x2_t point_x = vdupq_n_f64(positions[m].x);
+                const float64x2_t point_y = vdupq_n_f64(positions[m].y);
+                const float64x2_t point_z = vdupq_n_f64(positions[m].z);
+                float64x2_t proj_vec = vmulq_f64(point_x, symmetrized_x);
+                proj_vec = vfmaq_f64(proj_vec, point_y, symmetrized_y);
+                proj_vec = vfmaq_f64(proj_vec, point_z, symmetrized_z);
                 max_proj_vec = vmaxq_f64(max_proj_vec, proj_vec);
             }
 
