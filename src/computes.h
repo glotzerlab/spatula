@@ -148,17 +148,16 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
             }
 
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
-            // if (inner_term > 16.0) { // error < 5e-7
-            //     // overlap += prefix_term * util::fast_sinhc_approx(inner_term);
-            //     overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
-            // } else if (inner_term > 1e-6) {
-            //     // Use full-precision sinh to avoid errors when x is small
-            //     overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
-            // } else {
-            //     // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
-            //     overlap += prefix_term * 0.5;
-            // }
-            overlap += prefix_term * util::fast_sinhc_approx(inner_term);
+            if (inner_term > 24.0) {
+                // error < 2e-7 in x ∈ [24.0, 1500.0], above which sinh overflows.
+                overlap += prefix_term * util::fast_exp_approx(inner_term * 0.5) / (inner_term * 2);
+            } else if (inner_term > 1e-6) {
+                // Use full-precision sinh to avoid errors when x is small
+                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
+            } else {
+                // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
+                overlap += prefix_term * 0.5;
+            }
         }
     }
 

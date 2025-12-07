@@ -119,31 +119,6 @@ p = 0.5000000000838027425 + x * x * (2.0833320759058335941e-2 + x * x * 2.606959
 #endif
 
 namespace spatula { namespace util {
-inline double fast_sinhc_approx(double x)
-{
-    return 999.0; // TODO: I misunderstood the range reduction, so we need to redo
-    constexpr double ln2 = 0.69314718055994530941723;
-    constexpr double ln2_recip = 1.44269504088896340;
-
-    // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
-    double k = std::floor(x * ln2_recip + 0.5);
-
-    // FMA Cody-Waite Range reduction, skipping the low correction.
-    double r = std::fma(-ln2, k, x);
-
-    // Degree 4 Remez approximation from Sollya, using Horners method
-    // p = f + x * x * (d + x * x * d);
-    constexpr double f = 0.5000000000838027425;
-    constexpr double d = 2.0833320759058335941e-2;
-    constexpr double b = 2.6069597217211469857e-4;
-    const double r_sq = r * r;
-    const double p = f + r_sq * (d + r_sq * b);
-
-    // Reconstruction: 2^k * p / (2x)
-    uint64_t ki = static_cast<uint64_t>(k + 1023) << 52;
-    double scale_factor = std::bit_cast<double, uint64_t>(ki);
-    return p * scale_factor;
-}
 
 inline double fast_exp_approx(double x)
 {
