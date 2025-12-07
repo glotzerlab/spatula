@@ -142,12 +142,15 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
                 vst1q_f64(inner_arr, inner_term);
 
                 // Unroll loop for the two lanes
-                for (int i = 0; i < 2; ++i) {
-                    if (inner_arr[i] > 1e-6) {
-                        overlap += prefix_term * std::sinh(inner_arr[i] * 0.5) / inner_arr[i];
-                    } else {
-                        overlap += prefix_term * 0.5;
-                    }
+                if (inner_arr[0] > 1e-6) {
+                    overlap += prefix_term * std::sinh(inner_arr[0] * 0.5) / inner_arr[0];
+                } else {
+                    overlap += prefix_term * 0.5;
+                }
+                if (inner_arr[1] > 1e-6) {
+                    overlap += prefix_term * std::sinh(inner_arr[1] * 0.5) / inner_arr[1];
+                } else {
+                    overlap += prefix_term * 0.5;
                 }
             }
         }
@@ -160,10 +163,7 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
             }
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
 
-            if (inner_term > 16.0) { // error < 5e-7
-                // overlap += prefix_term * util::fast_sinhc_approx(inner_term);
-                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
-            } else if (inner_term > 1e-6) {
+            if (inner_term > 1e-6) {
                 overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else {
                 overlap += prefix_term * 0.5;
