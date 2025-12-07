@@ -46,7 +46,6 @@ incurring as little error accumulation as possible. The following is standard fo
 
 ```
 let x = (k + f) * ln(2) // for some integer k and fractional remainder f.
-let r = ln(2) / f       // note that f began as a value in [-1/2, 1/2]
 
 // |r| must be < ln(2) / 2 as shown above
 exp(x) = exp(k * ln(2) + r) = exp(k * ln(2)) * exp(r) = 2**k * exp(r)
@@ -59,7 +58,12 @@ let r = x - k * ln(2)
 ```
 
 `2**k` has an exact binary representation and r is in [-ln(2)/2, ln(2)/2], meaning we've
-reduced our unbounded range in a simple, accurate way!
+reduced our unbounded range in a simple way! Note that, due to floating point math, this
+approach still needs a bit of improviement. Cody and Waite proposed the following
+approach:
+
+https://arxiv.org/pdf/0708.3722v1
+https://doc.lagout.org/science/0_Computer%20Science/2_Algorithms/Elementary%20Functions_%20Algorithms%20and%20Implementation%20%282nd%20ed.%29%20%5bMuller%202005-10-24%5d.pdf
 
 // Solving for Remez coefficients
 The Sollya library is designed to solve for optimal coefficients for this sort of
@@ -94,8 +98,8 @@ Note that, with degree 5, our error is below the floating point machine epsilon.
 boundary is fairly arbitrary but seems reasonable.
 
 For the Fisher distribution overlap, our expression is `sinh(x / 2) / x`. Applying the
-same approach as `exp(x)` shows degree 4 is required for an error below 1e-7. It turns
-out we actually got lucky, with two coefficients being very small (< 1e-14). As a
+same approach as `exp(x)` shows degree 4 is required for an error below 1e-7. Because
+sinhc is an even function, the coefficient for odd powers (1 and 3) are very small. As a
 result, our expression can be further approximated to the following while maintaining
 near-optimal accuracy.
 
@@ -117,80 +121,62 @@ p = 0.5000000000838027425 + x * x * (2.0833320759058335941e-2 + x * x * 2.606959
 namespace spatula { namespace util {
 inline double fast_sinhc_approx(double x)
 {
-    // Cody-Waite Constants
-    constexpr double half_ln2_inv = 0.72134752044448170367996234050095; // 0.5 / ln(2)
+    return 999.0; // TODO: I misunderstood the range reduction, so we need to redo
+    constexpr double ln2 = 0.69314718055994530941723;
+    constexpr double ln2_recip = 1.44269504088896340;
 
-    // High bits of ln(2), with trailing zeros for exact multiplication.
-    constexpr double ln2_hi = 0.693147180369123816490;
+    // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
+    double k = std::floor(x * ln2_recip + 0.5);
 
-    // "missing" low bits for ln2
-    constexpr double ln2_lo = 1.90821492927058770002e-10;
+    // FMA Cody-Waite Range reduction, skipping the low correction.
+    double r = std::fma(-ln2, k, x);
 
-    // Range Reduction: k_float = round(x/2 / ln2)
-    double k_float = std::round(x * half_ln2_inv);
-    int k = static_cast<int>(k_float);
+    // Degree 4 Remez approximation from Sollya, using Horners method
+    // p = f + x * x * (d + x * x * d);
+    constexpr double f = 0.5000000000838027425;
+    constexpr double d = 2.0833320759058335941e-2;
+    constexpr double b = 2.6069597217211469857e-4;
+    const double r_sq = r * r;
+    const double p = f + r_sq * (d + r_sq * b);
 
-    // r = (x/2) - k * ln2. We compute this as: r = 0.5 * x - k * ln2_hi - k * ln2_lo
-    double r = 0.5 * x - k_float * ln2_hi;
-    r -= k_float * ln2_lo;
-
-    // Polynomial Approximation (Degree 5 Taylor, seems to be within ~ 5e-7)
-    constexpr double c5 = 1.0 / 120.0;
-    constexpr double c4 = 1.0 / 24.0;
-    constexpr double c3 = 1.0 / 6.0;
-    constexpr double c2 = 0.5;
-
-    // Evaluate (c4 + r*c5) and (c2 + r*c3) simultaneously (hopefully)
-    double term_54 = c4 + r * c5;
-    double term_32 = c2 + r * c3;
-
-    // Evaluate the polynomial expansion
-    double r_sq = r * r;
-    double p = (1.0 + r) + r_sq * (term_32 + r_sq * term_54);
-
-    // Reconstruction: 2^k * p / (2x), with a bias adjustment 1023 -> 1022 to halve x
-    uint64_t ki = static_cast<uint64_t>(k + 1022) << 52;
+    // Reconstruction: 2^k * p / (2x)
+    uint64_t ki = static_cast<uint64_t>(k + 1023) << 52;
     double scale_factor = std::bit_cast<double, uint64_t>(ki);
-
-    return p * (scale_factor / x);
+    return p * scale_factor;
 }
-// inline double fast_exp_approx(double x)
-// {
-//     // Cody-Waite Constants
-//     constexpr double ln2_inv = 1.44269504088896340735992468100189; // 1 / ln(2)
 
-//     // High bits of ln(2), with trailing zeros for exact multiplication.
-//     constexpr double ln2_hi = 0.693147180369123816490;
-//     constexpr double ln2_lo = 1.90821492927058770002e-10; // "missing" low bits for ln2
+inline double fast_exp_approx(double x)
+{
+    constexpr double ln2 = 0.69314718055994530941723;
+    constexpr double ln2_recip = 1.44269504088896340;
 
-//     // Range Reduction: k_float = round(x / ln2)
-//     double k_float = std::round(x * ln2_inv);
-//     int k = static_cast<int>(k_float);
+    // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
+    double k = std::floor(x * ln2_recip + 0.5);
 
-//     // r = x - k * ln2. We compute this as: r = x - k * ln2_hi - k * ln2_lo
-//     double r = x - k_float * ln2_hi;
-//     r -= k_float * ln2_lo;
+    // FMA Cody-Waite Range reduction, skipping the low correction.
+    double r = std::fma(-ln2, k, x);
 
-//     // Polynomial Approximation (Degree 5 Remez, should be within ~ 5e-7)
-//     constexpr double c5 = 1.0 / 120.0;
-//     constexpr double c4 = 1.0 / 24.0;
-//     constexpr double c3 = 1.0 / 6.0;
-//     constexpr double c2 = 0.5;
+    // Degree 5 Remez approximation from Sollya, using Estrin's method
+    // p = (p0 := g + f * r) + r^2 * ((p1 := d + c * r) + r^2 * (p2 := b + a * r))
+    constexpr double g = 1.0000000716546679769;
+    constexpr double f = 0.99999969199097560324;
+    constexpr double d = 0.4999889485139416001;
+    constexpr double c = 0.16667574730852952047;
+    constexpr double b = 4.191538198120380032e-2;
+    constexpr double a = 8.2976549459683138915e-3;
 
-//     // Evaluate (c4 + r*c5) and (c2 + r*c3) simultaneously (hopefully)
-//     double term_54 = c4 + r * c5;
-//     double term_32 = c2 + r * c3;
+    double r_sq = r * r;
+    double p0 = std::fma(f, r, g);
+    double p1 = std::fma(c, r, d);
+    double p2 = std::fma(a, r, b);
+    double p1_2 = std::fma(p2, r_sq, p1);
+    double p = std::fma(p1_2, r_sq, p0);
 
-//     // Evaluate the polynomial expansion
-//     double r_sq = r * r;
-//     double p = (1.0 + r) + r_sq * (term_32 + r_sq * term_54);
-
-//     // Reconstruction: 2^k * p / (2x), with a bias of 1023
-//     uint64_t ki = static_cast<uint64_t>(k + 1023) << 52;
-//     double scale_factor = std::bit_cast<double, uint64_t>(ki);
-
-//     return p * scale_factor;
-// }
+    // Reconstruction: 2^k * p / (2x)
+    uint64_t ki = static_cast<uint64_t>(k + 1023) << 52;
+    double scale_factor = std::bit_cast<double, uint64_t>(ki);
+    return p * scale_factor;
+}
 
 #if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
 inline float64x2_t fast_sinhc_approx_simd(float64x2_t x)
