@@ -156,47 +156,39 @@ inline double fast_exp_approx(double x)
 #if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
 inline float64x2_t fast_exp_approx_simd(float64x2_t x)
 {
-    // Cody-Waite Constants
-    const float64x2_t ln2_inv = vdupq_n_f64(1.44269504088896340735992468100189); // 1 / ln(2)
+    // constexpr double ln2 = 0.69314718055994530941723;
+    // constexpr double ln2_recip = 1.44269504088896340;
+    const float64x2_t ln2 = vdupq_n_f64(0.69314718055994530941723);
+    const float64x2_t ln2_recip = vdupq_n_f64(1.44269504088896340);
 
-    // High bits of ln(2), with trailing zeros for exact multiplication.
-    const float64x2_t ln2_hi = vdupq_n_f64(0.693147180369123816490);
-    const float64x2_t ln2_lo = vdupq_n_f64(1.90821492927058770002e-10);
+    // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
+    float64x2_t k = vrndaq_f64(vmulq_f64(x, ln2_recip));
 
-    // Range Reduction: k_float = round(x / ln2)
-    float64x2_t k_float = vrndaq_f64(vmulq_f64(x, ln2_inv));
+    // FMA Cody-Waite Range reduction, skipping the low correction.
+    float64x2_t r = vfmaq_f64(x, k, vnegq_f64(ln2));
 
-    // r = x - k * ln2. We compute this as: r = x - k * ln2_hi - k * ln2_lo
-    float64x2_t r = vmlsq_f64(x, k_float, ln2_hi);
-    r = vmlsq_f64(r, k_float, ln2_lo);
+    // Degree 5 Remez approximation from Sollya, using Estrin's method
+    // p = (p0 := g + f * r) + r^2 * ((p1 := d + c * r) + r^2 * (p2 := b + a * r))
+    const float64x2_t g = vdupq_n_f64(1.0000000716546679769);
+    const float64x2_t f = vdupq_n_f64(0.99999969199097560324);
+    const float64x2_t d = vdupq_n_f64(0.4999889485139416001);
+    const float64x2_t c = vdupq_n_f64(0.16667574730852952047);
+    const float64x2_t b = vdupq_n_f64(4.191538198120380032e-2);
+    const float64x2_t a = vdupq_n_f64(8.2976549459683138915e-3);
 
-    // Polynomial Approximation (Degree 5 taylor, should be within ~ 5e-7)
-    const float64x2_t c5 = vdupq_n_f64(1.0 / 120.0);
-    const float64x2_t c4 = vdupq_n_f64(1.0 / 24.0);
-    const float64x2_t c3 = vdupq_n_f64(1.0 / 6.0);
-    const float64x2_t c2 = vdupq_n_f64(0.5);
-
-    // Evaluate (c4 + r*c5) and (c2 + r*c3)
-    float64x2_t term_54 = vfmaq_f64(c4, r, c5);
-    float64x2_t term_32 = vfmaq_f64(c2, r, c3);
-
-    // Evaluate the polynomial expansion
+    // NOTE: vfmaq is a + (b*c), NOT (a * b) + c as std::fma
     float64x2_t r_sq = vmulq_f64(r, r);
-    float64x2_t p = vfmaq_f64(term_32, r_sq, term_54);
-    p = vmulq_f64(p, r_sq);
-    p = vaddq_f64(p, vaddq_f64(vdupq_n_f64(1.0), r));
+    float64x2_t p0 = vfmaq_f64(g, r, f);
+    float64x2_t p1 = vfmaq_f64(d, r, c);
+    float64x2_t p2 = vfmaq_f64(b, r, a);
+    float64x2_t p1_2 = vfmaq_f64(p1, r_sq, p2);
+    float64x2_t p = vfmaq_f64(p0, r_sq, p1_2);
 
-    // Reconstruction: 2^k * p / (2x), with a bias of 1023
-    int64x2_t k = vcvtq_s64_f64(k_float);
-
-    // Add exponent bias
+    // Reconstruction: 2^k * p / (2x)
     k = vaddq_s64(k, vdupq_n_s64(1023));
     uint64x2_t ki = vshlq_n_u64(vreinterpretq_u64_s64(k), 52);
-
-    // Reinterpret as double scale factors
     float64x2_t scale_factor = vreinterpretq_f64_u64(ki);
-
-    return p * scale_factor;
+    return vmulq_f64(p, scale_factor);
 }
 
 #endif
