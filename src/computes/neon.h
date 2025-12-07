@@ -84,6 +84,13 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
 {
     std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const double kappa = neighborhood.sigmas[0];
+
+    const float64x2_t fast_path_lower_bound = vdupq_n_f64(24.0);
+    const float64x2_t k = vdupq_n_f64(kappa);
+    const float64x2_t half = vdupq_n_f64(0.5);
+    const float64x2_t one = vdupq_n_f64(1.0);
+    const float64x2_t two = vdupq_n_f64(2.0);
+
     const double prefix_term = 2.0 * kappa / std::sinh(kappa);
     double overlap = 0.0;
     data::RotationMatrix R;
@@ -114,33 +121,33 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
                 max_proj_vec = vmaxq_f64(max_proj_vec, proj_vec);
             }
 
-            const float64x2_t k = vdupq_n_f64(kappa);
-            const float64x2_t two = vdupq_n_f64(2.0);
-            const float64x2_t one = vdupq_n_f64(1.0);
-
             float64x2_t inner_term
-                = vmulq_f64(k, vsqrtq_f64(vmulq_f64(two, (vaddq_f64(one, max_proj_vec)))));
-            double inner_arr[2];
-            vst1q_f64(inner_arr, inner_term);
+                = vmulq_f64(k, vsqrtq_f64(vmulq_f64(two, vaddq_f64(one, max_proj_vec))));
 
-            if (inner_arr[0] > 24.0 && inner_arr[1] > 24.0) {
-                // float64x2_t res = util::fast_exp_approx_simd(inner_term * 0.5) / (2.0 *
-                // inner_term);
-                float64x2_t half = vdupq_n_f64(0.5);
-                float64x2_t denom = vdivq_f64(inner_term, half);
-                float64x2_t res = util::fast_exp_approx_simd(vmulq_f64(half, inner_term)) / denom;
-                // horizontal add
+            // Create a mask where bits are 1 if (> 24.0), 0 otherwise.
+            uint64x2_t mask = vcgtq_f64(inner_term, fast_path_lower_bound);
+
+            // Check if ALL lanes passed the check.
+            // vminvq_u32 returns 0xFFFFFFFF (-1) only if every bit in the vector is 1.
+            if (vminvq_u32(vreinterpretq_u32_u64(mask)) == 0xFFFFFFFF) {
+                float64x2_t denom = vmulq_f64(inner_term, two);
+                float64x2_t res = util::fast_exp_approx_simd(vmulq_f64(inner_term, half));
+                res = vdivq_f64(res, denom);
+
+                // Horizontal add
                 overlap += prefix_term * vaddvq_f64(res);
+
             } else {
-                if (inner_arr[0] > 1e-6) {
-                    overlap += prefix_term * std::sinh(inner_arr[0] * 0.5) / inner_arr[0];
-                } else {
-                    overlap += prefix_term * 0.5;
-                }
-                if (inner_arr[1] > 1e-6) {
-                    overlap += prefix_term * std::sinh(inner_arr[1] * 0.5) / inner_arr[1];
-                } else {
-                    overlap += prefix_term * 0.5;
+                double inner_arr[2];
+                vst1q_f64(inner_arr, inner_term);
+
+                // Unroll loop for the two lanes
+                for (int i = 0; i < 2; ++i) {
+                    if (inner_arr[i] > 1e-6) {
+                        overlap += prefix_term * std::sinh(inner_arr[i] * 0.5) / inner_arr[i];
+                    } else {
+                        overlap += prefix_term * 0.5;
+                    }
                 }
             }
         }
