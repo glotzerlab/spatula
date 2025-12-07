@@ -185,9 +185,12 @@ inline float64x2_t fast_exp_approx_simd(float64x2_t x)
     float64x2_t p = vfmaq_f64(p0, r_sq, p1_2);
 
     // Reconstruction: 2^k * p / (2x)
-    k = vaddq_s64(k, vdupq_n_s64(1023));
-    uint64x2_t ki = vshlq_n_u64(vreinterpretq_u64_s64(k), 52);
-    float64x2_t scale_factor = vreinterpretq_f64_u64(ki);
+    int64x2_t k_i = vcvtq_s64_f64(k); // f64 -> i64
+
+    // Add bias (1023), shift into correct positoin, then rescale
+    k_i = vaddq_s64(k_i, vdupq_n_s64(1023));
+    uint64x2_t ki_u = vshlq_n_u64(vreinterpretq_u64_s64(k_i), 52);
+    float64x2_t scale_factor = vreinterpretq_f64_u64(ki_u);
     return vmulq_f64(p, scale_factor);
 }
 

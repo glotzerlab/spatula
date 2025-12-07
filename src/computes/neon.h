@@ -123,18 +123,24 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
             double inner_arr[2];
             vst1q_f64(inner_arr, inner_term);
 
-            if (inner_arr[0] > 16.0 && inner_arr[1] > 16.0) {
-                float64x2_t res = util::fast_sinhc_approx_simd(inner_term);
-                overlap += prefix_term * (vgetq_lane_f64(res, 0) + vgetq_lane_f64(res, 1));
+            if (inner_arr[0] > 24.0 && inner_arr[1] > 24.0) {
+                // float64x2_t res = util::fast_exp_approx_simd(inner_term * 0.5) / (2.0 *
+                // inner_term);
+                float64x2_t half = vdupq_n_f64(0.5);
+                float64x2_t denom = vdivq_f64(inner_term, half);
+                float64x2_t res = util::fast_exp_approx_simd(vmulq_f64(half, inner_term)) / denom;
+                // horizontal add
+                overlap += prefix_term * vaddvq_f64(res);
             } else {
-                for (int i = 0; i < 2; ++i) {
-                    if (inner_arr[i] > 16.0) { // error < 5e-7
-                        overlap += prefix_term * util::fast_sinhc_approx(inner_arr[i]);
-                    } else if (inner_arr[i] > 1e-6) {
-                        overlap += prefix_term * std::sinh(inner_arr[i] * 0.5) / inner_arr[i];
-                    } else {
-                        overlap += prefix_term * 0.5;
-                    }
+                if (inner_arr[0] > 1e-6) {
+                    overlap += prefix_term * std::sinh(inner_arr[0] * 0.5) / inner_arr[0];
+                } else {
+                    overlap += prefix_term * 0.5;
+                }
+                if (inner_arr[1] > 1e-6) {
+                    overlap += prefix_term * std::sinh(inner_arr[1] * 0.5) / inner_arr[1];
+                } else {
+                    overlap += prefix_term * 0.5;
                 }
             }
         }
