@@ -154,52 +154,6 @@ inline double fast_exp_approx(double x)
 }
 
 #if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
-inline float64x2_t fast_sinhc_approx_simd(float64x2_t x)
-{
-    // Cody-Waite Constants
-    const float64x2_t half_ln2_inv = vdupq_n_f64(0.72134752044448170367996234050095); // 0.5 / ln(2)
-
-    // High bits of ln(2), with trailing zeros for exact multiplication.
-    const float64x2_t ln2_hi = vdupq_n_f64(0.693147180369123816490);
-
-    // "missing" low bits for ln2
-    const float64x2_t ln2_lo = vdupq_n_f64(1.90821492927058770002e-10);
-
-    // Range Reduction: k_float = round(x/2 / ln2)
-    float64x2_t k_float = vrndaq_f64(vmulq_f64(x, half_ln2_inv));
-
-    // r = (x/2) - k * ln2. We compute this as: r = 0.5 * x - k * ln2_hi - k * ln2_lo
-    float64x2_t r = vmlsq_f64(vmulq_f64(x, vdupq_n_f64(0.5)), k_float, ln2_hi);
-    r = vmlsq_f64(r, k_float, ln2_lo);
-
-    // Polynomial Approximation (Degree 5 taylor, should be within ~ 5e-7)
-    const float64x2_t c5 = vdupq_n_f64(1.0 / 120.0);
-    const float64x2_t c4 = vdupq_n_f64(1.0 / 24.0);
-    const float64x2_t c3 = vdupq_n_f64(1.0 / 6.0);
-    const float64x2_t c2 = vdupq_n_f64(0.5);
-
-    // Evaluate (c4 + r*c5) and (c2 + r*c3) simultaneously (hopefully)
-    float64x2_t term_54 = vfmaq_f64(c4, r, c5);
-    float64x2_t term_32 = vfmaq_f64(c2, r, c3);
-
-    // Evaluate the polynomial expansion
-    float64x2_t r_sq = vmulq_f64(r, r);
-    float64x2_t p = vfmaq_f64(term_32, r_sq, term_54);
-    p = vmulq_f64(p, r_sq);
-    p = vaddq_f64(p, vaddq_f64(vdupq_n_f64(1.0), r));
-
-    // Reconstruction: 2^k * p / (2x), with a bias adjustment 1023 -> 1022 to halve x
-    double k_float_arr[2];
-    vst1q_f64(k_float_arr, k_float);
-    int64_t k_arr[] = {static_cast<int64_t>(k_float_arr[0]), static_cast<int64_t>(k_float_arr[1])};
-
-    uint64x2_t ki
-        = {static_cast<uint64_t>(k_arr[0] + 1022), static_cast<uint64_t>(k_arr[1] + 1022)};
-    ki = vshlq_n_u64(ki, 52);
-    float64x2_t scale_factor = vreinterpretq_f64_u64(ki);
-
-    return vmulq_f64(p, vdivq_f64(scale_factor, x));
-}
 inline float64x2_t fast_exp_approx_simd(float64x2_t x)
 {
     // Cody-Waite Constants
