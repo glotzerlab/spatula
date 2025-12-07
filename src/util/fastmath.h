@@ -45,7 +45,7 @@ incurring as little error accumulation as possible. The following is standard fo
 [Reference](https://justinwillmert.com/articles/2020/numerically-computing-the-exponential-function-with-polynomial-approximations/)
 
 ```
-let x = (k + f) * ln(2) // for some integer k and fractional remainder f.
+let x = k * ln(2) + r // for some integer k and fractional remainder r.
 
 // |r| must be < ln(2) / 2 as shown above
 exp(x) = exp(k * ln(2) + r) = exp(k * ln(2)) * exp(r) = 2**k * exp(r)
@@ -65,7 +65,7 @@ approach:
 https://arxiv.org/pdf/0708.3722v1
 https://doc.lagout.org/science/0_Computer%20Science/2_Algorithms/Elementary%20Functions_%20Algorithms%20and%20Implementation%20%282nd%20ed.%29%20%5bMuller%202005-10-24%5d.pdf
 
-// Solving for Remez coefficients
+// Solving for a correction factor (Remez coefficients)
 The Sollya library is designed to solve for optimal coefficients for this sort of
 polynomial approximation. The following script calculates the coefficients for a degree
 5 Remez approximation of exp(x), with further optimization for floating point
