@@ -162,7 +162,7 @@ inline float64x2_t fast_exp_approx_simd(float64x2_t x)
     const float64x2_t ln2_recip = vdupq_n_f64(1.44269504088896340);
 
     // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
-    float64x2_t k = vrndaq_f64(vmulq_f64(x, ln2_recip));
+    float64x2_t k = vrndnq_f64(vmulq_f64(x, ln2_recip));
 
     // FMA Cody-Waite Range reduction, skipping the low correction.
     float64x2_t r = vfmaq_f64(x, k, vnegq_f64(ln2));
