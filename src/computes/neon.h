@@ -132,10 +132,8 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
             if (vminvq_u32(vreinterpretq_u32_u64(mask)) == 0xFFFFFFFF) {
                 float64x2_t denom = vmulq_f64(inner_term, two);
                 float64x2_t res = util::fast_exp_approx_simd(vmulq_f64(inner_term, half));
-                res = vdivq_f64(res, denom);
-
                 // Horizontal add
-                overlap += prefix_term * vaddvq_f64(res);
+                overlap += prefix_term * vaddvq_f64(vdivq_f64(res, denom));
 
             } else {
                 double inner_arr[2];
