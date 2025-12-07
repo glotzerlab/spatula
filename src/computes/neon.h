@@ -70,7 +70,7 @@ double compute_pgop_gaussian_fast_neon(LocalNeighborhood& neighborhood,
                 // max(exp(-x)) == min(x)
                 max_res = std::min(max_res, diff.dot(diff));
             }
-            overlap += std::exp(-max_res * denom);
+            overlap += util::fast_exp_approx(-max_res * denom);
         }
     }
     // cast to double to avoid integer division
