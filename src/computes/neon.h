@@ -127,7 +127,7 @@ double compute_pgop_fisher_fast_neon(LocalNeighborhood& neighborhood,
             // Create a mask where bits are 1 if (> 24.0), 0 otherwise.
             uint64x2_t mask = vcgtq_f64(inner_term, fast_path_lower_bound);
 
-            // Check if ALL lanes passed the check.
+            // Check if all lanes are small enough to take the `exp` path.
             // vminvq_u32 returns 0xFFFFFFFF (-1) only if every bit in the vector is 1.
             if (vminvq_u32(vreinterpretq_u32_u64(mask)) == 0xFFFFFFFF) {
                 float64x2_t denom = vmulq_f64(inner_term, two);
