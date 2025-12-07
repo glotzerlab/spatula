@@ -110,7 +110,7 @@ p = 0.5000000000838027425 + x * x * (2.0833320759058335941e-2 + x * x * 2.606959
 #include <cstdint>
 #include <cstring>
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
 #include <arm_neon.h>
 #endif
 
@@ -192,7 +192,7 @@ inline double fast_sinhc_approx(double x)
 //     return p * scale_factor;
 // }
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
 inline float64x2_t fast_sinhc_approx_simd(float64x2_t x)
 {
     // Cody-Waite Constants

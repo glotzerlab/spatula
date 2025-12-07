@@ -5,7 +5,7 @@
 #include "data/RotationMatrix.h"
 #include "data/Vec3.h"
 #include "locality.h"
-#if defined(__aarch64__)
+#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
 #include "computes/neon.h"
 #endif
 #include "util/Metrics.h"
@@ -52,7 +52,7 @@ double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<co
 double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
                                   const std::span<const double> R_ij)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
     return compute_pgop_gaussian_fast_neon(neighborhood, R_ij);
 #else
     std::span<const data::Vec3> positions(neighborhood.rotated_positions);
@@ -123,7 +123,7 @@ double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<cons
 double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
     return compute_pgop_fisher_fast_neon(neighborhood, R_ij);
 #else
     std::span<const data::Vec3> positions(neighborhood.rotated_positions);

@@ -5,7 +5,7 @@
 #include "data/RotationMatrix.h"
 #include "data/Vec3.h"
 #include "locality.h"
-#if defined(__aarch64__)
+#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
 #include <arm_neon.h>
 #endif
 #include "util/Metrics.h"
