@@ -100,7 +100,7 @@ result, our expression can be further approximated to the following while mainta
 near-optimal accuracy.
 
 ```
-0.5000000000838027425 + x * x * (2.0833320759058335941e-2 + x * x * 2.6069597217211469857e-4)
+p = 0.5000000000838027425 + x * x * (2.0833320759058335941e-2 + x * x * 2.6069597217211469857e-4);
 ```
 */
 
@@ -193,7 +193,7 @@ inline double fast_sinhc_approx(double x)
 // }
 
 #if defined(__aarch64__)
-inline float64x2_t fast_sinhc_approx(float64x2_t x)
+inline float64x2_t fast_sinhc_approx_simd(float64x2_t x)
 {
     // Cody-Waite Constants
     const float64x2_t half_ln2_inv = vdupq_n_f64(0.72134752044448170367996234050095); // 0.5 / ln(2)
@@ -239,7 +239,7 @@ inline float64x2_t fast_sinhc_approx(float64x2_t x)
 
     return vmulq_f64(p, vdivq_f64(scale_factor, x));
 }
-inline float64x2_t fast_exp_approx(float64x2_t x)
+inline float64x2_t fast_exp_approx_simd(float64x2_t x)
 {
     // Cody-Waite Constants
     const float64x2_t ln2_inv = vdupq_n_f64(1.44269504088896340735992468100189); // 1 / ln(2)

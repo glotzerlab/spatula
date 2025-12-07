@@ -90,7 +90,7 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
             }
 
             float64x2_t overlaps
-                = util::fast_exp_approx(vnegq_f64(min_dist_sq_vec * vdupq_n_f64(denom)));
+                = util::fast_exp_approx_simd(vnegq_f64(min_dist_sq_vec * vdupq_n_f64(denom)));
             // Horizontal add
             overlap += vaddvq_f64(overlaps);
         }
@@ -208,7 +208,7 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
             vst1q_f64(inner_arr, inner_term);
 
             if (inner_arr[0] > 16.0 && inner_arr[1] > 16.0) {
-                float64x2_t res = util::fast_sinhc_approx(inner_term);
+                float64x2_t res = util::fast_sinhc_approx_simd(inner_term);
                 overlap += prefix_term * (vgetq_lane_f64(res, 0) + vgetq_lane_f64(res, 1));
             } else {
                 for (int i = 0; i < 2; ++i) {
@@ -232,7 +232,8 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
 
             if (inner_term > 16.0) { // error < 5e-7
-                overlap += prefix_term * util::fast_sinhc_approx(inner_term);
+                // overlap += prefix_term * util::fast_sinhc_approx(inner_term);
+                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else if (inner_term > 1e-6) {
                 overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else {
@@ -253,7 +254,8 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
 
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
             if (inner_term > 16.0) { // error < 5e-7
-                overlap += prefix_term * util::fast_sinhc_approx(inner_term);
+                // overlap += prefix_term * util::fast_sinhc_approx(inner_term);
+                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else if (inner_term > 1e-6) {
                 // Use full-precision sinh to avoid errors when x is small
                 overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
