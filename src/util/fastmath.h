@@ -61,10 +61,47 @@ let r = x - k * ln(2)
 `2**k` has an exact binary representation and r is in [-ln(2)/2, ln(2)/2], meaning we've
 reduced our unbounded range in a simple, accurate way!
 
+// Solving for Remez coefficients
+The Sollya library is designed to solve for optimal coefficients for this sort of
+polynomial approximation. The following script calculates the coefficients for a degree
+5 Remez approximation of exp(x), with further optimization for floating point
+coefficients. While this is not provably optimal, its far better than we really require.
 
+```sollya
+prec=64;
+f=exp(x);
+domain=[-log(2)/2;log(2)/2];
 
+p = fpminimax(f, 5, [|D...|], domain);
 
+maximum = dirtyinfnorm(p-f, domain);
+print("The infinity norm of error is", maximum);
+print("Optimized Polynomial:", p);
+```
 
+Output:
+```
+The infinity norm of error is 1.05976173233428312420268468938772131371726266388093e-7
+Optimized Polynomial: 1.00000007165468307590572294429875910282135009765625 + x *
+(0.99999969199162686006587819065316580235958099365234 + x *
+(0.49998894851191177934879306121729314327239990234375 + x *
+(0.166675747284489778055061037775885779410600662231445 + x *
+(4.1915381994165779033778562734369188547134399414062e-2 + x
+* 8.297655098188506939127506711884052492678165435791e-3))))
+```
+
+Note that, with degree 5, our error is below the floating point machine epsilon. This
+boundary is fairly arbitrary but seems reasonable.
+
+For the Fisher distribution overlap, our expression is `sinh(x / 2) / x`. Applying the
+same approach as `exp(x)` shows degree 4 is required for an error below 1e-7. It turns
+out we actually got lucky, with two coefficients being very small (< 1e-14). As a
+result, our expression can be further approximated to the following while maintaining
+near-optimal accuracy.
+
+```
+0.5000000000838027425 + x * x * (2.0833320759058335941e-2 + x * x * 2.6069597217211469857e-4)
+```
 */
 
 #pragma once
