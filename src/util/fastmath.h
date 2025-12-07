@@ -151,7 +151,7 @@ inline double fast_exp_approx(double x)
     constexpr double ln2_recip = 1.44269504088896340;
 
     // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
-    double k = std::floor(x * ln2_recip + 0.5);
+    double k = std::round(x * ln2_recip);
 
     // FMA Cody-Waite Range reduction, skipping the low correction.
     double r = std::fma(-ln2, k, x);
