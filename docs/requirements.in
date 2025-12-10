@@ -1,5 +1,6 @@
 furo
 ipython
+nanobind
 nbsphinx
 sphinx
 sphinxcontrib-bibtex

@@ -55,19 +55,19 @@ The following are **required** for building and installing **spatula** from sour
 - `NumPy <https://www.numpy.org/>`__
 - `Scipy <https://scipy.org/>`__
 - `freud <https://freud.readthedocs.io/en/latest/>`__
-- `pybind11 <https://pybind11.readthedocs.io/en/stable/index.html>`__
+- `nanobind <https://nanobind.readthedocs.io/en/latest/>`__
 - `scikit-build-core <https://scikit-build-core.readthedocs.io/en/latest/index.html>`__
 - `CMake <https://cmake.org/>`__
 
 .. code-block:: bash
 
-    mamba install -c conda-forge cxx-compiler numpy scipy freud pybind11 scikit-build-core cmake
+    mamba install -c conda-forge cxx-compiler numpy scipy freud nanobind scikit-build-core cmake
 
 All requirements other than the compiler can also be installed via the `Python Package Index <https://pypi.org/>`__
 
 .. code-block:: bash
 
-    uv pip install numpy scipy freud-analysis pybind11 scikit-build-core cmake
+    uv pip install numpy scipy freud-analysis nanobind scikit-build-core cmake
 
 The code that follows builds **spatula**:
 

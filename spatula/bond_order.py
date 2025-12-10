@@ -3,7 +3,7 @@
 
 """Simply bond order diagram classes."""
 
-import spatula._spatula
+import spatula._spatula_nb
 
 
 class BondOrder:
@@ -39,8 +39,8 @@ class BondOrderFisher(BondOrder):
             The concentration parameter for the von-Mises Fisher distribution.
 
         """
-        self._cpp = spatula._spatula.FisherBondOrder(
-            spatula._spatula.FisherDistribution(kappa), positions
+        self._cpp = spatula._spatula_nb.FisherBondOrder(
+            spatula._spatula_nb.FisherDistribution(kappa), positions
         )
 
 
@@ -59,6 +59,6 @@ class BondOrderUniform(BondOrder):
             non-zero for the uniform distribution.
 
         """
-        self._cpp = spatula._spatula.UniformBondOrder(
-            spatula._spatula.UniformDistribution(max_theta), positions
+        self._cpp = spatula._spatula_nb.UniformBondOrder(
+            spatula._spatula_nb.UniformDistribution(max_theta), positions
         )

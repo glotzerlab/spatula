@@ -2,111 +2,19 @@
 // Part of spatula, released under the BSD 3-Clause License.
 
 #pragma once
+#include <functional>
 #include <memory>
+#include <span>
 #include <tuple>
 #include <vector>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include "data/Quaternion.h"
+#include "locality.h"
 #include "optimize/Optimize.h"
 #include "util/Metrics.h"
 #include "util/Util.h"
 
-namespace py = pybind11;
-
 namespace spatula {
-
-/**
- * @brief storage for neighbor positions, weights, and rotated positions.
- *
- * This struct is helpful is organizing operations on the BOD's neighbors when optimizing over
- * SO(3), by keeping all the data together.
- */
-struct LocalNeighborhood {
-    LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                      std::vector<double>&& weights_,
-                      std::vector<double>&& sigmas_);
-
-    void rotate(const data::Vec3& q);
-
-    /// neighbor bonds
-    const std::vector<data::Vec3> positions;
-    /// neighbor weights
-    const std::vector<double> weights;
-    const std::vector<double> sigmas;
-    /// Storage for the current positions under a given rotation used in optimization.
-    std::vector<data::Vec3> rotated_positions;
-};
-
-/**
- * @brief Small helper class for storing and accessing neighbor list data from Python.
- *
- * Warning: This class consumes the raw arrays from Python and requires that these arrays outlive
- * class instances.
- */
-class Neighborhoods {
-    public:
-    Neighborhoods(size_t N,
-                  const int* neighbor_counts,
-                  const double* weights,
-                  const double* distance,
-                  const double* sigmas);
-
-    /// Get the neighbors for point i.
-    LocalNeighborhood getNeighborhood(size_t i) const;
-    /// Get the neighbor weight for point i.
-    std::vector<double> getWeights(size_t i) const;
-    /// Get the sigmas for each neighbor bond
-    std::vector<double> getSigmas(size_t i) const;
-    /// Get the number of neighbors for point i.
-    int getNeighborCount(size_t i) const;
-
-    private:
-    /// Number of points with neighbors
-    const size_t m_N;
-    /// The number of neighbors for each point
-    const int* m_neighbor_counts;
-    /// The distance vector of each neighbor
-    const double* m_distances;
-    /// The weights for each neighbor bond
-    const double* m_weights;
-    /// The sigmas for each neighbor bond
-    const double* m_sigmas;
-    /// The offsets to index into the distances array
-    std::vector<size_t> m_neighbor_offsets;
-};
-
-/**
- * @brief Store for the optimal PGOP values and rotations
- *
- * This simplifies the setting of the results from the optimization, and the use of numpy arrays in
- * the code.
- */
-struct PGOPStore {
-    PGOPStore(size_t N_particles, size_t N_symmetries);
-    /// Number of point group symmetries to compute
-    size_t N_syms;
-    /// The optimized value of PGOP for each point group
-    py::array_t<double> op;
-    /// The optimal rotations used to obtain the maximum PGOP as quaternions.
-    py::array_t<double> rotations;
-
-    /// Add a single point's set of PGOP and rotation values
-    void addOp(size_t i, const std::tuple<std::vector<double>, std::vector<data::Quaternion>>& op_);
-    /// Store 0's for point i. This is used when no neighbors for a point exist.
-    void addNull(size_t i);
-    /// Return a tuple of the two arrays op and rotations.
-    py::tuple getArrays();
-
-    private:
-    /// Fast access to op
-    py::detail::unchecked_mutable_reference<double, 2> u_op;
-    /// Fast access to rotations
-    py::detail::unchecked_mutable_reference<double, 3> u_rotations;
-};
 
 /**
  * @brief Central class, computes PGOP for provided points.
@@ -116,9 +24,11 @@ struct PGOPStore {
  */
 class PGOP {
     public:
-    PGOP(const py::list& R_ij,
+    PGOP(const std::vector<const double*> R_ij_data,
+         const size_t n_symmetries,
          std::shared_ptr<optimize::Optimizer>& optimizer,
-         const unsigned int mode,
+         const std::vector<size_t> group_sizes,
+         unsigned int mode,
          bool compute_per_operator);
 
     /**
@@ -129,10 +39,12 @@ class PGOP {
      * @param num_neighboors An array of the number of neighbor for each point.
      *
      */
-    py::tuple compute(const py::array_t<double> distances,
-                      const py::array_t<double> weights,
-                      const py::array_t<int> num_neighbors,
-                      const py::array_t<double> sigmas) const;
+    std::tuple<std::vector<double>, std::vector<data::Quaternion>>
+    compute(const double* distances,
+            const double* weights,
+            const int* num_neighbors,
+            const double* sigmas,
+            const size_t N_particles_in_neighbors) const;
 
     private:
     /**
@@ -156,8 +68,8 @@ class PGOP {
      *
      * @returns the optimized PGOP value and the optimal rotation for the given symmetry.
      */
-    std::tuple<double, data::Vec3> compute_symmetry(LocalNeighborhood& neighborhood,
-                                                    const std::vector<double>& R_ij) const;
+    std::tuple<double, data::Vec3>
+    compute_symmetry(LocalNeighborhood& neighborhood, const double* R_ij, size_t group_idx) const;
 
     /**
      * @brief Compute the PGOP for a set point group symmetry and rotation.
@@ -170,7 +82,7 @@ class PGOP {
      *
      * @returns The PGOP value.
      */
-    double compute_pgop(LocalNeighborhood& neighborhood, const std::vector<double>& R_ij) const;
+    double compute_pgop(LocalNeighborhood& neighborhood, const std::span<const double> R_ij) const;
 
     /**
      * Helper function to better handle both single threaded and multithreaded behavior. In single
@@ -180,18 +92,17 @@ class PGOP {
     void execute_func(std::function<void(size_t, size_t)> func, size_t N) const;
 
     /// The number of symmetries that PGOP is being computed for.
-    unsigned int m_n_symmetries;
-    /// The Wigner D matrices for each point group symmetry
-    std::vector<std::vector<double>> m_Rij;
+    const unsigned int m_n_symmetries;
+    /// The Cartesian matrices for each point group symmetry
+    const std::vector<const double*> m_Rij;
+    /// The number of elements in each group // TODO: divided by 9!
+    const std::vector<size_t> m_group_sizes;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
     /// The mode of the PGOP computation.
     unsigned int m_mode;
-    // Whether to compute the PGOP for each operator.
+    /// Whether to compute the PGOP for each operator.
     bool m_compute_per_operator;
 };
 
-void export_spatula_class(py::module& m, const std::string& name);
-
-void export_spatula(py::module& m);
 } // End namespace spatula
