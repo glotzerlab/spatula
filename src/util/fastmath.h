@@ -110,10 +110,6 @@ accuracy < 1e-7 for all regions of the curve, and still offers good performance.
 #include <cstdint>
 #include <cstring>
 
-#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
-#include <arm_neon.h>
-#endif
-
 namespace spatula { namespace util {
 
 inline double fast_exp_approx(double x)
@@ -148,43 +144,5 @@ inline double fast_exp_approx(double x)
     double scale_factor = std::bit_cast<double, uint64_t>(ki);
     return p * scale_factor;
 }
-
-#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
-inline float64x2_t fast_exp_approx_simd(float64x2_t x)
-{
-    const float64x2_t neg_ln2 = vdupq_n_f64(-0.69314718055994530941723);
-    const float64x2_t ln2_recip = vdupq_n_f64(1.44269504088896340);
-
-    // Compute the float representation of k = ⌊x / ln(2) + 1/2⌋
-    float64x2_t k = vrndnq_f64(vmulq_f64(x, ln2_recip));
-
-    // FMA Cody-Waite Range reduction, skipping the low correction.
-    float64x2_t r = vfmaq_f64(x, k, neg_ln2);
-
-    // Degree 5 Remez approximation from Sollya, using Estrin's method
-    // p = (p0 := g + f * r) + r^2 * ((p1 := d + c * r) + r^2 * (p2 := b + a * r))
-    const float64x2_t g = vdupq_n_f64(1.0000000716546679769);
-    const float64x2_t f = vdupq_n_f64(0.99999969199097560324);
-    const float64x2_t d = vdupq_n_f64(0.4999889485139416001);
-    const float64x2_t c = vdupq_n_f64(0.16667574730852952047);
-    const float64x2_t b = vdupq_n_f64(4.191538198120380032e-2);
-    const float64x2_t a = vdupq_n_f64(8.2976549459683138915e-3);
-
-    // NOTE: vfmaq is a + (b*c), NOT (a * b) + c as std::fma
-    float64x2_t r_sq = vmulq_f64(r, r);
-    float64x2_t p0 = vfmaq_f64(g, r, f);
-    float64x2_t p1 = vfmaq_f64(d, r, c);
-    float64x2_t p2 = vfmaq_f64(b, r, a);
-    float64x2_t p1_2 = vfmaq_f64(p1, r_sq, p2);
-    float64x2_t p = vfmaq_f64(p0, r_sq, p1_2);
-
-    // Reconstruction: 2^k * p / (2x) = (k as i64 << 52)
-    int64x2_t k_shifted = vshlq_n_s64(vcvtq_s64_f64(k), 52);
-
-    // Integer add to combine exponents, effectively computing p * 2^k
-    return vreinterpretq_f64_s64(vaddq_s64(vreinterpretq_s64_f64(p), k_shifted));
-}
-
-#endif
 
 }} // namespace spatula::util

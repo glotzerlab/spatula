@@ -5,9 +5,7 @@
 #include "data/RotationMatrix.h"
 #include "data/Vec3.h"
 #include "locality.h"
-#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
-#include "computes/neon.h"
-#endif
+
 #include "util/Metrics.h"
 #include <algorithm>
 #include <cmath>
@@ -52,9 +50,6 @@ double compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<co
 double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
                                   const std::span<const double> R_ij)
 {
-#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
-    return compute_pgop_gaussian_fast_neon(neighborhood, R_ij);
-#else
     const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
@@ -85,7 +80,6 @@ double compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
     // cast to double to avoid integer division
     const auto normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
-#endif
 }
 double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 {
@@ -123,9 +117,6 @@ double compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<cons
 double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const double> R_ij)
 
 {
-#if defined(__aarch64__) && !defined(SPATULA_DISABLE_NEON)
-    return compute_pgop_fisher_fast_neon(neighborhood, R_ij);
-#else
     std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const double kappa = neighborhood.sigmas[0];
     const double prefix_term = 2.0 * kappa / std::sinh(kappa);
@@ -165,6 +156,5 @@ double compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span
     const double normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
 
     return overlap / normalization;
-#endif
 }
 }} // namespace spatula::computes

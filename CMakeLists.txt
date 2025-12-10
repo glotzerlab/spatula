@@ -33,8 +33,3 @@ if(ENABLE_PROFILING)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g")
 endif()
-
-option(SPATULA_DISABLE_NEON "Disable NEON optimizations" OFF)
-if(SPATULA_DISABLE_NEON)
-    target_compile_definitions(_spatula_nb PRIVATE SPATULA_DISABLE_NEON)
-endif()
