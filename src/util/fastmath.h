@@ -97,15 +97,11 @@ Optimized Polynomial: 1.00000007165468307590572294429875910282135009765625 + x *
 Note that, with degree 5, our error is below the floating point machine epsilon. This
 boundary is fairly arbitrary but seems reasonable.
 
-For the Fisher distribution overlap, our expression is `sinh(x / 2) / x`. Applying the
-same approach as `exp(x)` shows degree 4 is required for an error below 1e-7. Because
-sinhc is an even function, the coefficient for odd powers (1 and 3) are very small. As a
-result, our expression can be further approximated to the following while maintaining
-near-optimal accuracy.
-
-```
-p = 0.5000000000838027425 + x * x * (2.0833320759058335941e-2 + x * x * 2.6069597217211469857e-4);
-```
+For the Fisher distribution overlap, our expression is `sinh(x / 2) / x`. This is
+challenging to approximate (1) because of numerical instability near zero and (2)
+large values of x result in a large slope. As a result, we use the fixed limit of 0.5
+near zero, std::sinh for 1e-6 < x < 24, and fast_exp_approx for large x. This guarantees
+accuracy < 1e-7 for all regions of the curve, and still offers good performance.
 */
 
 #pragma once
