@@ -46,15 +46,15 @@ jobs:
           oldest_numpy: '2.3.3'
 
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@63fd63b352a9a8bdcc24791c9dbee952ee9a8abc # v3.3.0
+        uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3.1
         env:
           CIBW_BUILD: "${{ matrix.python.version }}-*"
           CIBW_TEST_REQUIRES: pytest==8.4.2 numpy==${{ matrix.python.oldest_numpy }} pytest-rerunfailures==16.0.1 coxeter==0.10.0
 
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dist-python-${{ matrix.python.version }}-${{ matrix.os.base }}-${{ matrix.os.arch }}
           path: ./wheelhouse/*.whl
@@ -63,18 +63,18 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: 3.14
       - name: Set up Python environment
-        uses: glotzerlab/workflows/setup-uv@894d9678188a02b06560fdeb2b9ba98d016cd371 # 0.10.0
+        uses: glotzerlab/workflows/setup-uv@2245be9e78600bf7846aaf9555da322446f46110 # 0.11.0
       - name: Build sdist
         run: uv build --sdist --out-dir dist/ .
 
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dist-sdist
           path: dist/*.tar.gz
@@ -88,7 +88,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           merge-multiple: 'true'
           pattern: dist-*
