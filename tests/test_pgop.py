@@ -11,6 +11,8 @@ import scipy.spatial
 import spatula
 
 RTOL = 1e-4
+LEARN = 0.01
+MAX_ITER = 1000
 
 N_DICT = {
     3: "Triangular",
@@ -1385,7 +1387,7 @@ METHODS_DICT = {}
 # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
 # close to one as well.
 OPTIMIZER = spatula.optimize.Union.with_step_gradient_descent(
-    spatula.optimize.Mesh.from_grid(), max_iter=500, learning_rate=0.01
+    spatula.optimize.Mesh.from_grid(), max_iter=MAX_ITER, learning_rate=LEARN
 )
 
 
@@ -1522,8 +1524,8 @@ def compute_pgop_check_all_order_values(
         print("Used higher precision, lower precision value", op_pg.order)
         new_optimizer = spatula.optimize.Union.with_step_gradient_descent(
             spatula.optimize.Mesh.from_lattice(n_rotations=5_000),
-            max_iter=1_000,
-            learning_rate=0.01,
+            max_iter=MAX_ITER,
+            learning_rate=LEARN,
         )
         op_pg = compute_op_result(
             symmetry, new_optimizer, mode, system, nlist, sigma, qp, True
