@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 The Regents of the University of Michigan
+# Copyright (c) 2021-2026 The Regents of the University of Michigan
 # Part of spatula, released under the BSD 3-Clause License.
 
 """Provide helper class for computing spherical harmonics."""
@@ -56,8 +56,8 @@ class SphHarm:
         """
         # Note the different convention in theta and phi between scipy and this
         sph_ind, angle_ind = np.mgrid[0 : len(self._m), 0 : len(theta)]
-        return sp.special.sph_harm(
-            self._m[sph_ind], self._l[sph_ind], phi[angle_ind], theta[angle_ind]
+        return sp.special.sph_harm_y(
+            self._l[sph_ind], self._m[sph_ind], theta[angle_ind], phi[angle_ind]
         )
 
     @property
