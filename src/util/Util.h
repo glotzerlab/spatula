@@ -18,17 +18,21 @@ namespace spatula { namespace util {
 // Bring Vec3 and Quaternion into namespace.
 using namespace spatula::data;
 
-using vec3_iter = decltype(std::declval<std::vector<Vec3>>().begin());
-using cvec3_iter = decltype(std::declval<const std::vector<Vec3>>().begin());
+template<typename T>
+using vec3_iter = decltype(std::declval<std::vector<Vec3<T>>>().begin());
+template<typename T>
+using cvec3_iter = decltype(std::declval<const std::vector<Vec3<T>>>().begin());
 
 /// Compute and return the angle (in radians) between two vectors in 3D.
-inline double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
+template<typename T>
+inline double fast_angle_eucledian(const Vec3<T>& ref_x, const Vec3<T>& x)
 {
     return std::acos(ref_x.dot(x));
 }
 
 /// Rotate a single point x using rotation matrix R and place the result in x_prime.
-inline void single_rotate(const Vec3& x, Vec3& x_prime, const RotationMatrix& R)
+template<typename T>
+inline void single_rotate(const Vec3<T>& x, Vec3<T>& x_prime, const RotationMatrix<T>& R)
 {
     x_prime.x = R[0] * x.x + R[1] * x.y + R[2] * x.z;
     x_prime.y = R[3] * x.x + R[4] * x.y + R[5] * x.z;
@@ -41,16 +45,18 @@ inline void single_rotate(const Vec3& x, Vec3& x_prime, const RotationMatrix& R)
  *
  * This method is templated to enable more easy refactoring of container types in PGOP.cc.
  *
+ * @tparam T The floating point type (float or double)
  * @tparam IntputIterator An input iterator (or derived iterator concept).
  * @param points_begin constant iterator to the beginning of points to rotate.
  * @param points_end constant iterator to the end of points to rotate.
  * @param rotated_points_it iterator to the starting vector location to place rotated positions in.
  * @param R The rotation matrix given in row column order.
  */
-inline void rotate_matrix(cvec3_iter points_begin,
-                          cvec3_iter points_end,
-                          vec3_iter rotated_points_it,
-                          const RotationMatrix& R)
+template<typename T>
+inline void rotate_matrix(cvec3_iter<T> points_begin,
+                          cvec3_iter<T> points_end,
+                          vec3_iter<T> rotated_points_it,
+                          const RotationMatrix<T>& R)
 {
     for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {
         single_rotate(*it, *rotated_points_it, R);
@@ -63,19 +69,22 @@ inline void rotate_matrix(cvec3_iter points_begin,
  * This method assumes that \f$ || v || = \theta \f$ and \f$ x = \frac{v}{||v||} \f$ where \f$ x \f$
  * is the axis of rotation.
  *
+ * @tparam T The floating point type (float or double)
  * @param v The 3-vector to convert to a rotation matrix.
  */
-inline RotationMatrix to_rotation_matrix(const Vec3& v)
+template<typename T>
+inline RotationMatrix<T> to_rotation_matrix(const Vec3<T>& v)
 {
     const auto angle = v.norm();
-    if (std::abs(angle) < 1e-7) {
-        return RotationMatrix {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+    if (std::abs(angle) < T(1e-7)) {
+        return RotationMatrix<T> {T(1), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(1)};
     }
     const auto axis = v / angle;
-    const double c {std::cos(angle)}, s {std::sin(angle)};
-    const double C = 1 - c;
+    const T c {static_cast<T>(std::cos(angle))};
+    const T s {static_cast<T>(std::sin(angle))};
+    const T C = T(1) - c;
     const auto sv = axis * s;
-    return RotationMatrix {
+    return RotationMatrix<T> {
         C * axis.x * axis.x + c,
         C * axis.x * axis.y - sv.z,
         C * axis.x * axis.z + sv.y,
@@ -92,20 +101,24 @@ inline RotationMatrix to_rotation_matrix(const Vec3& v)
  * @brief Returns a vector of Vec3 of normalized distances. Each point in distances is normalized
  * and converted to a Vec3
  *
+ * @tparam T The floating point type (float or double)
  * @param distances A Raw pointer to an array of doubles interpreted as Vec3.
- * @returns a vector of Vec3 that is the same size as distances with each vector in the same
+ * @returns a vector of Vec3<T> that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
-inline std::vector<Vec3> normalize_distances(const double* distances,
+template<typename T>
+inline std::vector<Vec3<T>> normalize_distances(const double* distances,
                                              std::pair<size_t, size_t> slice)
 {
-    auto normalized_distances = std::vector<Vec3>();
+    auto normalized_distances = std::vector<Vec3<T>>();
     normalized_distances.reserve((slice.second - slice.first) / 3);
     // In C++ 23 used strided view with a transform.
     for (size_t i = slice.first; i < slice.second; i += 3) {
-        const auto point = Vec3(distances[i], distances[i + 1], distances[i + 2]);
-        const double norm = std::sqrt(point.dot(point));
-        if (norm == 0) {
+        const auto point = Vec3<T>(static_cast<T>(distances[i]),
+                                  static_cast<T>(distances[i + 1]),
+                                  static_cast<T>(distances[i + 2]));
+        const T norm = std::sqrt(point.dot(point));
+        if (norm == T(0)) {
             normalized_distances.emplace_back(point);
         } else {
             normalized_distances.emplace_back(point / norm);

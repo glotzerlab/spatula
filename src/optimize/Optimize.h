@@ -50,7 +50,7 @@ class Optimizer {
     virtual ~Optimizer() = default;
 
     /// Get the next point to compute the objective for.
-    data::Vec3 next_point()
+    data::Vec3d next_point()
     {
         if (m_need_objective) {
             throw std::runtime_error("Must record objective for new point first.");
@@ -77,7 +77,7 @@ class Optimizer {
     virtual bool terminate() const = 0;
 
     /// Get the current best point and the value of the objective function at that point.
-    std::pair<data::Vec3, double> get_optimum() const
+    std::pair<data::Vec3d, double> get_optimum() const
     {
         return m_best_point;
     }
@@ -95,12 +95,12 @@ class Optimizer {
 
     protected:
     /// The current point to evaluate the objective function for.
-    data::Vec3 m_point;
+    data::Vec3d m_point;
     /// The last recorded objective function value.
     double m_objective;
 
     /// The best (as of yet) point computed.
-    std::pair<data::Vec3, double> m_best_point;
+    std::pair<data::Vec3d, double> m_best_point;
 
     /// The number of iterations thus far.
     unsigned int m_count;

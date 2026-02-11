@@ -38,8 +38,9 @@ inline double covariance(const std::vector<std::complex<double>>& f,
     return mixed_covar / std::sqrt(g_covar * f_cov);
 }
 
-inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
-                                                         const data::Vec3& symmetrized_position,
+template<typename T>
+inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
+                                                         const data::Vec3<T>& symmetrized_position,
                                                          double sigma,
                                                          double sigma_symmetrized)
 {
@@ -51,11 +52,12 @@ inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& posit
     //    is used.
     double lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
     return lead_term * std::sqrt(lead_term)
-           * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
+           * std::exp(-static_cast<double>(r_pos.dot(r_pos)) / (4 * sigmas_squared_summed));
 }
+template<typename T>
 inline double
-compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
-                                                 const data::Vec3& symmetrized_position,
+compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
+                                                 const data::Vec3<T>& symmetrized_position,
                                                  double sigma,
                                                  double sigma_symmetrized)
 {
@@ -63,16 +65,17 @@ compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
     //    and positions[m])
     auto r_pos = symmetrized_position - position;
     // Reduced equation when sigma == sigma_symmetrized
-    return r_pos.dot(r_pos) / (8.0 * (sigma * sigma_symmetrized));
+    return static_cast<double>(r_pos.dot(r_pos)) / (8.0 * (sigma * sigma_symmetrized));
 }
 
-inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
-                                                       const data::Vec3& symmetrized_position,
+template<typename T>
+inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3<T>& position,
+                                                       const data::Vec3<T>& symmetrized_position,
                                                        double kappa,
                                                        double kappa_symmetrized)
 {
-    auto position_norm = std::sqrt(position.dot(position));
-    auto symmetrized_position_norm = std::sqrt(symmetrized_position.dot(symmetrized_position));
+    auto position_norm = std::sqrt(static_cast<double>(position.dot(position)));
+    auto symmetrized_position_norm = std::sqrt(static_cast<double>(symmetrized_position.dot(symmetrized_position)));
     // If position norm is zero vector means this point is at origin and contributes 1
     // to the overlap, check that with a small epsilon.
     if ((position_norm < 1e-10) && (symmetrized_position_norm < 1e-10)) {
@@ -83,15 +86,16 @@ inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& positio
     auto k1_sq = kappa * kappa;
     auto k2_sq = kappa_symmetrized * kappa_symmetrized;
     auto k1k2 = kappa * kappa_symmetrized;
-    auto proj = position.dot(symmetrized_position) / (position_norm * symmetrized_position_norm);
+    auto proj = static_cast<double>(position.dot(symmetrized_position)) / (position_norm * symmetrized_position_norm);
     return 2 * std::sqrt(k1k2 / (std::sinh(kappa) * std::sinh(kappa_symmetrized)))
            * std::sinh((std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj)) / 2)
            / std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj);
 }
 
+template<typename T>
 inline double
-compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
-                                                    const data::Vec3& symmetrized_position,
+compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3<T>& position,
+                                                    const data::Vec3<T>& symmetrized_position,
                                                     double kappa,
                                                     double kappa_symmetrized)
 {
@@ -100,7 +104,7 @@ compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
     auto k1_sq = kappa * kappa;
     auto k2_sq = kappa_symmetrized * kappa_symmetrized;
     auto k1k2 = kappa * kappa_symmetrized;
-    auto proj = position.dot(symmetrized_position);
+    auto proj = static_cast<double>(position.dot(symmetrized_position));
     return 2 * std::sqrt(k1k2 / (std::sinh(kappa) * std::sinh(kappa_symmetrized)))
            * std::sinh((std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj)) / 2)
            / std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj);

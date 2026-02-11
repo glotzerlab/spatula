@@ -104,7 +104,7 @@ template<typename distribution_type> class BOOSOP {
      * specified point group symmetries.
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(LocalNeighborhood& neighborhood,
+    compute_particle(LocalNeighborhoodd& neighborhood,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
 
@@ -122,7 +122,7 @@ template<typename distribution_type> class BOOSOP {
      * @returns the optimized BOOSOP value and the optimal rotation for the given symmetry.
      */
     std::tuple<double, data::Quaternion>
-    compute_symmetry(LocalNeighborhood& neighborhood,
+    compute_symmetry(LocalNeighborhoodd& neighborhood,
                      const std::vector<std::complex<double>>& D_ij,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
@@ -142,7 +142,7 @@ template<typename distribution_type> class BOOSOP {
      *
      * @returns The BOOSOP value.
      */
-    double compute_BOOSOP(LocalNeighborhood& neighborhood,
+    double compute_BOOSOP(LocalNeighborhoodd& neighborhood,
                           const std::vector<std::complex<double>>& D_ij,
                           const util::QlmEval& qlm_eval,
                           util::QlmBuf& qlm_buf) const;

@@ -118,7 +118,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const double* distances,
 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-BOOSOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
+BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodd& neighborhood,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
 {
@@ -136,7 +136,7 @@ BOOSOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
 
 template<typename distribution_type>
 std::tuple<double, data::Quaternion>
-BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
+BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodd& neighborhood,
                                             const std::vector<std::complex<double>>& D_ij,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
@@ -154,7 +154,7 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
 }
 
 template<typename distribution_type>
-double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhood& neighborhood,
+double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodd& neighborhood,
                                                  const std::vector<std::complex<double>>& D_ij,
                                                  const util::QlmEval& qlm_eval,
                                                  util::QlmBuf& qlm_buf) const

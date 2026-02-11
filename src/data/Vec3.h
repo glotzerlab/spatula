@@ -10,39 +10,41 @@ namespace spatula { namespace data {
 /**
  * @brief Vec3 represents a point in 3d space and provides arithmetic operators for easy
  * manipulation. Some other functions are provided such as Vec3::dot for other common use cases.
+ *
+ * @tparam T The floating point type (float or double)
  */
-struct Vec3 {
+template<typename T> struct Vec3 {
     /// x coordinate
-    double x;
+    T x;
     /// y coordinate
-    double y;
+    T y;
     /// z coordinate
-    double z;
+    T z;
 
     /**
      * @brief Construct a Vec3 from given Cartesian coordinates.
      */
-    Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
+    Vec3(T x_, T y_, T z_) : x(x_), y(y_), z(z_) { }
 
     /**
      * @brief Construct a Vec3 from a pointer to an array of at least length 3.
      */
-    Vec3(const double* point) : x(point[0]), y(point[1]), z(point[2]) { }
+    explicit Vec3(const T* point) : x(point[0]), y(point[1]), z(point[2]) { }
 
     /// Construct a point at the origin.
-    Vec3() : x(0.0), y(0.0), z(0.0) { }
+    Vec3() : x(T(0)), y(T(0)), z(T(0)) { }
 
     /**
      * @brief Compute the dot product of a dot b.
      *
      * @param b the point to compute the dot product of.
      */
-    inline double dot(const Vec3& b) const
+    inline T dot(const Vec3& b) const
     {
         return x * b.x + y * b.y + z * b.z;
     }
 
-    inline double norm() const
+    inline T norm() const
     {
         return std::sqrt(x * x + y * y + z * z);
     }
@@ -50,10 +52,10 @@ struct Vec3 {
     inline void normalize()
     {
         const auto n = norm();
-        if (n == 0) {
+        if (n == T(0)) {
             return;
         }
-        const double inv_norm = 1 / n;
+        const T inv_norm = T(1) / n;
         x *= inv_norm;
         y *= inv_norm;
         z *= inv_norm;
@@ -64,7 +66,7 @@ struct Vec3 {
         return Vec3(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
     }
 
-    inline double& operator[](const size_t i)
+    inline T& operator[](const size_t i)
     {
         if (i == 0) {
             return x;
@@ -75,7 +77,7 @@ struct Vec3 {
         return z;
     }
 
-    inline const double& operator[](size_t i) const
+    inline const T& operator[](size_t i) const
     {
         if (i == 0) {
             return x;
@@ -88,51 +90,51 @@ struct Vec3 {
 };
 
 /// Vec3 addition.
-template<typename number_type> inline Vec3 operator+(const Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T> operator+(const Vec3<T>& a, const number_type& b)
 {
-    return Vec3(a.x + b, a.y + b, a.z + b);
+    return Vec3<T>(a.x + b, a.y + b, a.z + b);
 }
 
 /// Vec3 subtraction.
-template<typename number_type> inline Vec3 operator-(const Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T> operator-(const Vec3<T>& a, const number_type& b)
 {
-    return Vec3(a.x - b, a.y - b, a.z - b);
+    return Vec3<T>(a.x - b, a.y - b, a.z - b);
 }
 
 /// Vec3 multiplication.
-template<typename number_type> inline Vec3 operator*(const Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T> operator*(const Vec3<T>& a, const number_type& b)
 {
-    return Vec3(a.x * b, a.y * b, a.z * b);
+    return Vec3<T>(a.x * b, a.y * b, a.z * b);
 }
 
 /// Vec3 division.
-template<typename number_type> inline Vec3 operator/(const Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T> operator/(const Vec3<T>& a, const number_type& b)
 {
-    return Vec3(a.x / b, a.y / b, a.z / b);
+    return Vec3<T>(a.x / b, a.y / b, a.z / b);
 }
 
-template<> inline Vec3 operator+(const Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T> operator+(const Vec3<T>& a, const Vec3<T>& b)
 {
-    return Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
+    return Vec3<T>(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-template<> inline Vec3 operator-(const Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T> operator-(const Vec3<T>& a, const Vec3<T>& b)
 {
-    return Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
+    return Vec3<T>(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-template<> inline Vec3 operator*(const Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T> operator*(const Vec3<T>& a, const Vec3<T>& b)
 {
-    return Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
+    return Vec3<T>(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-template<> inline Vec3 operator/(const Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T> operator/(const Vec3<T>& a, const Vec3<T>& b)
 {
-    return Vec3(a.x / b.x, a.y / b.y, a.z / b.z);
+    return Vec3<T>(a.x / b.x, a.y / b.y, a.z / b.z);
 }
 
 /// Vec3 inplace addition.
-template<typename number_type> inline Vec3& operator+=(Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T>& operator+=(Vec3<T>& a, const number_type& b)
 {
     a.x += b;
     a.y += b;
@@ -141,7 +143,7 @@ template<typename number_type> inline Vec3& operator+=(Vec3& a, const number_typ
 }
 
 /// Vec3 inplace subtraction.
-template<typename number_type> inline Vec3& operator-=(Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T>& operator-=(Vec3<T>& a, const number_type& b)
 {
     a.x -= b;
     a.y -= b;
@@ -150,7 +152,7 @@ template<typename number_type> inline Vec3& operator-=(Vec3& a, const number_typ
 }
 
 /// Vec3 inplace multiplication.
-template<typename number_type> inline Vec3& operator*=(Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T>& operator*=(Vec3<T>& a, const number_type& b)
 {
     a.x *= b;
     a.y *= b;
@@ -159,7 +161,7 @@ template<typename number_type> inline Vec3& operator*=(Vec3& a, const number_typ
 }
 
 /// Vec3 inplace division.
-template<typename number_type> inline Vec3& operator/=(Vec3& a, const number_type& b)
+template<typename T, typename number_type> inline Vec3<T>& operator/=(Vec3<T>& a, const number_type& b)
 {
     a.x /= b;
     a.y /= b;
@@ -167,7 +169,7 @@ template<typename number_type> inline Vec3& operator/=(Vec3& a, const number_typ
     return a;
 }
 
-template<> inline Vec3& operator+=(Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T>& operator+=(Vec3<T>& a, const Vec3<T>& b)
 {
     a.x += b.x;
     a.y += b.y;
@@ -175,7 +177,7 @@ template<> inline Vec3& operator+=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> inline Vec3& operator-=(Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T>& operator-=(Vec3<T>& a, const Vec3<T>& b)
 {
     a.x -= b.x;
     a.y -= b.y;
@@ -183,7 +185,7 @@ template<> inline Vec3& operator-=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> inline Vec3& operator*=(Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T>& operator*=(Vec3<T>& a, const Vec3<T>& b)
 {
     a.x *= b.x;
     a.y *= b.y;
@@ -191,7 +193,7 @@ template<> inline Vec3& operator*=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> inline Vec3& operator/=(Vec3& a, const Vec3& b)
+template<typename T> inline Vec3<T>& operator/=(Vec3<T>& a, const Vec3<T>& b)
 {
     a.x /= b.x;
     a.y /= b.y;
@@ -200,9 +202,13 @@ template<> inline Vec3& operator/=(Vec3& a, const Vec3& b)
 }
 
 /// Vec3 equality
-inline bool operator==(const Vec3& a, const Vec3& b)
+template<typename T> inline bool operator==(const Vec3<T>& a, const Vec3<T>& b)
 {
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
+
+// Typedefs for common precision types
+using Vec3d = Vec3<double>;
+using Vec3f = Vec3<float>;
 
 }} // namespace spatula::data
