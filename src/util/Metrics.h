@@ -41,8 +41,8 @@ inline double covariance(const std::vector<std::complex<double>>& f,
 template<typename T>
 inline T compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
                                                     const data::Vec3<T>& symmetrized_position,
-                                                    double sigma,
-                                                    double sigma_symmetrized)
+                                                    T sigma,
+                                                    T sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
@@ -57,8 +57,8 @@ inline T compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& positio
 template<typename T>
 inline T compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
                                                           const data::Vec3<T>& symmetrized_position,
-                                                          double sigma,
-                                                          double sigma_symmetrized)
+                                                          T sigma,
+                                                          T sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])

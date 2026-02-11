@@ -144,7 +144,7 @@ T compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood, const std::span<c
             // TODO: fast sinhf
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
             if (inner_term > 1e-6) {
-                // Use full-precision sinh to avoid errors when x is small
+                // Use double-precision sinh to avoid errors when x is small
                 overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else {
                 // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
