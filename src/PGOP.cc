@@ -16,7 +16,7 @@ PGOP::PGOP(const std::vector<const double*> R_ij_data,
            std::vector<size_t> group_sizes,
            unsigned int mode,
            bool compute_per_operator)
-    : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(group_sizes),
+    : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(std::move(group_sizes)),
       m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
 {
 }
