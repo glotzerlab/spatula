@@ -47,12 +47,12 @@ inline T compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& positio
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
     auto r_pos = symmetrized_position - position;
-    auto sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
+    T sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
     // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient
     //    is used.
     T lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
     return lead_term * std::sqrt(lead_term)
-           * std::exp(-static_cast<T>(r_pos.dot(r_pos)) / (4 * sigmas_squared_summed));
+           * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
 }
 template<typename T>
 inline T compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
