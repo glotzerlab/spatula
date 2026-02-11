@@ -18,14 +18,12 @@ namespace spatula { namespace util {
 // Bring Vec3 and Quaternion into namespace.
 using namespace spatula::data;
 
-template<typename T>
-using vec3_iter = decltype(std::declval<std::vector<Vec3<T>>>().begin());
+template<typename T> using vec3_iter = decltype(std::declval<std::vector<Vec3<T>>>().begin());
 template<typename T>
 using cvec3_iter = decltype(std::declval<const std::vector<Vec3<T>>>().begin());
 
 /// Compute and return the angle (in radians) between two vectors in 3D.
-template<typename T>
-inline double fast_angle_eucledian(const Vec3<T>& ref_x, const Vec3<T>& x)
+template<typename T> inline double fast_angle_eucledian(const Vec3<T>& ref_x, const Vec3<T>& x)
 {
     return std::acos(ref_x.dot(x));
 }
@@ -72,8 +70,7 @@ inline void rotate_matrix(cvec3_iter<T> points_begin,
  * @tparam T The floating point type (float or double)
  * @param v The 3-vector to convert to a rotation matrix.
  */
-template<typename T>
-inline RotationMatrix<T> to_rotation_matrix(const Vec3<T>& v)
+template<typename T> inline RotationMatrix<T> to_rotation_matrix(const Vec3<T>& v)
 {
     const auto angle = v.norm();
     if (std::abs(angle) < T(1e-7)) {
@@ -108,15 +105,15 @@ inline RotationMatrix<T> to_rotation_matrix(const Vec3<T>& v)
  */
 template<typename T>
 inline std::vector<Vec3<T>> normalize_distances(const double* distances,
-                                             std::pair<size_t, size_t> slice)
+                                                std::pair<size_t, size_t> slice)
 {
     auto normalized_distances = std::vector<Vec3<T>>();
     normalized_distances.reserve((slice.second - slice.first) / 3);
     // In C++ 23 used strided view with a transform.
     for (size_t i = slice.first; i < slice.second; i += 3) {
         const auto point = Vec3<T>(static_cast<T>(distances[i]),
-                                  static_cast<T>(distances[i + 1]),
-                                  static_cast<T>(distances[i + 2]));
+                                   static_cast<T>(distances[i + 1]),
+                                   static_cast<T>(distances[i + 2]));
         const T norm = std::sqrt(point.dot(point));
         if (norm == T(0)) {
             normalized_distances.emplace_back(point);

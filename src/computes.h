@@ -36,9 +36,9 @@ double compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span
                 max_res = std::max(
                     max_res,
                     util::compute_Bhattacharyya_coefficient_gaussian<T>(positions[m],
-                                                                     symmetrized_position,
-                                                                     sigmas[j],
-                                                                     sigmas[m]));
+                                                                        symmetrized_position,
+                                                                        sigmas[j],
+                                                                        sigmas[m]));
             }
             overlap += max_res;
         }
@@ -102,10 +102,11 @@ double compute_pgop_fisher(LocalNeighborhood<T>& neighborhood, const std::span<c
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
                 double BC = 0;
-                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized<T>(positions[m],
-                                                                               symmetrized_position,
-                                                                               sigmas[j],
-                                                                               sigmas[m]);
+                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized<T>(
+                    positions[m],
+                    symmetrized_position,
+                    sigmas[j],
+                    sigmas[m]);
                 if (BC > max_res)
                     max_res = BC;
             }
@@ -118,7 +119,8 @@ double compute_pgop_fisher(LocalNeighborhood<T>& neighborhood, const std::span<c
 }
 
 template<typename T>
-double compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
+double compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood,
+                                const std::span<const double> R_ij)
 
 {
     std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);

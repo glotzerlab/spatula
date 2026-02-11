@@ -77,14 +77,14 @@ struct Quaternion {
         const double wx {w * xs}, wy {w * ys}, wz {w * zs}, xx {x * xs}, xy {x * ys}, xz {x * zs},
             yy {y * ys}, yz {y * zs}, zz {z * zs};
         return RotationMatrixd {1 - yy - zz,
-                               xy - wz,
-                               xz + wy,
-                               xy + wz,
-                               1 - xx - zz,
-                               yz - wx,
-                               xz - wy,
-                               yz + wx,
-                               1 - xx - yy};
+                                xy - wz,
+                                xz + wy,
+                                xy + wz,
+                                1 - xx - zz,
+                                yz - wx,
+                                xz - wy,
+                                yz + wx,
+                                1 - xx - yy};
     }
     /// Convert quaternion to its axis angle representation
     std::pair<Vec3d, double> to_axis_angle() const
