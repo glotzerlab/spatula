@@ -78,22 +78,18 @@ void export_spatula(nb::module_& m)
                 const size_t num_query_points = num_neighbors.size();
                 const size_t num_symmetries = rotation_values.size() / num_query_points;
 
-                // // Convert op_values to ndarray with shape (Nq, Ns)
-                // const size_t num_op_values = op_values.size();
-                // double* op_data = new double[num_op_values];
-                // std::move(op_values.begin(), op_values.end(), op_data);
+                // Convert op_values to ndarray with shape (Nq, Ns)
+                const size_t num_op_values = op_values.size();
+                double* op_data = new double[num_op_values];
+                std::move(op_values.begin(), op_values.end(), op_data);
 
-                // nb::capsule op_owner(op_data,
-                //                      [](void* p) noexcept { delete[] static_cast<double*>(p); });
+                nb::capsule op_owner(op_data,
+                                     [](void* p) noexcept { delete[] static_cast<double*>(p); });
 
-                // nb::ndarray<nb::numpy, double, nb::shape<-1, -1>> py_op_values(
-                //     op_data,
-                //     {num_query_points, num_symmetries},
-                //     op_owner);
-                nb::ndarray<nb::numpy, double, nb::shape<-1, -1>> py_op_values
-                    = nb::ndarray<double, nb::shape<-1, -1>>(op_values.data(),
-                                                             {num_query_points, num_symmetries})
-                          .cast();
+                nb::ndarray<nb::numpy, double, nb::shape<-1, -1>> py_op_values(
+                    op_data,
+                    {num_query_points, num_symmetries},
+                    op_owner);
 
                 // Convert rotation_values to ndarray
                 double* rotation_data = new double[rotation_values.size() * 4];
