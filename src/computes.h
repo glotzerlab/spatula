@@ -123,8 +123,8 @@ T compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood, const std::span<c
 {
     std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
     const double kappa = neighborhood.sigmas[0];
-    const double prefix_term = 2.0 * kappa / std::sinh(kappa);
-    double overlap = 0.0;
+    const T prefix_term = 2.0 * kappa / std::sinh(kappa);
+    T overlap = 0.0;
     data::RotationMatrix<T> R;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
@@ -143,10 +143,7 @@ T compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood, const std::span<c
             }
             // TODO: fast sinhf
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
-            if (inner_term > 24.0) {
-                // error < 2e-7 in x ∈ [24.0, 1500.0], above which sinh overflows.
-                overlap += prefix_term * util::fast_exp_approx(inner_term * 0.5) / (inner_term * 2);
-            } else if (inner_term > 1e-6) {
+            if (inner_term > 1e-6) {
                 // Use full-precision sinh to avoid errors when x is small
                 overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
             } else {
