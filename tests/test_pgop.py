@@ -1445,14 +1445,24 @@ def generate_quaternions(n=1):
 
 
 def compute_op_result(
-    symmetry, opt, optyp, system, nlist, sigma=None, query_points=None, failed=False
+    symmetry,
+    opt,
+    optyp,
+    system,
+    nlist,
+    sigma=None,
+    query_points=None,
+    failed=False,
+    refine=False,
 ):
     if failed:
         op_compute = make_compute_object(symmetry, opt, optyp)
     else:
         op_compute = make_method(symmetry, opt, optyp)
     if optyp == "boosop":
-        op_compute.compute(system, nlist, query_points=query_points)
+        if refine:
+            op_compute._max_l = 24
+        op_compute.compute(system, nlist, query_points=query_points, refine=refine)
     elif optyp == "full" or optyp == "boo":
         op_compute.compute(system, sigma, nlist, query_points=query_points)
     return op_compute
@@ -1625,6 +1635,26 @@ def test_bcc_with_multiple_incorrect_symmetries(mode):
     sigs = SIGMA_VALUES[mode] if mode != "boosop" else None
     op_pg = compute_op_result(
         incorrect_symmetries, OPTIMIZER, mode, (box, points), qargs, sigs
+    )
+    single_column_shape = (len(crystals_dict["bcc"][1]),)
+    np.testing.assert_array_less(
+        op_pg.order[:, 1], np.full(single_column_shape, cutoff)
+    )
+    np.testing.assert_allclose(
+        op_pg.order[:, 0], np.ones(single_column_shape), rtol=RTOL
+    )
+
+
+@pytest.mark.parametrize("mode", MODES)
+@pytest.mark.parametrize("refine", [False, True])
+def test_bcc_with_multiple_incorrect_symmetries(mode, refine):
+    cutoff = 0.8
+    box, points = crystals_dict["bcc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
+    incorrect_symmetries = ["Oh", "D3h"]
+    sigs = SIGMA_VALUES[mode] if mode != "boosop" else None
+    op_pg = compute_op_result(
+        incorrect_symmetries, OPTIMIZER, mode, (box, points), qargs, sigs, refine=refine
     )
     single_column_shape = (len(crystals_dict["bcc"][1]),)
     np.testing.assert_array_less(
