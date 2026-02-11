@@ -5,7 +5,10 @@
 #include "data/RotationMatrix.h"
 #include "data/Vec3.h"
 #include "locality.h"
-#include <arm_neon.h>
+
+#if defined(__ARM_NEON)
+#include "computes/neon.h"
+#endif
 
 #include "util/Metrics.h"
 #include <algorithm>
@@ -27,7 +30,6 @@ float compute_pgop_gaussian(LocalNeighborhood<float>& neighborhood,
 
         // loop over positions
         for (size_t j {0}; j < positions.size(); ++j) {
-            // Load and deinterleave 4 Vec3f into a float32x4x3_t struct.
             const auto& p = positions[j];
             // symmetrized position is obtained by multiplying the operator with the position
             const auto symmetrized_position = R.rotate(p);
@@ -50,31 +52,13 @@ float compute_pgop_gaussian(LocalNeighborhood<float>& neighborhood,
     return overlap / normalization;
 }
 
-/// Perform the subtraction of all fields and lanes of l, r.
-inline float32x4x3_t neon_sub_3(float32x4x3_t l, float32x4x3_t r)
-{
-    return float32x4x3_t {vsubq_f32(l.val[0], r.val[0]),
-                          vsubq_f32(l.val[1], r.val[1]),
-                          vsubq_f32(l.val[2], r.val[2])};
-}
-/// Update a SIMD register storing the current minimum
-inline float32x4_t neon_min_mag_sq(float32x4_t running_min, const float32x4x3_t x)
-{
-    float32x4_t mag_sq = vmulq_f32(x.val[0], x.val[0]); // (x**2)
-    mag_sq = vfmaq_f32(mag_sq, x.val[1], x.val[1]);     // Accumulate y
-    mag_sq = vfmaq_f32(mag_sq, x.val[2], x.val[2]);     // Accumulate z
-
-    // Update the running minimum
-    return vminq_f32(running_min, mag_sq);
-}
 float compute_pgop_gaussian_fast(LocalNeighborhood<float>& neighborhood,
                                  const std::span<const float> R_ij)
 {
+#if defined(__ARM_NEON)
+    return compute_pgop_gaussian_fast_neon(neighborhood, R_ij);
+#else
     const std::span<const data::Vec3<float>> positions(neighborhood.rotated_positions);
-
-    // Extract the raw underlying data, with some safety checks
-    static_assert(sizeof(data::Vec3<float>) == 3 * sizeof(float), "Vec3 must be tightly packed!");
-    const float* raw_positions = reinterpret_cast<const float*>(positions.data());
 
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
@@ -92,39 +76,25 @@ float compute_pgop_gaussian_fast(LocalNeighborhood<float>& neighborhood,
             // symmetrized position is obtained by multiplying the operator with the position
             const data::Vec3<float> symmetrized_position = R.rotate(p);
 
-            const auto symmetrized_pos_tiled = vld3q_dup_f32(&symmetrized_position.x);
-
-            float32x4_t max_res = vdupq_n_f32(std::numeric_limits<float>::infinity());
-            const size_t num_safe_simd = (positions.size() / 4) * 4;
-            size_t m = 0;
-            for (; m < num_safe_simd; m += 4) {
-                auto pos_block = vld3q_f32(raw_positions + (m * 3));
-                auto diff_block = neon_sub_3(pos_block, symmetrized_pos_tiled);
+            float max_res = std::numeric_limits<float>::infinity();
+            for (size_t m {0}; m < positions.size(); ++m) {
+                const data::Vec3<float>& pos_m = positions[m];
+                const auto diff = pos_m - symmetrized_position;
 
                 // max(exp(-x)) == min(x)
-                max_res = neon_min_mag_sq(max_res, diff_block);
-            }
-
-            // Collapse the 4 SIMD lanes to a single scalar minimum
-            float final_min_dist = vminvq_f32(max_res);
-
-            // Handle the remaining elements (<= 3)
-            for (; m < positions.size(); ++m) {
-                const data::Vec3<float>& p = positions[m];
-                const auto diff = p - symmetrized_position;
-
-                // Update the final result
-                final_min_dist = std::min(final_min_dist, diff.dot(diff));
+                max_res = std::min(max_res, diff.dot(diff));
             }
 
             // Final calculation using the collapsed minimum
-            overlap += util::fast_exp_approx(-final_min_dist * denom);
+            overlap += util::fast_exp_approx(-max_res * denom);
         }
     }
     // cast to double to avoid integer division
     const auto normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
+#endif
 }
+
 float compute_pgop_fisher(LocalNeighborhood<float>& neighborhood, const std::span<const float> R_ij)
 {
     std::span<const data::Vec3<float>> positions(neighborhood.rotated_positions);
