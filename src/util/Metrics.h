@@ -38,26 +38,27 @@ inline double covariance(const std::vector<std::complex<double>>& f,
     return mixed_covar / std::sqrt(g_covar * f_cov);
 }
 
-inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
-                                                         const data::Vec3& symmetrized_position,
-                                                         double sigma,
-                                                         double sigma_symmetrized)
+template<typename T>
+inline T compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
+                                                    const data::Vec3<T>& symmetrized_position,
+                                                    T sigma,
+                                                    T sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
     auto r_pos = symmetrized_position - position;
-    auto sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
+    T sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
     // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient
     //    is used.
-    double lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
+    T lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
     return lead_term * std::sqrt(lead_term)
            * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
 }
-inline double
-compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
-                                                 const data::Vec3& symmetrized_position,
-                                                 double sigma,
-                                                 double sigma_symmetrized)
+template<typename T>
+inline T compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
+                                                          const data::Vec3<T>& symmetrized_position,
+                                                          T sigma,
+                                                          T sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
@@ -66,10 +67,11 @@ compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
     return r_pos.dot(r_pos) / (8.0 * (sigma * sigma_symmetrized));
 }
 
-inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
-                                                       const data::Vec3& symmetrized_position,
-                                                       double kappa,
-                                                       double kappa_symmetrized)
+template<typename T>
+inline T compute_Bhattacharyya_coefficient_fisher(const data::Vec3<T>& position,
+                                                  const data::Vec3<T>& symmetrized_position,
+                                                  double kappa,
+                                                  double kappa_symmetrized)
 {
     auto position_norm = std::sqrt(position.dot(position));
     auto symmetrized_position_norm = std::sqrt(symmetrized_position.dot(symmetrized_position));
@@ -89,9 +91,10 @@ inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& positio
            / std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj);
 }
 
-inline double
-compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
-                                                    const data::Vec3& symmetrized_position,
+template<typename T>
+inline T
+compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3<T>& position,
+                                                    const data::Vec3<T>& symmetrized_position,
                                                     double kappa,
                                                     double kappa_symmetrized)
 {
