@@ -94,18 +94,31 @@ float compute_pgop_gaussian_fast(LocalNeighborhood<float>& neighborhood,
 
             const auto symmetrized_pos_tiled = vld3q_dup_f32(&symmetrized_position.x);
 
-            // compute overlap with every point in the positions
             float32x4_t max_res = vdupq_n_f32(std::numeric_limits<float>::infinity());
-            size_t m = 0;                       // outside for tail
-            for (; m < positions.size(); ++m) { // TODO: tail
+            const size_t num_safe_simd = (positions.size() / 4) * 4;
+            size_t m = 0;
+            for (; m < num_safe_simd; m += 4) {
                 auto pos_block = vld3q_f32(raw_positions + (m * 3));
                 auto diff_block = neon_sub_3(pos_block, symmetrized_pos_tiled);
 
                 // max(exp(-x)) == min(x)
                 max_res = neon_min_mag_sq(max_res, diff_block);
             }
-            // Horizontal min over the final register of mins
-            overlap += util::fast_exp_approx(-vminvq_f32(max_res) * denom);
+
+            // Collapse the 4 SIMD lanes to a single scalar minimum
+            float final_min_dist = vminvq_f32(max_res);
+
+            // Handle the remaining elements (<= 3)
+            for (; m < positions.size(); ++m) {
+                const data::Vec3<float>& p = positions[m];
+                const auto diff = p - symmetrized_position;
+
+                // Update the final result
+                final_min_dist = std::min(final_min_dist, diff.dot(diff));
+            }
+
+            // Final calculation using the collapsed minimum
+            overlap += util::fast_exp_approx(-final_min_dist * denom);
         }
     }
     // cast to double to avoid integer division
