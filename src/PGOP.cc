@@ -10,7 +10,7 @@
 
 namespace spatula {
 
-PGOP::PGOP(const std::vector<const double*> R_ij_data,
+PGOP::PGOP(const std::vector<const float*> R_ij_data,
            const size_t n_symmetries,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            std::vector<size_t> group_sizes,
@@ -102,7 +102,7 @@ PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
             for (size_t i = 0; i < m_group_sizes[group_idx]; i += 9) {
                 // Compute the PGOP value for a single operator in our group
                 const auto particle_operator_op
-                    = compute_pgop(neighborhood, std::span<const double>(R_ij + i, 9));
+                    = compute_pgop(neighborhood, std::span<const float>(R_ij + i, 9));
                 spatula.emplace_back(particle_operator_op);
                 rotations.emplace_back(quat);
             }
@@ -112,7 +112,7 @@ PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
 }
 
 std::tuple<double, data::Vec3f>
-PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, size_t group_idx) const
+PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const float* R_ij, size_t group_idx) const
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
@@ -123,7 +123,7 @@ PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, siz
                               static_cast<float>(opt_vec3d.z));
         neighborhood.rotate(opt_vec3f);
         const auto particle_op
-            = compute_pgop(neighborhood, std::span<const double>(R_ij, m_group_sizes[group_idx]));
+            = compute_pgop(neighborhood, std::span<const float>(R_ij, m_group_sizes[group_idx]));
         opt->record_objective(-particle_op);
     }
     const auto optimum = opt->get_optimum();
@@ -136,8 +136,7 @@ PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, siz
     return std::make_tuple(-optimum.second, opt_vec3f);
 }
 
-double PGOP::compute_pgop(LocalNeighborhoodf& neighborhood,
-                          const std::span<const double> R_ij) const
+double PGOP::compute_pgop(LocalNeighborhoodf& neighborhood, const std::span<const float> R_ij) const
 {
     if (m_mode == 0) {
         if (neighborhood.constantSigmas()) {

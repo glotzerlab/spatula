@@ -24,7 +24,7 @@ namespace spatula {
  */
 class PGOP {
     public:
-    PGOP(const std::vector<const double*> R_ij_data,
+    PGOP(const std::vector<const float*> R_ij_data,
          const size_t n_symmetries,
          std::shared_ptr<optimize::Optimizer>& optimizer,
          const std::vector<size_t> group_sizes,
@@ -69,7 +69,7 @@ class PGOP {
      * @returns the optimized PGOP value and the optimal rotation for the given symmetry.
      */
     std::tuple<double, data::Vec3f>
-    compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, size_t group_idx) const;
+    compute_symmetry(LocalNeighborhoodf& neighborhood, const float* R_ij, size_t group_idx) const;
 
     /**
      * @brief Compute the PGOP for a set point group symmetry and rotation.
@@ -82,7 +82,7 @@ class PGOP {
      *
      * @returns The PGOP value.
      */
-    double compute_pgop(LocalNeighborhoodf& neighborhood, const std::span<const double> R_ij) const;
+    double compute_pgop(LocalNeighborhoodf& neighborhood, const std::span<const float> R_ij) const;
 
     /**
      * Helper function to better handle both single threaded and multithreaded behavior. In single
@@ -94,7 +94,7 @@ class PGOP {
     /// The number of symmetries that PGOP is being computed for.
     const unsigned int m_n_symmetries;
     /// The Cartesian matrices for each point group symmetry
-    const std::vector<const double*> m_Rij;
+    const std::vector<const float*> m_Rij;
     /// The number of elements in each group // TODO: divided by 9!
     const std::vector<size_t> m_group_sizes;
     /// Optimizer to find the optimal rotation for each point and symmetry.

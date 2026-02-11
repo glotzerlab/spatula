@@ -13,7 +13,7 @@
 
 namespace spatula { namespace computes {
 template<typename T>
-T compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
+T compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span<const T> R_ij)
 {
     const std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
@@ -49,7 +49,7 @@ T compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span<cons
 }
 
 template<typename T>
-T compute_pgop_gaussian_fast(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
+T compute_pgop_gaussian_fast(LocalNeighborhood<T>& neighborhood, const std::span<const T> R_ij)
 {
     const std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
@@ -83,7 +83,7 @@ T compute_pgop_gaussian_fast(LocalNeighborhood<T>& neighborhood, const std::span
     return overlap / normalization;
 }
 template<typename T>
-T compute_pgop_fisher(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
+T compute_pgop_fisher(LocalNeighborhood<T>& neighborhood, const std::span<const T> R_ij)
 {
     std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
@@ -118,7 +118,7 @@ T compute_pgop_fisher(LocalNeighborhood<T>& neighborhood, const std::span<const 
 }
 
 template<typename T>
-T compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
+T compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood, const std::span<const T> R_ij)
 
 {
     std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
