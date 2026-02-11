@@ -140,14 +140,14 @@ double PGOP::compute_pgop(LocalNeighborhoodf& neighborhood, const std::span<cons
 {
     if (m_mode == 0) {
         if (neighborhood.constantSigmas()) {
-            return computes::compute_pgop_gaussian_fast<float>(neighborhood, R_ij);
+            return computes::compute_pgop_gaussian_fast(neighborhood, R_ij);
         }
-        return computes::compute_pgop_gaussian<float>(neighborhood, R_ij);
+        return computes::compute_pgop_gaussian(neighborhood, R_ij);
     } else {
         if (neighborhood.constantSigmas()) {
-            return computes::compute_pgop_fisher_fast<float>(neighborhood, R_ij);
+            return computes::compute_pgop_fisher_fast(neighborhood, R_ij);
         }
-        return computes::compute_pgop_fisher<float>(neighborhood, R_ij);
+        return computes::compute_pgop_fisher(neighborhood, R_ij);
     }
 }
 
