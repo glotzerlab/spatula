@@ -58,7 +58,7 @@ inline float32x4x3_t neon_sub_3(float32x4x3_t l, float32x4x3_t r)
                           vsubq_f32(l.val[2], r.val[2])};
 }
 /// Update a SIMD register storing the current minimum
-inline float32x4_t neon_min_mag_sq(float32x4_t running_min, float32x4x3_t x)
+inline float32x4_t neon_min_mag_sq(float32x4_t running_min, const float32x4x3_t x)
 {
     float32x4_t mag_sq = vmulq_f32(x.val[0], x.val[0]); // (x**2)
     mag_sq = vfmaq_f32(mag_sq, x.val[1], x.val[1]);     // Accumulate y
@@ -92,21 +92,19 @@ float compute_pgop_gaussian_fast(LocalNeighborhood<float>& neighborhood,
             // symmetrized position is obtained by multiplying the operator with the position
             const data::Vec3<float> symmetrized_position = R.rotate(p);
 
-            auto symmetrized_pos_tiled = vld3q_dup_f32(&symmetrized_position.x);
+            const auto symmetrized_pos_tiled = vld3q_dup_f32(&symmetrized_position.x);
 
             // compute overlap with every point in the positions
-            // float max_res = std::numeric_limits<float>::infinity();
             float32x4_t max_res = vdupq_n_f32(std::numeric_limits<float>::infinity());
             size_t m = 0;                       // outside for tail
             for (; m < positions.size(); ++m) { // TODO: tail
                 auto pos_block = vld3q_f32(raw_positions + (m * 3));
                 auto diff_block = neon_sub_3(pos_block, symmetrized_pos_tiled);
-                // data::Vec3<float> diff = positions[m] - symmetrized_position;
 
                 // max(exp(-x)) == min(x)
-                // max_res = std::min(max_res, diff.dot(diff));
                 max_res = neon_min_mag_sq(max_res, diff_block);
             }
+            // Horizontal min over the final register of mins
             overlap += util::fast_exp_approx(-vminvq_f32(max_res) * denom);
         }
     }
