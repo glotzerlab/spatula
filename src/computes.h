@@ -50,10 +50,32 @@ float compute_pgop_gaussian(LocalNeighborhood<float>& neighborhood,
     return overlap / normalization;
 }
 
+/// Perform the subtraction of all fields and lanes of l, r.
+inline float32x4x3_t neon_sub_3(float32x4x3_t l, float32x4x3_t r)
+{
+    return float32x4x3_t {vsubq_f32(l.val[0], r.val[0]),
+                          vsubq_f32(l.val[1], r.val[1]),
+                          vsubq_f32(l.val[2], r.val[2])};
+}
+/// Update a SIMD register storing the current minimum
+inline float32x4_t neon_min_mag_sq(float32x4_t running_min, float32x4x3_t x)
+{
+    float32x4_t mag_sq = vmulq_f32(x.val[0], x.val[0]); // (x**2)
+    mag_sq = vfmaq_f32(mag_sq, x.val[1], x.val[1]);     // Accumulate y
+    mag_sq = vfmaq_f32(mag_sq, x.val[2], x.val[2]);     // Accumulate z
+
+    // Update the running minimum
+    return vminq_f32(running_min, mag_sq);
+}
 float compute_pgop_gaussian_fast(LocalNeighborhood<float>& neighborhood,
                                  const std::span<const float> R_ij)
 {
     const std::span<const data::Vec3<float>> positions(neighborhood.rotated_positions);
+
+    // Extract the raw underlying data, with some safety checks
+    static_assert(sizeof(data::Vec3<float>) == 3 * sizeof(float), "Vec3 must be tightly packed!");
+    const float* raw_positions = reinterpret_cast<const float*>(positions.data());
+
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
     const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
@@ -65,19 +87,27 @@ float compute_pgop_gaussian_fast(LocalNeighborhood<float>& neighborhood,
         std::copy_n(R_ij.data() + i, 9, R.begin());
 
         // loop over positions
-        for (size_t j {0}; j < positions.size(); ++j) {
+        for (size_t j {0}; j < positions.size(); j++) {
             const data::Vec3<float>& p = positions[j];
             // symmetrized position is obtained by multiplying the operator with the position
             const data::Vec3<float> symmetrized_position = R.rotate(p);
 
+            auto symmetrized_pos_tiled = vld3q_dup_f32(&symmetrized_position.x);
+
             // compute overlap with every point in the positions
-            float max_res = std::numeric_limits<float>::infinity();
-            for (size_t m {0}; m < positions.size(); ++m) {
-                data::Vec3<float> diff = positions[m] - symmetrized_position;
+            // float max_res = std::numeric_limits<float>::infinity();
+            float32x4_t max_res = vdupq_n_f32(std::numeric_limits<float>::infinity());
+            size_t m = 0;                       // outside for tail
+            for (; m < positions.size(); ++m) { // TODO: tail
+                auto pos_block = vld3q_f32(raw_positions + (m * 3));
+                auto diff_block = neon_sub_3(pos_block, symmetrized_pos_tiled);
+                // data::Vec3<float> diff = positions[m] - symmetrized_position;
+
                 // max(exp(-x)) == min(x)
-                max_res = std::min(max_res, diff.dot(diff));
+                // max_res = std::min(max_res, diff.dot(diff));
+                max_res = neon_min_mag_sq(max_res, diff_block);
             }
-            overlap += util::fast_exp_approx(-max_res * denom);
+            overlap += util::fast_exp_approx(-vminvq_f32(max_res) * denom);
         }
     }
     // cast to double to avoid integer division
