@@ -34,13 +34,21 @@ template<typename T> struct RotationMatrix : std::array<T, 9> {
     inline static RotationMatrix<T> from_vec3(const Vec3<T>& v)
     {
         const auto angle = v.norm();
-        if (std::abs(angle) < T(1e-7)) {
-            return RotationMatrix<T> {T(1), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(1)};
+        if (std::abs(angle) < static_cast<T>(1e-7)) {
+            return RotationMatrix<T> {static_cast<T>(1),
+                                      static_cast<T>(0),
+                                      static_cast<T>(0),
+                                      static_cast<T>(0),
+                                      static_cast<T>(1),
+                                      static_cast<T>(0),
+                                      static_cast<T>(0),
+                                      static_cast<T>(0),
+                                      static_cast<T>(1)};
         }
         const auto axis = v / angle;
         const T c {static_cast<T>(std::cos(angle))};
         const T s {static_cast<T>(std::sin(angle))};
-        const T C = T(1) - c;
+        const T C = static_cast<T>(1.0) - c;
         const auto sv = axis * s;
         return RotationMatrix<T> {
             C * axis.x * axis.x + c,
