@@ -39,10 +39,10 @@ inline double covariance(const std::vector<std::complex<double>>& f,
 }
 
 template<typename T>
-inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
-                                                         const data::Vec3<T>& symmetrized_position,
-                                                         double sigma,
-                                                         double sigma_symmetrized)
+inline T compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& position,
+                                                    const data::Vec3<T>& symmetrized_position,
+                                                    double sigma,
+                                                    double sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
@@ -50,9 +50,9 @@ inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<T>& po
     auto sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
     // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient
     //    is used.
-    double lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
+    T lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
     return lead_term * std::sqrt(lead_term)
-           * std::exp(-static_cast<double>(r_pos.dot(r_pos)) / (4 * sigmas_squared_summed));
+           * std::exp(-static_cast<T>(r_pos.dot(r_pos)) / (4 * sigmas_squared_summed));
 }
 template<typename T>
 inline double

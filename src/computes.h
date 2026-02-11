@@ -13,7 +13,7 @@
 
 namespace spatula { namespace computes {
 template<typename T>
-double compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
+T compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
 {
     const std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
@@ -31,7 +31,7 @@ double compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span
             const auto symmetrized_position = R.rotate(p);
 
             // compute overlap with every point in the positions
-            double max_res = 0.0;
+            T max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
                 max_res = std::max(
                     max_res,
@@ -44,13 +44,12 @@ double compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span
         }
     }
     // cast to double to avoid integer division
-    const auto normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
+    const auto normalization = static_cast<T>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
 }
 
 template<typename T>
-double compute_pgop_gaussian_fast(LocalNeighborhood<T>& neighborhood,
-                                  const std::span<const double> R_ij)
+T compute_pgop_gaussian_fast(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
 {
     const std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
@@ -70,17 +69,17 @@ double compute_pgop_gaussian_fast(LocalNeighborhood<T>& neighborhood,
             const data::Vec3<T> symmetrized_position = R.rotate(p);
 
             // compute overlap with every point in the positions
-            double max_res = std::numeric_limits<double>::infinity();
+            T max_res = std::numeric_limits<T>::infinity();
             for (size_t m {0}; m < positions.size(); ++m) {
                 data::Vec3<T> diff = positions[m] - symmetrized_position;
                 // max(exp(-x)) == min(x)
-                max_res = std::min(max_res, static_cast<double>(diff.dot(diff)));
+                max_res = std::min(max_res, diff.dot(diff));
             }
             overlap += util::fast_exp_approx(-max_res * denom);
         }
     }
     // cast to double to avoid integer division
-    const auto normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
+    const auto normalization = static_cast<T>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
 }
 template<typename T>
@@ -114,13 +113,12 @@ double compute_pgop_fisher(LocalNeighborhood<T>& neighborhood, const std::span<c
         }
     }
     // cast to double to avoid integer division
-    const double normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
+    const T normalization = static_cast<T>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
 }
 
 template<typename T>
-double compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood,
-                                const std::span<const double> R_ij)
+T compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood, const std::span<const double> R_ij)
 
 {
     std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
@@ -137,13 +135,13 @@ double compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood,
             // symmetrized position is obtained by multiplying the operator with the position
             const data::Vec3<T> symmetrized_position = R.rotate(positions[j]);
             // Clamp lower bound to -1.0 in case our projection underflowed
-            double max_proj = -1.0;
+            T max_proj = -1.0;
             for (size_t m {0}; m < positions.size(); ++m) {
                 auto position = positions[m];
-                double proj = static_cast<double>(position.dot(symmetrized_position));
+                T proj = position.dot(symmetrized_position);
                 max_proj = std::max(proj, max_proj);
             }
-
+            // TODO: fast sinhf
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
             if (inner_term > 24.0) {
                 // error < 2e-7 in x ∈ [24.0, 1500.0], above which sinh overflows.
@@ -159,7 +157,7 @@ double compute_pgop_fisher_fast(LocalNeighborhood<T>& neighborhood,
     }
 
     // cast to double to avoid integer division
-    const double normalization = static_cast<double>(positions.size() * R_ij.size()) / 9.0;
+    const T normalization = static_cast<T>(positions.size() * R_ij.size()) / 9.0;
 
     return overlap / normalization;
 }
