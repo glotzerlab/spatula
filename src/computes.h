@@ -54,7 +54,7 @@ T compute_pgop_gaussian_fast(LocalNeighborhood<T>& neighborhood, const std::span
     const std::span<const data::Vec3<T>> positions(neighborhood.rotated_positions);
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
-    const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
+    const T denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
     double overlap = 0.0;
     data::RotationMatrix<T> R;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
