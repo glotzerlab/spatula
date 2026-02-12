@@ -33,12 +33,12 @@ T compute_pgop_gaussian(LocalNeighborhood<T>& neighborhood, const std::span<cons
             // compute overlap with every point in the positions
             T max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
-                max_res = std::max(
-                    max_res,
-                    util::compute_Bhattacharyya_coefficient_gaussian<T>(positions[m],
-                                                                        symmetrized_position,
-                                                                        sigmas[j],
-                                                                        sigmas[m]));
+                max_res = std::max(max_res,
+                                   util::compute_Bhattacharyya_coefficient_gaussian(
+                                       static_cast<data::Vec3<float>>(positions[m]),
+                                       static_cast<data::Vec3<float>>(symmetrized_position),
+                                       static_cast<float>(sigmas[j]),
+                                       static_cast<float>(sigmas[m])));
             }
             overlap += max_res;
         }
