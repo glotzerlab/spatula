@@ -22,7 +22,7 @@ using vec3_iter = decltype(std::declval<std::vector<Vec3>>().begin());
 using cvec3_iter = decltype(std::declval<const std::vector<Vec3>>().begin());
 
 /// Compute and return the angle (in radians) between two vectors in 3D.
-template<typename T> inline double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
+inline float fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
 {
     return std::acos(ref_x.dot(x));
 }
