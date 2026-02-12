@@ -45,9 +45,9 @@ inline void single_rotate(const Vec3& x, Vec3& x_prime, const RotationMatrix& R)
  * @param rotated_points_it iterator to the starting vector location to place rotated positions in.
  * @param R The rotation matrix given in row column order.
  */
-inline void rotate_matrix(cvec3_iter<float> points_begin,
-                          cvec3_iter<float> points_end,
-                          vec3_iter<float> rotated_points_it,
+inline void rotate_matrix(cvec3_iter points_begin,
+                          cvec3_iter points_end,
+                          vec3_iter rotated_points_it,
                           const RotationMatrix& R)
 {
     for (auto it = points_begin; it != points_end; ++it, ++rotated_points_it) {

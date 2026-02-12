@@ -66,11 +66,10 @@ compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
     return r_pos.dot(r_pos) / (8.0f * (sigma * sigma_symmetrized));
 }
 
-template<typename T>
-inline T compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
-                                                  const data::Vec3& symmetrized_position,
-                                                  double kappa,
-                                                  double kappa_symmetrized)
+inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
+                                                       const data::Vec3& symmetrized_position,
+                                                       double kappa,
+                                                       double kappa_symmetrized)
 {
     auto position_norm = std::sqrt(position.dot(position));
     auto symmetrized_position_norm = std::sqrt(symmetrized_position.dot(symmetrized_position));
