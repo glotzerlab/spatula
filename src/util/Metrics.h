@@ -38,11 +38,10 @@ inline double covariance(const std::vector<std::complex<double>>& f,
     return mixed_covar / std::sqrt(g_covar * f_cov);
 }
 
-inline float
-compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
-                                           const data::Vec3& symmetrized_position,
-                                           float sigma,
-                                           float sigma_symmetrized)
+inline float compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                                        const data::Vec3& symmetrized_position,
+                                                        float sigma,
+                                                        float sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
@@ -92,11 +91,10 @@ inline T compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
 }
 
 template<typename T>
-inline T
-compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
-                                                    const data::Vec3& symmetrized_position,
-                                                    double kappa,
-                                                    double kappa_symmetrized)
+inline T compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
+                                                             const data::Vec3& symmetrized_position,
+                                                             double kappa,
+                                                             double kappa_symmetrized)
 {
     // If position norm is zero vector means this point is at origin and contributes 1
     // to the overlap, check that with a small epsilon.

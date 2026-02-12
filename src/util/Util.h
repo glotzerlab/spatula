@@ -96,7 +96,8 @@ inline RotationMatrix to_rotation_matrix(const Vec3& v)
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
-inline std::vector<Vec3> normalize_distances(const float* distances, std::pair<size_t, size_t> slice)
+inline std::vector<Vec3> normalize_distances(const float* distances,
+                                             std::pair<size_t, size_t> slice)
 {
     auto normalized_distances = std::vector<Vec3>();
     normalized_distances.reserve((slice.second - slice.first) / 3);

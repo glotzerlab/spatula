@@ -77,22 +77,21 @@ struct Quaternion {
         const float wx {w * xs}, wy {w * ys}, wz {w * zs}, xx {x * xs}, xy {x * ys}, xz {x * zs},
             yy {y * ys}, yz {y * zs}, zz {z * zs};
         return RotationMatrix {1.0f - yy - zz,
-                                xy - wz,
-                                xz + wy,
-                                xy + wz,
-                                1.0f - xx - zz,
-                                yz - wx,
-                                xz - wy,
-                                yz + wx,
-                                1.0f - xx - yy};
+                               xy - wz,
+                               xz + wy,
+                               xy + wz,
+                               1.0f - xx - zz,
+                               yz - wx,
+                               xz - wy,
+                               yz + wx,
+                               1.0f - xx - yy};
     }
     /// Convert quaternion to its axis angle representation
     std::pair<Vec3, float> to_axis_angle() const
     {
         const float half_angle = std::acos(w);
         const float sin_qw = half_angle != 0 ? 1.0f / std::sin(half_angle) : 0;
-        return std::make_pair<Vec3, float>({x * sin_qw, y * sin_qw, z * sin_qw},
-                                            2.0f * half_angle);
+        return std::make_pair<Vec3, float>({x * sin_qw, y * sin_qw, z * sin_qw}, 2.0f * half_angle);
     }
     /**
      * @brief Convert quaternion to the 3 vector representation

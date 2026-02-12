@@ -88,29 +88,25 @@ struct Vec3 {
 };
 
 /// Vec3 addition.
-template<typename number_type>
-inline Vec3 operator+(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator+(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x + b, a.y + b, a.z + b);
 }
 
 /// Vec3 subtraction.
-template<typename number_type>
-inline Vec3 operator-(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator-(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x - b, a.y - b, a.z - b);
 }
 
 /// Vec3 multiplication.
-template<typename number_type>
-inline Vec3 operator*(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator*(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x * b, a.y * b, a.z * b);
 }
 
 /// Vec3 division.
-template<typename number_type>
-inline Vec3 operator/(const Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3 operator/(const Vec3& a, const number_type& b)
 {
     return Vec3(a.x / b, a.y / b, a.z / b);
 }
@@ -136,8 +132,7 @@ inline Vec3 operator/(const Vec3& a, const Vec3& b)
 }
 
 /// Vec3 inplace addition.
-template<typename number_type>
-inline Vec3& operator+=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator+=(Vec3& a, const number_type& b)
 {
     a.x += b;
     a.y += b;
@@ -146,8 +141,7 @@ inline Vec3& operator+=(Vec3& a, const number_type& b)
 }
 
 /// Vec3 inplace subtraction.
-template<typename number_type>
-inline Vec3& operator-=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator-=(Vec3& a, const number_type& b)
 {
     a.x -= b;
     a.y -= b;
@@ -156,8 +150,7 @@ inline Vec3& operator-=(Vec3& a, const number_type& b)
 }
 
 /// Vec3 inplace multiplication.
-template<typename number_type>
-inline Vec3& operator*=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator*=(Vec3& a, const number_type& b)
 {
     a.x *= b;
     a.y *= b;
@@ -166,8 +159,7 @@ inline Vec3& operator*=(Vec3& a, const number_type& b)
 }
 
 /// Vec3 inplace division.
-template<typename number_type>
-inline Vec3& operator/=(Vec3& a, const number_type& b)
+template<typename number_type> inline Vec3& operator/=(Vec3& a, const number_type& b)
 {
     a.x /= b;
     a.y /= b;

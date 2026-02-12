@@ -29,11 +29,11 @@ PGOP::compute(const float* distances,
               const size_t N_particles_in_neighbors) const
 {
     const auto neighborhoods = Neighborhoods(N_particles_in_neighbors,
-                                                    num_neighbors,
-                                                    weights,
-                                                    distances,
-                                                    m_mode == 1,
-                                                    sigmas);
+                                             num_neighbors,
+                                             weights,
+                                             distances,
+                                             m_mode == 1,
+                                             sigmas);
     const size_t N_particles = N_particles_in_neighbors;
     size_t ops_per_particle = m_n_symmetries;
     if (m_compute_per_operator) {
@@ -125,8 +125,7 @@ PGOP::compute_symmetry(LocalNeighborhood& neighborhood, const double* R_ij, size
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
-double PGOP::compute_pgop(LocalNeighborhood& neighborhood,
-                          const std::span<const double> R_ij) const
+double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::span<const double> R_ij) const
 {
     if (m_mode == 0) {
         if (neighborhood.constantSigmas()) {

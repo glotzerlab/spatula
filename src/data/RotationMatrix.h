@@ -25,23 +25,15 @@ struct RotationMatrix : std::array<float, 9> {
     inline Vec3 rotate(Vec3 vec) const
     {
         return Vec3((*this)[0] * vec[0] + (*this)[1] * vec[1] + (*this)[2] * vec[2],
-                       (*this)[3] * vec[0] + (*this)[4] * vec[1] + (*this)[5] * vec[2],
-                       (*this)[6] * vec[0] + (*this)[7] * vec[1] + (*this)[8] * vec[2]);
+                    (*this)[3] * vec[0] + (*this)[4] * vec[1] + (*this)[5] * vec[2],
+                    (*this)[6] * vec[0] + (*this)[7] * vec[1] + (*this)[8] * vec[2]);
     }
 
     inline static RotationMatrix from_vec3(const Vec3& v)
     {
         const auto angle = v.norm();
         if (std::abs(angle) < 1e-7f) {
-            return RotationMatrix {1.0f,
-                                      0.0f,
-                                      0.0f,
-                                      0.0f,
-                                      1.0f,
-                                      0.0f,
-                                      0.0f,
-                                      0.0f,
-                                      1.0f};
+            return RotationMatrix {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
         }
         const auto axis = v / angle;
         const float c {static_cast<float>(std::cos(angle))};

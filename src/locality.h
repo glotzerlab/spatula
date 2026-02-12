@@ -37,8 +37,8 @@ class LocalNeighborhood {
 };
 
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                                           std::span<const double> weights_,
-                                           std::span<const double> sigmas_)
+                                            std::span<const double> weights_,
+                                            std::span<const double> sigmas_)
     : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
 {
     // Verify whether all sigma values are equivalent
@@ -49,7 +49,7 @@ inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_
 }
 
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                                           std::span<const double> weights_)
+                                            std::span<const double> weights_)
     : positions(positions_), weights(weights_), rotated_positions(positions)
 {
     m_constant_sigmas = false;
@@ -92,11 +92,11 @@ class Neighborhoods {
 };
 
 inline Neighborhoods::Neighborhoods(size_t N,
-                                       const int* neighbor_counts,
-                                       const double* weights,
-                                       const float* distance,
-                                       bool normalize_distances,
-                                       const double* sigmas)
+                                    const int* neighbor_counts,
+                                    const double* weights,
+                                    const float* distance,
+                                    bool normalize_distances,
+                                    const double* sigmas)
     : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
       m_sigmas {sigmas}, m_neighbor_offsets(), m_normalize_distances {normalize_distances}
 {
@@ -120,9 +120,7 @@ inline LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
         neighborhood_positions.reserve(num_neighbors);
         for (size_t j = start; j < end; ++j) {
             neighborhood_positions.emplace_back(
-                data::Vec3 {m_distances[3 * j],
-                                   m_distances[3 * j + 1],
-                                   m_distances[3 * j + 2]});
+                data::Vec3 {m_distances[3 * j], m_distances[3 * j + 1], m_distances[3 * j + 2]});
         }
     }
 
@@ -132,7 +130,7 @@ inline LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
                                  std::span(m_sigmas + start, num_neighbors));
     }
     return LocalNeighborhood(std::move(neighborhood_positions),
-                            std::span(m_weights + start, num_neighbors));
+                             std::span(m_weights + start, num_neighbors));
 }
 
 inline std::span<const double> Neighborhoods::getWeights(size_t i) const
