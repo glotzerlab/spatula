@@ -36,7 +36,7 @@ inline void single_rotate(const Vec3& x, Vec3& x_prime, const RotationMatrix& R)
 };
 
 /**
- * @brief Rotate an iterator of points via a rotation matrix R.
+ * @brief Rotate an interator of points via the rotation matrix R.
  * The points rotated are given by @c (auto it = points_begin; it < points_end; ++it).
  *
  * @tparam IntputIterator An input iterator (or derived iterator concept).
@@ -58,7 +58,7 @@ inline void rotate_matrix(cvec3_iter points_begin,
 /**
  * @brief Convert a Vec3 representing an axis, angle rotation parametrization to a rotation matrix.
  *
- * This method assumes that \f$ ||v|| = \theta\f$ and \f$x = \frac{v}{||v||}\f$ where \f$x\f$
+ * This method assumes that \f$ || v || = \theta \f$ and \f$ x = \frac{v}{||v||} \f$ where \f$ x \f$
  * is the axis of rotation.
  *
  * @param v The 3-vector to convert to a rotation matrix.
@@ -66,8 +66,8 @@ inline void rotate_matrix(cvec3_iter points_begin,
 inline RotationMatrix to_rotation_matrix(const Vec3& v)
 {
     const auto angle = v.norm();
-    if (std::abs(angle) < 1e-7f) {
-        return RotationMatrix {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+    if (std::abs(angle) < 1e-7) {
+        return RotationMatrix {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
     }
     const auto axis = v / angle;
     const float c {static_cast<float>(std::cos(angle))};
@@ -121,7 +121,7 @@ inline std::vector<Vec3> normalize_distances(const float* distances,
  * @param D_ij The Wigner D matrix to symmetrize Qlms by
  * @param sym_qlm_buf The buffer/array to store the symmetrized Qlms
  * @param max_l The max_l of the provided Qlms and D_ij. This is not strictly necessary, but it
- * prevents the need to determine max_l from the qlms vector or create a custom struct that
+ * prevents the need to determine the max_l from the qlms vector or create a custom struct that
  * stores this.
  */
 inline void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
