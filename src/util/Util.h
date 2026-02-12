@@ -102,16 +102,13 @@ template<typename T> inline RotationMatrix<T> to_rotation_matrix(const Vec3<T>& 
  * direction but with unit magnitude.
  */
 template<typename T>
-inline std::vector<Vec3<T>> normalize_distances(const double* distances,
-                                                std::pair<size_t, size_t> slice)
+inline std::vector<Vec3<T>> normalize_distances(const T* distances, std::pair<size_t, size_t> slice)
 {
     auto normalized_distances = std::vector<Vec3<T>>();
     normalized_distances.reserve((slice.second - slice.first) / 3);
     // In C++ 23 used strided view with a transform.
     for (size_t i = slice.first; i < slice.second; i += 3) {
-        const auto point = Vec3<T>(static_cast<T>(distances[i]),
-                                   static_cast<T>(distances[i + 1]),
-                                   static_cast<T>(distances[i + 2]));
+        const auto point = Vec3<T>(distances[i], distances[i + 1], distances[i + 2]);
         const T norm = std::sqrt(point.dot(point));
         if (norm == T(0)) {
             normalized_distances.emplace_back(point);
