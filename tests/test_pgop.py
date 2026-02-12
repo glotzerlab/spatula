@@ -1429,7 +1429,11 @@ def make_method(symmetries, optimizer, optype, boosop_max_l=10):
         METHODS_DICT[symmetry] = {}
     if optype not in METHODS_DICT[symmetry]:
         METHODS_DICT[symmetry][optype] = {}
-    key = (optimizer.__hash__(), boosop_max_l) if optype == "boosop" else optimizer.__hash__()
+    key = (
+        (optimizer.__hash__(), boosop_max_l)
+        if optype == "boosop"
+        else optimizer.__hash__()
+    )
     if key not in METHODS_DICT[symmetry][optype]:
         METHODS_DICT[symmetry][optype][key] = make_compute_object(
             symmetries, optimizer, optype, boosop_max_l=boosop_max_l
