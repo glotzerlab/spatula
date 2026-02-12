@@ -3,10 +3,7 @@
 
 #pragma once
 
-#include <random>
-
-#include <pybind11/pybind11.h>
-
+#include "../data/Quaternion.h"
 #include "Optimize.h"
 
 namespace spatula { namespace optimize {
@@ -37,30 +34,99 @@ class StepGradientDescent : public Optimizer {
      * @param learning_rate The learning rate for the gradient descent in the search stage.
      * @param tol The amount of improvement required to continue optimizing rather than terminating.
      */
-    StepGradientDescent(const data::Vec3& initial_point,
+    StepGradientDescent(const data::Quaternion& initial_point,
                         unsigned int max_iter,
                         double initial_jump,
                         double learning_rate,
-                        double tol);
+                        double tol)
+        : Optimizer(), m_max_iter(max_iter), m_initial_jump(initial_jump),
+          m_learning_rate(learning_rate), m_tol(tol),
+          m_stage(StepGradientDescent::Stage::INITIALIZE), m_dim_starting_objective(0.0),
+          m_terminate(false), m_current_dim(0), m_last_objective(0.0), m_delta(0.0)
+    {
+        m_point = initial_point.to_axis_angle_3D();
+    }
     ~StepGradientDescent() override = default;
     /// Returns whether or not convergence or termination conditions have been met.
-    bool terminate() const override;
+    bool terminate() const override
+    {
+        const bool term = m_terminate || m_count > m_max_iter;
+        if (term) { }
+        return term;
+    }
     /// Create a clone of this optimizer
-    std::unique_ptr<Optimizer> clone() const override;
+    std::unique_ptr<Optimizer> clone() const override
+    {
+        return std::make_unique<StepGradientDescent>(*this);
+    }
 
     /// Set the next point to compute the objective for to m_point.
-    void internal_next_point() override;
+    void internal_next_point() override
+    {
+        if (m_stage == StepGradientDescent::Stage::INITIALIZE) {
+            initialize();
+        }
+        if (m_stage == StepGradientDescent::Stage::GRADIENT) {
+            findGradient();
+        }
+        if (m_stage == StepGradientDescent::Stage::SEARCH) {
+            searchAlongGradient();
+            if (m_stage == StepGradientDescent::Stage::GRADIENT) {
+                findGradient();
+            }
+        }
+    }
 
     private:
     enum Stage { INITIALIZE = 1, GRADIENT = 2, SEARCH = 4 };
     /// Switch the step of the algorithm
-    void step();
+    void step()
+    {
+        if (m_stage == StepGradientDescent::Stage::INITIALIZE) {
+            m_last_objective = m_best_point.second;
+            m_dim_starting_objective = m_best_point.second;
+            m_stage = StepGradientDescent::Stage::GRADIENT;
+        }
+        if (m_stage == StepGradientDescent::Stage::GRADIENT) {
+            m_stage = StepGradientDescent::Stage::SEARCH;
+        } else if (m_stage == StepGradientDescent::Stage::SEARCH) {
+            m_stage = StepGradientDescent::Stage::GRADIENT;
+            m_current_dim = (m_current_dim + 1) % 3;
+            if (m_current_dim == 0) {
+                m_terminate = (m_dim_starting_objective - m_best_point.second) < m_tol;
+            }
+            m_dim_starting_objective = m_best_point.second;
+        }
+    }
     /// Run the first iteration and step afterwards
-    void initialize();
+    void initialize()
+    {
+        if (m_best_point.second == std::numeric_limits<double>::max()) {
+            return;
+        }
+        step();
+    }
     /// Find the gradient using a small jump and the forward difference
-    void findGradient();
+    void findGradient()
+    {
+        m_point = m_best_point.first;
+        m_point[m_current_dim] -= m_initial_jump;
+        m_delta = m_initial_jump;
+        step();
+    }
     /// Perform a gradient descent in the given direction
-    void searchAlongGradient();
+    void searchAlongGradient()
+    {
+        const double objective_change = m_objective - m_last_objective;
+        m_last_objective = m_objective;
+        if (std::abs(objective_change) < m_tol) {
+            step();
+            return;
+        }
+        const double grad = -objective_change / (m_delta);
+        m_delta = m_learning_rate * grad;
+        m_point[m_current_dim] -= m_delta;
+    }
 
     // Hyperparameters
     /// Maximum number of iterations to run the algorithm
@@ -87,6 +153,4 @@ class StepGradientDescent : public Optimizer {
     /// The current change between iterations in gradient descent.
     double m_delta;
 };
-
-void export_step_gradient_descent(py::module& m);
 }} // namespace spatula::optimize

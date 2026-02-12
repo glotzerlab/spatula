@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -26,18 +30,36 @@ class Mesh : public Optimizer {
      *
      * @param points The points to test. Expected sizes are \f$ (N_{brute}, N_{dim} \f$.
      */
-    Mesh(const std::vector<data::Quaternion>& points);
+    Mesh(const double* points, size_t n_points) : Optimizer(), m_points()
+    {
+        m_points.reserve(n_points);
+        for (size_t i = 0; i < n_points; ++i) {
+            const data::Quaternion q(points[i * 4 + 0],
+                                     points[i * 4 + 1],
+                                     points[i * 4 + 2],
+                                     points[i * 4 + 3]);
+            m_points.push_back(q.to_axis_angle_3D());
+        }
+    }
 
     ~Mesh() override = default;
 
-    void internal_next_point() override;
-    bool terminate() const override;
-    std::unique_ptr<Optimizer> clone() const override;
+    void internal_next_point() override
+    {
+        m_point = m_points[std::min(m_points.size(), static_cast<size_t>(m_count))];
+    }
+    bool terminate() const override
+    {
+        return m_count >= m_points.size();
+    }
+    std::unique_ptr<Optimizer> clone() const override
+    {
+        return std::make_unique<Mesh>(*this);
+    }
 
     private:
     /// The set of points to evaluate.
     std::vector<data::Vec3> m_points;
 };
 
-void export_mesh(py::module& m);
 }} // namespace spatula::optimize

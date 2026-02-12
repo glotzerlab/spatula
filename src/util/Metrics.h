@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "../data/Vec3.h"
 #include <complex>
+#include <numeric>
 #include <vector>
 
 namespace spatula { namespace util {
@@ -17,6 +19,67 @@ namespace spatula { namespace util {
  * @param g The coefficents for the second spherical harmonic expansion
  * @returns A vector of the Pearson correlation for the two expansions
  */
-double covariance(const std::vector<std::complex<double>>& f,
-                  const std::vector<std::complex<double>>& g);
+inline double covariance(const std::vector<std::complex<double>>& f,
+                         const std::vector<std::complex<double>>& g)
+{
+    // For the covariance we must skip the first element as it adds a spurious
+    // detection of symmetry/covariance.
+    double f_cov = 0;
+    double g_covar = 0;
+    double mixed_covar = 0;
+    for (size_t j {1}; j < f.size(); ++j) {
+        f_cov += std::norm(f[j]);
+        g_covar += std::norm(g[j]);
+        mixed_covar += std::real(f[j] * std::conj(g[j]));
+    }
+    if (f_cov == 0 || g_covar == 0) {
+        return 0;
+    }
+    return mixed_covar / std::sqrt(g_covar * f_cov);
+}
+
+inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                                         const data::Vec3& symmetrized_position,
+                                                         double sigma,
+                                                         double sigma_symmetrized)
+{
+    // 1. compute the distance between the two vectors (symmetrized_position
+    //    and positions[m])
+    auto r_pos = symmetrized_position - position;
+    auto sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
+    // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient
+    //    is used.
+    double lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
+    return lead_term * std::sqrt(lead_term)
+           * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
+}
+inline double
+compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                                 const data::Vec3& symmetrized_position,
+                                                 double sigma,
+                                                 double sigma_symmetrized)
+{
+    // 1. compute the distance between the two vectors (symmetrized_position
+    //    and positions[m])
+    auto r_pos = symmetrized_position - position;
+    // Reduced equation when sigma == sigma_symmetrized
+    return r_pos.dot(r_pos) / (8.0 * (sigma * sigma_symmetrized));
+}
+
+inline double
+compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
+                                                    const data::Vec3& symmetrized_position,
+                                                    double kappa,
+                                                    double kappa_symmetrized)
+{
+    // If position norm is zero vector means this point is at origin and contributes 1
+    // to the overlap, check that with a small epsilon.
+    auto k1_sq = kappa * kappa;
+    auto k2_sq = kappa_symmetrized * kappa_symmetrized;
+    auto k1k2 = kappa * kappa_symmetrized;
+    auto proj = position.dot(symmetrized_position);
+    return 2 * std::sqrt(k1k2 / (std::sinh(kappa) * std::sinh(kappa_symmetrized)))
+           * std::sinh((std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj)) / 2)
+           / std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj);
+}
 }} // namespace spatula::util

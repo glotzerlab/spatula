@@ -3,15 +3,21 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <span>
 #include <utility>
 #include <vector>
 
 #include "data/Vec3.h"
+#include "util/Util.h"
+
+#ifdef _MSC_VER
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace spatula {
-// Model concept to show expected interface. We cannot use C++20 for now so we have commented it
-// out.
-
 /**
  * @brief Concept to show the necessary interface for a spherical surface distribution. Given the
  * performance critical nature of the evaluation the bond order diagram, we should use concepts and
@@ -56,14 +62,20 @@ class UniformDistribution {
      *
      * @param max_theta The distance in radian from the mean that is non-zero.
      */
-    UniformDistribution(param_type max_theta);
+    inline UniformDistribution(param_type max_theta)
+        : m_threshold(std::cos(max_theta)), m_prefactor(1 / (2 * M_PI * (1 - std::cos(max_theta))))
+    {
+    }
 
     /**
      * @brief Return the value of the distribution at the given point.
      *
      * @param x The distance from the mean to evaluate the distribution at.
      */
-    double operator()(double x) const;
+    inline double operator()(double x) const
+    {
+        return x > m_threshold ? m_prefactor : 0;
+    }
 
     /// operator() uses the distance to evaluate
     static const bool use_theta = false;
@@ -95,14 +107,20 @@ class FisherDistribution {
      * @param kappa the concentration parameter of the distribution. Larger values result in a more
      * concentrated (tighter) distribution.
      */
-    FisherDistribution(param_type kappa);
+    inline FisherDistribution(param_type kappa)
+        : m_kappa(kappa), m_prefactor(kappa / (2 * M_PI * (std::exp(kappa) - std::exp(-kappa))))
+    {
+    }
 
     /**
      * @brief Return the value of the distribution at the given point.
      *
      * @param x The distance from the mean to evaluate the distribution at.
      */
-    double operator()(double x) const;
+    inline double operator()(double x) const
+    {
+        return m_prefactor * std::exp(m_kappa * x);
+    }
 
     /// operator() uses the distance to evaluate
     static const bool use_theta = false;
@@ -143,12 +161,25 @@ template<typename distribution_type> class BondOrder {
      * mean for the \f$ N \f$ distributions on the bond order diagram.
      * @param weights The weights to use for each position. Should be the same size as positions.
      */
-    BondOrder(distribution_type dist,
-              const std::vector<data::Vec3>& positions,
-              const std::vector<double>& weights);
+    inline BondOrder(distribution_type dist,
+                     std::span<const data::Vec3> positions,
+                     std::span<const double> weights)
+        : m_dist(dist), m_positions(positions), m_weights(weights),
+          m_normalization(1.0 / std::reduce(m_weights.begin(), m_weights.end()))
+    {
+    }
 
     // Assumes points are on the unit sphere
-    std::vector<double> operator()(const std::vector<data::Vec3>& points) const;
+    inline std::vector<double> operator()(std::span<const data::Vec3> points) const
+    {
+        auto bo = std::vector<double>();
+        bo.reserve(points.size());
+        std::transform(points.begin(),
+                       points.end(),
+                       std::back_inserter(bo),
+                       [this](const auto& point) { return this->single_call(point); });
+        return bo;
+    }
 
     private:
     /**
@@ -156,14 +187,46 @@ template<typename distribution_type> class BondOrder {
      *
      * @param point A point on the unit sphere in Cartesian coordinates.
      */
-    inline double single_call(const data::Vec3& point) const;
+    inline double single_call(const data::Vec3& point) const
+    {
+        double sum_correction = 0;
+        // Get the unweighted contribution from each distribution lazily.
+        auto single_contributions = std::vector<double>();
+        single_contributions.resize(m_positions.size());
+        std::transform(m_positions.begin(),
+                       m_positions.end(),
+                       single_contributions.begin(),
+                       [this, &point](const auto& p) -> double {
+                           if constexpr (distribution_type::use_theta) {
+                               return this->m_dist(util::fast_angle_eucledian(p, point));
+                           } else {
+                               return this->m_dist(p.dot(point));
+                           }
+                       });
+        // Normalize the value and weight the contributions.
+        return m_normalization
+               * std::transform_reduce(
+                   single_contributions.begin(),
+                   single_contributions.end(),
+                   m_weights.begin(),
+                   0.0,
+                   // Use Kahan summation to improve accuracy of the summation of small
+                   // numbers.,
+                   [&sum_correction](const auto& sum, const auto& y) -> double {
+                       auto addition = y - sum_correction;
+                       const auto new_sum = sum + addition;
+                       sum_correction = new_sum - sum - addition;
+                       return new_sum;
+                   },
+                   std::multiplies<>());
+    }
 
     /// The distribution to use for all provided neighbor vectors.
     distribution_type m_dist;
     /// The normalized neighbor vectors for the bond order diagram.
-    const std::vector<data::Vec3>& m_positions;
+    std::span<const data::Vec3> m_positions;
     /// The weights for the points on the bond order diagram.
-    const std::vector<double>& m_weights;
+    std::span<const double> m_weights;
     /// The normalization constant @c 1 / std::reduce(m_weights).
     double m_normalization;
 };

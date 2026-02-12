@@ -6,9 +6,6 @@
 #include <functional>
 
 #include "BS_thread_pool.hpp"
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
 
 namespace spatula { namespace util {
 /**
@@ -80,6 +77,4 @@ class ThreadPool {
     BS::synced_stream m_out;
     BS::thread_pool m_pool;
 };
-
-void export_threads(py::module& m);
 }} // namespace spatula::util

@@ -1,5 +1,11 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.15...3.30)
 project(spatula)
+
+if (CMAKE_VERSION VERSION_LESS 3.18)
+  set(DEV_MODULE Development)
+else()
+  set(DEV_MODULE Development.Module)
+endif()
 
 set(DEFAULT_BUILD_TYPE Release)
 if(NOT CMAKE_BUILD_TYPE)
@@ -12,8 +18,18 @@ if (UNIX)
 endif (UNIX)
 
 
-find_package(pybind11 CONFIG REQUIRED)
+find_package(Python COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+find_package(nanobind CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/dependencies)
 add_subdirectory(src)
 add_subdirectory(spatula)
+add_subdirectory(src/nanobind)
+
+option(ENABLE_PROFILING "Enable profiling support" OFF)
+
+if(ENABLE_PROFILING)
+    message(STATUS "ENABLE_PROFILING is ON. Adding -g to compiler and linker flags.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g")
+endif()
