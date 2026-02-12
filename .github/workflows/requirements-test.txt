@@ -35,8 +35,7 @@ pybind11==3.0.1
 pygments==2.19.2
     # via pytest
 pytest==9.0.2
-    # via
-    #   -r .github/workflows/requirements-test.in
+    # via -r .github/workflows/requirements-test.in
 rowan==1.3.2
     # via
     #   coxeter
