@@ -91,7 +91,8 @@ struct Quaternion {
     {
         const float half_angle = std::acos(w);
         const float sin_qw = half_angle != 0 ? 1.0f / std::sin(half_angle) : 0;
-        return std::make_pair<Vec3f, float>({x * sin_qw, y * sin_qw, z * sin_qw}, 2.0f * half_angle);
+        return std::make_pair<Vec3f, float>({x * sin_qw, y * sin_qw, z * sin_qw},
+                                            2.0f * half_angle);
     }
     /**
      * @brief Convert quaternion to the 3 vector representation

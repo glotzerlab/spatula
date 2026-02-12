@@ -181,18 +181,6 @@ template<typename distribution_type> class BondOrder {
         return bo;
     }
 
-    // Overload for Vec3d (backward compatibility with QlmEval which uses double positions)
-    inline std::vector<double> operator()(std::span<const data::Vec3d> points) const
-    {
-        auto bo = std::vector<double>();
-        bo.reserve(points.size());
-        std::transform(points.begin(),
-                       points.end(),
-                       std::back_inserter(bo),
-                       [this](const data::Vec3d& point) { return this->single_call(data::Vec3f(point.x, point.y, point.z)); });
-        return bo;
-    }
-
     private:
     /**
      * @brief Compute the bond order diagram at a given point.

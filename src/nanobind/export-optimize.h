@@ -77,11 +77,12 @@ void export_optimize(nb::module_& m)
                 return std::make_shared<Union>(
                     initial_opt,
                     [max_iter, initial_jump, learning_rate, tol](const Optimizer& opt) {
-                        return std::make_unique<StepGradientDescent>(data::Quaternion(opt.get_optimum().first),
-                                                                     max_iter,
-                                                                     initial_jump,
-                                                                     learning_rate,
-                                                                     tol);
+                        return std::make_unique<StepGradientDescent>(
+                            data::Quaternion(opt.get_optimum().first),
+                            max_iter,
+                            initial_jump,
+                            learning_rate,
+                            tol);
                     });
             },
             "optimizer"_a,

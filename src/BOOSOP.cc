@@ -36,7 +36,8 @@ BOOSOP<distribution_type>::compute(const float* distances,
                                         ylms,
                                         quad_positions_shape_0,
                                         ylms_shape_0);
-    const auto neighborhoods = Neighborhoods<float>(N_particles, num_neighbors, weights, distances, true);
+    const auto neighborhoods
+        = Neighborhoods<float>(N_particles, num_neighbors, weights, distances, true);
 
     std::vector<double> op_values(N_particles * m_n_symmetries);
     std::vector<data::Quaternion> rotation_values(N_particles * m_n_symmetries);
@@ -86,7 +87,8 @@ std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
                                         ylms,
                                         quad_positions_shape_0,
                                         ylms_shape_0);
-    const auto neighborhoods = Neighborhoods<float>(N_particles, num_neighbors, weights, distances, true);
+    const auto neighborhoods
+        = Neighborhoods<float>(N_particles, num_neighbors, weights, distances, true);
     std::vector<double> op_store(N_particles * m_n_symmetries);
 
     const auto loop_func = [&](const size_t start, const size_t stop) {
