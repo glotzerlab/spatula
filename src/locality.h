@@ -36,31 +36,6 @@ template<typename T> class LocalNeighborhood {
     bool m_constant_sigmas = false;
 };
 
-class Neighborhoods {
-    public:
-    Neighborhoods(size_t N,
-                  const int* neighbor_counts,
-                  const double* weights,
-                  const double* distance,
-                  bool normalize_distances,
-                  const double* sigmas = nullptr);
-
-    // Returns a double-precision LocalNeighborhood for backward compatibility
-    template<typename T = double> LocalNeighborhood<T> getNeighborhood(size_t i) const;
-    std::span<const double> getWeights(size_t i) const;
-    std::span<const double> getSigmas(size_t i) const;
-    int getNeighborCount(size_t i) const;
-
-    private:
-    const size_t m_N;
-    const int* m_neighbor_counts;
-    const double* m_distances;
-    const double* m_weights;
-    const double* m_sigmas;
-    std::vector<size_t> m_neighbor_offsets;
-    bool m_normalize_distances;
-};
-
 template<typename T>
 inline LocalNeighborhood<T>::LocalNeighborhood(std::vector<data::Vec3<T>>&& positions_,
                                                std::span<const double> weights_,
@@ -93,14 +68,41 @@ template<typename T> inline void LocalNeighborhood<T>::rotate(const data::Vec3<T
     util::rotate_matrix<T>(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
-inline Neighborhoods::Neighborhoods(size_t N,
+template<typename D>
+class Neighborhoods {
+    public:
+    Neighborhoods(size_t N,
+                  const int* neighbor_counts,
+                  const double* weights,
+                  const D* distance,
+                  bool normalize_distances,
+                  const double* sigmas = nullptr);
+
+    // Returns LocalNeighborhood with position type matching distance type
+    LocalNeighborhood<D> getNeighborhood(size_t i) const;
+    std::span<const double> getWeights(size_t i) const;
+    std::span<const double> getSigmas(size_t i) const;
+    int getNeighborCount(size_t i) const;
+
+    private:
+    const size_t m_N;
+    const int* m_neighbor_counts;
+    const D* m_distances;
+    const double* m_weights;
+    const double* m_sigmas;
+    std::vector<size_t> m_neighbor_offsets;
+    bool m_normalize_distances;
+};
+
+template<typename D>
+inline Neighborhoods<D>::Neighborhoods(size_t N,
                                     const int* neighbor_counts,
                                     const double* weights,
-                                    const double* distance,
+                                    const D* distance,
                                     bool normalize_distances,
                                     const double* sigmas)
-    : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
-      m_sigmas {sigmas}, m_neighbor_offsets(), m_normalize_distances {normalize_distances}
+    : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance},
+      m_weights {weights}, m_sigmas {sigmas}, m_neighbor_offsets(), m_normalize_distances {normalize_distances}
 {
     m_neighbor_offsets.reserve(m_N + 1);
     m_neighbor_offsets.emplace_back(0);
@@ -109,41 +111,44 @@ inline Neighborhoods::Neighborhoods(size_t N,
                      std::back_inserter(m_neighbor_offsets));
 }
 
-template<typename T> inline LocalNeighborhood<T> Neighborhoods::getNeighborhood(size_t i) const
+template<typename D>
+inline LocalNeighborhood<D> Neighborhoods<D>::getNeighborhood(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     const size_t num_neighbors = end - start;
 
-    std::vector<data::Vec3<T>> neighborhood_positions;
+    std::vector<data::Vec3<D>> neighborhood_positions;
     if (m_normalize_distances) {
         neighborhood_positions
-            = util::normalize_distances<T>(m_distances, std::make_pair(3 * start, 3 * end));
+            = util::normalize_distances<D>(m_distances, std::make_pair(3 * start, 3 * end));
     } else {
         neighborhood_positions.reserve(num_neighbors);
         for (size_t j = start; j < end; ++j) {
             neighborhood_positions.emplace_back(
-                data::Vec3<T> {static_cast<T>(m_distances[3 * j]),
-                               static_cast<T>(m_distances[3 * j + 1]),
-                               static_cast<T>(m_distances[3 * j + 2])});
+                data::Vec3<D> {static_cast<D>(m_distances[3 * j]),
+                                   static_cast<D>(m_distances[3 * j + 1]),
+                                   static_cast<D>(m_distances[3 * j + 2])});
         }
     }
 
     if (m_sigmas) {
-        return LocalNeighborhood<T>(std::move(neighborhood_positions),
+        return LocalNeighborhood<D>(std::move(neighborhood_positions),
                                     std::span(m_weights + start, num_neighbors),
                                     std::span(m_sigmas + start, num_neighbors));
     }
-    return LocalNeighborhood<T>(std::move(neighborhood_positions),
+    return LocalNeighborhood<D>(std::move(neighborhood_positions),
                                 std::span(m_weights + start, num_neighbors));
 }
 
-inline std::span<const double> Neighborhoods::getWeights(size_t i) const
+template<typename D>
+inline std::span<const double> Neighborhoods<D>::getWeights(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     return std::span(m_weights + start, end - start);
 }
 
-inline std::span<const double> Neighborhoods::getSigmas(size_t i) const
+template<typename D>
+inline std::span<const double> Neighborhoods<D>::getSigmas(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     if (m_sigmas) {
@@ -152,7 +157,8 @@ inline std::span<const double> Neighborhoods::getSigmas(size_t i) const
     return std::span<const double>();
 }
 
-inline int Neighborhoods::getNeighborCount(size_t i) const
+template<typename D>
+inline int Neighborhoods<D>::getNeighborCount(size_t i) const
 {
     return m_neighbor_counts[i];
 }

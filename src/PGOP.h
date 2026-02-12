@@ -40,7 +40,7 @@ class PGOP {
      *
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute(const double* distances,
+    compute(const float* distances,
             const double* weights,
             const int* num_neighbors,
             const double* sigmas,
