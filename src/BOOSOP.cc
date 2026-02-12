@@ -150,7 +150,7 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodd& neighborhood,
     // TODO currently optimum.first can be empty resulting in a SEGFAULT. This only happens in badly
     // formed arguments (particles with no neighbors), but can occur.
     const auto optimum = opt->get_optimum();
-    return std::make_tuple(-optimum.second, optimum.first);
+    return std::make_tuple(static_cast<double>(-optimum.second), data::Quaternion(optimum.first));
 }
 
 template<typename distribution_type>
