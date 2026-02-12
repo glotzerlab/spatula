@@ -91,9 +91,7 @@ PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
         auto neighborhood = neighborhood_original;
         const auto result = compute_symmetry(neighborhood, R_ij, group_idx);
         spatula.emplace_back(std::get<0>(result));
-        const auto quat = data::Quaternion(
-            data::Vec3d(std::get<1>(result).x, std::get<1>(result).y, std::get<1>(result).z),
-            static_cast<double>(std::get<1>(result).norm()));
+        const auto quat = data::Quaternion(std::get<1>(result));
         rotations.emplace_back(quat);
         if (m_compute_per_operator) {
             auto neighborhood = neighborhood_original;
@@ -116,12 +114,7 @@ PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, siz
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
-        const auto opt_vec3d = opt->next_point();
-        // Convert double Vec3 to float Vec3 for rotation
-        data::Vec3f opt_vec3f(static_cast<float>(opt_vec3d.x),
-                              static_cast<float>(opt_vec3d.y),
-                              static_cast<float>(opt_vec3d.z));
-        neighborhood.rotate(opt_vec3f);
+        neighborhood.rotate(opt->next_point());
         const auto particle_op
             = compute_pgop(neighborhood, std::span<const double>(R_ij, m_group_sizes[group_idx]));
         opt->record_objective(-particle_op);
@@ -129,11 +122,7 @@ PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, siz
     const auto optimum = opt->get_optimum();
     // op value is negated to get the correct value, because optimization scheme is
     // minimization not maximization!
-    const auto& opt_vec3d = optimum.first;
-    data::Vec3f opt_vec3f(static_cast<float>(opt_vec3d.x),
-                          static_cast<float>(opt_vec3d.y),
-                          static_cast<float>(opt_vec3d.z));
-    return std::make_tuple(-optimum.second, opt_vec3f);
+    return std::make_tuple(-optimum.second, optimum.first);
 }
 
 double PGOP::compute_pgop(LocalNeighborhoodf& neighborhood,

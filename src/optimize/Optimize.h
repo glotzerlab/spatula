@@ -61,7 +61,7 @@ class Optimizer {
         return m_point;
     }
     /// Record the objective function's value for the last querried point.
-    virtual void record_objective(double objective)
+    virtual void record_objective(float objective)
     {
         if (!m_need_objective) {
             throw std::runtime_error("Must get new point before recording objective.");

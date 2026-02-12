@@ -47,17 +47,17 @@ void export_optimize(nb::module_& m)
             [](StepGradientDescent* self,
                nb::tuple initial_point,
                unsigned int max_iter,
-               double initial_jump,
-               double learning_rate,
-               double tol) {
+               float initial_jump,
+               float learning_rate,
+               float tol) {
                 if (initial_point.size() != 4) {
                     throw std::invalid_argument(
                         "initial_point must be a tuple of 4 floats (w, x, y, z)");
                 }
-                const data::Quaternion q(nb::cast<double>(initial_point[0]),
-                                         nb::cast<double>(initial_point[1]),
-                                         nb::cast<double>(initial_point[2]),
-                                         nb::cast<double>(initial_point[3]));
+                const data::Quaternion q(nb::cast<float>(initial_point[0]),
+                                         nb::cast<float>(initial_point[1]),
+                                         nb::cast<float>(initial_point[2]),
+                                         nb::cast<float>(initial_point[3]));
                 new (self) StepGradientDescent(q, max_iter, initial_jump, learning_rate, tol);
             },
             "initial_point"_a,
@@ -71,13 +71,13 @@ void export_optimize(nb::module_& m)
             "with_step_gradient_descent",
             [](const std::shared_ptr<const Optimizer> initial_opt,
                unsigned int max_iter,
-               double initial_jump,
-               double learning_rate,
-               double tol) -> std::shared_ptr<Union> {
+               float initial_jump,
+               float learning_rate,
+               float tol) -> std::shared_ptr<Union> {
                 return std::make_shared<Union>(
                     initial_opt,
                     [max_iter, initial_jump, learning_rate, tol](const Optimizer& opt) {
-                        return std::make_unique<StepGradientDescent>(opt.get_optimum().first,
+                        return std::make_unique<StepGradientDescent>(data::Quaternion(opt.get_optimum().first),
                                                                      max_iter,
                                                                      initial_jump,
                                                                      learning_rate,

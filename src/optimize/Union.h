@@ -33,7 +33,7 @@ class Union : public Optimizer {
 
     ~Union() override = default;
 
-    void record_objective(double objective) override
+    void record_objective(float objective) override
     {
         if (!m_need_objective) {
             throw std::runtime_error("Must get new point before recording objective.");
