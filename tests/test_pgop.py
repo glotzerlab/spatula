@@ -1407,9 +1407,9 @@ def get_shape_sys_nlist(vertices):
     return system, nlist
 
 
-def make_compute_object(symmetries, optimizer, optype):
+def make_compute_object(symmetries, optimizer, optype, boosop_max_l=10):
     if optype == "boosop":
-        return spatula.BOOSOP("fisher", symmetries, optimizer)
+        return spatula.BOOSOP("fisher", symmetries, optimizer, max_l=boosop_max_l)
     elif optype == "full":
         return spatula.PGOP(symmetries, optimizer)
     elif optype == "boo":
@@ -1418,20 +1418,23 @@ def make_compute_object(symmetries, optimizer, optype):
         raise ValueError(f"Invalid optype {optype}")
 
 
-def make_method(symmetries, optimizer, optype):
+def make_method(symmetries, optimizer, optype, boosop_max_l=10):
     if isinstance(symmetries, str):
         symmetry = symmetries[0]
     else:
-        return make_compute_object(symmetries, optimizer, optype)
+        return make_compute_object(
+            symmetries, optimizer, optype, boosop_max_l=boosop_max_l
+        )
     if symmetry not in METHODS_DICT:
         METHODS_DICT[symmetry] = {}
     if optype not in METHODS_DICT[symmetry]:
         METHODS_DICT[symmetry][optype] = {}
-    if optimizer.__hash__() not in METHODS_DICT[symmetry][optype]:
-        METHODS_DICT[symmetry][optype][optimizer.__hash__()] = make_compute_object(
-            symmetries, optimizer, optype
+    key = (optimizer.__hash__(), boosop_max_l) if optype == "boosop" else optimizer.__hash__()
+    if key not in METHODS_DICT[symmetry][optype]:
+        METHODS_DICT[symmetry][optype][key] = make_compute_object(
+            symmetries, optimizer, optype, boosop_max_l=boosop_max_l
         )
-    return METHODS_DICT[symmetry][optype][optimizer.__hash__()]
+    return METHODS_DICT[symmetry][optype][key]
 
 
 def generate_quaternions(n=1):
@@ -1455,13 +1458,14 @@ def compute_op_result(
     failed=False,
     refine=False,
 ):
+    boosop_max_l = 20 if refine and optyp == "boosop" else 10
     if failed:
-        op_compute = make_compute_object(symmetry, opt, optyp)
+        op_compute = make_compute_object(
+            symmetry, opt, optyp, boosop_max_l=boosop_max_l
+        )
     else:
-        op_compute = make_method(symmetry, opt, optyp)
+        op_compute = make_method(symmetry, opt, optyp, boosop_max_l=boosop_max_l)
     if optyp == "boosop":
-        if refine:
-            op_compute._max_l = 24
         op_compute.compute(system, nlist, query_points=query_points, refine=refine)
     elif optyp == "full" or optyp == "boo":
         op_compute.compute(system, sigma, nlist, query_points=query_points)
