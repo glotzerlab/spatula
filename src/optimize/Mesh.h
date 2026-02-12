@@ -59,7 +59,7 @@ class Mesh : public Optimizer {
 
     private:
     /// The set of points to evaluate.
-    std::vector<data::Vec3d> m_points;
+    std::vector<data::Vec3f> m_points;
 };
 
 }} // namespace spatula::optimize
