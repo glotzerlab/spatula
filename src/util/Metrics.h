@@ -89,11 +89,11 @@ inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& positio
            / std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj);
 }
 
-template<typename T>
-inline T compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
-                                                             const data::Vec3& symmetrized_position,
-                                                             double kappa,
-                                                             double kappa_symmetrized)
+inline double
+compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
+                                                    const data::Vec3& symmetrized_position,
+                                                    double kappa,
+                                                    double kappa_symmetrized)
 {
     // If position norm is zero vector means this point is at origin and contributes 1
     // to the overlap, check that with a small epsilon.
