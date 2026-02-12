@@ -41,8 +41,6 @@ inline void single_rotate(const Vec3<T>& x, Vec3<T>& x_prime, const RotationMatr
  * @brief Rotate an interator of points via the rotation matrix R.
  * The points rotated are given by @c (auto it = points_begin; it < points_end; ++it).
  *
- * This method is templated to enable more easy refactoring of container types in PGOP.cc.
- *
  * @tparam T The floating point type (float or double)
  * @tparam IntputIterator An input iterator (or derived iterator concept).
  * @param points_begin constant iterator to the beginning of points to rotate.
