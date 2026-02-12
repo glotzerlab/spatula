@@ -32,7 +32,9 @@ QlmEval::QlmEval(unsigned int m,
     }
     m_positions.reserve(n_quad_points);
     for (size_t i {0}; i < n_quad_points; ++i) {
-        m_positions.emplace_back(&positions[i * 3]);
+        m_positions.emplace_back(static_cast<float>(positions[i * 3]),
+                                 static_cast<float>(positions[i * 3 + 1]),
+                                 static_cast<float>(positions[i * 3 + 2]));
     }
 }
 
