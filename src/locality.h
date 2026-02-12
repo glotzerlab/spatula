@@ -18,25 +18,25 @@ namespace spatula {
 
 class LocalNeighborhood {
     public:
-    LocalNeighborhood(std::vector<data::Vec3<float>>&& positions_,
+    LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                       std::span<const double> weights_,
                       std::span<const double> sigmas_);
-    LocalNeighborhood(std::vector<data::Vec3<float>>&& positions_, std::span<const double> weights_);
+    LocalNeighborhood(std::vector<data::Vec3>&& positions_, std::span<const double> weights_);
 
-    void rotate(const data::Vec3<float>& v);
+    void rotate(const data::Vec3& v);
 
     bool constantSigmas() const;
 
-    std::vector<data::Vec3<float>> positions;
+    std::vector<data::Vec3> positions;
     std::span<const double> weights;
     std::span<const double> sigmas;
-    std::vector<data::Vec3<float>> rotated_positions;
+    std::vector<data::Vec3> rotated_positions;
 
     private:
     bool m_constant_sigmas = false;
 };
 
-inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3<float>>&& positions_,
+inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                                            std::span<const double> weights_,
                                            std::span<const double> sigmas_)
     : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
@@ -48,7 +48,7 @@ inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3<float>>&& pos
               == sigmas.end());
 }
 
-inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3<float>>&& positions_,
+inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                                            std::span<const double> weights_)
     : positions(positions_), weights(weights_), rotated_positions(positions)
 {
@@ -60,10 +60,10 @@ inline bool LocalNeighborhood::constantSigmas() const
     return m_constant_sigmas;
 }
 
-inline void LocalNeighborhood::rotate(const data::Vec3<float>& v)
+inline void LocalNeighborhood::rotate(const data::Vec3& v)
 {
-    const auto R = data::RotationMatrix<float>::from_vec3(v);
-    util::rotate_matrix<float>(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
+    const auto R = data::RotationMatrix::from_vec3(v);
+    util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
 class Neighborhoods {
@@ -112,15 +112,15 @@ inline LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     const size_t num_neighbors = end - start;
 
-    std::vector<data::Vec3<float>> neighborhood_positions;
+    std::vector<data::Vec3> neighborhood_positions;
     if (m_normalize_distances) {
         neighborhood_positions
-            = util::normalize_distances<float>(m_distances, std::make_pair(3 * start, 3 * end));
+            = util::normalize_distances(m_distances, std::make_pair(3 * start, 3 * end));
     } else {
         neighborhood_positions.reserve(num_neighbors);
         for (size_t j = start; j < end; ++j) {
             neighborhood_positions.emplace_back(
-                data::Vec3<float> {m_distances[3 * j],
+                data::Vec3 {m_distances[3 * j],
                                    m_distances[3 * j + 1],
                                    m_distances[3 * j + 2]});
         }

@@ -109,7 +109,7 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
     return std::make_tuple(std::move(spatula), std::move(rotations));
 }
 
-std::tuple<double, data::Vec3f>
+std::tuple<double, data::Vec3>
 PGOP::compute_symmetry(LocalNeighborhood& neighborhood, const double* R_ij, size_t group_idx) const
 {
     auto opt = m_optimize->clone();

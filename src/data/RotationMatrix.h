@@ -11,10 +11,8 @@ namespace spatula { namespace data {
  * @brief Class provides helper methods for dealing with rotation matrices.
  *
  * spatula uses rotation matrices for high-throughput rotation of points.
- *
- * @tparam T The floating point type (float or double)
  */
-template<typename T> struct RotationMatrix : std::array<T, 9> {
+struct RotationMatrix : std::array<float, 9> {
 /**
  * @brief Rotate a Vec3 by a matrix R, returning a new vector.
  */
@@ -24,33 +22,33 @@ template<typename T> struct RotationMatrix : std::array<T, 9> {
 #ifdef _MSC_VER // MSVC
     __declspec(dllexport)
 #endif
-    inline Vec3<T> rotate(Vec3<T> vec) const
+    inline Vec3 rotate(Vec3 vec) const
     {
-        return Vec3<T>((*this)[0] * vec[0] + (*this)[1] * vec[1] + (*this)[2] * vec[2],
+        return Vec3((*this)[0] * vec[0] + (*this)[1] * vec[1] + (*this)[2] * vec[2],
                        (*this)[3] * vec[0] + (*this)[4] * vec[1] + (*this)[5] * vec[2],
                        (*this)[6] * vec[0] + (*this)[7] * vec[1] + (*this)[8] * vec[2]);
     }
 
-    inline static RotationMatrix<T> from_vec3(const Vec3<T>& v)
+    inline static RotationMatrix from_vec3(const Vec3& v)
     {
         const auto angle = v.norm();
-        if (std::abs(angle) < static_cast<T>(1e-7)) {
-            return RotationMatrix<T> {static_cast<T>(1),
-                                      static_cast<T>(0),
-                                      static_cast<T>(0),
-                                      static_cast<T>(0),
-                                      static_cast<T>(1),
-                                      static_cast<T>(0),
-                                      static_cast<T>(0),
-                                      static_cast<T>(0),
-                                      static_cast<T>(1)};
+        if (std::abs(angle) < 1e-7f) {
+            return RotationMatrix {1.0f,
+                                      0.0f,
+                                      0.0f,
+                                      0.0f,
+                                      1.0f,
+                                      0.0f,
+                                      0.0f,
+                                      0.0f,
+                                      1.0f};
         }
         const auto axis = v / angle;
-        const T c {static_cast<T>(std::cos(angle))};
-        const T s {static_cast<T>(std::sin(angle))};
-        const T C = static_cast<T>(1.0) - c;
+        const float c {static_cast<float>(std::cos(angle))};
+        const float s {static_cast<float>(std::sin(angle))};
+        const float C = 1.0f - c;
         const auto sv = axis * s;
-        return RotationMatrix<T> {
+        return RotationMatrix {
             C * axis.x * axis.x + c,
             C * axis.x * axis.y - sv.z,
             C * axis.x * axis.z + sv.y,
@@ -63,9 +61,5 @@ template<typename T> struct RotationMatrix : std::array<T, 9> {
         };
     }
 };
-
-// Typedefs for common precision types
-using RotationMatrixd = RotationMatrix<double>;
-using RotationMatrixf = RotationMatrix<float>;
 
 }} // namespace spatula::data

@@ -39,8 +39,8 @@ inline double covariance(const std::vector<std::complex<double>>& f,
 }
 
 inline float
-compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<float>& position,
-                                           const data::Vec3<float>& symmetrized_position,
+compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                           const data::Vec3& symmetrized_position,
                                            float sigma,
                                            float sigma_symmetrized)
 {
@@ -55,8 +55,8 @@ compute_Bhattacharyya_coefficient_gaussian(const data::Vec3<float>& position,
            * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
 }
 inline float
-compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3f& position,
-                                                 const data::Vec3f& symmetrized_position,
+compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                                 const data::Vec3& symmetrized_position,
                                                  float sigma,
                                                  float sigma_symmetrized)
 {
@@ -68,8 +68,8 @@ compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3f& position,
 }
 
 template<typename T>
-inline T compute_Bhattacharyya_coefficient_fisher(const data::Vec3<T>& position,
-                                                  const data::Vec3<T>& symmetrized_position,
+inline T compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
+                                                  const data::Vec3& symmetrized_position,
                                                   double kappa,
                                                   double kappa_symmetrized)
 {
@@ -93,8 +93,8 @@ inline T compute_Bhattacharyya_coefficient_fisher(const data::Vec3<T>& position,
 
 template<typename T>
 inline T
-compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3<T>& position,
-                                                    const data::Vec3<T>& symmetrized_position,
+compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
+                                                    const data::Vec3& symmetrized_position,
                                                     double kappa,
                                                     double kappa_symmetrized)
 {
