@@ -28,7 +28,7 @@ PGOP::compute(const float* distances,
               const double* sigmas,
               const size_t N_particles_in_neighbors) const
 {
-    const auto neighborhoods = Neighborhoods<float>(N_particles_in_neighbors,
+    const auto neighborhoods = Neighborhoods(N_particles_in_neighbors,
                                                     num_neighbors,
                                                     weights,
                                                     distances,
@@ -74,7 +74,7 @@ PGOP::compute(const float* distances,
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
+PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
 {
     // Optimized PGOP value for each group
     auto spatula = std::vector<double>();
@@ -110,7 +110,7 @@ PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
 }
 
 std::tuple<double, data::Vec3f>
-PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, size_t group_idx) const
+PGOP::compute_symmetry(LocalNeighborhood& neighborhood, const double* R_ij, size_t group_idx) const
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
@@ -125,19 +125,19 @@ PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const double* R_ij, siz
     return std::make_tuple(-optimum.second, optimum.first);
 }
 
-double PGOP::compute_pgop(LocalNeighborhoodf& neighborhood,
+double PGOP::compute_pgop(LocalNeighborhood& neighborhood,
                           const std::span<const double> R_ij) const
 {
     if (m_mode == 0) {
         if (neighborhood.constantSigmas()) {
-            return computes::compute_pgop_gaussian_fast<float>(neighborhood, R_ij);
+            return computes::compute_pgop_gaussian_fast(neighborhood, R_ij);
         }
-        return computes::compute_pgop_gaussian<float>(neighborhood, R_ij);
+        return computes::compute_pgop_gaussian(neighborhood, R_ij);
     } else {
         if (neighborhood.constantSigmas()) {
-            return computes::compute_pgop_fisher_fast<float>(neighborhood, R_ij);
+            return computes::compute_pgop_fisher_fast(neighborhood, R_ij);
         }
-        return computes::compute_pgop_fisher<float>(neighborhood, R_ij);
+        return computes::compute_pgop_fisher(neighborhood, R_ij);
     }
 }
 

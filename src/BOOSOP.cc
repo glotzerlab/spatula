@@ -37,7 +37,7 @@ BOOSOP<distribution_type>::compute(const float* distances,
                                         quad_positions_shape_0,
                                         ylms_shape_0);
     const auto neighborhoods
-        = Neighborhoods<float>(N_particles, num_neighbors, weights, distances, true);
+        = Neighborhoods(N_particles, num_neighbors, weights, distances, true);
 
     std::vector<double> op_values(N_particles * m_n_symmetries);
     std::vector<data::Quaternion> rotation_values(N_particles * m_n_symmetries);
@@ -88,7 +88,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
                                         quad_positions_shape_0,
                                         ylms_shape_0);
     const auto neighborhoods
-        = Neighborhoods<float>(N_particles, num_neighbors, weights, distances, true);
+        = Neighborhoods(N_particles, num_neighbors, weights, distances, true);
     std::vector<double> op_store(N_particles * m_n_symmetries);
 
     const auto loop_func = [&](const size_t start, const size_t stop) {
@@ -120,7 +120,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodf& neighborhood,
+BOOSOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
 {
@@ -138,7 +138,7 @@ BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodf& neighborhood,
 
 template<typename distribution_type>
 std::tuple<double, data::Quaternion>
-BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodf& neighborhood,
+BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
                                             const std::vector<std::complex<double>>& D_ij,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
@@ -156,7 +156,7 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodf& neighborhood,
 }
 
 template<typename distribution_type>
-double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodf& neighborhood,
+double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhood& neighborhood,
                                                  const std::vector<std::complex<double>>& D_ij,
                                                  const util::QlmEval& qlm_eval,
                                                  util::QlmBuf& qlm_buf) const
