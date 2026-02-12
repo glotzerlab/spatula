@@ -46,7 +46,7 @@ template<typename distribution_type> class BOOSOP {
      *
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute(const double* distances,
+    compute(const float* distances,
             const double* weights,
             const int* num_neighbors,
             size_t N_particles,
@@ -77,7 +77,7 @@ template<typename distribution_type> class BOOSOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    std::vector<double> refine(const double* distances,
+    std::vector<double> refine(const float* distances,
                                const double* rotations,
                                const double* weights,
                                const int* num_neighbors,
@@ -104,7 +104,7 @@ template<typename distribution_type> class BOOSOP {
      * specified point group symmetries.
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(LocalNeighborhoodd& neighborhood,
+    compute_particle(LocalNeighborhoodf& neighborhood,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
 
@@ -122,7 +122,7 @@ template<typename distribution_type> class BOOSOP {
      * @returns the optimized BOOSOP value and the optimal rotation for the given symmetry.
      */
     std::tuple<double, data::Quaternion>
-    compute_symmetry(LocalNeighborhoodd& neighborhood,
+    compute_symmetry(LocalNeighborhoodf& neighborhood,
                      const std::vector<std::complex<double>>& D_ij,
                      const util::QlmEval& qlm_eval,
                      util::QlmBuf& qlm_buf) const;
@@ -142,7 +142,7 @@ template<typename distribution_type> class BOOSOP {
      *
      * @returns The BOOSOP value.
      */
-    double compute_BOOSOP(LocalNeighborhoodd& neighborhood,
+    double compute_BOOSOP(LocalNeighborhoodf& neighborhood,
                           const std::vector<std::complex<double>>& D_ij,
                           const util::QlmEval& qlm_eval,
                           util::QlmBuf& qlm_buf) const;

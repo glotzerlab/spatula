@@ -55,7 +55,7 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
         .def(
             "compute",
             [](const BOOSOP<distribution_type>& self,
-               const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> distances,
+               const nb::ndarray<float, nb::shape<-1, 3>, nb::c_contig> distances,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
                const unsigned int m,
@@ -93,7 +93,7 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
         .def(
             "refine",
             [](const BOOSOP<distribution_type>& self,
-               const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> distances,
+               const nb::ndarray<float, nb::shape<-1, 3>, nb::c_contig> distances,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> rotations,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> weights,
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,

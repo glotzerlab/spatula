@@ -162,15 +162,15 @@ template<typename distribution_type> class BondOrder {
      * @param weights The weights to use for each position. Should be the same size as positions.
      */
     inline BondOrder(distribution_type dist,
-                     std::span<const data::Vec3d> positions,
+                     std::span<const data::Vec3f> positions,
                      std::span<const double> weights)
         : m_dist(dist), m_positions(positions), m_weights(weights),
-          m_normalization(1.0 / std::reduce(m_weights.begin(), m_weights.end()))
+          m_normalization(1.0f / std::reduce(m_weights.begin(), m_weights.end()))
     {
     }
 
     // Assumes points are on the unit sphere
-    inline std::vector<double> operator()(std::span<const data::Vec3d> points) const
+    inline std::vector<double> operator()(std::span<const data::Vec3f> points) const
     {
         auto bo = std::vector<double>();
         bo.reserve(points.size());
@@ -181,13 +181,25 @@ template<typename distribution_type> class BondOrder {
         return bo;
     }
 
+    // Overload for Vec3d (backward compatibility with QlmEval which uses double positions)
+    inline std::vector<double> operator()(std::span<const data::Vec3d> points) const
+    {
+        auto bo = std::vector<double>();
+        bo.reserve(points.size());
+        std::transform(points.begin(),
+                       points.end(),
+                       std::back_inserter(bo),
+                       [this](const data::Vec3d& point) { return this->single_call(data::Vec3f(point.x, point.y, point.z)); });
+        return bo;
+    }
+
     private:
     /**
      * @brief Compute the bond order diagram at a given point.
      *
      * @param point A point on the unit sphere in Cartesian coordinates.
      */
-    inline double single_call(const data::Vec3d& point) const
+    inline double single_call(const data::Vec3f& point) const
     {
         double sum_correction = 0;
         // Get the unweighted contribution from each distribution lazily.
@@ -224,7 +236,7 @@ template<typename distribution_type> class BondOrder {
     /// The distribution to use for all provided neighbor vectors.
     distribution_type m_dist;
     /// The normalized neighbor vectors for the bond order diagram.
-    std::span<const data::Vec3d> m_positions;
+    std::span<const data::Vec3f> m_positions;
     /// The weights for the points on the bond order diagram.
     std::span<const double> m_weights;
     /// The normalization constant @c 1 / std::reduce(m_weights).
