@@ -35,6 +35,13 @@ template<typename T> struct Vec3 {
     Vec3() : x(T(0)), y(T(0)), z(T(0)) { }
 
     /**
+     * @brief Conversion constructor from Vec3<U> to Vec3<T>.
+     * Allows implicit conversion between Vec3<float> and Vec3<double>.
+     */
+    template<typename U>
+    Vec3(const Vec3<U>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)) { }
+
+    /**
      * @brief Compute the dot product of a dot b.
      *
      * @param b the point to compute the dot product of.
