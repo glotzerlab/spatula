@@ -60,7 +60,7 @@ void export_spatula(nb::module_& m)
         .def(
             "compute",
             [](PGOP* self,
-               const nb::ndarray<double, nb::shape<-1, 3>>& distances,
+               const nb::ndarray<float, nb::shape<-1, 3>>& distances,
                const nb::ndarray<double, nb::shape<-1>>& weights,
                const nb::ndarray<int, nb::shape<-1>>& num_neighbors,
                const nb::ndarray<double, nb::shape<-1>>& sigmas
