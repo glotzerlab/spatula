@@ -8,7 +8,7 @@
 
 namespace spatula { namespace util {
 QlmEval::QlmEval(unsigned int m,
-                 const double* positions,
+                 const float* positions,
                  const double* weights,
                  const std::complex<double>* ylms,
                  size_t n_quad_points,
@@ -32,9 +32,7 @@ QlmEval::QlmEval(unsigned int m,
     }
     m_positions.reserve(n_quad_points);
     for (size_t i {0}; i < n_quad_points; ++i) {
-        m_positions.emplace_back(static_cast<float>(positions[i * 3]),
-                                 static_cast<float>(positions[i * 3 + 1]),
-                                 static_cast<float>(positions[i * 3 + 2]));
+        m_positions.emplace_back(&positions[i * 3]);
     }
 }
 

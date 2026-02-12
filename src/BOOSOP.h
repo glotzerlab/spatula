@@ -53,7 +53,7 @@ template<typename distribution_type> class BOOSOP {
             const unsigned int m,
             const std::complex<double>* ylms,
             size_t ylms_shape_0,
-            const double* quad_positions,
+            const float* quad_positions,
             size_t quad_positions_shape_0,
             const double* quad_weights) const;
 
@@ -85,7 +85,7 @@ template<typename distribution_type> class BOOSOP {
                                const unsigned int m,
                                const std::complex<double>* ylms,
                                size_t ylms_shape_0,
-                               const double* quad_positions,
+                               const float* quad_positions,
                                size_t quad_positions_shape_0,
                                const double* quad_weights) const;
 

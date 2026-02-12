@@ -26,7 +26,7 @@ BOOSOP<distribution_type>::compute(const float* distances,
                                    const unsigned int m,
                                    const std::complex<double>* ylms,
                                    size_t ylms_shape_0,
-                                   const double* quad_positions,
+                                   const float* quad_positions,
                                    size_t quad_positions_shape_0,
                                    const double* quad_weights) const
 {
@@ -77,7 +77,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
                                                       const unsigned int m,
                                                       const std::complex<double>* ylms,
                                                       size_t ylms_shape_0,
-                                                      const double* quad_positions,
+                                                      const float* quad_positions,
                                                       size_t quad_positions_shape_0,
                                                       const double* quad_weights) const
 {

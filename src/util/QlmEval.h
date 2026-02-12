@@ -29,7 +29,7 @@ class QlmEval {
      * ordering of the first dimension is in accending order of \f$ l \f$ and \f$ m \f$.
      */
     QlmEval(unsigned int m,
-            const double* positions,
+            const float* positions,
             const double* weights,
             const std::complex<double>* ylms,
             size_t n_quad_points,

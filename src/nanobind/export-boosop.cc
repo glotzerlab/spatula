@@ -60,7 +60,7 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
                const unsigned int m,
                const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> ylms,
-               const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> quad_positions,
+               const nb::ndarray<float, nb::shape<-1, 3>, nb::c_contig> quad_positions,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> quad_weights) {
                 auto result_tuple = self.compute(distances.data(),
                                                  weights.data(),
@@ -99,7 +99,7 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
                const unsigned int m,
                const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> ylms,
-               const nb::ndarray<double, nb::shape<-1, 3>, nb::c_contig> quad_positions,
+               const nb::ndarray<float, nb::shape<-1, 3>, nb::c_contig> quad_positions,
                const nb::ndarray<double, nb::ndim<1>, nb::c_contig> quad_weights) {
                 auto op_values_vec = self.refine(distances.data(),
                                                  rotations.data(),
