@@ -74,9 +74,9 @@ class PGOP:
             pg = representations.CartesianRepMatrix(point_group)
             # skips E operator if group is not C1
             if point_group == "C1":
-                matrices.append(pg.condensed_matrices)
+                matrices.append(pg.condensed_matrices.astype(np.float32))
             else:
-                matrices.append(pg.condensed_matrices[9:])
+                matrices.append(pg.condensed_matrices.astype(np.float32)[9:])
         if mode == "full":
             m_mode = 0
         elif mode == "boo":

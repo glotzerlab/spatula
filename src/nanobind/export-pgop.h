@@ -22,13 +22,13 @@ void export_spatula(nb::module_& m)
         .def(
             "__init__",
             [](PGOP* self,
-               const std::vector<nb::ndarray<double, nb::ndim<1>>>& R_ij_list,
+               const std::vector<nb::ndarray<float, nb::ndim<1>>>& R_ij_list,
                std::shared_ptr<optimize::Optimizer>& optimizer,
                unsigned int m_mode,
                bool compute_per_operator) {
                 // Save a vector of pointers to each group's data
-                const std::vector<const double*> ptrs = [&]() {
-                    std::vector<const double*> v;
+                const std::vector<const float*> ptrs = [&]() {
+                    std::vector<const float*> v;
                     v.reserve(R_ij_list.size());
                     for (const auto& arr : R_ij_list)
                         v.push_back(arr.data());
