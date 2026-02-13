@@ -26,7 +26,7 @@ class ThreadPool {
     }
 
     /// Get the current thread pool
-    BS::thread_pool& get_pool()
+    BS::light_thread_pool& get_pool()
     {
         return m_pool;
     }
@@ -75,6 +75,6 @@ class ThreadPool {
     // Must be before m_pool to ensure construction before the thread pool to
     // avoid crashes.
     BS::synced_stream m_out;
-    BS::thread_pool m_pool;
+    BS::light_thread_pool m_pool;
 };
 }} // namespace spatula::util
