@@ -29,8 +29,8 @@ class QlmEval {
      * ordering of the first dimension is in accending order of \f$ l \f$ and \f$ m \f$.
      */
     QlmEval(unsigned int m,
-            const double* positions,
-            const double* weights,
+            const float* positions,
+            const float* weights,
             const std::complex<double>* ylms,
             size_t n_quad_points,
             size_t n_lms);
@@ -78,7 +78,7 @@ class QlmEval {
     /// Number of points in quadrature.
     unsigned int m_n_points;
     /// The quadrature points.
-    std::vector<data::Vec3d> m_positions;
+    std::vector<data::Vec3> m_positions;
     /// Precomputed weighted ylms of the provided quadrature and normalization.
     std::vector<std::vector<std::complex<double>>> m_weighted_ylms;
 };

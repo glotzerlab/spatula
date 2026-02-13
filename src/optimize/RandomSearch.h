@@ -23,7 +23,7 @@ namespace spatula { namespace optimize {
 class RandomSearch : public Optimizer {
     public:
     RandomSearch(unsigned int iterations, long unsigned int seed)
-        : Optimizer(), m_iterations(iterations), m_seed(seed), m_rng(seed), m_normal_dist(0, 1.0)
+        : Optimizer(), m_iterations(iterations), m_seed(seed), m_rng(seed), m_normal_dist(0.0, 1.0)
     {
     }
     ~RandomSearch() override = default;
@@ -80,7 +80,7 @@ class RandomSearch : public Optimizer {
     /** A normal distribution instance for generating normally distributed data from a random number
      *  generator like std::mt19937_64.
      */
-    std::normal_distribution<double> m_normal_dist;
+    std::normal_distribution<float> m_normal_dist;
 };
 
 }} // namespace spatula::optimize

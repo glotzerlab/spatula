@@ -19,16 +19,16 @@ BOOSOP<distribution_type>::BOOSOP(const std::vector<std::vector<std::complex<dou
 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-BOOSOP<distribution_type>::compute(const double* distances,
-                                   const double* weights,
+BOOSOP<distribution_type>::compute(const float* distances,
+                                   const float* weights,
                                    const int* num_neighbors,
                                    size_t N_particles,
                                    const unsigned int m,
                                    const std::complex<double>* ylms,
                                    size_t ylms_shape_0,
-                                   const double* quad_positions,
+                                   const float* quad_positions,
                                    size_t quad_positions_shape_0,
-                                   const double* quad_weights) const
+                                   const float* quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m,
                                         quad_positions,
@@ -68,17 +68,17 @@ BOOSOP<distribution_type>::compute(const double* distances,
 }
 
 template<typename distribution_type>
-std::vector<double> BOOSOP<distribution_type>::refine(const double* distances,
-                                                      const double* rotations,
-                                                      const double* weights,
+std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
+                                                      const float* rotations,
+                                                      const float* weights,
                                                       const int* num_neighbors,
                                                       size_t N_particles,
                                                       const unsigned int m,
                                                       const std::complex<double>* ylms,
                                                       size_t ylms_shape_0,
-                                                      const double* quad_positions,
+                                                      const float* quad_positions,
                                                       size_t quad_positions_shape_0,
-                                                      const double* quad_weights) const
+                                                      const float* quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m,
                                         quad_positions,
@@ -118,7 +118,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const double* distances,
 
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodd& neighborhood,
+BOOSOP<distribution_type>::compute_particle(LocalNeighborhood& neighborhood,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
 {
@@ -136,7 +136,7 @@ BOOSOP<distribution_type>::compute_particle(LocalNeighborhoodd& neighborhood,
 
 template<typename distribution_type>
 std::tuple<double, data::Quaternion>
-BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodd& neighborhood,
+BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
                                             const std::vector<std::complex<double>>& D_ij,
                                             const util::QlmEval& qlm_eval,
                                             util::QlmBuf& qlm_buf) const
@@ -150,11 +150,11 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhoodd& neighborhood,
     // TODO currently optimum.first can be empty resulting in a SEGFAULT. This only happens in badly
     // formed arguments (particles with no neighbors), but can occur.
     const auto optimum = opt->get_optimum();
-    return std::make_tuple(-optimum.second, optimum.first);
+    return std::make_tuple(static_cast<double>(-optimum.second), data::Quaternion(optimum.first));
 }
 
 template<typename distribution_type>
-double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhoodd& neighborhood,
+double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhood& neighborhood,
                                                  const std::vector<std::complex<double>>& D_ij,
                                                  const util::QlmEval& qlm_eval,
                                                  util::QlmBuf& qlm_buf) const
