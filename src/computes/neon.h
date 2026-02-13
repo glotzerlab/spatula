@@ -34,20 +34,20 @@ inline float32x4_t neon_min_mag_sq(float32x4_t running_min, const float32x4x3_t 
     return vminq_f32(running_min, mag_sq);
 }
 
-inline float compute_pgop_gaussian_fast_neon(LocalNeighborhood<float>& neighborhood,
+inline float compute_pgop_gaussian_fast_neon(LocalNeighborhood& neighborhood,
                                              const std::span<const float> R_ij)
 {
-    const std::span<const data::Vec3<float>> positions(neighborhood.rotated_positions);
+    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
 
     // Extract the raw underlying data, with some safety checks
-    static_assert(sizeof(data::Vec3<float>) == 3 * sizeof(float), "Vec3 must be tightly packed!");
+    static_assert(sizeof(data::Vec3) == 3 * sizeof(float), "Vec3 must be tightly packed!");
     const float* raw_positions = reinterpret_cast<const float*>(positions.data());
 
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
     const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
     double overlap = 0.0; // Accumulate in double, as the exp is done in f64
-    data::RotationMatrix<float> R;
+    data::RotationMatrix R;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
     // matrix. Each matrix should be applied to each point in positions.
     for (size_t i {0}; i < R_ij.size(); i += 9) {
@@ -55,9 +55,9 @@ inline float compute_pgop_gaussian_fast_neon(LocalNeighborhood<float>& neighborh
 
         // loop over positions
         for (size_t j {0}; j < positions.size(); j++) {
-            const data::Vec3<float>& p = positions[j];
+            const data::Vec3& p = positions[j];
             // symmetrized position is obtained by multiplying the operator with the position
-            const data::Vec3<float> symmetrized_position = R.rotate(p);
+            const data::Vec3 symmetrized_position = R.rotate(p);
 
             const auto symmetrized_pos_tiled = vld3q_dup_f32(&symmetrized_position.x);
 
@@ -77,7 +77,7 @@ inline float compute_pgop_gaussian_fast_neon(LocalNeighborhood<float>& neighborh
 
             // Handle the remaining elements (<= 3)
             for (; m < positions.size(); ++m) {
-                const data::Vec3<float>& p = positions[m];
+                const data::Vec3& p = positions[m];
                 const auto diff = p - symmetrized_position;
 
                 // Update the final result

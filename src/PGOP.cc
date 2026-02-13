@@ -22,10 +22,10 @@ PGOP::PGOP(const std::vector<const float*> R_ij_data,
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP::compute(const double* distances,
-              const double* weights,
+PGOP::compute(const float* distances,
+              const float* weights,
               const int* num_neighbors,
-              const double* sigmas,
+              const float* sigmas,
               const size_t N_particles_in_neighbors) const
 {
     const auto neighborhoods = Neighborhoods(N_particles_in_neighbors,
@@ -56,7 +56,7 @@ PGOP::compute(const double* distances,
                 }
                 continue;
             }
-            auto neighborhood = neighborhoods.getNeighborhood<float>(i);
+            auto neighborhood = neighborhoods.getNeighborhood(i);
             const auto particle_op_rot = this->compute_particle(neighborhood);
 
             const auto& particle_ops = std::get<0>(particle_op_rot);
@@ -74,7 +74,7 @@ PGOP::compute(const double* distances,
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
+PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
 {
     // Optimized PGOP value for each group
     auto spatula = std::vector<double>();
@@ -92,8 +92,8 @@ PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
         const auto result = compute_symmetry(neighborhood, R_ij, group_idx);
         spatula.emplace_back(std::get<0>(result));
         const auto quat = data::Quaternion(
-            data::Vec3d(std::get<1>(result).x, std::get<1>(result).y, std::get<1>(result).z),
-            static_cast<double>(std::get<1>(result).norm()));
+            std::get<1>(result),
+            static_cast<float>(std::get<1>(result).norm()));
         rotations.emplace_back(quat);
         if (m_compute_per_operator) {
             auto neighborhood = neighborhood_original;
@@ -111,17 +111,17 @@ PGOP::compute_particle(LocalNeighborhoodf& neighborhood_original) const
     return std::make_tuple(std::move(spatula), std::move(rotations));
 }
 
-std::tuple<double, data::Vec3f>
-PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const float* R_ij, size_t group_idx) const
+std::tuple<double, data::Vec3>
+PGOP::compute_symmetry(LocalNeighborhood& neighborhood, const float* R_ij, size_t group_idx) const
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
         const auto opt_vec3d = opt->next_point();
         // Convert double Vec3 to float Vec3 for rotation
-        data::Vec3f opt_vec3f(static_cast<float>(opt_vec3d.x),
+        data::Vec3 opt_vec3(static_cast<float>(opt_vec3d.x),
                               static_cast<float>(opt_vec3d.y),
                               static_cast<float>(opt_vec3d.z));
-        neighborhood.rotate(opt_vec3f);
+        neighborhood.rotate(opt_vec3);
         const auto particle_op
             = compute_pgop(neighborhood, std::span<const float>(R_ij, m_group_sizes[group_idx]));
         opt->record_objective(-particle_op);
@@ -130,13 +130,13 @@ PGOP::compute_symmetry(LocalNeighborhoodf& neighborhood, const float* R_ij, size
     // op value is negated to get the correct value, because optimization scheme is
     // minimization not maximization!
     const auto& opt_vec3d = optimum.first;
-    data::Vec3f opt_vec3f(static_cast<float>(opt_vec3d.x),
+    data::Vec3 opt_vec3(static_cast<float>(opt_vec3d.x),
                           static_cast<float>(opt_vec3d.y),
                           static_cast<float>(opt_vec3d.z));
-    return std::make_tuple(-optimum.second, opt_vec3f);
+    return std::make_tuple(-optimum.second, opt_vec3);
 }
 
-double PGOP::compute_pgop(LocalNeighborhoodf& neighborhood, const std::span<const float> R_ij) const
+double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::span<const float> R_ij) const
 {
     if (m_mode == 0) {
         if (neighborhood.constantSigmas()) {

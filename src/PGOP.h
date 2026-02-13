@@ -40,10 +40,10 @@ class PGOP {
      *
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute(const double* distances,
-            const double* weights,
+    compute(const float* distances,
+            const float* weights,
             const int* num_neighbors,
-            const double* sigmas,
+            const float* sigmas,
             const size_t N_particles_in_neighbors) const;
 
     private:
@@ -57,7 +57,7 @@ class PGOP {
      * specified point group symmetries.
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute_particle(LocalNeighborhoodf& neighborhood_original) const;
+    compute_particle(LocalNeighborhood& neighborhood_original) const;
 
     /**
      * @brief Compute the optimal PGOP and rotation for a given point group symmetry.
@@ -68,8 +68,8 @@ class PGOP {
      *
      * @returns the optimized PGOP value and the optimal rotation for the given symmetry.
      */
-    std::tuple<double, data::Vec3f>
-    compute_symmetry(LocalNeighborhoodf& neighborhood, const float* R_ij, size_t group_idx) const;
+    std::tuple<double, data::Vec3>
+    compute_symmetry(LocalNeighborhood& neighborhood, const float* R_ij, size_t group_idx) const;
 
     /**
      * @brief Compute the PGOP for a set point group symmetry and rotation.
@@ -82,7 +82,7 @@ class PGOP {
      *
      * @returns The PGOP value.
      */
-    double compute_pgop(LocalNeighborhoodf& neighborhood, const std::span<const float> R_ij) const;
+    double compute_pgop(LocalNeighborhood& neighborhood, const std::span<const float> R_ij) const;
 
     /**
      * Helper function to better handle both single threaded and multithreaded behavior. In single
