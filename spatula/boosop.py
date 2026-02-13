@@ -204,7 +204,7 @@ class BOOSOP:
         )
         self._order, self._rotations = self._cpp.compute(
             dist.astype(np.float64),
-            neighbors.weights.astype(np.float64),
+            neighbors.weights.astype(np.float32),
             np.ascontiguousarray(neighbors.neighbor_counts.astype(np.int32)),
             np.uint32(m),
             np.conj(self._ylms(l, m)),

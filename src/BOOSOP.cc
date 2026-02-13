@@ -20,7 +20,7 @@ BOOSOP<distribution_type>::BOOSOP(const std::vector<std::vector<std::complex<dou
 template<typename distribution_type>
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
 BOOSOP<distribution_type>::compute(const float* distances,
-                                   const double* weights,
+                                   const float* weights,
                                    const int* num_neighbors,
                                    size_t N_particles,
                                    const unsigned int m,
@@ -28,7 +28,7 @@ BOOSOP<distribution_type>::compute(const float* distances,
                                    size_t ylms_shape_0,
                                    const float* quad_positions,
                                    size_t quad_positions_shape_0,
-                                   const double* quad_weights) const
+                                   const float* quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m,
                                         quad_positions,
@@ -69,8 +69,8 @@ BOOSOP<distribution_type>::compute(const float* distances,
 
 template<typename distribution_type>
 std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
-                                                      const double* rotations,
-                                                      const double* weights,
+                                                      const float* rotations,
+                                                      const float* weights,
                                                       const int* num_neighbors,
                                                       size_t N_particles,
                                                       const unsigned int m,
@@ -78,7 +78,7 @@ std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
                                                       size_t ylms_shape_0,
                                                       const float* quad_positions,
                                                       size_t quad_positions_shape_0,
-                                                      const double* quad_weights) const
+                                                      const float* quad_weights) const
 {
     const auto qlm_eval = util::QlmEval(m,
                                         quad_positions,

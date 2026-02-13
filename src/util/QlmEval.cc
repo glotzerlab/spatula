@@ -9,7 +9,7 @@
 namespace spatula { namespace util {
 QlmEval::QlmEval(unsigned int m,
                  const float* positions,
-                 const double* weights,
+                 const float* weights,
                  const std::complex<double>* ylms,
                  size_t n_quad_points,
                  size_t n_lms)
