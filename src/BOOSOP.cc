@@ -177,7 +177,7 @@ void BOOSOP<distribution_type>::execute_func(std::function<void(size_t, size_t)>
         util::ThreadPool::get().serial_compute<void, size_t>(0, N, func);
     } else {
         auto& pool = util::ThreadPool::get().get_pool();
-        pool.submit_blocks(0, N, func, 2 * pool.get_thread_count());
+        pool.detach_blocks(0, N, func, 2 * pool.get_thread_count());
         pool.wait();
     }
 }
