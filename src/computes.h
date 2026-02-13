@@ -136,7 +136,6 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<
                 float proj = position.dot(symmetrized_position);
                 max_proj = std::max(proj, max_proj);
             }
-            // TODO: fast sinhf
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
             if (inner_term > 1e-6) {
                 // Use double-precision sinh to avoid errors when x is small
