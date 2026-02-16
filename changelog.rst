@@ -37,6 +37,9 @@ Change Log
 * RotationMatrix std::array wrapper for fast and strongly typed vector rotations
 * ``-DENABLE_PROFILING`` flag to allow for easy profiling
 
+*Updated*
+
+* ``bs_thread_pool`` 3.1.0 -> 5.2.0
 
 0.1.1 (2025-10-16)
 ^^^^^^^^^^^^^^^^^^
