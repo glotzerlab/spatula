@@ -72,27 +72,25 @@ export uniform float compute_pgop_gaussian_fast_ispc(
         uniform float R7 = R_ij[i * 9 + 7];
         uniform float R8 = R_ij[i * 9 + 8];
 
-        // Loop over positions to symmetrize
-        for (uniform int32 j = 0; j < num_positions; ++j) {
-            // Load the current position from SoA arrays
-            uniform float px = pos_x[j];
-            uniform float py = pos_y[j];
-            uniform float pz = pos_z[j];
+        // Vectorize over positions to symmetrize - process multiple in parallel
+        foreach (j = 0 ... num_positions) {
+            // Load the current position from SoA arrays (varying per lane)
+            varying float px = pos_x[j];
+            varying float py = pos_y[j];
+            varying float pz = pos_z[j];
 
-            // Apply the rotation matrix
-            uniform float sym_x = R0 * px + R1 * py + R2 * pz;
-            uniform float sym_y = R3 * px + R4 * py + R5 * pz;
-            uniform float sym_z = R6 * px + R7 * py + R8 * pz;
+            // Apply the rotation matrix (each lane computes its symmetrized position)
+            varying float sym_x = R0 * px + R1 * py + R2 * pz;
+            varying float sym_y = R3 * px + R4 * py + R5 * pz;
+            varying float sym_z = R6 * px + R7 * py + R8 * pz;
 
             // Find minimum distance from symmetrized position to all positions
-            // SoA format enables contiguous vector loads - no gathers needed
             varying float min_dist_sq = INFINITY;
 
-            foreach (m = 0 ... num_positions)
-            {
-                varying float p_x = pos_x[m];
-                varying float p_y = pos_y[m];
-                varying float p_z = pos_z[m];
+            for (uniform int32 m = 0; m < num_positions; ++m) {
+                uniform float p_x = pos_x[m];
+                uniform float p_y = pos_y[m];
+                uniform float p_z = pos_z[m];
 
                 varying float dx = p_x - sym_x;
                 varying float dy = p_y - sym_y;
@@ -102,11 +100,9 @@ export uniform float compute_pgop_gaussian_fast_ispc(
                 min_dist_sq = min(min_dist_sq, dist_sq);
             }
 
-            // Reduce to get the global minimum
-            uniform float global_min_dist_sq = reduce_min(min_dist_sq);
-
-            // Accumulate the overlap contribution
-            overlap += fast_exp_approx(-(uniform double)global_min_dist_sq * denom);
+            // Accumulate the overlap contribution from all lanes using reduce_add
+            varying double exp_val = fast_exp_approx(-min_dist_sq * denom);
+            overlap += reduce_add(exp_val);
         }
     }
 
