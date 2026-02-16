@@ -66,29 +66,6 @@ compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
     return r_pos.dot(r_pos) / (8.0f * (sigma * sigma_symmetrized));
 }
 
-inline double compute_Bhattacharyya_coefficient_fisher(const data::Vec3& position,
-                                                       const data::Vec3& symmetrized_position,
-                                                       double kappa,
-                                                       double kappa_symmetrized)
-{
-    auto position_norm = std::sqrt(position.dot(position));
-    auto symmetrized_position_norm = std::sqrt(symmetrized_position.dot(symmetrized_position));
-    // If position norm is zero vector means this point is at origin and contributes 1
-    // to the overlap, check that with a small epsilon.
-    if ((position_norm < 1e-10) && (symmetrized_position_norm < 1e-10)) {
-        return 1;
-    } else if ((position_norm < 1e-10) || (symmetrized_position_norm < 1e-10)) {
-        return 0;
-    }
-    auto k1_sq = kappa * kappa;
-    auto k2_sq = kappa_symmetrized * kappa_symmetrized;
-    auto k1k2 = kappa * kappa_symmetrized;
-    auto proj = position.dot(symmetrized_position) / (position_norm * symmetrized_position_norm);
-    return 2 * std::sqrt(k1k2 / (std::sinh(kappa) * std::sinh(kappa_symmetrized)))
-           * std::sinh((std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj)) / 2)
-           / std::sqrt(k1_sq + k2_sq + 2 * k1k2 * proj);
-}
-
 inline double
 compute_Bhattacharyya_coefficient_fisher_normalized(const data::Vec3& position,
                                                     const data::Vec3& symmetrized_position,
