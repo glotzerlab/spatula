@@ -3,21 +3,40 @@ add_library(spatula_ispc OBJECT
     ../computes/pgop_gaussian.ispc
 )
 
-# Set ISPC target based on architecture using compile options
-# The ISPC_TARGETS property doesn't work reliably, so we use target_compile_options
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|amd64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "Intel")
-    # Target AVX2 for x86_64 (8-wide float SIMD)
-    target_compile_options(spatula_ispc PRIVATE "--target=avx2-i32x8")
-    message(STATUS "x86_64 detected: ISPC targeting avx2-i32x8")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-    # Use native ARM NEON target (4-wide float SIMD)
-    target_compile_options(spatula_ispc PRIVATE "--target=neon-i32x4")
-    message(STATUS "ARM detected: ISPC targeting neon-i32x4")
+# Detect ISPC architecture (see https://github.com/ispc/ispc/blob/main/examples/cpu/cmake/AddISPCExampleModern.cmake)
+if(NOT ISPC_ARCH)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|amd64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "Intel")
+        set(ispc_arch "x86-64")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        set(ispc_arch "aarch64")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+        set(ispc_arch "arm")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686|i386")
+        set(ispc_arch "x86")
+    endif()
+    set(ISPC_ARCH "${ispc_arch}" CACHE STRING "ISPC target architecture")
 endif()
 
-# Generate header file for C++ integration
+# Set ISPC instruction set based on architecture
+if(ISPC_ARCH STREQUAL "x86-64" OR ISPC_ARCH STREQUAL "x86")
+    # AVX2 for x86_64 (8-wide float SIMD)
+    set(ISPC_TARGETS "avx2-i32x8")
+elseif(ISPC_ARCH STREQUAL "aarch64")
+    # NEON for ARM64 (4-wide float SIMD)
+    set(ISPC_TARGETS "neon-i32x4")
+elseif(ISPC_ARCH STREQUAL "arm")
+    # NEON for 32-bit ARM
+    set(ISPC_TARGETS "neon-i32x4")
+endif()
+
+message(STATUS "ISPC architecture: ${ISPC_ARCH}, targets: ${ISPC_TARGETS}")
+set_property(TARGET spatula_ispc PROPERTY ISPC_INSTRUCTION_SETS "${ISPC_TARGETS}")
+target_compile_options(spatula_ispc PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=${ISPC_ARCH}>")
+
+# Generate header file(s) for C++ integration
 set_target_properties(spatula_ispc PROPERTIES
     ISPC_HEADER_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    POSITION_INDEPENDENT_CODE ON
 )
 
 nanobind_add_module(_spatula_nb
