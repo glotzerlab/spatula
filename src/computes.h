@@ -16,8 +16,7 @@
 #include <span>
 
 namespace spatula { namespace computes {
-float compute_pgop_gaussian(LocalNeighborhood& neighborhood,
-                            const std::span<const float> R_ij)
+float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
 {
     const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
@@ -40,9 +39,9 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood,
                 max_res = std::max(
                     max_res,
                     util::compute_Bhattacharyya_coefficient_gaussian(positions[m],
-                                                                            symmetrized_position,
-                                                                            sigmas[j],
-                                                                            sigmas[m]));
+                                                                     symmetrized_position,
+                                                                     sigmas[j],
+                                                                     sigmas[m]));
             }
             overlap += max_res;
         }
@@ -52,8 +51,7 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood,
     return overlap / normalization;
 }
 
-float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
-                                 const std::span<const float> R_ij)
+float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
 {
 #if defined(__ARM_NEON)
     return compute_pgop_gaussian_fast_neon(neighborhood, R_ij);
@@ -113,11 +111,10 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
                 double BC = 0;
-                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized(
-                    positions[m],
-                    symmetrized_position,
-                    sigmas[j],
-                    sigmas[m]);
+                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized(positions[m],
+                                                                               symmetrized_position,
+                                                                               sigmas[j],
+                                                                               sigmas[m]);
                 if (BC > max_res)
                     max_res = BC;
             }
@@ -129,8 +126,7 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
     return overlap / normalization;
 }
 
-float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood,
-                               const std::span<const float> R_ij)
+float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
 
 {
     std::span<const data::Vec3> positions(neighborhood.rotated_positions);
@@ -153,11 +149,10 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood,
                 float proj = position.dot(symmetrized_position);
                 max_proj = std::max(proj, max_proj);
             }
-            // floatODO: fast sinhf
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
             if (inner_term > 1e-6) {
                 // Use double-precision sinh to avoid errors when x is small
-                overlap += prefix_term * std::sinh(inner_term * 0.5) / inner_term;
+                overlap += prefix_term * std::sinhf(inner_term * 0.5) / inner_term;
             } else {
                 // Handle singularity at inner_term near 0 (when max_proj is near -1.0)
                 overlap += prefix_term * 0.5;
