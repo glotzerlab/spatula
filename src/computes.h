@@ -6,7 +6,15 @@
 #include "data/Vec3.h"
 #include "locality.h"
 
-#if defined(__ARM_NEON)
+// Include ISPC for SIMD (supports both x86 and ARM via NEON)
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86) \
+    || defined(__aarch64__) || defined(_M_ARM64)
+#include "computes/ispc.h"
+#define SPATULA_HAS_ISPC 1
+#endif
+
+// Keep native NEON as fallback for ARM
+#if defined(__ARM_NEON) && !defined(SPATULA_HAS_ISPC)
 #include "computes/neon.h"
 #endif
 
@@ -53,7 +61,9 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<con
 
 float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
 {
-#if defined(__ARM_NEON)
+#if defined(SPATULA_HAS_ISPC)
+    return compute_pgop_gaussian_fast_ispc_wrapper(neighborhood, R_ij);
+#elif defined(__ARM_NEON)
     return compute_pgop_gaussian_fast_neon(neighborhood, R_ij);
 #else
     const std::span<const data::Vec3> positions(neighborhood.rotated_positions);

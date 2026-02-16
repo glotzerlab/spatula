@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15...3.30)
-project(spatula)
+cmake_minimum_required(VERSION 3.19...3.30)
+project(spatula LANGUAGES CXX ISPC)
 
 if (CMAKE_VERSION VERSION_LESS 3.18)
   set(DEV_MODULE Development)
