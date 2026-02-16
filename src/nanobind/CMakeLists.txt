@@ -17,18 +17,7 @@ if(NOT ISPC_ARCH)
     set(ISPC_ARCH "${ispc_arch}" CACHE STRING "ISPC target architecture")
 endif()
 
-# Set ISPC instruction set based on architecture
-if(ISPC_ARCH STREQUAL "x86-64" OR ISPC_ARCH STREQUAL "x86")
-    # AVX2 for x86_64 (8-wide float SIMD)
-    set(ISPC_TARGETS "avx2-i32x8")
-elseif(ISPC_ARCH STREQUAL "aarch64")
-    # NEON for ARM64 (4-wide float SIMD)
-    set(ISPC_TARGETS "neon-i32x4")
-elseif(ISPC_ARCH STREQUAL "arm")
-    # NEON for 32-bit ARM
-    set(ISPC_TARGETS "neon-i32x4")
-endif()
-
+# ISPC will automatically select the correct SIMD instruction set if available
 message(STATUS "ISPC architecture: ${ISPC_ARCH}, targets: ${ISPC_TARGETS}")
 set_property(TARGET spatula_ispc PROPERTY ISPC_INSTRUCTION_SETS "${ISPC_TARGETS}")
 target_compile_options(spatula_ispc PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=${ISPC_ARCH}>")
