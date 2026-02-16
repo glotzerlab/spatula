@@ -8,6 +8,7 @@
 #include "../data/Vec3.h"
 #include "../locality.h"
 #include <span>
+#include <vector>
 
 // Include the ISPC-generated header
 #include "pgop_gaussian_ispc.h"
@@ -20,16 +21,25 @@ inline float compute_pgop_gaussian_fast_ispc_wrapper(LocalNeighborhood& neighbor
 {
     const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
 
-    // Extract the raw underlying data, with safety check
-    static_assert(sizeof(data::Vec3) == 3 * sizeof(float), "Vec3 must be tightly packed!");
-    const float* raw_positions = reinterpret_cast<const float*>(positions.data());
+    // Convert AoS (x0,y0,z0, x1,y1,z1, ...) to SoA (x[], y[], z[])
+    // This enables ISPC to use contiguous vector loads instead of gathers
+    const size_t n = positions.size();
+    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
+
+    for (size_t i = 0; i < n; ++i) {
+        pos_x[i] = positions[i].x;
+        pos_y[i] = positions[i].y;
+        pos_z[i] = positions[i].z;
+    }
 
     // NOTE: This function assumes all sigmas are constant (as with other fast variants)
     const float sigma = neighborhood.sigmas[0];
-    const int32_t num_positions = static_cast<int32_t>(positions.size());
+    const int32_t num_positions = static_cast<int32_t>(n);
     const int32_t num_matrices = static_cast<int32_t>(R_ij.size() / 9);
 
-    return ispc::compute_pgop_gaussian_fast_ispc(raw_positions,
+    return ispc::compute_pgop_gaussian_fast_ispc(pos_x.data(),
+                                                 pos_y.data(),
+                                                 pos_z.data(),
                                                  R_ij.data(),
                                                  num_positions,
                                                  num_matrices,
