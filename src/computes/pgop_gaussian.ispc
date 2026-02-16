@@ -62,15 +62,15 @@ export uniform float compute_pgop_gaussian_fast_ispc(
     // Loop over each rotation matrix
     for (uniform int32 i = 0; i < num_matrices; ++i) {
         // Load the rotation matrix elements into uniform variables
-        uniform float R0 = R_ij[i * 9 + 0];
-        uniform float R1 = R_ij[i * 9 + 1];
-        uniform float R2 = R_ij[i * 9 + 2];
-        uniform float R3 = R_ij[i * 9 + 3];
-        uniform float R4 = R_ij[i * 9 + 4];
-        uniform float R5 = R_ij[i * 9 + 5];
-        uniform float R6 = R_ij[i * 9 + 6];
-        uniform float R7 = R_ij[i * 9 + 7];
-        uniform float R8 = R_ij[i * 9 + 8];
+        const uniform float R0 = R_ij[i * 9 + 0];
+        const uniform float R1 = R_ij[i * 9 + 1];
+        const uniform float R2 = R_ij[i * 9 + 2];
+        const uniform float R3 = R_ij[i * 9 + 3];
+        const uniform float R4 = R_ij[i * 9 + 4];
+        const uniform float R5 = R_ij[i * 9 + 5];
+        const uniform float R6 = R_ij[i * 9 + 6];
+        const uniform float R7 = R_ij[i * 9 + 7];
+        const uniform float R8 = R_ij[i * 9 + 8];
 
         // Vectorize over positions to symmetrize - process multiple in parallel
         foreach (j = 0 ... num_positions) {
@@ -107,6 +107,6 @@ export uniform float compute_pgop_gaussian_fast_ispc(
     }
 
     // Normalize the result
-    uniform float normalization = (uniform float)(num_positions * num_matrices);
+    const uniform float normalization = (uniform float)(num_positions * num_matrices);
     return (uniform float)(overlap / (uniform double)normalization);
 }
