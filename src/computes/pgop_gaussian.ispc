@@ -43,45 +43,16 @@ static inline uniform double fast_exp_approx(uniform double x)
     return p * scale_factor;
 }
 
-// Compute the minimum squared distance from symmetrized_position to all positions.
-// This is vectorized across the inner loop over positions.
-static inline uniform float compute_min_dist_sq(
-    uniform const float positions[],
-    uniform int32 num_positions,
-    uniform float sym_x,
-    uniform float sym_y,
-    uniform float sym_z)
-{
-    // Track the minimum squared distance across all lanes
-    varying float min_dist_sq = INFINITY;
-
-    // Iterate over positions, vectorized by ISPC
-    foreach (m = 0 ... num_positions)
-    {
-        varying float px = positions[3 * m + 0];
-        varying float py = positions[3 * m + 1];
-        varying float pz = positions[3 * m + 2];
-
-        varying float dx = px - sym_x;
-        varying float dy = py - sym_y;
-        varying float dz = pz - sym_z;
-
-        varying float dist_sq = dx * dx + dy * dy + dz * dz;
-        min_dist_sq = min(min_dist_sq, dist_sq);
-    }
-
-    // Reduce across all lanes to get the global minimum
-    return reduce_min(min_dist_sq);
-}
-
-// Main kernel: compute PGOP Gaussian fast
-// positions: array of Vec3 as flat floats (x0, y0, z0, x1, y1, z1, ...)
+// Positions are passed in Structure-of-Arrays (SoA) format for efficient vector loads.
+// pos_x, pos_y, pos_z: separate arrays of position components
 // R_ij: array of rotation matrices (9 floats per matrix, row-major)
-// num_positions: number of points in positions array
+// num_positions: number of points in positions arrays
 // num_matrices: number of rotation matrices (R_ij.size() / 9)
 // sigma: the constant sigma value for all points
 export uniform float compute_pgop_gaussian_fast_ispc(
-    uniform const float positions[],
+    uniform const float pos_x[],
+    uniform const float pos_y[],
+    uniform const float pos_z[],
     uniform const float R_ij[],
     uniform int32 num_positions,
     uniform int32 num_matrices,
@@ -106,10 +77,10 @@ export uniform float compute_pgop_gaussian_fast_ispc(
 
         // Loop over positions to symmetrize
         for (uniform int32 j = 0; j < num_positions; ++j) {
-            // Load the current position
-            uniform float px = positions[3 * j + 0];
-            uniform float py = positions[3 * j + 1];
-            uniform float pz = positions[3 * j + 2];
+            // Load the current position from SoA arrays
+            uniform float px = pos_x[j];
+            uniform float py = pos_y[j];
+            uniform float pz = pos_z[j];
 
             // Apply the rotation matrix
             uniform float sym_x = R0 * px + R1 * py + R2 * pz;
@@ -117,11 +88,28 @@ export uniform float compute_pgop_gaussian_fast_ispc(
             uniform float sym_z = R6 * px + R7 * py + R8 * pz;
 
             // Find minimum distance from symmetrized position to all positions
-            uniform float min_dist_sq = compute_min_dist_sq(
-                positions, num_positions, sym_x, sym_y, sym_z);
+            // SoA format enables contiguous vector loads - no gathers needed
+            varying float min_dist_sq = INFINITY;
+
+            foreach (m = 0 ... num_positions)
+            {
+                varying float p_x = pos_x[m];
+                varying float p_y = pos_y[m];
+                varying float p_z = pos_z[m];
+
+                varying float dx = p_x - sym_x;
+                varying float dy = p_y - sym_y;
+                varying float dz = p_z - sym_z;
+
+                varying float dist_sq = dx * dx + dy * dy + dz * dz;
+                min_dist_sq = min(min_dist_sq, dist_sq);
+            }
+
+            // Reduce to get the global minimum
+            uniform float global_min_dist_sq = reduce_min(min_dist_sq);
 
             // Accumulate the overlap contribution
-            overlap += fast_exp_approx(-(uniform double)min_dist_sq * denom);
+            overlap += fast_exp_approx(-(uniform double)global_min_dist_sq * denom);
         }
     }
 
