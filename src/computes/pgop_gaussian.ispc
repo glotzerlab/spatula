@@ -9,16 +9,17 @@
 
 // Fast exponential approximation using degree 5 Remez polynomial
 // with Cody-Waite range reduction.
-static inline uniform double fast_exp_approx(uniform double x)
+// Works with both uniform and varying double inputs.
+static inline double fast_exp_approx(double x)
 {
     uniform double ln2 = 0.69314718055994530941723;
     uniform double ln2_recip = 1.44269504088896340;
 
     // Compute k = round(x / ln(2))
-    uniform double k = round(x * ln2_recip);
+    double k = round(x * ln2_recip);
 
     // Cody-Waite range reduction
-    uniform double r = x - ln2 * k;
+    double r = x - ln2 * k;
 
     // Degree 5 Remez approximation using Estrin's method
     uniform double g = 1.0000000716546679769;
@@ -28,19 +29,15 @@ static inline uniform double fast_exp_approx(uniform double x)
     uniform double b = 4.191538198120380032e-2;
     uniform double a = 8.2976549459683138915e-3;
 
-    uniform double r_sq = r * r;
-    uniform double p0 = f * r + g;
-    uniform double p1 = c * r + d_const;
-    uniform double p2 = a * r + b;
-    uniform double p1_2 = p2 * r_sq + p1;
-    uniform double p = p1_2 * r_sq + p0;
+    double r_sq = r * r;
+    double p0 = f * r + g;
+    double p1 = c * r + d_const;
+    double p2 = a * r + b;
+    double p1_2 = p2 * r_sq + p1;
+    double p = p1_2 * r_sq + p0;
 
-    // Reconstruction: 2^k * p
-    // Use pointer casting for type punning
-    uniform int64 ki = ((uniform int64)(k + 1023.0)) << 52;
-    uniform double scale_factor = *((uniform double *)&ki);
-
-    return p * scale_factor;
+    // Reconstruction: 2^k * p using ldexp
+    return ldexp(p, (int32)k);
 }
 
 // Positions are passed in Structure-of-Arrays (SoA) format for efficient vector loads.
