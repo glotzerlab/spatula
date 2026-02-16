@@ -99,10 +99,10 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
             double max_res = 0.0;
             for (size_t m {0}; m < positions.size(); ++m) {
                 double BC = 0;
-                BC = util::compute_Bhattacharyya_coefficient_fisher(positions[m],
-                                                                    symmetrized_position,
-                                                                    sigmas[j],
-                                                                    sigmas[m]);
+                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized(positions[m],
+                                                                               symmetrized_position,
+                                                                               sigmas[j],
+                                                                               sigmas[m]);
                 if (BC > max_res)
                     max_res = BC;
             }

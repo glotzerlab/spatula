@@ -31,8 +31,7 @@ void export_optimize(nb::module_& m)
 
     nb::class_<Mesh, Optimizer>(m, "Mesh").def(
         "__init__",
-        [](Mesh* self,
-           nb::ndarray<float, nb::shape<-1, 4>, nb::c_contig, nb::device::cpu> points) {
+        [](Mesh* self, nb::ndarray<float, nb::shape<-1, 4>, nb::c_contig, nb::device::cpu> points) {
             new (self) Mesh(points.data(), points.shape(0));
         });
 
