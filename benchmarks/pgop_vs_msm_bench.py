@@ -82,7 +82,6 @@ def parse_data_string(data: str) -> tuple[int, list[tuple[str, int, np.ndarray]]
 
 # Pre-computed benchmark data. Set to empty string to run benchmarks live.
 DATA = """N_PARTICLES=13824
-N_PARTICLES=13824
 threads=128
   msm: 78.2841ms +/- 1.2453ms (0.0057ms/particle)
   pgop: 551.6669ms +/- 13.6764ms (0.0399ms/particle)
@@ -180,11 +179,31 @@ if __name__ == "__main__":
     MARKER = {"msm": "H", "pgop": "o"}
     INFO = {"msm": f"Q{L}", "pgop": f"{SYMMETRIES}"}
 
+    # Get all thread counts for ideal scaling
+    all_threads = sorted(set(r[1] for r in results))
+
     for method in ["msm", "pgop"]:
         data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
         threads = [d[0] for d in data]
         means = [d[1] / N_PARTICLES for d in data]
         stds = [d[2] / N_PARTICLES for d in data]
+
+        # Plot ideal scaling (1/nthreads) only for PGOP
+        if method == "pgop":
+            single_thread_data = [d for d in data if d[0] == 1]
+            if single_thread_data:
+                baseline = single_thread_data[0][1] / N_PARTICLES
+                ideal_threads = [t for t in all_threads if t >= 1]
+                ideal_means = [baseline / t for t in ideal_threads]
+                ax.plot(
+                    ideal_threads,
+                    ideal_means,
+                    linestyle="--",
+                    color=COLORS[method],
+                    alpha=0.5,
+                    linewidth=1.5,
+                )
+
         ax.errorbar(
             threads,
             means,
