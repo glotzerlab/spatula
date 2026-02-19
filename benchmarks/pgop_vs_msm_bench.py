@@ -185,16 +185,21 @@ if __name__ == "__main__":
     for method in ["msm", "pgop"]:
         data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
         threads = [d[0] for d in data]
-        means = [d[1] / N_PARTICLES for d in data]
-        stds = [d[2] / N_PARTICLES for d in data]
+        # Convert ms/particle to particles/second: 1000 / (ms/particle)
+        # Error propagation: std_y ≈ y² * std_x / 1000
+        ms_per_particle = [d[1] / N_PARTICLES for d in data]
+        std_ms_per_particle = [d[2] / N_PARTICLES for d in data]
+        means = [1000 / x for x in ms_per_particle]
+        stds = [(y**2) * sx / 1000 for y, sx in zip(means, std_ms_per_particle)]
 
         # Plot ideal scaling (1/nthreads) only for PGOP
         if method == "pgop":
             single_thread_data = [d for d in data if d[0] == 1]
             if single_thread_data:
-                baseline = single_thread_data[0][1] / N_PARTICLES
+                baseline_ms_per_particle = single_thread_data[0][1] / N_PARTICLES
+                baseline_particles_per_sec = 1000 / baseline_ms_per_particle
                 ideal_threads = [t for t in all_threads if t >= 1]
-                ideal_means = [baseline / t for t in ideal_threads]
+                ideal_means = [baseline_particles_per_sec * t for t in ideal_threads]
                 ax.plot(
                     ideal_threads,
                     ideal_means,
@@ -213,11 +218,11 @@ if __name__ == "__main__":
             marker=MARKER[method],
             capsize=5,
             linewidth=2,
-            markersize=8,
+            markersize=5,
         )
 
     ax.set_xlabel("Threads")
-    ax.set_ylabel("Runtime per particle (ms)")
+    ax.set_ylabel("Particles per second")
     ax.set_yscale("log")
     ax.legend()
     ax.set_title(f"Runtime vs Threads (N={N_PARTICLES})")
