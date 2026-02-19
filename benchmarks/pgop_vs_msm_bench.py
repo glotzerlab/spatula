@@ -5,8 +5,9 @@ Run: python benchmarks/pgop_vs_msm_bench.py
 
 # ruff: noqa: D103, B023
 import timeit
+from pathlib import Path
 import warnings
-
+import gsd.hoomd
 import freud
 import numpy as np
 
@@ -52,6 +53,12 @@ if __name__ == "__main__":
 
     results = []
     box, points = make_system(N_PARTICLES)
+    data_file = Path(
+        "~/tetartoid-2d/workspace/28591ed8ebfcf2f02710ae05fc4c887f"
+    )
+    exit()
+    # with gsd.hoomd.open(__file__)
+    # box, points =
     voronoi = make_voronoi(box, points)
 
     for n_threads in THREADS:
