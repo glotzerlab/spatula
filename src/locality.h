@@ -39,7 +39,8 @@ class LocalNeighborhood {
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                                             std::span<const float> weights_,
                                             std::span<const float> sigmas_)
-    : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
+    : positions(std::move(positions_)), weights(weights_), sigmas(sigmas_),
+      rotated_positions(positions) // The rotated positions must be a copy
 {
     // Verify whether all sigma values are equivalent
     m_constant_sigmas
@@ -50,7 +51,7 @@ inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_
 
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                                             std::span<const float> weights_)
-    : positions(positions_), weights(weights_), rotated_positions(positions)
+    : positions(std::move(positions_)), weights(weights_), rotated_positions(positions)
 {
     m_constant_sigmas = false;
 }
