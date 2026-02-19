@@ -222,8 +222,10 @@ if __name__ == "__main__":
         )
 
     ax.set_xlabel("Threads")
+    ax.set_xscale("log", base=2)
+    ax.set_xticks(all_threads)
     ax.set_ylabel("Particles per second")
-    ax.set_yscale("log")
+    ax.set_yscale("linear")
     ax.legend()
     ax.set_title(f"Runtime vs Threads (N={N_PARTICLES})")
 
