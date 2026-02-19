@@ -63,7 +63,7 @@ if __name__ == "__main__":
         msm_times = timeit.repeat(
             lambda: compute_msm(L, (box, points), voronoi),
             number=SAMPLES,
-            repeat=REPEATS,
+            repeat=REPEATS * 10,
         )
         msm_arr = np.array(msm_times) * 1000
         results.append(("msm", n_threads, msm_arr))
