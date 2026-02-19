@@ -230,3 +230,13 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig("benchmark_results_ispc.svg", dpi=150)
     print("plotted")
+
+    # Print particles per second table
+    print("\nParticles per second:")
+    for method in ["msm", "pgop"]:
+        print(f"  {method.upper()}:")
+        data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
+        for n_threads, mean_ms, std_ms in sorted(data, key=lambda x: -x[0]):
+            ms_per_particle = mean_ms / N_PARTICLES
+            particles_per_sec = 1000 / ms_per_particle
+            print(f"    threads={n_threads}: {particles_per_sec:.1f}")
