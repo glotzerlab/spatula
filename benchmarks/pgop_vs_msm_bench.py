@@ -6,8 +6,8 @@ Run: python benchmarks/pgop_vs_msm_bench.py --data-file path/to/file.gsd
 # ruff: noqa: D103, B023
 import argparse
 import timeit
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import freud
 import gsd.hoomd
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     SAMPLES = 1
-    REPEATS = 1
+    REPEATS = 20
     L = 6
     SYMMETRIES = ["Oh"]
     THREADS = [8, 4, 2, 1]
