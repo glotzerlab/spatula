@@ -47,7 +47,9 @@ def compute_pgop(symmetries, system, voronoi: freud.locality.Voronoi):
 
 
 if __name__ == "__main__":
-    runner = pyperf.Runner(processes=1)
+    SAMPLES = 10
+    REPEATS = 10
+    runner = pyperf.Runner(processes=1, values=SAMPLES, warmups=REPEATS)
 
     L = 6
     SYMMETRIES = ["Oh", "D3h"]
