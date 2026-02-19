@@ -186,7 +186,13 @@ if __name__ == "__main__":
         data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
         threads = [d[0] for d in data]
         # Convert ms/particle to particles/second: 1000 / (ms/particle)
-        # Error propagation: std_y ≈ y² * std_x / 1000
+        # Error propagation for reciprocal preserves relative uncertainty:
+        #   σ_y / y = σ_x / x  →  σ_y = y² * σ_x / 1000
+        # This first-order (delta method) approximation is valid when:
+        #   - The original distribution doesn't cross zero (times are strictly positive)
+        #   - The coefficient of variation (σ/μ) is small
+        # See: https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Reciprocal_and_shifted_reciprocal
+        # and: https://en.wikipedia.org/wiki/Inverse_distribution#Reciprocal_normal_distribution
         ms_per_particle = [d[1] / N_PARTICLES for d in data]
         std_ms_per_particle = [d[2] / N_PARTICLES for d in data]
         means = [1000 / x for x in ms_per_particle]
@@ -240,5 +246,7 @@ if __name__ == "__main__":
         data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
         for n_threads, mean_ms, std_ms in sorted(data, key=lambda x: -x[0]):
             ms_per_particle = mean_ms / N_PARTICLES
+            std_ms_per_particle = std_ms / N_PARTICLES
             particles_per_sec = 1000 / ms_per_particle
-            print(f"    threads={n_threads}: {particles_per_sec:.1f}")
+            std_particles_per_sec = (particles_per_sec**2) * std_ms_per_particle / 1000
+            print(f"    threads={n_threads}: {particles_per_sec:.1f} +/- {std_particles_per_sec:.1f}")
