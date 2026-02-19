@@ -180,7 +180,7 @@ if __name__ == "__main__":
     INFO = {"msm": f"Q{L}", "pgop": f"{SYMMETRIES}"}
 
     # Get all thread counts for ideal scaling
-    all_threads = sorted(set(r[1] for r in results))
+    all_threads = sorted({r[1] for r in results})
 
     for method in ["msm", "pgop"]:
         data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
