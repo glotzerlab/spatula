@@ -81,16 +81,17 @@ def parse_data_string(data: str) -> tuple[int, list[tuple[str, int, np.ndarray]]
 
 
 # Pre-computed benchmark data. Set to empty string to run benchmarks live.
+# up to 16 (|) thread sare 100 samples of PGOP and 5000 for msm
 DATA = """N_PARTICLES=13824
 threads=128
-  msm: 78.2841ms +/- 1.2453ms (0.0057ms/particle)
-  pgop: 551.6669ms +/- 13.6764ms (0.0399ms/particle)
+  msm: 76.2179ms +/- 0.7587ms (0.0055ms/particle)
+  pgop: 566.5622ms +/- 35.6551ms (0.0410ms/particle)
 threads=64
-  msm: 88.7745ms +/- 1.4662ms (0.0064ms/particle)
-  pgop: 815.7703ms +/- 20.6883ms (0.0590ms/particle)
+  msm: 85.7163ms +/- 0.4749ms (0.0062ms/particle)
+  pgop: 833.7957ms +/- 18.5031ms (0.0603ms/particle)
 threads=32
-  msm: 128.3489ms +/- 13.8206ms (0.0093ms/particle)
-  pgop: 1404.6857ms +/- 30.7761ms (0.1016ms/particle)
+  msm: 109.5415ms +/- 1.0573ms (0.0079ms/particle)
+  pgop: 1390.6887ms +/- 14.2761ms (0.1006ms/particle)
 threads=16
   msm: 153.0175ms +/- 7.7131ms (0.0111ms/particle)
   pgop: 2582.3495ms +/- 54.3781ms (0.1868ms/particle)
