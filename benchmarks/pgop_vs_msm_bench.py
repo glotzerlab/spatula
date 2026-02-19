@@ -11,7 +11,9 @@ import warnings
 
 import freud
 import gsd.hoomd
+import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 import spatula
 
@@ -51,7 +53,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     SAMPLES = 1
-    REPEATS = 10
+    REPEATS = 1
     L = 6
     SYMMETRIES = ["Oh"]
     THREADS = [8, 4, 2, 1]
@@ -60,7 +62,7 @@ if __name__ == "__main__":
     with gsd.hoomd.open(args.data_file) as f:
         frame = f[-1]
         box, points = (
-            freud.Box.from_box(*frame.configuration.box),
+            freud.Box(*frame.configuration.box),
             frame.particles.position,
         )
     N_PARTICLES = len(points)
@@ -76,7 +78,7 @@ if __name__ == "__main__":
         msm_times = timeit.repeat(
             lambda: compute_msm(L, (box, points), voronoi),
             number=SAMPLES,
-            repeat=REPEATS * 10,
+            repeat=REPEATS * 50,
         )
         msm_arr = np.array(msm_times) * 1000
         results.append(("msm", n_threads, msm_arr))
@@ -101,4 +103,37 @@ if __name__ == "__main__":
 
     # results is a list of (method, n_threads, times_array)
     # Access like: results[0][2] for the numpy array of times
-    # print(results)
+
+    # Plotting
+    sns.set_theme(style="whitegrid")
+    fig, ax = plt.subplots()
+
+    COLORS = {"msm": "#2980B9", "pgop": "#00C9A4"}
+    MARKER = {"msm": "H", "pgop": "o"}
+    INFO = {"msm": f"Q{L}", "pgop": f"{SYMMETRIES}"}
+
+    for method in ["msm", "pgop"]:
+        data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
+        threads = [d[0] for d in data]
+        means = [d[1] for d in data]
+        stds = [d[2] for d in data]
+        ax.errorbar(
+            threads,
+            means,
+            yerr=stds,
+            label=f"{method.upper()} : {INFO[method]}",
+            color=COLORS[method],
+            marker=MARKER[method],
+            capsize=5,
+            linewidth=2,
+            markersize=8,
+        )
+
+    ax.set_xlabel("Threads")
+    ax.set_ylabel("Runtime (ms)")
+    ax.set_yscale("log")
+    ax.legend()
+    ax.set_title(f"Runtime vs Threads (N={N_PARTICLES})")
+
+    plt.tight_layout()
+    plt.savefig("benchmark_results_ispc.svg", dpi=150)
