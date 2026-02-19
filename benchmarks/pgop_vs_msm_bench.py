@@ -1,14 +1,16 @@
 """Benchmark comparing PGOP vs MSM runtime.
 
-Run: python benchmarks/pgop_vs_msm_bench.py
+Run: python benchmarks/pgop_vs_msm_bench.py --data-file path/to/file.gsd
 """
 
 # ruff: noqa: D103, B023
+import argparse
 import timeit
 from pathlib import Path
 import warnings
-import gsd.hoomd
+
 import freud
+import gsd.hoomd
 import numpy as np
 
 import spatula
@@ -44,21 +46,25 @@ def compute_pgop(symmetries, system, voronoi: freud.locality.Voronoi):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-file", type=Path, required=True)
+    args = parser.parse_args()
+
     SAMPLES = 1
     REPEATS = 10
     L = 6
-    SYMMETRIES = ["Oh"]  # , "D3h"]
-    N_PARTICLES = 500
+    SYMMETRIES = ["Oh"]
     THREADS = [8, 4, 2, 1]
 
     results = []
-    box, points = make_system(N_PARTICLES)
-    data_file = Path(
-        "~/tetartoid-2d/workspace/28591ed8ebfcf2f02710ae05fc4c887f"
-    )
-    exit()
-    # with gsd.hoomd.open(__file__)
-    # box, points =
+    with gsd.hoomd.open(args.data_file) as f:
+        frame = f[-1]
+        box, points = (
+            freud.Box.from_box(*frame.configuration.box),
+            frame.particles.position,
+        )
+    N_PARTICLES = len(points)
+    print(f"N_PARTICLES={N_PARTICLES}")
     voronoi = make_voronoi(box, points)
 
     for n_threads in THREADS:
