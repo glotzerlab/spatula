@@ -231,9 +231,9 @@ if __name__ == "__main__":
     ax.set_xscale("log", base=2)
     ax.set_xticks(all_threads)
     ax.set_ylabel("Particles per second")
-    ax.set_yscale("linear")
+    ax.set_yscale("log", base=10)
     ax.legend()
-    ax.set_title(f"Runtime vs Threads (N={N_PARTICLES})")
+    ax.set_title(f"Weak Scaling of PGOP $O_h$ and $msm_6$ for N={N_PARTICLES}")
 
     plt.tight_layout()
     plt.savefig("benchmark_results_ispc.svg", dpi=150)
