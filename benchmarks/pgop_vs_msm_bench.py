@@ -108,15 +108,16 @@ if __name__ == "__main__":
     sns.set_theme(style="whitegrid")
     fig, ax = plt.subplots()
 
-    COLORS = {"msm": "#2980B9", "pgop": "#00C9A4"}
+    # msm coloring is the freud pallette, #C7196A is from pgop paper figure 6
+    COLORS = {"msm": "#2980B9", "pgop": "#C7196A"}
     MARKER = {"msm": "H", "pgop": "o"}
     INFO = {"msm": f"Q{L}", "pgop": f"{SYMMETRIES}"}
 
     for method in ["msm", "pgop"]:
         data = [(r[1], r[2].mean(), r[2].std()) for r in results if r[0] == method]
         threads = [d[0] for d in data]
-        means = [d[1] for d in data]
-        stds = [d[2] for d in data]
+        means = [d[1] / N_PARTICLES for d in data]
+        stds = [d[2] / N_PARTICLES for d in data]
         ax.errorbar(
             threads,
             means,
@@ -130,7 +131,7 @@ if __name__ == "__main__":
         )
 
     ax.set_xlabel("Threads")
-    ax.set_ylabel("Runtime (ms)")
+    ax.set_ylabel("Runtime per particle (ms)")
     ax.set_yscale("log")
     ax.legend()
     ax.set_title(f"Runtime vs Threads (N={N_PARTICLES})")
