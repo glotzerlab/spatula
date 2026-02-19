@@ -1,21 +1,17 @@
-"""Benchmark comparing PGOP vs MSM runtime using pyperf.
+"""Benchmark comparing PGOP vs MSM runtime.
 
-Run: python benchmarks/pgop_vs_msm_bench.py -o results.json
-CSV: python -m pyperf dump results.json --csv > results.csv
+Run: python benchmarks/pgop_vs_msm_bench.py
 """
 
-# ruff: noqa: D103
+# ruff: noqa: D103, B023
+import timeit
 import warnings
-from pathlib import Path
 
 import freud
 import numpy as np
-import pyperf
 
 import spatula
 
-if (p := Path("results.json")).exists():
-    p.unlink()
 warnings.filterwarnings("ignore")
 
 OPTIMIZER = spatula.optimize.Union.with_step_gradient_descent(
@@ -47,28 +43,49 @@ def compute_pgop(symmetries, system, voronoi: freud.locality.Voronoi):
 
 
 if __name__ == "__main__":
-    SAMPLES = 10
+    SAMPLES = 1
     REPEATS = 10
-    runner = pyperf.Runner(processes=1, values=SAMPLES, warmups=REPEATS)
-
     L = 6
-    SYMMETRIES = ["Oh", "D3h"]
+    SYMMETRIES = ["Oh"]  # , "D3h"]
+    N_PARTICLES = 500
+    THREADS = [8, 4, 2, 1]
 
-    for n_threads in [1, 2, 4, 8]:
-        box, points = make_system(n_threads)
-        voronoi = make_voronoi(box, points)
+    results = []
+    box, points = make_system(N_PARTICLES)
+    voronoi = make_voronoi(box, points)
+
+    for n_threads in THREADS:
+        print(f"threads={n_threads}")
 
         freud.set_num_threads(n_threads)
         spatula.util.set_num_threads(n_threads)
 
-        runner.timeit(
-            name=f"msm: threads={n_threads}",
-            stmt=f"compute_msm({L}, (box, points), voronoi)",
-            setup="from __main__ import box, points, voronoi, compute_msm",
+        msm_times = timeit.repeat(
+            lambda: compute_msm(L, (box, points), voronoi),
+            number=SAMPLES,
+            repeat=REPEATS,
+        )
+        msm_arr = np.array(msm_times) * 1000
+        results.append(("msm", n_threads, msm_arr))
+        msm_per_particle = msm_arr / N_PARTICLES
+        print(
+            f"  msm: {msm_arr.mean():.4f}ms +/- {msm_arr.std():.4f}ms "
+            f"({msm_per_particle.mean():.4f}ms/particle)"
         )
 
-        runner.timeit(
-            name=f"pgop: threads={n_threads}",
-            stmt=f"compute_pgop({SYMMETRIES}, (box, points), voronoi)",
-            setup="from __main__ import box, points, voronoi, compute_pgop",
+        pgop_times = timeit.repeat(
+            lambda: compute_pgop(SYMMETRIES, (box, points), voronoi),
+            number=SAMPLES,
+            repeat=REPEATS,
         )
+        pgop_arr = np.array(pgop_times) * 1000  # ms
+        results.append(("pgop", n_threads, pgop_arr))
+        pgop_per_particle = pgop_arr / N_PARTICLES
+        print(
+            f"  pgop: {pgop_arr.mean():.4f}ms +/- {pgop_arr.std():.4f}ms "
+            f"({pgop_per_particle.mean():.4f}ms/particle)"
+        )
+
+    # results is a list of (method, n_threads, times_array)
+    # Access like: results[0][2] for the numpy array of times
+    # print(results)
