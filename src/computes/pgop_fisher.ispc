@@ -15,7 +15,7 @@ export uniform float compute_pgop_fisher_fast_ispc(
     uniform int32 num_matrices,
     uniform float kappa)
 {
-    uniform double prefix_term = 2.0 * (uniform double)kappa / fast_sinh_uniform((uniform double)kappa);
+    varying double prefix_term = 2.0 * (uniform double)kappa / fast_sinh((uniform double)kappa);
     uniform double overlap = 0.0;
 
     PGOP_OUTER_LOOP(
