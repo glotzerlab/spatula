@@ -32,7 +32,7 @@ inline float compute_pgop_gaussian_fast_ispc_wrapper(LocalNeighborhood& neighbor
                                                  sigma);
 }
 
-/// Compute PGOP Fisher using ISPC for SIMD.
+/// Compute PGOP Fisher.
 inline float compute_pgop_fisher_fast_ispc_wrapper(LocalNeighborhood& neighborhood,
                                                    const std::span<const float> R_ij)
 {
@@ -49,7 +49,7 @@ inline float compute_pgop_fisher_fast_ispc_wrapper(LocalNeighborhood& neighborho
                                                kappa);
 }
 
-/// Compute PGOP Gaussian (non-fast, per-point sigmas) using ISPC for SIMD.
+/// Compute PGOP Gaussian (non-fast, per-point sigmas).
 inline float compute_pgop_gaussian_ispc_wrapper(LocalNeighborhood& neighborhood,
                                                 const std::span<const float> R_ij)
 {
@@ -65,7 +65,7 @@ inline float compute_pgop_gaussian_ispc_wrapper(LocalNeighborhood& neighborhood,
                                             num_matrices);
 }
 
-/// Compute PGOP Fisher (non-fast, per-point kappas) using ISPC for SIMD.
+/// Compute PGOP Fisher (non-fast, per-point kappas).
 inline float compute_pgop_fisher_ispc_wrapper(LocalNeighborhood& neighborhood,
                                               const std::span<const float> R_ij)
 {
