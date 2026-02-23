@@ -21,32 +21,16 @@ export uniform float compute_pgop_gaussian_fast_ispc(
     uniform double denom = 1.0 / (8.0 * (uniform double)sigma * (uniform double)sigma);
     uniform double overlap = 0.0;
 
-    for (uniform int32 i = 0; i < num_matrices; ++i) {
-        uniform RotationMatrix R = load_rotation_matrix(R_ij, i);
-
-        foreach (j = 0 ... num_positions) {
-            varying float px = pos_x[j];
-            varying float py = pos_y[j];
-            varying float pz = pos_z[j];
-
-            varying float sym_x, sym_y, sym_z;
-            apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z);
-
-            // Find minimum distance
-            varying float min_dist_sq = INFINITY;
-            for (uniform int32 m = 0; m < num_positions; ++m) {
-                varying float dist_sq = distance_squared(
-                    sym_x, sym_y, sym_z,
-                    (varying float)pos_x[m], (varying float)pos_y[m], (varying float)pos_z[m]);
-                min_dist_sq = min(min_dist_sq, dist_sq);
-            }
-
-            varying double exp_val = fast_exp_approx(-min_dist_sq * denom);
-            overlap += reduce_add(exp_val);
+    PGOP_OUTER_LOOP(
+        varying float min_dist_sq = INFINITY;
+        for (uniform int32 m = 0; m < num_positions; ++m) {
+            varying float dist_sq = distance_squared(
+                sym_x, sym_y, sym_z,
+                (varying float)pos_x[m], (varying float)pos_y[m], (varying float)pos_z[m]);
+            min_dist_sq = min(min_dist_sq, dist_sq);
         }
-    }
-
-    return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));
+        varying double contribution = fast_exp_approx(-min_dist_sq * denom);
+    )
 }
 
 // Non-fast version: handles per-point sigmas.
@@ -61,31 +45,16 @@ export uniform float compute_pgop_gaussian_ispc(
 {
     uniform double overlap = 0.0;
 
-    for (uniform int32 i = 0; i < num_matrices; ++i) {
-        uniform RotationMatrix R = load_rotation_matrix(R_ij, i);
-
-        foreach (j = 0 ... num_positions) {
-            varying float px = pos_x[j];
-            varying float py = pos_y[j];
-            varying float pz = pos_z[j];
-            varying float sigma_j = sigmas[j];
-
-            varying float sym_x, sym_y, sym_z;
-            apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z);
-
-            // Find maximum Bhattacharyya coefficient
-            varying double max_bc = 0.0;
-            for (uniform int32 m = 0; m < num_positions; ++m) {
-                varying double bc = compute_Bhattacharyya_coefficient_gaussian(
-                    (varying double)pos_x[m], (varying double)pos_y[m], (varying double)pos_z[m],
-                    (varying double)sym_x, (varying double)sym_y, (varying double)sym_z,
-                    (varying double)sigma_j, (uniform double)sigmas[m]);
-                max_bc = max(max_bc, bc);
-            }
-
-            overlap += reduce_add(max_bc);
+    PGOP_OUTER_LOOP(
+        varying float sigma_j = sigmas[j];
+        varying double max_bc = 0.0;
+        for (uniform int32 m = 0; m < num_positions; ++m) {
+            varying double bc = compute_Bhattacharyya_coefficient_gaussian(
+                (varying double)pos_x[m], (varying double)pos_y[m], (varying double)pos_z[m],
+                (varying double)sym_x, (varying double)sym_y, (varying double)sym_z,
+                (varying double)sigma_j, (uniform double)sigmas[m]);
+            max_bc = max(max_bc, bc);
         }
-    }
-
-    return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));
+        varying double contribution = max_bc;
+    )
 }

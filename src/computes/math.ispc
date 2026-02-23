@@ -168,3 +168,22 @@ static inline varying float dot_product(
 {
     return x1 * x2 + y1 * y2 + z1 * z2;
 }
+
+// Macro for the common PGOP outer loop structure
+// Usage: PGOP_OUTER_LOOP(inner_computation_block)
+// The inner block must define `varying double contribution`
+// Assumes: R_ij, num_matrices, num_positions, pos_x, pos_y, pos_z, overlap are in scope
+#define PGOP_OUTER_LOOP(INNER_BLOCK) \
+    for (uniform int32 i = 0; i < num_matrices; ++i) { \
+        uniform RotationMatrix R = load_rotation_matrix(R_ij, i); \
+        foreach (j = 0 ... num_positions) { \
+            varying float px = pos_x[j]; \
+            varying float py = pos_y[j]; \
+            varying float pz = pos_z[j]; \
+            varying float sym_x, sym_y, sym_z; \
+            apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z); \
+            INNER_BLOCK \
+            overlap += reduce_add(contribution); \
+        } \
+    } \
+    return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));

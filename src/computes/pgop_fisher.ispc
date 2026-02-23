@@ -18,40 +18,23 @@ export uniform float compute_pgop_fisher_fast_ispc(
     uniform double prefix_term = 2.0 * (uniform double)kappa / fast_sinh_uniform((uniform double)kappa);
     uniform double overlap = 0.0;
 
-    for (uniform int32 i = 0; i < num_matrices; ++i) {
-        uniform RotationMatrix R = load_rotation_matrix(R_ij, i);
-
-        foreach (j = 0 ... num_positions) {
-            varying float px = pos_x[j];
-            varying float py = pos_y[j];
-            varying float pz = pos_z[j];
-
-            varying float sym_x, sym_y, sym_z;
-            apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z);
-
-            // Find maximum projection
-            varying float max_proj = -1.0f;
-            for (uniform int32 m = 0; m < num_positions; ++m) {
-                varying float proj = dot_product(
-                    sym_x, sym_y, sym_z,
-                    (varying float)pos_x[m], (varying float)pos_y[m], (varying float)pos_z[m]);
-                max_proj = max(max_proj, proj);
-            }
-
-            varying double inner_term = (uniform double)kappa * sqrt(2.0 * (1.0 + (varying double)max_proj));
-
-            varying double contribution;
-            if (inner_term > 1e-6) {
-                contribution = prefix_term * fast_sinh(inner_term * 0.5) / inner_term;
-            } else {
-                contribution = prefix_term * 0.5;
-            }
-
-            overlap += reduce_add(contribution);
+    PGOP_OUTER_LOOP(
+        varying float max_proj = -1.0f;
+        for (uniform int32 m = 0; m < num_positions; ++m) {
+            varying float proj = dot_product(
+                sym_x, sym_y, sym_z,
+                (varying float)pos_x[m], (varying float)pos_y[m], (varying float)pos_z[m]);
+            max_proj = max(max_proj, proj);
         }
-    }
 
-    return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));
+        varying double inner_term = (uniform double)kappa * sqrt(2.0 * (1.0 + (varying double)max_proj));
+        varying double contribution;
+        if (inner_term > 1e-6) {
+            contribution = prefix_term * fast_sinh(inner_term * 0.5) / inner_term;
+        } else {
+            contribution = prefix_term * 0.5;
+        }
+    )
 }
 
 // Non-fast version: handles per-point kappas.
@@ -66,31 +49,16 @@ export uniform float compute_pgop_fisher_ispc(
 {
     uniform double overlap = 0.0;
 
-    for (uniform int32 i = 0; i < num_matrices; ++i) {
-        uniform RotationMatrix R = load_rotation_matrix(R_ij, i);
-
-        foreach (j = 0 ... num_positions) {
-            varying float px = pos_x[j];
-            varying float py = pos_y[j];
-            varying float pz = pos_z[j];
-            varying float kappa_j = kappas[j];
-
-            varying float sym_x, sym_y, sym_z;
-            apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z);
-
-            // Find maximum Bhattacharyya coefficient
-            varying double max_bc = 0.0;
-            for (uniform int32 m = 0; m < num_positions; ++m) {
-                varying double bc = compute_Bhattacharyya_coefficient_fisher_normalized(
-                    (varying double)pos_x[m], (varying double)pos_y[m], (varying double)pos_z[m],
-                    (varying double)sym_x, (varying double)sym_y, (varying double)sym_z,
-                    (varying double)kappa_j, (uniform double)kappas[m]);
-                max_bc = max(max_bc, bc);
-            }
-
-            overlap += reduce_add(max_bc);
+    PGOP_OUTER_LOOP(
+        varying float kappa_j = kappas[j];
+        varying double max_bc = 0.0;
+        for (uniform int32 m = 0; m < num_positions; ++m) {
+            varying double bc = compute_Bhattacharyya_coefficient_fisher_normalized(
+                (varying double)pos_x[m], (varying double)pos_y[m], (varying double)pos_z[m],
+                (varying double)sym_x, (varying double)sym_y, (varying double)sym_z,
+                (varying double)kappa_j, (uniform double)kappas[m]);
+            max_bc = max(max_bc, bc);
         }
-    }
-
-    return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));
+        varying double contribution = max_bc;
+    )
 }
