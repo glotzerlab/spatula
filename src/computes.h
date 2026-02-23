@@ -137,8 +137,10 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
 }
 
 float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
-
 {
+#if defined(SPATULA_HAS_ISPC)
+    return compute_pgop_fisher_fast_ispc_wrapper(neighborhood, R_ij);
+#else
     std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const double kappa = neighborhood.sigmas[0];
     const float prefix_term = 2.0 * kappa / std::sinh(kappa);
@@ -174,5 +176,6 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<
     const float normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
 
     return overlap / normalization;
+#endif
 }
 }} // namespace spatula::computes

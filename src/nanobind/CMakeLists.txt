@@ -1,6 +1,7 @@
 # ISPC library for SIMD-optimized PGOP computations
 add_library(spatula_ispc OBJECT
     ../computes/pgop_gaussian.ispc
+    ../computes/pgop_fisher.ispc
 )
 
 # Detect ISPC architecture (see https://github.com/ispc/ispc/blob/main/examples/cpu/cmake/AddISPCExampleModern.cmake)
