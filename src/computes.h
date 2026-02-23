@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <span>
+#include <vector>
 
 namespace spatula { namespace computes {
 float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
@@ -23,6 +24,16 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<con
     return compute_pgop_gaussian_ispc_wrapper(neighborhood, R_ij);
 #else
     const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const size_t n = positions.size();
+
+    // Convert AoS to SoA for better cache locality
+    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
+    for (size_t i = 0; i < n; ++i) {
+        pos_x[i] = positions[i].x;
+        pos_y[i] = positions[i].y;
+        pos_z[i] = positions[i].z;
+    }
+
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
@@ -32,26 +43,27 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<con
         std::copy_n(R_ij.data() + i, 9, R.begin());
 
         // loop over positions
-        for (size_t j {0}; j < positions.size(); ++j) {
-            const auto& p = positions[j];
+        for (size_t j {0}; j < n; ++j) {
             // symmetrized position is obtained by multiplying the operator with the position
-            const auto symmetrized_position = R.rotate(p);
+            data::Vec3 symmetrized_position {R[0] * pos_x[j] + R[1] * pos_y[j] + R[2] * pos_z[j],
+                                             R[3] * pos_x[j] + R[4] * pos_y[j] + R[5] * pos_z[j],
+                                             R[6] * pos_x[j] + R[7] * pos_y[j] + R[8] * pos_z[j]};
 
             // compute overlap with every point in the positions
             float max_res = 0.0;
-            for (size_t m {0}; m < positions.size(); ++m) {
-                max_res = std::max(
-                    max_res,
-                    util::compute_Bhattacharyya_coefficient_gaussian(positions[m],
-                                                                     symmetrized_position,
-                                                                     sigmas[j],
-                                                                     sigmas[m]));
+            for (size_t m {0}; m < n; ++m) {
+                max_res = std::max(max_res,
+                                   util::compute_Bhattacharyya_coefficient_gaussian(
+                                       data::Vec3 {pos_x[m], pos_y[m], pos_z[m]},
+                                       symmetrized_position,
+                                       sigmas[j],
+                                       sigmas[m]));
             }
             overlap += max_res;
         }
     }
     // cast to double to avoid integer division
-    const auto normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
+    const auto normalization = static_cast<float>(n * R_ij.size()) / 9.0;
     return overlap / normalization;
 #endif
 }
@@ -62,6 +74,15 @@ float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::spa
     return compute_pgop_gaussian_fast_ispc_wrapper(neighborhood, R_ij);
 #else
     const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const size_t n = positions.size();
+
+    // Convert AoS to SoA for better cache locality
+    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
+    for (size_t i = 0; i < n; ++i) {
+        pos_x[i] = positions[i].x;
+        pos_y[i] = positions[i].y;
+        pos_z[i] = positions[i].z;
+    }
 
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
@@ -74,26 +95,28 @@ float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::spa
         std::copy_n(R_ij.data() + i, 9, R.begin());
 
         // loop over positions
-        for (size_t j {0}; j < positions.size(); j++) {
-            const data::Vec3& p = positions[j];
+        for (size_t j {0}; j < n; j++) {
             // symmetrized position is obtained by multiplying the operator with the position
-            const data::Vec3 symmetrized_position = R.rotate(p);
+            const float sym_x = R[0] * pos_x[j] + R[1] * pos_y[j] + R[2] * pos_z[j];
+            const float sym_y = R[3] * pos_x[j] + R[4] * pos_y[j] + R[5] * pos_z[j];
+            const float sym_z = R[6] * pos_x[j] + R[7] * pos_y[j] + R[8] * pos_z[j];
 
-            float max_res = std::numeric_limits<float>::infinity();
-            for (size_t m {0}; m < positions.size(); ++m) {
-                const data::Vec3& pos_m = positions[m];
-                const auto diff = pos_m - symmetrized_position;
+            float min_dist_sq = std::numeric_limits<float>::infinity();
+            for (size_t m {0}; m < n; ++m) {
+                const float dx = pos_x[m] - sym_x;
+                const float dy = pos_y[m] - sym_y;
+                const float dz = pos_z[m] - sym_z;
 
                 // max(exp(-x)) == min(x)
-                max_res = std::min(max_res, diff.dot(diff));
+                min_dist_sq = std::min(min_dist_sq, dx * dx + dy * dy + dz * dz);
             }
 
             // Final calculation using the collapsed minimum
-            overlap += util::fast_exp_approx(-max_res * denom);
+            overlap += util::fast_exp_approx(-min_dist_sq * denom);
         }
     }
     // cast to double to avoid integer division
-    const auto normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
+    const auto normalization = static_cast<float>(n * R_ij.size()) / 9.0;
     return overlap / normalization;
 #endif
 }
@@ -103,7 +126,17 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
 #if defined(SPATULA_HAS_ISPC)
     return compute_pgop_fisher_ispc_wrapper(neighborhood, R_ij);
 #else
-    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const size_t n = positions.size();
+
+    // Convert AoS to SoA for better cache locality
+    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
+    for (size_t i = 0; i < n; ++i) {
+        pos_x[i] = positions[i].x;
+        pos_y[i] = positions[i].y;
+        pos_z[i] = positions[i].z;
+    }
+
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
     // loop over the R_ij. Each 3x3 segment is a symmetry operation
@@ -112,17 +145,20 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
         data::RotationMatrix R;
         std::copy_n(R_ij.data() + i, 9, R.begin());
         // loop over positions
-        for (size_t j {0}; j < positions.size(); ++j) {
+        for (size_t j {0}; j < n; ++j) {
             // symmetrized position is obtained by multiplying the operator with the position
-            const data::Vec3 symmetrized_position = R.rotate(positions[j]);
+            data::Vec3 symmetrized_position {R[0] * pos_x[j] + R[1] * pos_y[j] + R[2] * pos_z[j],
+                                             R[3] * pos_x[j] + R[4] * pos_y[j] + R[5] * pos_z[j],
+                                             R[6] * pos_x[j] + R[7] * pos_y[j] + R[8] * pos_z[j]};
             // compute overlap with every point in the positions
             double max_res = 0.0;
-            for (size_t m {0}; m < positions.size(); ++m) {
+            for (size_t m {0}; m < n; ++m) {
                 double BC = 0;
-                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized(positions[m],
-                                                                               symmetrized_position,
-                                                                               sigmas[j],
-                                                                               sigmas[m]);
+                BC = util::compute_Bhattacharyya_coefficient_fisher_normalized(
+                    data::Vec3 {pos_x[m], pos_y[m], pos_z[m]},
+                    symmetrized_position,
+                    sigmas[j],
+                    sigmas[m]);
                 if (BC > max_res)
                     max_res = BC;
             }
@@ -130,7 +166,7 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
         }
     }
     // cast to double to avoid integer division
-    const float normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
+    const float normalization = static_cast<float>(n * R_ij.size()) / 9.0;
     return overlap / normalization;
 #endif
 }
@@ -140,7 +176,17 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<
 #if defined(SPATULA_HAS_ISPC)
     return compute_pgop_fisher_fast_ispc_wrapper(neighborhood, R_ij);
 #else
-    std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
+    const size_t n = positions.size();
+
+    // Convert AoS to SoA for better cache locality
+    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
+    for (size_t i = 0; i < n; ++i) {
+        pos_x[i] = positions[i].x;
+        pos_y[i] = positions[i].y;
+        pos_z[i] = positions[i].z;
+    }
+
     const double kappa = neighborhood.sigmas[0];
     const float prefix_term = 2.0 * kappa / std::sinh(kappa);
     float overlap = 0.0;
@@ -150,14 +196,16 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<
     for (size_t i {0}; i < R_ij.size(); i += 9) {
         std::copy_n(R_ij.data() + i, 9, R.begin());
 
-        for (size_t j {0}; j < positions.size(); ++j) {
+        for (size_t j {0}; j < n; ++j) {
             // symmetrized position is obtained by multiplying the operator with the position
-            const data::Vec3 symmetrized_position = R.rotate(positions[j]);
+            const float sym_x = R[0] * pos_x[j] + R[1] * pos_y[j] + R[2] * pos_z[j];
+            const float sym_y = R[3] * pos_x[j] + R[4] * pos_y[j] + R[5] * pos_z[j];
+            const float sym_z = R[6] * pos_x[j] + R[7] * pos_y[j] + R[8] * pos_z[j];
+
             // Clamp lower bound to -1.0 in case our projection underflowed
             float max_proj = -1.0;
-            for (size_t m {0}; m < positions.size(); ++m) {
-                auto position = positions[m];
-                float proj = position.dot(symmetrized_position);
+            for (size_t m {0}; m < n; ++m) {
+                float proj = pos_x[m] * sym_x + pos_y[m] * sym_y + pos_z[m] * sym_z;
                 max_proj = std::max(proj, max_proj);
             }
             double inner_term = kappa * std::sqrt(2.0 * (1.0 + max_proj));
@@ -172,7 +220,7 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<
     }
 
     // cast to double to avoid integer division
-    const float normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
+    const float normalization = static_cast<float>(n * R_ij.size()) / 9.0;
 
     return overlap / normalization;
 #endif
