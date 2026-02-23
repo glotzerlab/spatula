@@ -140,7 +140,7 @@ static inline varying float dot_product(
 // The inner block must define `varying double contribution`
 // Assumes: R_ij, num_matrices, num_positions, pos_x, pos_y, pos_z, overlap are in scope
 #define PGOP_OUTER_LOOP(INNER_BLOCK) \
-    foreach (j = 0 ... num_positions) { \
+    foreach_tiled (j = 0 ... num_positions) { \
         varying float px = pos_x[j]; \
         varying float py = pos_y[j]; \
         varying float pz = pos_z[j]; \
