@@ -154,17 +154,20 @@ template<typename distribution_type> class BondOrder {
     public:
     /**
      * @brief Create a BondOrder<distribution_type> object from a distribution and normalized
-     * position vectors.
+     * position vectors in SoA format.
      *
      * @param dist The distribution to be centered at the given neighbor vectors.
-     * @param positions The normalized (lie on the unit sphere) neighbor vectors. These serve as the
-     * mean for the \f$ N \f$ distributions on the bond order diagram.
+     * @param pos_x X components of normalized neighbor vectors.
+     * @param pos_y Y components of normalized neighbor vectors.
+     * @param pos_z Z components of normalized neighbor vectors.
      * @param weights The weights to use for each position. Should be the same size as positions.
      */
     inline BondOrder(distribution_type dist,
-                     std::span<const data::Vec3> positions,
+                     std::span<const float> pos_x,
+                     std::span<const float> pos_y,
+                     std::span<const float> pos_z,
                      std::span<const float> weights)
-        : m_dist(dist), m_positions(positions), m_weights(weights),
+        : m_dist(dist), m_pos_x(pos_x), m_pos_y(pos_y), m_pos_z(pos_z), m_weights(weights),
           m_normalization(1.0f / std::reduce(m_weights.begin(), m_weights.end()))
     {
     }
@@ -192,17 +195,22 @@ template<typename distribution_type> class BondOrder {
         double sum_correction = 0;
         // Get the unweighted contribution from each distribution lazily.
         auto single_contributions = std::vector<double>();
-        single_contributions.resize(m_positions.size());
-        std::transform(m_positions.begin(),
-                       m_positions.end(),
-                       single_contributions.begin(),
-                       [this, &point](const auto& p) -> double {
-                           if constexpr (distribution_type::use_theta) {
-                               return this->m_dist(util::fast_angle_eucledian(p, point));
-                           } else {
-                               return this->m_dist(p.dot(point));
-                           }
-                       });
+        const size_t n = m_pos_x.size();
+        single_contributions.resize(n);
+
+        for (size_t i = 0; i < n; ++i) {
+            if constexpr (distribution_type::use_theta) {
+                // Compute angle using dot product: acos(p · point)
+                const float dot
+                    = m_pos_x[i] * point.x + m_pos_y[i] * point.y + m_pos_z[i] * point.z;
+                single_contributions[i] = m_dist(std::acos(dot));
+            } else {
+                // Dot product
+                single_contributions[i]
+                    = m_dist(m_pos_x[i] * point.x + m_pos_y[i] * point.y + m_pos_z[i] * point.z);
+            }
+        }
+
         // Normalize the value and weight the contributions.
         return m_normalization
                * std::transform_reduce(
@@ -223,8 +231,10 @@ template<typename distribution_type> class BondOrder {
 
     /// The distribution to use for all provided neighbor vectors.
     distribution_type m_dist;
-    /// The normalized neighbor vectors for the bond order diagram.
-    std::span<const data::Vec3> m_positions;
+    /// Position components in SoA format.
+    std::span<const float> m_pos_x;
+    std::span<const float> m_pos_y;
+    std::span<const float> m_pos_z;
     /// The weights for the points on the bond order diagram.
     std::span<const float> m_weights;
     /// The normalization constant @c 1 / std::reduce(m_weights).
