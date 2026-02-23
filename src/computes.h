@@ -19,6 +19,9 @@
 namespace spatula { namespace computes {
 float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
 {
+#if defined(SPATULA_HAS_ISPC)
+    return compute_pgop_gaussian_ispc_wrapper(neighborhood, R_ij);
+#else
     const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
@@ -50,6 +53,7 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<con
     // cast to double to avoid integer division
     const auto normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
+#endif
 }
 
 float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
@@ -96,6 +100,9 @@ float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::spa
 
 float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
 {
+#if defined(SPATULA_HAS_ISPC)
+    return compute_pgop_fisher_ispc_wrapper(neighborhood, R_ij);
+#else
     std::span<const data::Vec3> positions(neighborhood.rotated_positions);
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
@@ -125,6 +132,7 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
     // cast to double to avoid integer division
     const float normalization = static_cast<float>(positions.size() * R_ij.size()) / 9.0;
     return overlap / normalization;
+#endif
 }
 
 float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
