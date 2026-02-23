@@ -27,10 +27,16 @@ class LocalNeighborhood {
 
     bool constantSigmas() const;
 
+    // AoS format (for BondOrder, NEON compatibility)
     std::vector<data::Vec3> positions;
+    std::vector<data::Vec3> rotated_positions;
+
+    // SoA format (for fast PGOP computes)
+    std::vector<float> pos_x, pos_y, pos_z;
+    std::vector<float> rotated_pos_x, rotated_pos_y, rotated_pos_z;
+
     std::span<const float> weights;
     std::span<const float> sigmas;
-    std::vector<data::Vec3> rotated_positions;
 
     private:
     bool m_constant_sigmas = false;
@@ -39,8 +45,25 @@ class LocalNeighborhood {
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                                             std::span<const float> weights_,
                                             std::span<const float> sigmas_)
-    : positions(positions_), weights(weights_), sigmas(sigmas_), rotated_positions(positions)
+    : positions(positions_), rotated_positions(positions_), weights(weights_), sigmas(sigmas_)
 {
+    // Populate SoA format
+    const size_t n = positions.size();
+    pos_x.resize(n);
+    pos_y.resize(n);
+    pos_z.resize(n);
+    rotated_pos_x.resize(n);
+    rotated_pos_y.resize(n);
+    rotated_pos_z.resize(n);
+    for (size_t i = 0; i < n; ++i) {
+        pos_x[i] = positions[i].x;
+        pos_y[i] = positions[i].y;
+        pos_z[i] = positions[i].z;
+        rotated_pos_x[i] = positions[i].x;
+        rotated_pos_y[i] = positions[i].y;
+        rotated_pos_z[i] = positions[i].z;
+    }
+
     // Verify whether all sigma values are equivalent
     m_constant_sigmas
         = !sigmas.empty()
@@ -50,8 +73,25 @@ inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_
 
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
                                             std::span<const float> weights_)
-    : positions(positions_), weights(weights_), rotated_positions(positions)
+    : positions(positions_), rotated_positions(positions_), weights(weights_)
 {
+    // Populate SoA format
+    const size_t n = positions.size();
+    pos_x.resize(n);
+    pos_y.resize(n);
+    pos_z.resize(n);
+    rotated_pos_x.resize(n);
+    rotated_pos_y.resize(n);
+    rotated_pos_z.resize(n);
+    for (size_t i = 0; i < n; ++i) {
+        pos_x[i] = positions[i].x;
+        pos_y[i] = positions[i].y;
+        pos_z[i] = positions[i].z;
+        rotated_pos_x[i] = positions[i].x;
+        rotated_pos_y[i] = positions[i].y;
+        rotated_pos_z[i] = positions[i].z;
+    }
+
     m_constant_sigmas = false;
 }
 
@@ -63,7 +103,17 @@ inline bool LocalNeighborhood::constantSigmas() const
 inline void LocalNeighborhood::rotate(const data::Vec3& v)
 {
     const auto R = data::RotationMatrix::from_vec3(v);
+
+    // Rotate AoS format
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
+
+    // Rotate SoA format
+    const size_t n = positions.size();
+    for (size_t i = 0; i < n; ++i) {
+        rotated_pos_x[i] = R[0] * pos_x[i] + R[1] * pos_y[i] + R[2] * pos_z[i];
+        rotated_pos_y[i] = R[3] * pos_x[i] + R[4] * pos_y[i] + R[5] * pos_z[i];
+        rotated_pos_z[i] = R[6] * pos_x[i] + R[7] * pos_y[i] + R[8] * pos_z[i];
+    }
 }
 
 class Neighborhoods {

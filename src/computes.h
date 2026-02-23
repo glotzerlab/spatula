@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <cmath>
 #include <span>
-#include <vector>
 
 namespace spatula { namespace computes {
 float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
@@ -23,16 +22,10 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<con
 #if defined(SPATULA_HAS_ISPC)
     return compute_pgop_gaussian_ispc_wrapper(neighborhood, R_ij);
 #else
-    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
-    const size_t n = positions.size();
-
-    // Convert AoS to SoA for better cache locality
-    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
-    for (size_t i = 0; i < n; ++i) {
-        pos_x[i] = positions[i].x;
-        pos_y[i] = positions[i].y;
-        pos_z[i] = positions[i].z;
-    }
+    const float* pos_x = neighborhood.rotated_pos_x.data();
+    const float* pos_y = neighborhood.rotated_pos_y.data();
+    const float* pos_z = neighborhood.rotated_pos_z.data();
+    const size_t n = neighborhood.rotated_pos_x.size();
 
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
@@ -73,16 +66,10 @@ float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::spa
 #if defined(SPATULA_HAS_ISPC)
     return compute_pgop_gaussian_fast_ispc_wrapper(neighborhood, R_ij);
 #else
-    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
-    const size_t n = positions.size();
-
-    // Convert AoS to SoA for better cache locality
-    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
-    for (size_t i = 0; i < n; ++i) {
-        pos_x[i] = positions[i].x;
-        pos_y[i] = positions[i].y;
-        pos_z[i] = positions[i].z;
-    }
+    const float* pos_x = neighborhood.rotated_pos_x.data();
+    const float* pos_y = neighborhood.rotated_pos_y.data();
+    const float* pos_z = neighborhood.rotated_pos_z.data();
+    const size_t n = neighborhood.rotated_pos_x.size();
 
     // NOTE: in src/PGOP.cc, we make the assumption that this function is only ever
     // called when all sigmas are constant. As such, we can precompute the denominator
@@ -126,16 +113,10 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
 #if defined(SPATULA_HAS_ISPC)
     return compute_pgop_fisher_ispc_wrapper(neighborhood, R_ij);
 #else
-    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
-    const size_t n = positions.size();
-
-    // Convert AoS to SoA for better cache locality
-    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
-    for (size_t i = 0; i < n; ++i) {
-        pos_x[i] = positions[i].x;
-        pos_y[i] = positions[i].y;
-        pos_z[i] = positions[i].z;
-    }
+    const float* pos_x = neighborhood.rotated_pos_x.data();
+    const float* pos_y = neighborhood.rotated_pos_y.data();
+    const float* pos_z = neighborhood.rotated_pos_z.data();
+    const size_t n = neighborhood.rotated_pos_x.size();
 
     const auto sigmas = neighborhood.sigmas;
     double overlap = 0.0;
@@ -176,16 +157,10 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<
 #if defined(SPATULA_HAS_ISPC)
     return compute_pgop_fisher_fast_ispc_wrapper(neighborhood, R_ij);
 #else
-    const std::span<const data::Vec3> positions(neighborhood.rotated_positions);
-    const size_t n = positions.size();
-
-    // Convert AoS to SoA for better cache locality
-    std::vector<float> pos_x(n), pos_y(n), pos_z(n);
-    for (size_t i = 0; i < n; ++i) {
-        pos_x[i] = positions[i].x;
-        pos_y[i] = positions[i].y;
-        pos_z[i] = positions[i].z;
-    }
+    const float* pos_x = neighborhood.rotated_pos_x.data();
+    const float* pos_y = neighborhood.rotated_pos_y.data();
+    const float* pos_z = neighborhood.rotated_pos_z.data();
+    const size_t n = neighborhood.rotated_pos_x.size();
 
     const double kappa = neighborhood.sigmas[0];
     const float prefix_term = 2.0 * kappa / std::sinh(kappa);
