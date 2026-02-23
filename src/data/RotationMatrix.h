@@ -12,7 +12,7 @@ namespace spatula { namespace data {
  *
  * spatula uses rotation matrices for high-throughput rotation of points.
  */
-struct RotationMatrix : std::array<double, 9> {
+struct RotationMatrix : std::array<float, 9> {
 /**
  * @brief Rotate a Vec3 by a matrix R, returning a new vector.
  */
@@ -32,12 +32,13 @@ struct RotationMatrix : std::array<double, 9> {
     inline static RotationMatrix from_vec3(const Vec3& v)
     {
         const auto angle = v.norm();
-        if (std::abs(angle) < 1e-7) {
-            return RotationMatrix {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+        if (std::abs(angle) < 1e-7f) {
+            return RotationMatrix {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
         }
         const auto axis = v / angle;
-        const double c {std::cos(angle)}, s {std::sin(angle)};
-        const double C = 1 - c;
+        const float c {static_cast<float>(std::cos(angle))};
+        const float s {static_cast<float>(std::sin(angle))};
+        const float C = 1.0f - c;
         const auto sv = axis * s;
         return RotationMatrix {
             C * axis.x * axis.x + c,
@@ -52,4 +53,5 @@ struct RotationMatrix : std::array<double, 9> {
         };
     }
 };
+
 }} // namespace spatula::data

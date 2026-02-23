@@ -163,9 +163,9 @@ template<typename distribution_type> class BondOrder {
      */
     inline BondOrder(distribution_type dist,
                      std::span<const data::Vec3> positions,
-                     std::span<const double> weights)
+                     std::span<const float> weights)
         : m_dist(dist), m_positions(positions), m_weights(weights),
-          m_normalization(1.0 / std::reduce(m_weights.begin(), m_weights.end()))
+          m_normalization(1.0f / std::reduce(m_weights.begin(), m_weights.end()))
     {
     }
 
@@ -226,7 +226,7 @@ template<typename distribution_type> class BondOrder {
     /// The normalized neighbor vectors for the bond order diagram.
     std::span<const data::Vec3> m_positions;
     /// The weights for the points on the bond order diagram.
-    std::span<const double> m_weights;
+    std::span<const float> m_weights;
     /// The normalization constant @c 1 / std::reduce(m_weights).
     double m_normalization;
 };

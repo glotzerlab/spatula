@@ -36,9 +36,9 @@ class StepGradientDescent : public Optimizer {
      */
     StepGradientDescent(const data::Quaternion& initial_point,
                         unsigned int max_iter,
-                        double initial_jump,
-                        double learning_rate,
-                        double tol)
+                        float initial_jump,
+                        float learning_rate,
+                        float tol)
         : Optimizer(), m_max_iter(max_iter), m_initial_jump(initial_jump),
           m_learning_rate(learning_rate), m_tol(tol),
           m_stage(StepGradientDescent::Stage::INITIALIZE), m_dim_starting_objective(0.0),
@@ -101,7 +101,7 @@ class StepGradientDescent : public Optimizer {
     /// Run the first iteration and step afterwards
     void initialize()
     {
-        if (m_best_point.second == std::numeric_limits<double>::max()) {
+        if (m_best_point.second == std::numeric_limits<float>::max()) {
             return;
         }
         step();
@@ -117,13 +117,13 @@ class StepGradientDescent : public Optimizer {
     /// Perform a gradient descent in the given direction
     void searchAlongGradient()
     {
-        const double objective_change = m_objective - m_last_objective;
+        const float objective_change = m_objective - m_last_objective;
         m_last_objective = m_objective;
         if (std::abs(objective_change) < m_tol) {
             step();
             return;
         }
-        const double grad = -objective_change / (m_delta);
+        const float grad = -objective_change / (m_delta);
         m_delta = m_learning_rate * grad;
         m_point[m_current_dim] -= m_delta;
     }
@@ -132,25 +132,25 @@ class StepGradientDescent : public Optimizer {
     /// Maximum number of iterations to run the algorithm
     unsigned int m_max_iter;
     /// The jump size to use in determining the gradient for gradient descent
-    double m_initial_jump;
+    float m_initial_jump;
     /// The learning rate for the gradient descent in the search stage
-    double m_learning_rate;
+    float m_learning_rate;
     /// The amount of improvement required to continue optimizing rather than terminating.
-    double m_tol;
+    float m_tol;
     // State variables
     // General
     /// The current stage of the optimization
     Stage m_stage;
     /// The starting objective for a given round of 1-dimensional optimizations
-    double m_dim_starting_objective;
+    float m_dim_starting_objective;
     /// Whether the optimization has terminated
     bool m_terminate;
     // Gradient Descent
     /// The current dimension for optimizing
     unsigned short m_current_dim;
     /// The last step's objective in gradient descent
-    double m_last_objective;
+    float m_last_objective;
     /// The current change between iterations in gradient descent.
-    double m_delta;
+    float m_delta;
 };
 }} // namespace spatula::optimize

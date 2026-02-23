@@ -43,7 +43,7 @@ class Optimizer {
      */
     Optimizer()
         : m_point(), m_objective(),
-          m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<double>::max()), m_count(0),
+          m_best_point({0.0, 0.0, 0.0}, std::numeric_limits<float>::max()), m_count(0),
           m_need_objective(false)
     {
     }
@@ -61,7 +61,7 @@ class Optimizer {
         return m_point;
     }
     /// Record the objective function's value for the last querried point.
-    virtual void record_objective(double objective)
+    virtual void record_objective(float objective)
     {
         if (!m_need_objective) {
             throw std::runtime_error("Must get new point before recording objective.");
@@ -77,7 +77,7 @@ class Optimizer {
     virtual bool terminate() const = 0;
 
     /// Get the current best point and the value of the objective function at that point.
-    std::pair<data::Vec3, double> get_optimum() const
+    std::pair<data::Vec3, float> get_optimum() const
     {
         return m_best_point;
     }
@@ -97,10 +97,10 @@ class Optimizer {
     /// The current point to evaluate the objective function for.
     data::Vec3 m_point;
     /// The last recorded objective function value.
-    double m_objective;
+    float m_objective;
 
     /// The best (as of yet) point computed.
-    std::pair<data::Vec3, double> m_best_point;
+    std::pair<data::Vec3, float> m_best_point;
 
     /// The number of iterations thus far.
     unsigned int m_count;

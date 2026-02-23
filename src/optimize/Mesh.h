@@ -30,7 +30,7 @@ class Mesh : public Optimizer {
      *
      * @param points The points to test. Expected sizes are \f$ (N_{brute}, N_{dim} \f$.
      */
-    Mesh(const double* points, size_t n_points) : Optimizer(), m_points()
+    Mesh(const float* points, size_t n_points) : Optimizer(), m_points()
     {
         m_points.reserve(n_points);
         for (size_t i = 0; i < n_points; ++i) {

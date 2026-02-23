@@ -19,50 +19,26 @@ namespace spatula {
 class LocalNeighborhood {
     public:
     LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                      std::span<const double> weights_,
-                      std::span<const double> sigmas_);
-    LocalNeighborhood(std::vector<data::Vec3>&& positions_, std::span<const double> weights_);
+                      std::span<const float> weights_,
+                      std::span<const float> sigmas_);
+    LocalNeighborhood(std::vector<data::Vec3>&& positions_, std::span<const float> weights_);
 
     void rotate(const data::Vec3& v);
 
     bool constantSigmas() const;
 
     std::vector<data::Vec3> positions;
-    std::span<const double> weights;
-    std::span<const double> sigmas;
+    std::span<const float> weights;
+    std::span<const float> sigmas;
     std::vector<data::Vec3> rotated_positions;
 
     private:
     bool m_constant_sigmas = false;
 };
 
-class Neighborhoods {
-    public:
-    Neighborhoods(size_t N,
-                  const int* neighbor_counts,
-                  const double* weights,
-                  const double* distance,
-                  bool normalize_distances,
-                  const double* sigmas = nullptr);
-
-    LocalNeighborhood getNeighborhood(size_t i) const;
-    std::span<const double> getWeights(size_t i) const;
-    std::span<const double> getSigmas(size_t i) const;
-    int getNeighborCount(size_t i) const;
-
-    private:
-    const size_t m_N;
-    const int* m_neighbor_counts;
-    const double* m_distances;
-    const double* m_weights;
-    const double* m_sigmas;
-    std::vector<size_t> m_neighbor_offsets;
-    bool m_normalize_distances;
-};
-
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                                            std::span<const double> weights_,
-                                            std::span<const double> sigmas_)
+                                            std::span<const float> weights_,
+                                            std::span<const float> sigmas_)
     : positions(std::move(positions_)), weights(weights_), sigmas(sigmas_),
       rotated_positions(positions) // The rotated positions must be a copy
 {
@@ -74,7 +50,7 @@ inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_
 }
 
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
-                                            std::span<const double> weights_)
+                                            std::span<const float> weights_)
     : positions(std::move(positions_)), weights(weights_), rotated_positions(positions)
 {
     m_constant_sigmas = false;
@@ -91,12 +67,37 @@ inline void LocalNeighborhood::rotate(const data::Vec3& v)
     util::rotate_matrix(positions.cbegin(), positions.cend(), rotated_positions.begin(), R);
 }
 
+class Neighborhoods {
+    public:
+    Neighborhoods(size_t N,
+                  const int* neighbor_counts,
+                  const float* weights,
+                  const float* distance,
+                  bool normalize_distances,
+                  const float* sigmas = nullptr);
+
+    // Returns LocalNeighborhood with position type matching distance type
+    LocalNeighborhood getNeighborhood(size_t i) const;
+    std::span<const float> getWeights(size_t i) const;
+    std::span<const float> getSigmas(size_t i) const;
+    int getNeighborCount(size_t i) const;
+
+    private:
+    const size_t m_N;
+    const int* m_neighbor_counts;
+    const float* m_distances;
+    const float* m_weights;
+    const float* m_sigmas;
+    std::vector<size_t> m_neighbor_offsets;
+    bool m_normalize_distances;
+};
+
 inline Neighborhoods::Neighborhoods(size_t N,
                                     const int* neighbor_counts,
-                                    const double* weights,
-                                    const double* distance,
+                                    const float* weights,
+                                    const float* distance,
                                     bool normalize_distances,
-                                    const double* sigmas)
+                                    const float* sigmas)
     : m_N {N}, m_neighbor_counts {neighbor_counts}, m_distances {distance}, m_weights {weights},
       m_sigmas {sigmas}, m_neighbor_offsets(), m_normalize_distances {normalize_distances}
 {
@@ -133,19 +134,19 @@ inline LocalNeighborhood Neighborhoods::getNeighborhood(size_t i) const
                              std::span(m_weights + start, num_neighbors));
 }
 
-inline std::span<const double> Neighborhoods::getWeights(size_t i) const
+inline std::span<const float> Neighborhoods::getWeights(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     return std::span(m_weights + start, end - start);
 }
 
-inline std::span<const double> Neighborhoods::getSigmas(size_t i) const
+inline std::span<const float> Neighborhoods::getSigmas(size_t i) const
 {
     const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
     if (m_sigmas) {
         return std::span(m_sigmas + start, end - start);
     }
-    return std::span<const double>();
+    return std::span<const float>();
 }
 
 inline int Neighborhoods::getNeighborCount(size_t i) const
