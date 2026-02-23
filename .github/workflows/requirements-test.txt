@@ -11,8 +11,7 @@ iniconfig==2.3.0
 more-itertools==10.8.0
     # via parsnip-cif
 nanobind==2.11.0
-    # via
-    #   -r .github/workflows/requirements-test.in
+    # via -r .github/workflows/requirements-test.in
 ninja==1.13.0
     # via -r .github/workflows/requirements-test.in
 numpy==2.4.2
@@ -33,8 +32,6 @@ pathspec==1.0.4
     # via scikit-build-core
 pluggy==1.6.0
     # via pytest
-pybind11==3.0.1
-    # via -r .github/workflows/requirements-test.in
 pygments==2.19.2
     # via pytest
 pytest==9.0.2
