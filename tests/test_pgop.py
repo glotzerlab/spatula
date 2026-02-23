@@ -1407,9 +1407,9 @@ def get_shape_sys_nlist(vertices):
     return system, nlist
 
 
-def make_compute_object(symmetries, optimizer, optype):
+def make_compute_object(symmetries, optimizer, optype, boosop_max_l=10):
     if optype == "boosop":
-        return spatula.BOOSOP("fisher", symmetries, optimizer)
+        return spatula.BOOSOP("fisher", symmetries, optimizer, max_l=boosop_max_l)
     elif optype == "full":
         return spatula.PGOP(symmetries, optimizer)
     elif optype == "boo":
@@ -1418,20 +1418,27 @@ def make_compute_object(symmetries, optimizer, optype):
         raise ValueError(f"Invalid optype {optype}")
 
 
-def make_method(symmetries, optimizer, optype):
+def make_method(symmetries, optimizer, optype, boosop_max_l=10):
     if isinstance(symmetries, str):
         symmetry = symmetries[0]
     else:
-        return make_compute_object(symmetries, optimizer, optype)
+        return make_compute_object(
+            symmetries, optimizer, optype, boosop_max_l=boosop_max_l
+        )
     if symmetry not in METHODS_DICT:
         METHODS_DICT[symmetry] = {}
     if optype not in METHODS_DICT[symmetry]:
         METHODS_DICT[symmetry][optype] = {}
-    if optimizer.__hash__() not in METHODS_DICT[symmetry][optype]:
-        METHODS_DICT[symmetry][optype][optimizer.__hash__()] = make_compute_object(
-            symmetries, optimizer, optype
+    key = (
+        (optimizer.__hash__(), boosop_max_l)
+        if optype == "boosop"
+        else optimizer.__hash__()
+    )
+    if key not in METHODS_DICT[symmetry][optype]:
+        METHODS_DICT[symmetry][optype][key] = make_compute_object(
+            symmetries, optimizer, optype, boosop_max_l=boosop_max_l
         )
-    return METHODS_DICT[symmetry][optype][optimizer.__hash__()]
+    return METHODS_DICT[symmetry][optype][key]
 
 
 def generate_quaternions(n=1):
@@ -1445,14 +1452,25 @@ def generate_quaternions(n=1):
 
 
 def compute_op_result(
-    symmetry, opt, optyp, system, nlist, sigma=None, query_points=None, failed=False
+    symmetry,
+    opt,
+    optyp,
+    system,
+    nlist,
+    sigma=None,
+    query_points=None,
+    failed=False,
+    refine=False,
 ):
+    boosop_max_l = 20 if refine and optyp == "boosop" else 10
     if failed:
-        op_compute = make_compute_object(symmetry, opt, optyp)
+        op_compute = make_compute_object(
+            symmetry, opt, optyp, boosop_max_l=boosop_max_l
+        )
     else:
-        op_compute = make_method(symmetry, opt, optyp)
+        op_compute = make_method(symmetry, opt, optyp, boosop_max_l=boosop_max_l)
     if optyp == "boosop":
-        op_compute.compute(system, nlist, query_points=query_points)
+        op_compute.compute(system, nlist, query_points=query_points, refine=refine)
     elif optyp == "full" or optyp == "boo":
         op_compute.compute(system, sigma, nlist, query_points=query_points)
     return op_compute
@@ -1625,6 +1643,26 @@ def test_bcc_with_multiple_incorrect_symmetries(mode):
     sigs = SIGMA_VALUES[mode] if mode != "boosop" else None
     op_pg = compute_op_result(
         incorrect_symmetries, OPTIMIZER, mode, (box, points), qargs, sigs
+    )
+    single_column_shape = (len(crystals_dict["bcc"][1]),)
+    np.testing.assert_array_less(
+        op_pg.order[:, 1], np.full(single_column_shape, cutoff)
+    )
+    np.testing.assert_allclose(
+        op_pg.order[:, 0], np.ones(single_column_shape), rtol=RTOL
+    )
+
+
+@pytest.mark.parametrize("mode", MODES)
+@pytest.mark.parametrize("refine", [False, True])
+def test_bcc_with_multiple_incorrect_symmetries(mode, refine):
+    cutoff = 0.8
+    box, points = crystals_dict["bcc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
+    incorrect_symmetries = ["Oh", "D3h"]
+    sigs = SIGMA_VALUES[mode] if mode != "boosop" else None
+    op_pg = compute_op_result(
+        incorrect_symmetries, OPTIMIZER, mode, (box, points), qargs, sigs, refine=refine
     )
     single_column_shape = (len(crystals_dict["bcc"][1]),)
     np.testing.assert_array_less(

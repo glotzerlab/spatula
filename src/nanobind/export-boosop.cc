@@ -94,7 +94,7 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
             "refine",
             [](const BOOSOP<distribution_type>& self,
                const nb::ndarray<float, nb::shape<-1, 3>, nb::c_contig> distances,
-               const nb::ndarray<float, nb::ndim<1>, nb::c_contig> rotations,
+               const nb::ndarray<float, nb::shape<-1, -1, 4>, nb::c_contig> rotations,
                const nb::ndarray<float, nb::ndim<1>, nb::c_contig> weights,
                const nb::ndarray<int, nb::ndim<1>, nb::c_contig> num_neighbors,
                const unsigned int m,
