@@ -1,5 +1,20 @@
 cmake_minimum_required(VERSION 3.19...3.30)
-project(spatula LANGUAGES CXX ISPC)
+project(spatula LANGUAGES CXX)
+
+# Option to disable ISPC (must be set before enable_language)
+option(ENABLE_ISPC "Use ISPC for SIMD-optimized computations" ON)
+
+if(ENABLE_ISPC)
+    include(CheckLanguage)
+    check_language(ISPC)
+    if(CMAKE_ISPC_COMPILER)
+        enable_language(ISPC)
+        message(STATUS "ISPC enabled")
+    else()
+        message(WARNING "ISPC compiler not found, falling back to scalar implementations")
+        set(ENABLE_ISPC OFF CACHE BOOL "Use ISPC for SIMD-optimized computations" FORCE)
+    endif()
+endif()
 
 if (CMAKE_VERSION VERSION_LESS 3.18)
   set(DEV_MODULE Development)
