@@ -81,16 +81,11 @@ static inline uniform double fast_sinh_uniform(uniform double x)
 }
 
 // Compute the Bhattacharyya coefficient for two Gaussian distributions.
-// position: first position vector
-// symmetrized_position: second position vector (symmetrized by rotation)
-// sigma: standard deviation for first distribution
-// sigma_symmetrized: standard deviation for second distribution
 static inline double compute_Bhattacharyya_coefficient_gaussian(
     double pos_x, double pos_y, double pos_z,
     double sym_x, double sym_y, double sym_z,
     double sigma, double sigma_symmetrized)
 {
-    // Compute distance between the two vectors
     double dx = sym_x - pos_x;
     double dy = sym_y - pos_y;
     double dz = sym_z - pos_z;
@@ -105,11 +100,6 @@ static inline double compute_Bhattacharyya_coefficient_gaussian(
 }
 
 // Compute the Bhattacharyya coefficient for two Fisher (von Mises-Fisher) distributions.
-// Assumes positions are normalized (unit vectors).
-// position: first position vector (unit vector)
-// symmetrized_position: second position vector (unit vector, symmetrized by rotation)
-// kappa: concentration parameter for first distribution
-// kappa_symmetrized: concentration parameter for second distribution
 static inline double compute_Bhattacharyya_coefficient_fisher_normalized(
     double pos_x, double pos_y, double pos_z,
     double sym_x, double sym_y, double sym_z,
@@ -119,7 +109,6 @@ static inline double compute_Bhattacharyya_coefficient_fisher_normalized(
     double k2_sq = kappa_symmetrized * kappa_symmetrized;
     double k1k2 = kappa * kappa_symmetrized;
 
-    // Dot product of position and symmetrized_position
     double proj = pos_x * sym_x + pos_y * sym_y + pos_z * sym_z;
 
     double inner_sqrt = k1_sq + k2_sq + 2.0 * k1k2 * proj;
@@ -132,14 +121,11 @@ static inline double compute_Bhattacharyya_coefficient_fisher_normalized(
            * fast_sinh(sqrt_inner / 2.0) / sqrt_inner;
 }
 
-// Struct to hold rotation matrix elements (all members are uniform)
 uniform struct RotationMatrix
 {
     uniform float R0, R1, R2, R3, R4, R5, R6, R7, R8;
 };
 
-// Load a rotation matrix from the R_ij array at the given matrix index.
-// Returns a uniform struct since all data comes from uniform arrays.
 static inline uniform RotationMatrix load_rotation_matrix(uniform const float R_ij[], uniform int32 matrix_idx)
 {
     uniform RotationMatrix R;
@@ -156,7 +142,6 @@ static inline uniform RotationMatrix load_rotation_matrix(uniform const float R_
     return R;
 }
 
-// Apply a rotation matrix to a position (varying inputs for vectorization).
 static inline void apply_rotation(
     varying float px, varying float py, varying float pz,
     uniform const RotationMatrix R,
@@ -167,7 +152,6 @@ static inline void apply_rotation(
     sym_z = R.R6 * px + R.R7 * py + R.R8 * pz;
 }
 
-// Compute squared distance between two 3D points.
 static inline varying float distance_squared(
     varying float x1, varying float y1, varying float z1,
     varying float x2, varying float y2, varying float z2)
@@ -178,7 +162,6 @@ static inline varying float distance_squared(
     return dx * dx + dy * dy + dz * dz;
 }
 
-// Compute dot product of two 3D vectors.
 static inline varying float dot_product(
     varying float x1, varying float y1, varying float z1,
     varying float x2, varying float y2, varying float z2)

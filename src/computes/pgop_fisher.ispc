@@ -29,6 +29,7 @@ export uniform float compute_pgop_fisher_fast_ispc(
             varying float sym_x, sym_y, sym_z;
             apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z);
 
+            // Find maximum projection
             varying float max_proj = -1.0f;
             for (uniform int32 m = 0; m < num_positions; ++m) {
                 varying float proj = dot_product(
@@ -50,8 +51,7 @@ export uniform float compute_pgop_fisher_fast_ispc(
         }
     }
 
-    const uniform float normalization = (uniform float)(num_positions * num_matrices);
-    return (uniform float)(overlap / (uniform double)normalization);
+    return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));
 }
 
 // Non-fast version: handles per-point kappas.
@@ -78,6 +78,7 @@ export uniform float compute_pgop_fisher_ispc(
             varying float sym_x, sym_y, sym_z;
             apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z);
 
+            // Find maximum Bhattacharyya coefficient
             varying double max_bc = 0.0;
             for (uniform int32 m = 0; m < num_positions; ++m) {
                 varying double bc = compute_Bhattacharyya_coefficient_fisher_normalized(
@@ -91,6 +92,5 @@ export uniform float compute_pgop_fisher_ispc(
         }
     }
 
-    const uniform float normalization = (uniform float)(num_positions * num_matrices);
-    return (uniform float)(overlap / (uniform double)normalization);
+    return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));
 }
