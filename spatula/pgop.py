@@ -210,7 +210,7 @@ class PGOP:
             )
         self._sigmas = sigmas
         self._order, self._rotations = self._cpp.compute(
-            dist.astype(np.float64),
+            dist.astype(np.float32),
             neighbors.weights.astype(np.float32),
             neighbors.neighbor_counts.astype(np.int32),
             sigmas.astype(np.float32),

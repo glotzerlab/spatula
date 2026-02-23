@@ -175,7 +175,7 @@ class Mesh(Optimizer):
             The rotaional quaternions to test.
 
         """
-        self._cpp = _spatula_nb.Mesh(np.asarray(points, dtype=np.float64, order="C"))
+        self._cpp = _spatula_nb.Mesh(np.asarray(points, dtype=np.float32, order="C"))
 
     @classmethod
     def from_grid(cls, n_axes=75, n_angles=10):
