@@ -26,7 +26,7 @@ export uniform float compute_pgop_gaussian_fast_ispc(
         for (uniform int32 m = 0; m < num_positions; ++m) {
             varying float dist_sq = distance_squared(
                 sym_x, sym_y, sym_z,
-                (varying float)pos_x[m], (varying float)pos_y[m], (varying float)pos_z[m]);
+                pos_x[m], pos_y[m], pos_z[m]);
             min_dist_sq = min(min_dist_sq, dist_sq);
         }
         varying double contribution = fast_exp_approx(-min_dist_sq * denom);
@@ -50,9 +50,9 @@ export uniform float compute_pgop_gaussian_ispc(
         varying double max_bc = 0.0;
         for (uniform int32 m = 0; m < num_positions; ++m) {
             varying double bc = compute_Bhattacharyya_coefficient_gaussian(
-                (varying double)pos_x[m], (varying double)pos_y[m], (varying double)pos_z[m],
-                (varying double)sym_x, (varying double)sym_y, (varying double)sym_z,
-                (varying double)sigma_j, (uniform double)sigmas[m]);
+                pos_x[m], pos_y[m], pos_z[m],
+                sym_x, sym_y, sym_z,
+                sigma_j, sigmas[m]);
             max_bc = max(max_bc, bc);
         }
         varying double contribution = max_bc;

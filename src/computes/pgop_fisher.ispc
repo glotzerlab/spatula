@@ -23,7 +23,7 @@ export uniform float compute_pgop_fisher_fast_ispc(
         for (uniform int32 m = 0; m < num_positions; ++m) {
             varying float proj = dot_product(
                 sym_x, sym_y, sym_z,
-                (varying float)pos_x[m], (varying float)pos_y[m], (varying float)pos_z[m]);
+                pos_x[m], pos_y[m], pos_z[m]);
             max_proj = max(max_proj, proj);
         }
 
@@ -54,9 +54,9 @@ export uniform float compute_pgop_fisher_ispc(
         varying double max_bc = 0.0;
         for (uniform int32 m = 0; m < num_positions; ++m) {
             varying double bc = compute_Bhattacharyya_coefficient_fisher_normalized(
-                (varying double)pos_x[m], (varying double)pos_y[m], (varying double)pos_z[m],
-                (varying double)sym_x, (varying double)sym_y, (varying double)sym_z,
-                (varying double)kappa_j, (uniform double)kappas[m]);
+                pos_x[m], pos_y[m], pos_z[m],
+                sym_x, sym_y, sym_z,
+                kappa_j, kappas[m]);
             max_bc = max(max_bc, bc);
         }
         varying double contribution = max_bc;
