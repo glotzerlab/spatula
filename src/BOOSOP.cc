@@ -160,7 +160,9 @@ double BOOSOP<distribution_type>::compute_BOOSOP(LocalNeighborhood& neighborhood
                                                  util::QlmBuf& qlm_buf) const
 {
     const auto bond_order = BondOrder<distribution_type>(m_distribution,
-                                                         neighborhood.rotated_positions,
+                                                         neighborhood.rotated_pos_x,
+                                                         neighborhood.rotated_pos_y,
+                                                         neighborhood.rotated_pos_z,
                                                          neighborhood.weights);
     // compute spherical harmonic values in-place (qlm_buf.qlms)
     qlm_eval.eval<distribution_type>(bond_order, qlm_buf.qlms);

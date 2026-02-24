@@ -18,18 +18,27 @@ on:
 
 jobs:
   run_tests:
-    name: Unit test [py${{ matrix.python }} ${{ matrix.os }}]
+    name: Unit test [py${{ matrix.python }} ${{ matrix.os }} ${{ matrix.ispc && 'ispc' || 'no-ispc' }}]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        ispc: [true]
         os: [ubuntu-24.04]
         python: ['3.12', '3.13', '3.14']
         include:
           - os: 'macos-15'
             python: '3.14'
+            ispc: true
           - os: 'windows-2025'
             python: '3.14'
+            ispc: false # Setting up ISPC on windows is nontrivial
+          - os: 'ubuntu-24.04'
+            python: '3.12'
+            ispc: false
+          - os: 'ubuntu-24.04'
+            python: '3.14'
+            ispc: false
 
     steps:
       - name: Checkout Code
@@ -40,11 +49,19 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python }}
+      - name: Install ISPC (Ubuntu)
+        if: matrix.ispc && runner.os == 'Linux'
+        run: sudo apt-get install -y ispc
+      - name: Install ISPC (macOS)
+        if: matrix.ispc && runner.os == 'macOS'
+        run: brew install ispc
       - name: Set up Python environment
         uses: glotzerlab/workflows/setup-uv@204dc7c0f82720090703712694b7cab761aacaa0 # 0.13.0
         with:
           lockfile: ".github/workflows/requirements-test.txt"
       - name: Build and Install
+        env:
+          CMAKE_ARGS: ${{ !matrix.ispc && '-DENABLE_ISPC=OFF' || '' }}
         run: |
           uv pip install . --no-build-isolation --no-deps --system -v
       - name: Run Tests (Unix/macOS)
