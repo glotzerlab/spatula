@@ -5,8 +5,9 @@
 
 #include "math.ispc"
 
-// Define INFINITY for ISPC
-#define INFINITY 1e30f
+#ifndef FLT_MAX
+#define FLT_MAX 3.40282e+38f
+#endif
 
 // Fast version: assumes constant sigmas.
 export uniform float compute_pgop_gaussian_fast_ispc(uniform const float pos_x[],
@@ -21,7 +22,7 @@ export uniform float compute_pgop_gaussian_fast_ispc(uniform const float pos_x[]
     uniform double overlap = 0.0;
 
     PGOP_OUTER_LOOP(
-        varying float min_dist_sq = INFINITY; for (uniform int32 m = 0; m < num_positions; ++m) {
+        varying float min_dist_sq = FLT_MAX; for (uniform int32 m = 0; m < num_positions; ++m) {
             varying float dist_sq
                 = distance_squared(sym_x, sym_y, sym_z, pos_x[m], pos_y[m], pos_z[m]);
             min_dist_sq = min(min_dist_sq, dist_sq);
