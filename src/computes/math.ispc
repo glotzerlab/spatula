@@ -47,46 +47,46 @@ static inline double fast_sinh(double x)
 }
 
 // Compute the Bhattacharyya coefficient for two Gaussian distributions.
-static inline double compute_Bhattacharyya_coefficient_gaussian(double pos_x,
-                                                                double pos_y,
-                                                                double pos_z,
-                                                                double sym_x,
-                                                                double sym_y,
-                                                                double sym_z,
-                                                                double sigma,
-                                                                double sigma_symmetrized)
+static inline double compute_Bhattacharyya_coefficient_gaussian(float pos_x,
+                                                                float pos_y,
+                                                                float pos_z,
+                                                                float sym_x,
+                                                                float sym_y,
+                                                                float sym_z,
+                                                                float sigma,
+                                                                float sigma_symmetrized)
 {
-    double dx = sym_x - pos_x;
-    double dy = sym_y - pos_y;
-    double dz = sym_z - pos_z;
-    double r_sq = dx * dx + dy * dy + dz * dz;
+    float dx = sym_x - pos_x;
+    float dy = sym_y - pos_y;
+    float dz = sym_z - pos_z;
+    float r_sq = dx * dx + dy * dy + dz * dz;
 
-    double sigma_sq = sigma * sigma;
-    double sigma_sym_sq = sigma_symmetrized * sigma_symmetrized;
-    double sigmas_squared_summed = sigma_sq + sigma_sym_sq;
+    float sigma_sq = sigma * sigma;
+    float sigma_sym_sq = sigma_symmetrized * sigma_symmetrized;
+    float sigmas_squared_summed = sigma_sq + sigma_sym_sq;
 
     double lead_term = (2.0 * sigma * sigma_symmetrized) / sigmas_squared_summed;
     return lead_term * sqrt(lead_term) * fast_exp_approx(-r_sq / (4.0 * sigmas_squared_summed));
 }
 
 // Compute the Bhattacharyya coefficient for two Fisher (von Mises-Fisher) distributions.
-static inline double compute_Bhattacharyya_coefficient_fisher_normalized(double pos_x,
-                                                                         double pos_y,
-                                                                         double pos_z,
-                                                                         double sym_x,
-                                                                         double sym_y,
-                                                                         double sym_z,
-                                                                         double kappa,
-                                                                         double kappa_symmetrized)
+static inline float compute_Bhattacharyya_coefficient_fisher_normalized(float pos_x,
+                                                                         float pos_y,
+                                                                         float pos_z,
+                                                                         float sym_x,
+                                                                         float sym_y,
+                                                                         float sym_z,
+                                                                         float kappa,
+                                                                         float kappa_symmetrized)
 {
-    double k1_sq = kappa * kappa;
-    double k2_sq = kappa_symmetrized * kappa_symmetrized;
-    double k1k2 = kappa * kappa_symmetrized;
+    float k1_sq = kappa * kappa;
+    float k2_sq = kappa_symmetrized * kappa_symmetrized;
+    float k1k2 = kappa * kappa_symmetrized;
 
-    double proj = pos_x * sym_x + pos_y * sym_y + pos_z * sym_z;
+    float proj = pos_x * sym_x + pos_y * sym_y + pos_z * sym_z;
 
-    double inner_sqrt = k1_sq + k2_sq + 2.0 * k1k2 * proj;
-    double sqrt_inner = sqrt(inner_sqrt);
+    float inner_sqrt = k1_sq + k2_sq + 2.0 * k1k2 * proj;
+    float sqrt_inner = sqrt(inner_sqrt);
 
     double sinh_kappa = fast_sinh(kappa);
     double sinh_kappa_sym = fast_sinh(kappa_symmetrized);
