@@ -6,6 +6,7 @@
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86) \
     || defined(__aarch64__) || defined(_M_ARM64)
 #include "../locality.h"
+#include <cstdint>
 #include <span>
 
 // Include the ISPC-generated headers
@@ -20,8 +21,8 @@ inline float compute_pgop_gaussian_fast_ispc_wrapper(LocalNeighborhood& neighbor
 {
     // NOTE: This function assumes all sigmas are constant (as with other fast variants)
     const float sigma = neighborhood.sigmas[0];
-    const int32_t num_positions = static_cast<int32_t>(neighborhood.rotated_pos_x.size());
-    const int32_t num_matrices = static_cast<int32_t>(R_ij.size() / 9);
+    const std::int32_t num_positions = static_cast<std::int32_t>(neighborhood.rotated_pos_x.size());
+    const std::int32_t num_matrices = static_cast<std::int32_t>(R_ij.size() / 9);
 
     return ispc::compute_pgop_gaussian_fast_ispc(neighborhood.rotated_pos_x.data(),
                                                  neighborhood.rotated_pos_y.data(),
@@ -37,8 +38,8 @@ inline float compute_pgop_fisher_fast_ispc_wrapper(LocalNeighborhood& neighborho
                                                    const std::span<const float> R_ij)
 {
     const float kappa = neighborhood.sigmas[0];
-    const int32_t num_positions = static_cast<int32_t>(neighborhood.rotated_pos_x.size());
-    const int32_t num_matrices = static_cast<int32_t>(R_ij.size() / 9);
+    const std::int32_t num_positions = static_cast<std::int32_t>(neighborhood.rotated_pos_x.size());
+    const std::int32_t num_matrices = static_cast<std::int32_t>(R_ij.size() / 9);
 
     return ispc::compute_pgop_fisher_fast_ispc(neighborhood.rotated_pos_x.data(),
                                                neighborhood.rotated_pos_y.data(),
@@ -53,8 +54,8 @@ inline float compute_pgop_fisher_fast_ispc_wrapper(LocalNeighborhood& neighborho
 inline float compute_pgop_gaussian_ispc_wrapper(LocalNeighborhood& neighborhood,
                                                 const std::span<const float> R_ij)
 {
-    const int32_t num_positions = static_cast<int32_t>(neighborhood.rotated_pos_x.size());
-    const int32_t num_matrices = static_cast<int32_t>(R_ij.size() / 9);
+    const std::int32_t num_positions = static_cast<std::int32_t>(neighborhood.rotated_pos_x.size());
+    const std::int32_t num_matrices = static_cast<std::int32_t>(R_ij.size() / 9);
 
     return ispc::compute_pgop_gaussian_ispc(neighborhood.rotated_pos_x.data(),
                                             neighborhood.rotated_pos_y.data(),
@@ -69,8 +70,8 @@ inline float compute_pgop_gaussian_ispc_wrapper(LocalNeighborhood& neighborhood,
 inline float compute_pgop_fisher_ispc_wrapper(LocalNeighborhood& neighborhood,
                                               const std::span<const float> R_ij)
 {
-    const int32_t num_positions = static_cast<int32_t>(neighborhood.rotated_pos_x.size());
-    const int32_t num_matrices = static_cast<int32_t>(R_ij.size() / 9);
+    const std::int32_t num_positions = static_cast<std::int32_t>(neighborhood.rotated_pos_x.size());
+    const std::int32_t num_matrices = static_cast<std::int32_t>(R_ij.size() / 9);
 
     return ispc::compute_pgop_fisher_ispc(neighborhood.rotated_pos_x.data(),
                                           neighborhood.rotated_pos_y.data(),
