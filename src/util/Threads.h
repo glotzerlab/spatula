@@ -4,6 +4,7 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 
 #include "BS_thread_pool.hpp"
 
@@ -17,6 +18,18 @@ namespace spatula { namespace util {
  * The singleton defaults to using every available thread.
  */
 class ThreadPool {
+    private:
+    // Helper to pin a thread to a specific CPU core for better cache locality
+    static void pin_thread(std::size_t thread_idx)
+    {
+        auto process_affinity = BS::get_os_process_affinity();
+        if (process_affinity.has_value() && thread_idx < process_affinity->size()) {
+            std::vector<bool> thread_affinity(process_affinity->size(), false);
+            thread_affinity[thread_idx] = true;
+            BS::this_thread::set_os_thread_affinity(thread_affinity);
+        }
+    }
+
     public:
     /// Get the ThreadPool singletom
     static ThreadPool& get()
@@ -40,7 +53,7 @@ class ThreadPool {
     /// Set the number of threads to run spatula on.
     void set_threads(unsigned int num_threads)
     {
-        m_pool.reset(num_threads);
+        m_pool.reset(num_threads, &ThreadPool::pin_thread);
     }
 
     /// Get the current number of threads in the thread pool.
@@ -71,7 +84,7 @@ class ThreadPool {
     void operator=(ThreadPool const&) = delete;
 
     private:
-    ThreadPool() : m_out(), m_pool() { }
+    ThreadPool() : m_out(), m_pool(0, &ThreadPool::pin_thread) { }
     // Must be before m_pool to ensure construction before the thread pool to
     // avoid crashes.
     BS::synced_stream m_out;

@@ -22,8 +22,10 @@ class LocalNeighborhood {
                       std::span<const float> weights_,
                       std::span<const float> sigmas_);
     LocalNeighborhood(std::vector<data::Vec3>&& positions_, std::span<const float> weights_);
+    LocalNeighborhood(size_t max_neighbors); // Pre-allocate for reuse
 
     void rotate(const data::Vec3& v);
+    void reset();
 
     bool constantSigmas() const;
 
@@ -36,6 +38,7 @@ class LocalNeighborhood {
 
     private:
     bool m_constant_sigmas = false;
+    friend class Neighborhoods;
 };
 
 inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_,
@@ -91,9 +94,27 @@ inline LocalNeighborhood::LocalNeighborhood(std::vector<data::Vec3>&& positions_
     m_constant_sigmas = false;
 }
 
+inline LocalNeighborhood::LocalNeighborhood(size_t max_neighbors)
+    : weights {}, sigmas {}, m_constant_sigmas {false}
+{
+    pos_x.reserve(max_neighbors);
+    pos_y.reserve(max_neighbors);
+    pos_z.reserve(max_neighbors);
+    rotated_pos_x.reserve(max_neighbors);
+    rotated_pos_y.reserve(max_neighbors);
+    rotated_pos_z.reserve(max_neighbors);
+}
+
 inline bool LocalNeighborhood::constantSigmas() const
 {
     return m_constant_sigmas;
+}
+
+inline void LocalNeighborhood::reset()
+{
+    std::copy(pos_x.begin(), pos_x.end(), rotated_pos_x.begin());
+    std::copy(pos_y.begin(), pos_y.end(), rotated_pos_y.begin());
+    std::copy(pos_z.begin(), pos_z.end(), rotated_pos_z.begin());
 }
 
 inline void LocalNeighborhood::rotate(const data::Vec3& v)
@@ -119,6 +140,8 @@ class Neighborhoods {
 
     // Returns LocalNeighborhood with position type matching distance type
     LocalNeighborhood getNeighborhood(size_t i) const;
+    void fillNeighborhood(size_t i, LocalNeighborhood& neighborhood) const;
+    int getMaxNeighborCount() const;
     std::span<const float> getWeights(size_t i) const;
     std::span<const float> getSigmas(size_t i) const;
     int getNeighborCount(size_t i) const;
@@ -193,6 +216,61 @@ inline std::span<const float> Neighborhoods::getSigmas(size_t i) const
 inline int Neighborhoods::getNeighborCount(size_t i) const
 {
     return m_neighbor_counts[i];
+}
+
+inline void Neighborhoods::fillNeighborhood(size_t i, LocalNeighborhood& neighborhood) const
+{
+    const size_t start {m_neighbor_offsets[i]}, end {m_neighbor_offsets[i + 1]};
+    const size_t num_neighbors = end - start;
+
+    neighborhood.pos_x.resize(num_neighbors);
+    neighborhood.pos_y.resize(num_neighbors);
+    neighborhood.pos_z.resize(num_neighbors);
+    neighborhood.rotated_pos_x.resize(num_neighbors);
+    neighborhood.rotated_pos_y.resize(num_neighbors);
+    neighborhood.rotated_pos_z.resize(num_neighbors);
+
+    if (m_normalize_distances) {
+        auto normalized
+            = util::normalize_distances(m_distances, std::make_pair(3 * start, 3 * end));
+        for (size_t j = 0; j < num_neighbors; ++j) {
+            neighborhood.pos_x[j] = normalized[j].x;
+            neighborhood.pos_y[j] = normalized[j].y;
+            neighborhood.pos_z[j] = normalized[j].z;
+            neighborhood.rotated_pos_x[j] = normalized[j].x;
+            neighborhood.rotated_pos_y[j] = normalized[j].y;
+            neighborhood.rotated_pos_z[j] = normalized[j].z;
+        }
+    } else {
+        for (size_t j = 0; j < num_neighbors; ++j) {
+            const float x = m_distances[3 * (start + j)];
+            const float y = m_distances[3 * (start + j) + 1];
+            const float z = m_distances[3 * (start + j) + 2];
+            neighborhood.pos_x[j] = x;
+            neighborhood.pos_y[j] = y;
+            neighborhood.pos_z[j] = z;
+            neighborhood.rotated_pos_x[j] = x;
+            neighborhood.rotated_pos_y[j] = y;
+            neighborhood.rotated_pos_z[j] = z;
+        }
+    }
+
+    neighborhood.weights = std::span(m_weights + start, num_neighbors);
+    if (m_sigmas) {
+        neighborhood.sigmas = std::span(m_sigmas + start, num_neighbors);
+        neighborhood.m_constant_sigmas = std::adjacent_find(neighborhood.sigmas.begin(),
+                                                            neighborhood.sigmas.end(),
+                                                            std::not_equal_to<float>())
+                                         == neighborhood.sigmas.end();
+    } else {
+        neighborhood.sigmas = std::span<const float>();
+        neighborhood.m_constant_sigmas = false;
+    }
+}
+
+inline int Neighborhoods::getMaxNeighborCount() const
+{
+    return *std::max_element(m_neighbor_counts, m_neighbor_counts + m_N);
 }
 
 } // namespace spatula
