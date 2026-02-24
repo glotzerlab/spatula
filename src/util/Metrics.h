@@ -38,32 +38,32 @@ inline double covariance(const std::vector<std::complex<double>>& f,
     return mixed_covar / std::sqrt(g_covar * f_cov);
 }
 
-inline double compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
-                                                         const data::Vec3& symmetrized_position,
-                                                         double sigma,
-                                                         double sigma_symmetrized)
+inline float compute_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
+                                                        const data::Vec3& symmetrized_position,
+                                                        float sigma,
+                                                        float sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
     auto r_pos = symmetrized_position - position;
-    auto sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
+    float sigmas_squared_summed = sigma * sigma + sigma_symmetrized * sigma_symmetrized;
     // 2. compute the gaussian overlap between the two points. Bhattacharyya coefficient
     //    is used.
-    double lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
+    float lead_term = (2 * sigma * sigma_symmetrized / sigmas_squared_summed);
     return lead_term * std::sqrt(lead_term)
            * std::exp(-r_pos.dot(r_pos) / (4 * sigmas_squared_summed));
 }
-inline double
+inline float
 compute_log_m_Bhattacharyya_coefficient_gaussian(const data::Vec3& position,
                                                  const data::Vec3& symmetrized_position,
-                                                 double sigma,
-                                                 double sigma_symmetrized)
+                                                 float sigma,
+                                                 float sigma_symmetrized)
 {
     // 1. compute the distance between the two vectors (symmetrized_position
     //    and positions[m])
     auto r_pos = symmetrized_position - position;
     // Reduced equation when sigma == sigma_symmetrized
-    return r_pos.dot(r_pos) / (8.0 * (sigma * sigma_symmetrized));
+    return r_pos.dot(r_pos) / (8.0f * (sigma * sigma_symmetrized));
 }
 
 inline double

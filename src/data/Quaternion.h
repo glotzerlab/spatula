@@ -22,24 +22,24 @@ namespace spatula { namespace data {
  * The unit quaternion for the code's purposes is (1, 0, 0, 0).
  */
 struct Quaternion {
-    double w;
-    double x;
-    double y;
-    double z;
+    float w;
+    float x;
+    float y;
+    float z;
 
-    Quaternion() : w(1.0), x(0.0), y(0.0), z(0.0) { }
-    Quaternion(double w_, double x_, double y_, double z_) : w(w_), x(x_), y(y_), z(z_) { }
-    Quaternion(Vec3 axis, double angle)
+    Quaternion() : w(1.0f), x(0.0f), y(0.0f), z(0.0f) { }
+    Quaternion(float w_, float x_, float y_, float z_) : w(w_), x(x_), y(y_), z(z_) { }
+    Quaternion(Vec3 axis, float angle)
     {
         axis.normalize();
-        const double half_angle = 0.5 * angle;
+        const float half_angle = 0.5f * angle;
         w = std::cos(half_angle);
-        const double sin_half_angle = std::sin(half_angle);
+        const float sin_half_angle = std::sin(half_angle);
         x = sin_half_angle * axis.x;
         y = sin_half_angle * axis.y;
         z = sin_half_angle * axis.z;
     }
-    Quaternion(Vec3 v) : Quaternion(v, v.norm()) { }
+    Quaternion(Vec3 v) : Quaternion(v, static_cast<float>(v.norm())) { }
 
     /// Return the conjugate of the quaternion (w, -x, -y, -z)
     Quaternion conjugate() const
@@ -47,18 +47,18 @@ struct Quaternion {
         return Quaternion(w, -x, -y, -z);
     }
     /// Return the norm of the quaterion
-    double norm() const
+    float norm() const
     {
         return std::sqrt(w * w + x * x + y * y + z * z);
     }
     /// Normalize the quaternion to a unit quaternion
     void normalize()
     {
-        const double n = norm();
+        const float n = norm();
         if (n == 0) {
             return;
         }
-        const double inv_norm = 1 / n;
+        const float inv_norm = 1.0f / n;
         w *= inv_norm;
         x *= inv_norm;
         y *= inv_norm;
@@ -68,30 +68,30 @@ struct Quaternion {
     RotationMatrix to_rotation_matrix() const
     {
         // Necessary if not unit quaternion. Otherwise it is just 2 / 1 = 2.
-        const double denominator = w * w + x * x + y * y + z * z;
+        const float denominator = w * w + x * x + y * y + z * z;
         if (denominator == 0) {
-            return RotationMatrix {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+            return RotationMatrix {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
         }
-        const double s = 2 / denominator;
-        const double xs {x * s}, ys {y * s}, zs {z * s};
-        const double wx {w * xs}, wy {w * ys}, wz {w * zs}, xx {x * xs}, xy {x * ys}, xz {x * zs},
+        const float s = 2.0f / denominator;
+        const float xs {x * s}, ys {y * s}, zs {z * s};
+        const float wx {w * xs}, wy {w * ys}, wz {w * zs}, xx {x * xs}, xy {x * ys}, xz {x * zs},
             yy {y * ys}, yz {y * zs}, zz {z * zs};
-        return RotationMatrix {1 - yy - zz,
+        return RotationMatrix {1.0f - yy - zz,
                                xy - wz,
                                xz + wy,
                                xy + wz,
-                               1 - xx - zz,
+                               1.0f - xx - zz,
                                yz - wx,
                                xz - wy,
                                yz + wx,
-                               1 - xx - yy};
+                               1.0f - xx - yy};
     }
     /// Convert quaternion to its axis angle representation
-    std::pair<Vec3, double> to_axis_angle() const
+    std::pair<Vec3, float> to_axis_angle() const
     {
-        const double half_angle = std::acos(w);
-        const double sin_qw = half_angle != 0 ? 1 / std::sin(half_angle) : 0;
-        return std::make_pair<Vec3, double>({x * sin_qw, y * sin_qw, z * sin_qw}, 2 * half_angle);
+        const float half_angle = std::acos(w);
+        const float sin_qw = half_angle != 0 ? 1.0f / std::sin(half_angle) : 0;
+        return std::make_pair<Vec3, float>({x * sin_qw, y * sin_qw, z * sin_qw}, 2.0f * half_angle);
     }
     /**
      * @brief Convert quaternion to the 3 vector representation

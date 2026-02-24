@@ -22,7 +22,7 @@ using vec3_iter = decltype(std::declval<std::vector<Vec3>>().begin());
 using cvec3_iter = decltype(std::declval<const std::vector<Vec3>>().begin());
 
 /// Compute and return the angle (in radians) between two vectors in 3D.
-inline double fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
+inline float fast_angle_eucledian(const Vec3& ref_x, const Vec3& x)
 {
     return std::acos(ref_x.dot(x));
 }
@@ -38,8 +38,6 @@ inline void single_rotate(const Vec3& x, Vec3& x_prime, const RotationMatrix& R)
 /**
  * @brief Rotate an interator of points via the rotation matrix R.
  * The points rotated are given by @c (auto it = points_begin; it < points_end; ++it).
- *
- * This method is templated to enable more easy refactoring of container types in PGOP.cc.
  *
  * @tparam IntputIterator An input iterator (or derived iterator concept).
  * @param points_begin constant iterator to the beginning of points to rotate.
@@ -72,8 +70,9 @@ inline RotationMatrix to_rotation_matrix(const Vec3& v)
         return RotationMatrix {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
     }
     const auto axis = v / angle;
-    const double c {std::cos(angle)}, s {std::sin(angle)};
-    const double C = 1 - c;
+    const float c {static_cast<float>(std::cos(angle))};
+    const float s {static_cast<float>(std::sin(angle))};
+    const float C = 1.0f - c;
     const auto sv = axis * s;
     return RotationMatrix {
         C * axis.x * axis.x + c,
@@ -92,11 +91,12 @@ inline RotationMatrix to_rotation_matrix(const Vec3& v)
  * @brief Returns a vector of Vec3 of normalized distances. Each point in distances is normalized
  * and converted to a Vec3
  *
- * @param distances A Raw pointer to an array of doubles interpreted as Vec3.
+ * @tparam T The floating point type (float or double)
+ * @param distances A Raw pointer to an array of floats interpreted as Vec3.
  * @returns a vector of Vec3 that is the same size as distances with each vector in the same
  * direction but with unit magnitude.
  */
-inline std::vector<Vec3> normalize_distances(const double* distances,
+inline std::vector<Vec3> normalize_distances(const float* distances,
                                              std::pair<size_t, size_t> slice)
 {
     auto normalized_distances = std::vector<Vec3>();
@@ -104,8 +104,8 @@ inline std::vector<Vec3> normalize_distances(const double* distances,
     // In C++ 23 used strided view with a transform.
     for (size_t i = slice.first; i < slice.second; i += 3) {
         const auto point = Vec3(distances[i], distances[i + 1], distances[i + 2]);
-        const double norm = std::sqrt(point.dot(point));
-        if (norm == 0) {
+        const float norm = std::sqrt(point.dot(point));
+        if (norm == 0.0f) {
             normalized_distances.emplace_back(point);
         } else {
             normalized_distances.emplace_back(point / norm);
@@ -146,4 +146,5 @@ inline void symmetrize_qlm(const std::vector<std::complex<double>>& qlms,
         qlm_i += max_m;
     }
 }
+
 }} // namespace spatula::util

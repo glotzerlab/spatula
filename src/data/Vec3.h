@@ -13,36 +13,36 @@ namespace spatula { namespace data {
  */
 struct Vec3 {
     /// x coordinate
-    double x;
+    float x;
     /// y coordinate
-    double y;
+    float y;
     /// z coordinate
-    double z;
+    float z;
 
     /**
      * @brief Construct a Vec3 from given Cartesian coordinates.
      */
-    Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
+    Vec3(float x_, float y_, float z_) : x(x_), y(y_), z(z_) { }
 
     /**
      * @brief Construct a Vec3 from a pointer to an array of at least length 3.
      */
-    Vec3(const double* point) : x(point[0]), y(point[1]), z(point[2]) { }
+    explicit Vec3(const float* point) : x(point[0]), y(point[1]), z(point[2]) { }
 
     /// Construct a point at the origin.
-    Vec3() : x(0.0), y(0.0), z(0.0) { }
+    Vec3() : x(0.0f), y(0.0f), z(0.0f) { }
 
     /**
-     * @brief Compute the dot product of a dot b.
+     * @brief Compute dot product of a dot b.
      *
-     * @param b the point to compute the dot product of.
+     * @param b point to compute dot product of.
      */
-    inline double dot(const Vec3& b) const
+    inline float dot(const Vec3& b) const
     {
         return x * b.x + y * b.y + z * b.z;
     }
 
-    inline double norm() const
+    inline float norm() const
     {
         return std::sqrt(x * x + y * y + z * z);
     }
@@ -50,10 +50,10 @@ struct Vec3 {
     inline void normalize()
     {
         const auto n = norm();
-        if (n == 0) {
+        if (n == 0.0f) {
             return;
         }
-        const double inv_norm = 1 / n;
+        const float inv_norm = 1.0f / n;
         x *= inv_norm;
         y *= inv_norm;
         z *= inv_norm;
@@ -64,7 +64,7 @@ struct Vec3 {
         return Vec3(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
     }
 
-    inline double& operator[](const size_t i)
+    inline float& operator[](const size_t i)
     {
         if (i == 0) {
             return x;
@@ -75,7 +75,7 @@ struct Vec3 {
         return z;
     }
 
-    inline const double& operator[](size_t i) const
+    inline const float& operator[](size_t i) const
     {
         if (i == 0) {
             return x;
@@ -111,22 +111,22 @@ template<typename number_type> inline Vec3 operator/(const Vec3& a, const number
     return Vec3(a.x / b, a.y / b, a.z / b);
 }
 
-template<> inline Vec3 operator+(const Vec3& a, const Vec3& b)
+inline Vec3 operator+(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-template<> inline Vec3 operator-(const Vec3& a, const Vec3& b)
+inline Vec3 operator-(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-template<> inline Vec3 operator*(const Vec3& a, const Vec3& b)
+inline Vec3 operator*(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-template<> inline Vec3 operator/(const Vec3& a, const Vec3& b)
+inline Vec3 operator/(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x / b.x, a.y / b.y, a.z / b.z);
 }
@@ -167,7 +167,7 @@ template<typename number_type> inline Vec3& operator/=(Vec3& a, const number_typ
     return a;
 }
 
-template<> inline Vec3& operator+=(Vec3& a, const Vec3& b)
+inline Vec3& operator+=(Vec3& a, const Vec3& b)
 {
     a.x += b.x;
     a.y += b.y;
@@ -175,7 +175,7 @@ template<> inline Vec3& operator+=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> inline Vec3& operator-=(Vec3& a, const Vec3& b)
+inline Vec3& operator-=(Vec3& a, const Vec3& b)
 {
     a.x -= b.x;
     a.y -= b.y;
@@ -183,7 +183,7 @@ template<> inline Vec3& operator-=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> inline Vec3& operator*=(Vec3& a, const Vec3& b)
+inline Vec3& operator*=(Vec3& a, const Vec3& b)
 {
     a.x *= b.x;
     a.y *= b.y;
@@ -191,7 +191,7 @@ template<> inline Vec3& operator*=(Vec3& a, const Vec3& b)
     return a;
 }
 
-template<> inline Vec3& operator/=(Vec3& a, const Vec3& b)
+inline Vec3& operator/=(Vec3& a, const Vec3& b)
 {
     a.x /= b.x;
     a.y /= b.y;

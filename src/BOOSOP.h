@@ -46,16 +46,16 @@ template<typename distribution_type> class BOOSOP {
      *
      */
     std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-    compute(const double* distances,
-            const double* weights,
+    compute(const float* distances,
+            const float* weights,
             const int* num_neighbors,
             size_t N_particles,
             const unsigned int m,
             const std::complex<double>* ylms,
             size_t ylms_shape_0,
-            const double* quad_positions,
+            const float* quad_positions,
             size_t quad_positions_shape_0,
-            const double* quad_weights) const;
+            const float* quad_weights) const;
 
     /**
      * @brief Compute BOOSOP at given rotations for each point.
@@ -77,17 +77,17 @@ template<typename distribution_type> class BOOSOP {
      * @param quad_weights The weights associated with the Gauss-Legendre quadrature points.
      *
      */
-    std::vector<double> refine(const double* distances,
-                               const double* rotations,
-                               const double* weights,
+    std::vector<double> refine(const float* distances,
+                               const float* rotations,
+                               const float* weights,
                                const int* num_neighbors,
                                size_t N_particles,
                                const unsigned int m,
                                const std::complex<double>* ylms,
                                size_t ylms_shape_0,
-                               const double* quad_positions,
+                               const float* quad_positions,
                                size_t quad_positions_shape_0,
-                               const double* quad_weights) const;
+                               const float* quad_weights) const;
 
     private:
     /**

@@ -22,10 +22,10 @@ PGOP::PGOP(const std::vector<const double*> R_ij_data,
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
-PGOP::compute(const double* distances,
-              const double* weights,
+PGOP::compute(const float* distances,
+              const float* weights,
               const int* num_neighbors,
-              const double* sigmas,
+              const float* sigmas,
               const size_t N_particles_in_neighbors) const
 {
     const auto neighborhoods = Neighborhoods(N_particles_in_neighbors,
