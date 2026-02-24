@@ -92,7 +92,7 @@ void export_spatula(nb::module_& m)
                     op_owner);
 
                 // Convert rotation_values to ndarray
-                double* rotation_data = new double[rotation_values.size() * 4];
+                float* rotation_data = new float[rotation_values.size() * 4];
                 for (size_t i = 0; i < rotation_values.size(); ++i) {
                     rotation_data[i * 4 + 0] = rotation_values[i].w;
                     rotation_data[i * 4 + 1] = rotation_values[i].x;
@@ -102,10 +102,10 @@ void export_spatula(nb::module_& m)
 
                 // Create capsule with deleter to own the memory
                 nb::capsule rotation_owner(rotation_data, [](void* p) noexcept {
-                    delete[] static_cast<double*>(p);
+                    delete[] static_cast<float*>(p);
                 });
 
-                nb::ndarray<nb::numpy, double, nb::shape<-1, -1, 4>> py_rotations(
+                nb::ndarray<nb::numpy, float, nb::shape<-1, -1, 4>> py_rotations(
                     rotation_data,
                     {num_query_points, num_symmetries, 4},
                     rotation_owner);
