@@ -47,10 +47,14 @@ static inline double fast_sinh(double x)
 }
 
 // Compute the Bhattacharyya coefficient for two Gaussian distributions.
-static inline double compute_Bhattacharyya_coefficient_gaussian(
-    double pos_x, double pos_y, double pos_z,
-    double sym_x, double sym_y, double sym_z,
-    double sigma, double sigma_symmetrized)
+static inline double compute_Bhattacharyya_coefficient_gaussian(double pos_x,
+                                                                double pos_y,
+                                                                double pos_z,
+                                                                double sym_x,
+                                                                double sym_y,
+                                                                double sym_z,
+                                                                double sigma,
+                                                                double sigma_symmetrized)
 {
     double dx = sym_x - pos_x;
     double dy = sym_y - pos_y;
@@ -66,10 +70,14 @@ static inline double compute_Bhattacharyya_coefficient_gaussian(
 }
 
 // Compute the Bhattacharyya coefficient for two Fisher (von Mises-Fisher) distributions.
-static inline double compute_Bhattacharyya_coefficient_fisher_normalized(
-    double pos_x, double pos_y, double pos_z,
-    double sym_x, double sym_y, double sym_z,
-    double kappa, double kappa_symmetrized)
+static inline double compute_Bhattacharyya_coefficient_fisher_normalized(double pos_x,
+                                                                         double pos_y,
+                                                                         double pos_z,
+                                                                         double sym_x,
+                                                                         double sym_y,
+                                                                         double sym_z,
+                                                                         double kappa,
+                                                                         double kappa_symmetrized)
 {
     double k1_sq = kappa * kappa;
     double k2_sq = kappa_symmetrized * kappa_symmetrized;
@@ -83,16 +91,16 @@ static inline double compute_Bhattacharyya_coefficient_fisher_normalized(
     double sinh_kappa = fast_sinh(kappa);
     double sinh_kappa_sym = fast_sinh(kappa_symmetrized);
 
-    return 2.0 * sqrt(k1k2 / (sinh_kappa * sinh_kappa_sym))
-           * fast_sinh(sqrt_inner / 2.0) / sqrt_inner;
+    return 2.0 * sqrt(k1k2 / (sinh_kappa * sinh_kappa_sym)) * fast_sinh(sqrt_inner / 2.0)
+           / sqrt_inner;
 }
 
-uniform struct RotationMatrix
-{
+uniform struct RotationMatrix {
     uniform float R0, R1, R2, R3, R4, R5, R6, R7, R8;
 };
 
-static inline uniform RotationMatrix load_rotation_matrix(uniform const float R_ij[], uniform int32 matrix_idx)
+static inline uniform RotationMatrix load_rotation_matrix(uniform const float R_ij[],
+                                                          uniform int32 matrix_idx)
 {
     uniform RotationMatrix R;
     uniform int32 base = matrix_idx * 9;
@@ -108,19 +116,25 @@ static inline uniform RotationMatrix load_rotation_matrix(uniform const float R_
     return R;
 }
 
-static inline void apply_rotation(
-    varying float px, varying float py, varying float pz,
-    uniform const RotationMatrix R,
-    varying float& sym_x, varying float& sym_y, varying float& sym_z)
+static inline void apply_rotation(varying float px,
+                                  varying float py,
+                                  varying float pz,
+                                  uniform const RotationMatrix R,
+                                  varying float& sym_x,
+                                  varying float& sym_y,
+                                  varying float& sym_z)
 {
     sym_x = R.R0 * px + R.R1 * py + R.R2 * pz;
     sym_y = R.R3 * px + R.R4 * py + R.R5 * pz;
     sym_z = R.R6 * px + R.R7 * py + R.R8 * pz;
 }
 
-static inline varying float distance_squared(
-    varying float x1, varying float y1, varying float z1,
-    varying float x2, varying float y2, varying float z2)
+static inline varying float distance_squared(varying float x1,
+                                             varying float y1,
+                                             varying float z1,
+                                             varying float x2,
+                                             varying float y2,
+                                             varying float z2)
 {
     varying float dx = x2 - x1;
     varying float dy = y2 - y1;
@@ -128,9 +142,12 @@ static inline varying float distance_squared(
     return dx * dx + dy * dy + dz * dz;
 }
 
-static inline varying float dot_product(
-    varying float x1, varying float y1, varying float z1,
-    varying float x2, varying float y2, varying float z2)
+static inline varying float dot_product(varying float x1,
+                                        varying float y1,
+                                        varying float z1,
+                                        varying float x2,
+                                        varying float y2,
+                                        varying float z2)
 {
     return x1 * x2 + y1 * y2 + z1 * z2;
 }
@@ -139,19 +156,20 @@ static inline varying float dot_product(
 // Usage: PGOP_OUTER_LOOP(inner_computation_block)
 // The inner block must define `varying double contribution`
 // Assumes: R_ij, num_matrices, num_positions, pos_x, pos_y, pos_z, overlap are in scope
-#define PGOP_OUTER_LOOP(INNER_BLOCK) \
-    foreach_tiled (j = 0 ... num_positions) { \
-        varying float px = pos_x[j]; \
-        varying float py = pos_y[j]; \
-        varying float pz = pos_z[j]; \
-        varying double position_total = 0.0; \
-        for (uniform int32 i = 0; i < num_matrices; ++i) { \
+#define PGOP_OUTER_LOOP(INNER_BLOCK)                                  \
+    foreach_tiled(j = 0 ... num_positions)                            \
+    {                                                                 \
+        varying float px = pos_x[j];                                  \
+        varying float py = pos_y[j];                                  \
+        varying float pz = pos_z[j];                                  \
+        varying double position_total = 0.0;                          \
+        for (uniform int32 i = 0; i < num_matrices; ++i) {            \
             uniform RotationMatrix R = load_rotation_matrix(R_ij, i); \
-            varying float sym_x, sym_y, sym_z; \
-            apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z); \
-            INNER_BLOCK \
-            position_total += contribution; \
-        } \
-        overlap += reduce_add(position_total); \
-    } \
+            varying float sym_x, sym_y, sym_z;                        \
+            apply_rotation(px, py, pz, R, sym_x, sym_y, sym_z);       \
+            INNER_BLOCK                                               \
+            position_total += contribution;                           \
+        }                                                             \
+        overlap += reduce_add(position_total);                        \
+    }                                                                 \
     return (uniform float)(overlap / (uniform double)(num_positions * num_matrices));
