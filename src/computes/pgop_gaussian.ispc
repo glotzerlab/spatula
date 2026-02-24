@@ -45,17 +45,17 @@ export uniform float compute_pgop_gaussian_ispc(uniform const float pos_x[],
 
     PGOP_OUTER_LOOP(
         varying float sigma_j = sigmas[j]; varying double max_bc = 0.0;
-            for (uniform int32 m = 0; m < num_positions; ++m) {
-                varying double bc = compute_Bhattacharyya_coefficient_gaussian(pos_x[m],
-                                                                               pos_y[m],
-                                                                               pos_z[m],
-                                                                               sym_x,
-                                                                               sym_y,
-                                                                               sym_z,
-                                                                               sigma_j,
-                                                                               sigmas[m]);
-                max_bc = max(max_bc, bc);
-                    }
+        for (uniform int32 m = 0; m < num_positions; ++m) {
+            varying double bc = compute_Bhattacharyya_coefficient_gaussian(pos_x[m],
+                                                                           pos_y[m],
+                                                                           pos_z[m],
+                                                                           sym_x,
+                                                                           sym_y,
+                                                                           sym_z,
+                                                                           sigma_j,
+                                                                           sigmas[m]);
+            max_bc = max(max_bc, bc);
+        }
         varying double contribution = max_bc;
     )
 }
