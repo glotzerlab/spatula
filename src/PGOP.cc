@@ -45,7 +45,12 @@ PGOP::compute(const float* distances,
     std::vector<double> op_values(N_particles * ops_per_particle);
     std::vector<data::Quaternion> rotation_values(N_particles * ops_per_particle);
 
+    const int max_neighbors = neighborhoods.getMaxNeighborCount();
+
     const auto loop_func = [&](const size_t start_idx, const size_t stop_idx) {
+        // Thread-local buffer to avoid repeated allocations
+        thread_local LocalNeighborhood buffer(max_neighbors);
+
         for (size_t i = start_idx; i < stop_idx; ++i) {
             const size_t current_particle_offset = i * ops_per_particle;
             if (neighborhoods.getNeighborCount(i) == 0) {
@@ -56,8 +61,8 @@ PGOP::compute(const float* distances,
                 }
                 continue;
             }
-            auto neighborhood = neighborhoods.getNeighborhood(i);
-            const auto particle_op_rot = this->compute_particle(neighborhood);
+            neighborhoods.fillNeighborhood(i, buffer);
+            const auto particle_op_rot = this->compute_particle(buffer);
 
             const auto& particle_ops = std::get<0>(particle_op_rot);
             const auto& particle_rots = std::get<1>(particle_op_rot);
@@ -87,21 +92,21 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
     // for (const auto& R_ij : m_Rij) {
     for (size_t group_idx = 0; group_idx < m_Rij.size(); ++group_idx) {
         auto R_ij = m_Rij[group_idx];
-        // make a copy of the neighborhood to avoid modifying the original
-        auto neighborhood = neighborhood_original;
-        const auto result = compute_symmetry(neighborhood, R_ij, group_idx);
+        // Reset neighborhood to original positions before each symmetry group
+        neighborhood_original.reset();
+        const auto result = compute_symmetry(neighborhood_original, R_ij, group_idx);
         spatula.emplace_back(std::get<0>(result));
         const auto quat
             = data::Quaternion(std::get<1>(result), static_cast<float>(std::get<1>(result).norm()));
         rotations.emplace_back(quat);
         if (m_compute_per_operator) {
-            auto neighborhood = neighborhood_original;
-            neighborhood.rotate(std::get<1>(result));
+            neighborhood_original.reset();
+            neighborhood_original.rotate(std::get<1>(result));
             // loop over every operator; each operator is a 3x3 matrix so size 9
             for (size_t i = 0; i < m_group_sizes[group_idx]; i += 9) {
                 // Compute the PGOP value for a single operator in our group
                 const auto particle_operator_op
-                    = compute_pgop(neighborhood, std::span<const float>(R_ij + i, 9));
+                    = compute_pgop(neighborhood_original, std::span<const float>(R_ij + i, 9));
                 spatula.emplace_back(particle_operator_op);
                 rotations.emplace_back(quat);
             }
@@ -157,8 +162,8 @@ void PGOP::execute_func(std::function<void(size_t, size_t)> func, size_t N) cons
         util::ThreadPool::get().serial_compute<void, size_t>(0, N, func);
     } else {
         auto& pool = util::ThreadPool::get().get_pool();
-        pool.push_loop(0, N, func, 2 * pool.get_thread_count());
-        pool.wait_for_tasks();
+        pool.detach_blocks(0, N, func, 2 * pool.get_thread_count());
+        pool.wait();
     }
 }
 

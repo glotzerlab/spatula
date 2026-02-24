@@ -74,6 +74,9 @@ endif (UNIX)
 if (MSVC)
     target_compile_options(_spatula_nb PRIVATE /Wall  /permissive-)
 endif (MSVC)
-target_compile_definitions(_spatula_nb PRIVATE VERSION_INFO=${VERSION_INFO})
+target_compile_definitions(_spatula_nb PRIVATE
+    VERSION_INFO=${VERSION_INFO}
+    BS_THREAD_POOL_NATIVE_EXTENSIONS
+)
 
 install(TARGETS _spatula_nb LIBRARY DESTINATION spatula)
