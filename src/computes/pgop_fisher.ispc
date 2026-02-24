@@ -27,7 +27,7 @@ export uniform float compute_pgop_fisher_fast_ispc(uniform const float pos_x[],
         varying double inner_term
         = (uniform double)kappa * sqrt(2.0 * (1.0 + (varying double)max_proj));
         varying double contribution;
-        if (inner_term > 1e-6) {
+        cif (inner_term > 1e-6) {
             contribution = prefix_term * fast_sinh(inner_term * 0.5) / inner_term;
         } else {
             contribution = prefix_term * 0.5;
