@@ -1,11 +1,12 @@
 # Copyright (c) 2021-2026 The Regents of the University of Michigan
 # Part of spatula, released under the BSD 3-Clause License.
 
-r"""Plot benchmark data comparing PGOP runtime across different symmetry groups.
+"""Plot benchmark data comparing PGOP runtime across different symmetry groups.
 
 Run:
 ```bash
-python benchmarks/group_size_scaling_plots.py --data-file benchmarks/data/group_size_scaling.txt
+python benchmarks/group_size_scaling_plots.py \
+    --data-file=benchmarks/data/group_size_scaling.txt
 ```
 """
 
@@ -187,7 +188,7 @@ if __name__ == "__main__":
     MSM_LINESTYLES = ["--", "-.", ":"]  # dashed, dotdash, dotted
     MSM_COLOR = "#2980B9"
 
-    for i, (msm_name, msm_mean, _) in enumerate(msm_results):
+    for i, (_, msm_mean, _) in enumerate(msm_results):
         linestyle = MSM_LINESTYLES[i % len(MSM_LINESTYLES)]
         ax.axhline(
             y=msm_mean,
@@ -228,6 +229,7 @@ if __name__ == "__main__":
 
     ax.set_xlabel("Group Order")
     ax.set_xscale("linear")
+    ax.set_xlim((0, 50))
     ax.set_ylabel("Particles per second")
     ax.set_yscale("linear")
     ax.set_title(rf"PGOP Performance vs Symmetry Order for {n_particles:,} Particles")
@@ -244,5 +246,6 @@ if __name__ == "__main__":
     results_sorted = sorted(results, key=lambda x: x[1])
     for symmetry, order, arr in results_sorted:
         print(
-            f"  {symmetry} (order={order}): {arr.mean():.1f} +/- {arr.std():.1f} particles/sec"
+            f"  {symmetry} (order={order}): "
+            f"{arr.mean():.1f} +/- {arr.std():.1f} particles/sec"
         )

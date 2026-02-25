@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     SAMPLES = 1
     REPEATS = 10
-    MSM_L = 8
+    MSM_L_VALUES = [6, 8, 12]
 
     with gsd.hoomd.open(args.data_file) as f:
         frame = f[-1]
@@ -132,15 +132,16 @@ if __name__ == "__main__":
     # Collect results
     results = []
 
-    # Benchmark MSM
-    msm_times = timeit.repeat(
-        lambda: compute_msm(MSM_L, (box, points), voronoi),
-        number=SAMPLES,
-        repeat=REPEATS * 50,
-    )
-    msm_times_ms = np.array(msm_times) * 1000  # ms
-    msm_particles_per_sec_arr = N_PARTICLES * 1000 / msm_times_ms
-    results.append(("msm_6", 0, msm_particles_per_sec_arr))  # order=0 for MSM
+    # Benchmark MSM for each L value
+    for l in MSM_L_VALUES:
+        msm_times = timeit.repeat(
+            lambda l=l: compute_msm(l, (box, points), voronoi),
+            number=SAMPLES,
+            repeat=REPEATS * 50,
+        )
+        msm_times_ms = np.array(msm_times) * 1000  # ms
+        msm_particles_per_sec_arr = N_PARTICLES * 1000 / msm_times_ms
+        results.append((f"msm_{l}", 0, msm_particles_per_sec_arr))  # order=0 for MSM
 
     for symmetry in POINT_GROUPS:
         order = get_symmetry_order(symmetry)
@@ -160,7 +161,8 @@ if __name__ == "__main__":
         f.write(f"THREADS={args.threads}\n")
         for method, order, arr in results:
             f.write(
-                f"  {method} (order={order}): {arr.mean():.1f} +/- {arr.std():.1f} particles/sec\n"
+                f"  {method} (order={order}): "
+                f"{arr.mean():.1f} +/- {arr.std():.1f} particles/sec\n"
             )
 
     print(f"Benchmark data written to {args.output}")
