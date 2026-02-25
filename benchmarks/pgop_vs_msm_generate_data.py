@@ -7,7 +7,7 @@ Run:
 
 ```bash
 python benchmarks/pgop_vs_msm_generate_data.py \
-    --data-file path/to/file.gsd --output benchmark_data.txt
+    --data-file path/to/file.gsd --output benchmarks/data/machine_name.txt
 ```
 """
 
@@ -128,6 +128,7 @@ if __name__ == "__main__":
         results.append(("pgop_none", n_threads, pgop_none_arr))
 
     # Write results to output file in parseable format
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     with Path.open(args.output, "w") as f:
         f.write(f"N_PARTICLES={N_PARTICLES}\n")
         f.write(f"N_SAMPLES={SAMPLES}\n")

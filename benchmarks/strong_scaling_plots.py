@@ -6,7 +6,7 @@ r"""Plot strong scaling benchmark data for PGOP vs MSM runtime.
 Run:
 ```bash
 python benchmarks/strong_scaling_plots.py \
-   --data-file1 m1_data.txt --data-file2 anvil_data.txt
+   --data-supercomputer benchmarks/data/anvil.txt --data-local benchmarks/data/m1.txt
 """
 
 # ruff: noqa: D103, B023, N806
@@ -59,12 +59,25 @@ def parse_data_string(data: str) -> tuple[int, list[tuple[str, int, np.ndarray]]
 def parse_data_file(filepath: Path) -> tuple[int, list[tuple[str, int, np.ndarray]]]:
     """Parse a benchmark data file into results format.
 
+    Tries the provided path first, then benchmarks/data/ as a fallback.
+
     Returns:
         N_PARTICLES and list of (method, n_threads, times_array) tuples
 
     """
-    with Path.open(filepath) as f:
-        return parse_data_string(f.read())
+    # Try the provided path first
+    if filepath.exists():
+        with Path.open(filepath) as f:
+            return parse_data_string(f.read())
+
+    # Try benchmarks/data/ as a fallback
+    fallback = Path("benchmarks/data") / filepath.name
+    if fallback.exists():
+        with Path.open(fallback) as f:
+            return parse_data_string(f.read())
+
+    msg = f"Data file not found: {filepath} or {fallback}"
+    raise FileNotFoundError(msg)
 
 
 def plot_subplot(ax, results, n_particles, title: str, show_ideal: bool = True):
@@ -87,7 +100,7 @@ def plot_subplot(ax, results, n_particles, title: str, show_ideal: bool = True):
         "msm": f"MSM$_{L}$",
         "pgop": r"PGOP $\mathrm{O_h}$ (600 mesh)",
         "pgop_60": r"PGOP $\mathrm{O_h}$ (60 mesh)",
-        "pgop_none": r"PGOP $\mathrm{O_h}$ (no SO(3) opt)",
+        "pgop_none": r"PGOP $\mathrm{O_h}$ (no SO(3) optimization)",
     }
 
     all_threads = sorted({r[1] for r in results})
@@ -132,22 +145,22 @@ def plot_subplot(ax, results, n_particles, title: str, show_ideal: bool = True):
                 )
 
     ax.set_xlabel("Threads")
-    ax.set_xscale("log")
+    ax.set_xscale("linear")
     ax.set_yscale("log")
     ax.set_ylim((1e2, 1e6))
-    ax.set_title(title)
+    ax.set_title(title.replace("_", " ").title())
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--data-file1",
+        "--data-supercomputer",
         type=Path,
         required=True,
         help="First benchmark data file",
     )
     parser.add_argument(
-        "--data-file2",
+        "--data-local",
         type=Path,
         required=True,
         help="Second benchmark data file",
@@ -167,18 +180,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("Figure_strongscale_combined_log.pdf"),
+        default=Path("benchmarks/plots/Figure_strongscale_combined_log.pdf"),
         help="Output plot file",
     )
     args = parser.parse_args()
 
     # Parse both data sets
-    n_particles1, results1 = parse_data_file(args.data_file1)
-    n_particles2, results2 = parse_data_file(args.data_file2)
+    n_particles1, results1 = parse_data_file(args.data_supercomputer)
+    n_particles2, results2 = parse_data_file(args.data_local)
 
     # Use provided labels or default to filenames
-    label1 = args.label1 or args.data_file1.stem
-    label2 = args.label2 or args.data_file2.stem
+    label1 = args.label1 or args.data_supercomputer.stem
+    label2 = args.label2 or args.data_local.stem
 
     # Calculate width ratio based on max thread counts
     max_threads1 = max(r[1] for r in results1)
@@ -246,6 +259,7 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.88)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(args.output, dpi=450, bbox_inches="tight")
     print(f"Plot saved to {args.output}")
 
