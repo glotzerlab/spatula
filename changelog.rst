@@ -24,6 +24,7 @@ Change Log
 * Many ``std::vector<std::vector<...>>`` are now vectors of pointers, allowing for copy- and move- free access to python data. Matrix elements are accessed with ``std::span`` and cast to statically-allocated types for performance.
 * ``py::array`` are now replaced with ``std::vector`` or ``type*`` pointers
 * Implied rotation matrix type (``std::vector<double>``) is now ``typedef RotationMatrix = std::array<double, 9>``
+* Use Python stable ABI (``abi3``).
 
 *Removed*
 
