@@ -34,16 +34,8 @@ jobs:
           arch: 'arm64'
 
         python:
-        - version: 'cp310'
-          oldest_numpy: '2.0.0'
-        - version: 'cp311'
-          oldest_numpy: '2.0.0'
         - version: 'cp312'
           oldest_numpy: '2.0.0'
-        - version: 'cp313'
-          oldest_numpy: '2.1.1'
-        - version: 'cp314'
-          oldest_numpy: '2.3.3'
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
