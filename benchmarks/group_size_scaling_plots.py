@@ -230,7 +230,7 @@ if __name__ == "__main__":
     ax.set_xlabel("Group Order")
     ax.set_xscale("linear")
     ax.set_xlim((0, 50))
-    ax.set_ylabel("Particles per second")
+    ax.set_ylabel("Particles per Second")
     ax.set_yscale("linear")
     ax.set_title(rf"PGOP Performance vs Symmetry Order for {n_particles:,} Particles")
 
