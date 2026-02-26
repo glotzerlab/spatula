@@ -41,7 +41,7 @@ Issues = "https://github.com/glotzerlab/spatula/issues"
 
 [tool.cibuildwheel]
 archs = ["auto64"]
-skip = ["pp*","*musllinux*","cp3??t-*"]
+skip = ["*musllinux*","cp3??t-*"]
 
 # Use abi3audit to catch issues with Limited API wheels
 [tool.cibuildwheel.linux]
