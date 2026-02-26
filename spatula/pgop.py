@@ -31,6 +31,7 @@ class PGOP:
         optimizer: spatula.optimize.Optimizer,
         mode: str = "full",
         compute_per_operator_values_for_final_orientation: bool = False,
+        metric: str = "BC",
     ):
         r"""Create a PGOP object.
 
@@ -62,11 +63,34 @@ class PGOP:
             PGOP value. Defaults to False. `order` values are in order point group
             symmetry, order for symmetry operators of this point group in order given by
             the representations.matrices, order for second point group symmetry, etc.
+        metric : str, optional
+            The metric to report. ``"BC"`` reports the Bhattacharyya coefficient and
+            ``"HD"`` reports the Hellinger distance,
+            :math:`\sqrt{1 - \mathrm{BC}}`.
 
+            ``"HD"`` obeys the triangle inequality while ``"BC"`` does not. This means
+            HD values are true distances and can be compared on a linear distance scale
+            (e.g., ``0.2`` is twice the distance of ``0.1``), making HD preferable for
+            distance-based workflows such as clustering, nearest-neighbor search, and
+            thresholding by geometric separation.
+
+            Interpretation:
+            - ``metric="BC"``: 1 means maximally ordered (perfect overlap), 0 means
+              disordered/no overlap.
+            - ``metric="HD"``: 0 means maximally ordered (zero distance), larger values
+              mean less ordered. Defaults to ``"BC"``.
         """
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
         self._symmetries = symmetries
+        metric = metric.upper()
+        if metric not in {"BC", "HD"}:
+            msg = (
+                f"Metric '{metric}' is not valid "
+                "(valid params: {'BC', 'HD'})"
+            )
+            raise ValueError(msg)
+        self._metric = metric
         # computing the PGOP
         self._optimizer = optimizer
         matrices = []
@@ -215,13 +239,22 @@ class PGOP:
             neighbors.neighbor_counts.astype(np.int32),
             sigmas.astype(np.float32),
         )
+        if self.metric == "HD":
+            np.clip(self._order, 0.0, 1.0, out=self._order)
+            np.subtract(1.0, self._order, out=self._order)
+            np.sqrt(self._order, out=self._order)
 
     @property
     def order(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym})` numpy.ndarray of float: The order parameter is [0,1].
+        """:math:`(N_p, N_{sym})` numpy.ndarray of float: Reported metric values.
 
         The symmetry order is consistent with the order passed to
         `PGOP.compute`.
+
+        Value interpretation depends on ``self.metric``:
+        - ``metric="BC"``: values are in [0, 1], with 1 = ordered, 0 = disordered.
+        - ``metric="HD"``: values are in [0, 1], with 0 = ordered, larger = less
+          ordered.
         """
         if self._order is None:
             raise ValueError("PGOP not computed, call compute first.")
@@ -256,3 +289,8 @@ class PGOP:
     def mode(self) -> str:
         """The mode used for the computation."""
         return self._mode
+
+    @property
+    def metric(self) -> str:
+        """The metric used for the reported order values."""
+        return self._metric
