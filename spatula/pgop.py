@@ -79,16 +79,14 @@ class PGOP:
               disordered/no overlap.
             - ``metric="HD"``: 0 means maximally ordered (zero distance), larger values
               mean less ordered. Defaults to ``"BC"``.
+
         """
         if isinstance(symmetries, str):
             raise ValueError("symmetries must be an iterable of str instances.")
         self._symmetries = symmetries
         metric = metric.upper()
         if metric not in {"BC", "HD"}:
-            msg = (
-                f"Metric '{metric}' is not valid "
-                "(valid params: {'BC', 'HD'})"
-            )
+            msg = f"Metric '{metric}' is not valid (valid params: {{'BC', 'HD'}})"
             raise ValueError(msg)
         self._metric = metric
         # computing the PGOP

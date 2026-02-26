@@ -1654,7 +1654,9 @@ def test_hd_metric_matches_bc_transform(mode):
     op_hd = spatula.PGOP(["Oh", "D3h"], no_opt, mode=mode, metric="HD")
     op_hd.compute((box, points), sigma, nlist)
 
-    np.testing.assert_allclose(op_hd.order, _bc_to_hd(op_bc.order), rtol=RTOL, atol=RTOL)
+    np.testing.assert_allclose(
+        op_hd.order, _bc_to_hd(op_bc.order), rtol=RTOL, atol=RTOL
+    )
 
 
 def test_hd_metric_matches_bc_transform_per_operator_values():
@@ -1682,7 +1684,9 @@ def test_hd_metric_matches_bc_transform_per_operator_values():
     )
     op_hd.compute((box, points), SIGMA_VALUES["full"], nlist, query_points=qp)
 
-    np.testing.assert_allclose(op_hd.order, _bc_to_hd(op_bc.order), rtol=RTOL, atol=RTOL)
+    np.testing.assert_allclose(
+        op_hd.order, _bc_to_hd(op_bc.order), rtol=RTOL, atol=RTOL
+    )
 
 
 def test_pgop_rejects_unknown_metric():
