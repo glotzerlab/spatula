@@ -1624,6 +1624,72 @@ SIGMA_VALUES = {
 }
 
 
+def _bc_to_hd(values):
+    return np.sqrt(1.0 - np.clip(values, 0.0, 1.0))
+
+
+@pytest.mark.parametrize("mode", ["full", "boo"])
+def test_hd_metric_perfect_symmetry_is_zero(mode):
+    box, points = crystals_dict["sc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
+    nlist = freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    sigma = SIGMA_VALUES[mode]
+
+    op_hd = spatula.PGOP(["Oh"], OPTIMIZER, mode=mode, metric="HD")
+    op_hd.compute((box, points), sigma, nlist)
+    np.testing.assert_allclose(op_hd.order, np.zeros_like(op_hd.order), atol=RTOL)
+
+
+@pytest.mark.parametrize("mode", ["full", "boo"])
+def test_hd_metric_matches_bc_transform(mode):
+    box, points = crystals_dict["sc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["sc"]}
+    nlist = freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
+    sigma = SIGMA_VALUES[mode]
+    no_opt = spatula.optimize.NoOptimization()
+
+    op_bc = spatula.PGOP(["Oh", "D3h"], no_opt, mode=mode, metric="BC")
+    op_bc.compute((box, points), sigma, nlist)
+
+    op_hd = spatula.PGOP(["Oh", "D3h"], no_opt, mode=mode, metric="HD")
+    op_hd.compute((box, points), sigma, nlist)
+
+    np.testing.assert_allclose(op_hd.order, _bc_to_hd(op_bc.order), rtol=RTOL, atol=RTOL)
+
+
+def test_hd_metric_matches_bc_transform_per_operator_values():
+    box, points = crystals_dict["bcc"]
+    qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
+    qp = np.asarray([points[0]])
+    nlist = freud.locality.AABBQuery(box, points).query(qp, qargs).toNeighborList()
+    no_opt = spatula.optimize.NoOptimization()
+
+    op_bc = spatula.PGOP(
+        ["Oh"],
+        no_opt,
+        mode="full",
+        metric="BC",
+        compute_per_operator_values_for_final_orientation=True,
+    )
+    op_bc.compute((box, points), SIGMA_VALUES["full"], nlist, query_points=qp)
+
+    op_hd = spatula.PGOP(
+        ["Oh"],
+        no_opt,
+        mode="full",
+        metric="HD",
+        compute_per_operator_values_for_final_orientation=True,
+    )
+    op_hd.compute((box, points), SIGMA_VALUES["full"], nlist, query_points=qp)
+
+    np.testing.assert_allclose(op_hd.order, _bc_to_hd(op_bc.order), rtol=RTOL, atol=RTOL)
+
+
+def test_pgop_rejects_unknown_metric():
+    with pytest.raises(ValueError, match="Metric"):
+        spatula.PGOP(["Oh"], OPTIMIZER, metric="invalid")
+
+
 @pytest.mark.parametrize("mode", MODES)
 def test_bcc_with_multiple_correct_symmetries(mode):
     qargs = {"exclude_ii": True, "mode": "ball", "r_max": crystal_cutoffs["bcc"]}
