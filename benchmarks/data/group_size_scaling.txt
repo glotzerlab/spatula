@@ -1,0 +1,39 @@
+N_PARTICLES=13824
+  msm_6: 72600.0 +/- 500.0 particles/sec
+  msm_8: 58846 +/- 0.0 particles/sec
+  msm_12: 40047 +/- 0.0 particles/sec
+  Cs (order=2): 52402.4 +/- 1114.4 particles/sec
+  Ch (order=2): 52591.7 +/- 397.6 particles/sec
+  Ci (order=2): 52601.6 +/- 382.0 particles/sec
+  C2 (order=2): 52655.2 +/- 230.0 particles/sec
+  C3 (order=3): 52935.4 +/- 471.9 particles/sec
+  C4 (order=4): 52179.4 +/- 1947.9 particles/sec
+  C5 (order=5): 51936.4 +/- 529.7 particles/sec
+  C6 (order=6): 52050.1 +/- 444.7 particles/sec
+  C2h (order=4): 52870.7 +/- 160.4 particles/sec
+  C3h (order=6): 52792.1 +/- 282.4 particles/sec
+  C4h (order=8): 52282.2 +/- 437.6 particles/sec
+  C2v (order=4): 53220.6 +/- 454.7 particles/sec
+  C3v (order=6): 52633.7 +/- 912.1 particles/sec
+  C4v (order=8): 52363.0 +/- 500.1 particles/sec
+  C5v (order=10): 51678.3 +/- 267.2 particles/sec
+  C6v (order=12): 51448.8 +/- 483.5 particles/sec
+  S4 (order=4): 52861.1 +/- 628.6 particles/sec
+  S6 (order=6): 53297.4 +/- 213.5 particles/sec
+  D2 (order=4): 53136.5 +/- 258.3 particles/sec
+  D3 (order=6): 52671.2 +/- 525.9 particles/sec
+  D4 (order=8): 52104.9 +/- 327.4 particles/sec
+  D2h (order=8): 53101.3 +/- 182.4 particles/sec
+  D2d (order=8): 52123.0 +/- 445.4 particles/sec
+  C5v (order=10): 51678.3 +/- 267.2 particles/sec
+  D5 (order=10): 51652.8 +/- 306.0 particles/sec
+  C6v (order=12): 51448.8 +/- 483.5 particles/sec
+  D6 (order=12): 51443.9 +/- 272.7 particles/sec
+  D3h (order=12): 51583.2 +/- 741.5 particles/sec
+  D3d (order=12): 50946.7 +/- 658.7 particles/sec
+  T (order=12): 50904.8 +/- 164.9 particles/sec
+  D4h (order=16): 50637.7 +/- 429.9 particles/sec
+  Td (order=24): 48876.9 +/- 303.3 particles/sec
+  Th (order=24): 48292.9 +/- 309.9 particles/sec
+  O (order=24): 48295.1 +/- 143.4 particles/sec
+  Oh (order=48): 44409.5 +/- 120.3 particles/sec
