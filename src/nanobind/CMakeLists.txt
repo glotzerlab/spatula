@@ -36,6 +36,7 @@ else()
 endif()
 
 nanobind_add_module(_spatula_nb
+    STABLE_ABI
     export.cc
     export-threads.h
     export-boosop.cc
