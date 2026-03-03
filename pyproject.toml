@@ -42,7 +42,7 @@ Issues = "https://github.com/glotzerlab/spatula/issues"
 archs = ["auto64"]
 skip = ["*musllinux*","cp3??t-*"]
 test-requires = [
-  "pytest==8.4.2", "numpy==2.0.0", "coxeter==0.10.0", "pytest-xdist==3.8.0"
+  "pytest==8.4.2", "coxeter==0.10.0", "pytest-xdist==3.8.0"
 ]
 test-sources = ["tests"]
 test-command = "pytest ./tests -n auto"
