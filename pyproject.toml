@@ -80,6 +80,19 @@ repair-wheel-command = [
   "copy {wheel} {dest_dir}",
   "pipx run abi3audit --strict --verbose {wheel}",
 ]
+before-all = """
+mkdir ispc
+curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-windows.zip -o ispc-v1.30.0-windows.zip
+
+mkdir ispc
+tar -xf ispc-v1.30.0-windows.zip -C ispc --strip-components 1
+
+./ispc/bin/ispc --version
+echo "pwd: $(pwd)"
+"""
+environment = { PATH="/project/ispc/bin:$PATH" }
+
+
 [tool.ruff]
 line-length = 88
 
