@@ -316,8 +316,19 @@ class Union(Optimizer):
 
 
 class NoOptimization(Optimizer):
-    """No optimization is performed."""
+    """No optimization is performed.
 
-    def __init__(self):
-        """Create a NoOptimization object."""
-        self._cpp = _spatula_nb.NoOptimization()
+    This optimizer evaluates PGOP/BOOSOP at exactly one fixed orientation.
+    """
+
+    def __init__(self, orientation=(1.0, 0.0, 0.0, 0.0)):
+        """Create a NoOptimization object.
+
+        Parameters
+        ----------
+        orientation : tuple[float, float, float, float], optional
+            The fixed orientation quaternion in ``[w, x, y, z]`` convention.
+            Defaults to the identity quaternion ``(1, 0, 0, 0)``.
+
+        """
+        self._cpp = _spatula_nb.NoOptimization(tuple(orientation))

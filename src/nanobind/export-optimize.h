@@ -90,7 +90,21 @@ void export_optimize(nb::module_& m)
             "learning_rate"_a,
             "tol"_a);
 
-    nb::class_<NoOptimization, Optimizer>(m, "NoOptimization").def(nb::init());
+    nb::class_<NoOptimization, Optimizer>(m, "NoOptimization")
+        .def(
+            "__init__",
+            [](NoOptimization* self, nb::tuple orientation) {
+                if (orientation.size() != 4) {
+                    throw std::invalid_argument(
+                        "orientation must be a tuple of 4 floats (w, x, y, z)");
+                }
+                const data::Quaternion q(nb::cast<float>(orientation[0]),
+                                         nb::cast<float>(orientation[1]),
+                                         nb::cast<float>(orientation[2]),
+                                         nb::cast<float>(orientation[3]));
+                new (self) NoOptimization(q);
+            },
+            "orientation"_a = nb::make_tuple(1.0f, 0.0f, 0.0f, 0.0f));
 }
 
 }} // namespace spatula::optimize
