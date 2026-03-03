@@ -11,9 +11,10 @@ namespace spatula {
 template<typename distribution_type>
 BOOSOP<distribution_type>::BOOSOP(const std::vector<std::vector<std::complex<double>>>& D_ij,
                                   std::shared_ptr<optimize::Optimizer>& optimizer,
-                                  typename distribution_type::param_type distribution_params)
+                                  typename distribution_type::param_type distribution_params,
+                                  bool operators_rotated_for_noopt)
     : m_distribution(distribution_params), m_n_symmetries(D_ij.size()), m_Dij(D_ij),
-      m_optimize(optimizer)
+      m_optimize(optimizer), m_operators_rotated_for_noopt(operators_rotated_for_noopt)
 {
 }
 
@@ -143,7 +144,10 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
-        neighborhood.rotate(opt->next_point());
+        const auto next_point = opt->next_point();
+        if (!m_operators_rotated_for_noopt) {
+            neighborhood.rotate(next_point);
+        }
         const auto particle_op = compute_BOOSOP(neighborhood, D_ij, qlm_eval, qlm_buf);
         opt->record_objective(-particle_op);
     }

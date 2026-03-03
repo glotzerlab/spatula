@@ -331,4 +331,19 @@ class NoOptimization(Optimizer):
             Defaults to the identity quaternion ``(1, 0, 0, 0)``.
 
         """
-        self._cpp = _spatula_nb.NoOptimization(tuple(orientation))
+        orientation = np.asarray(orientation, dtype=np.float64)
+        if orientation.shape != (4,):
+            raise ValueError(
+                "orientation must contain exactly 4 values in [w, x, y, z]."
+            )
+        norm = np.linalg.norm(orientation)
+        if norm == 0:
+            raise ValueError("orientation quaternion cannot be zero.")
+        orientation /= norm
+        self._orientation = tuple(orientation)
+        self._cpp = _spatula_nb.NoOptimization(self._orientation)
+
+    @property
+    def orientation(self):
+        """tuple[float, float, float, float]: Fixed quaternion in [w, x, y, z]."""
+        return self._orientation

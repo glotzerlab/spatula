@@ -10,6 +10,7 @@ particle's neighborhood or its local bond orientation order diagram.
 import warnings
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 import spatula._spatula_nb
 
@@ -39,6 +40,35 @@ def _get_neighbors(
         neighbors = query.query(query_points, neighbors).toNeighborList()
     neighbors.filter(neighbors.distances > 0)
     return query.box.wrap(neighbors.vectors), neighbors
+
+
+def _rotate_wigner_operators_for_noopt(
+    matrices: list[np.ndarray],
+    max_l: int,
+    orientation: tuple[float, float, float, float],
+) -> list[np.ndarray]:
+    """Rotate Wigner-D operators into a fixed noopt orientation."""
+    orientation = np.asarray(orientation, dtype=np.float64)
+    scipy_quat = np.array(
+        [orientation[1], orientation[2], orientation[3], orientation[0]],
+        dtype=np.float64,
+    )
+    rotvec = Rotation.from_quat(scipy_quat).as_rotvec()
+    angle = np.linalg.norm(rotvec)
+    if angle < 1e-12:
+        return matrices
+    axis = rotvec / angle
+    rotation_operator = representations.rotation_from_axis_angle_sph(max_l, axis, angle)
+    inverse_rotation_operator = representations.rotation_from_axis_angle_sph(
+        max_l, axis, -angle
+    )
+    return [
+        representations.dot_product(
+            inverse_rotation_operator,
+            representations.dot_product(matrix, rotation_operator),
+        )
+        for matrix in matrices
+    ]
 
 
 class BOOSOP:
@@ -85,7 +115,9 @@ class BOOSOP:
             ``["C3", "D6h"]``.
         optimizer : spatula.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
-            neighborhoods.
+            neighborhoods. When using ``spatula.optimize.NoOptimization``, the
+            provided fixed orientation is applied by rotating the Wigner-D
+            symmetry operators once up front.
         max_l : `int`, optional
             The maximum spherical harmonic l to use for computations. This number should
             be larger than the ``l`` and ``refine_l`` used in ``compute``. Defaults to
@@ -123,8 +155,19 @@ class BOOSOP:
             matrices.append(
                 representations.WignerD(point_group, self._max_l).condensed_matrices
             )
+        operators_rotated_for_noopt = False
+        if isinstance(optimizer, spatula.optimize.NoOptimization):
+            matrices = _rotate_wigner_operators_for_noopt(
+                matrices, self._max_l, optimizer.orientation
+            )
+            operators_rotated_for_noopt = True
         D_ij = np.stack(matrices, axis=0)  # noqa N806
-        self._cpp = cls_(D_ij, optimizer._cpp, dist_param)
+        self._cpp = cls_(
+            D_ij,
+            optimizer._cpp,
+            dist_param,
+            operators_rotated_for_noopt,
+        )
         self._order = None
         self._rotations = None
         self._ylm_cache = util._Cache(5)
