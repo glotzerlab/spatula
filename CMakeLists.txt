@@ -5,7 +5,6 @@ project(spatula LANGUAGES CXX)
 option(ENABLE_ISPC "Use ISPC for SIMD-optimized computations" ON)
 
 if(ENABLE_ISPC)
-    message(STATUS "PATH: $ENV{PATH}")
     include(CheckLanguage)
     check_language(ISPC)
     if(CMAKE_ISPC_COMPILER)
