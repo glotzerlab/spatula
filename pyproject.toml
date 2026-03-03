@@ -29,7 +29,6 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "pytest",
-    "pytest-rerunfailures",
     "coxeter",
 ]
 
@@ -42,6 +41,9 @@ Issues = "https://github.com/glotzerlab/spatula/issues"
 [tool.cibuildwheel]
 archs = ["auto64"]
 skip = ["*musllinux*","cp3??t-*"]
+test-requires = ["pytest==8.4.2", "numpy==2.0.0", "coxeter==0.10.0"]
+test-sources = ["tests"]
+test-command = "pytest ./tests -n auto"
 
 # Use abi3audit to catch issues with Limited API wheels
 [tool.cibuildwheel.linux]
