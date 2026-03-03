@@ -107,7 +107,9 @@ std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
                                                   rotations[rot_idx + 2],
                                                   rotations[rot_idx + 3])
                                      .to_axis_angle_3D();
-                neighborhood.rotate(rot);
+                if (!m_operators_rotated_for_noopt) {
+                    neighborhood.rotate(rot);
+                }
                 op_store[i * m_n_symmetries + j]
                     = this->compute_BOOSOP(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
             }
