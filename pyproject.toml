@@ -55,16 +55,9 @@ curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-li
 """
 before-build = """
 export PATH="$(pwd)/ispc/bin:$PATH"
-echo "pwd"
-pwd
-echo "$PATH"
-$PATH
-echo "ls"
-ls
-echo "ls ispc"
-ls ispc
 ispc --version
 """
+environment = { PATH="/project/ispc/bin:$PATH" }
 
 [tool.cibuildwheel.macos]
 repair-wheel-command = [
