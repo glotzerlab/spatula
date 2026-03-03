@@ -1,14 +1,46 @@
 // Copyright (c) 2021-2026 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
+#include <algorithm>
 #include <cmath>
 
 #include "PGOP.h"
 #include "computes.h"
 #include "locality.h"
+#include "optimize/NoOptimization.h"
 #include "util/Threads.h"
 
 namespace spatula {
+namespace {
+
+inline data::RotationMatrix multiply_rotation_matrices(const data::RotationMatrix& a,
+                                                       const data::RotationMatrix& b)
+{
+    data::RotationMatrix result {};
+    for (size_t row = 0; row < 3; ++row) {
+        for (size_t col = 0; col < 3; ++col) {
+            result[row * 3 + col] = a[row * 3 + 0] * b[0 * 3 + col]
+                                    + a[row * 3 + 1] * b[1 * 3 + col]
+                                    + a[row * 3 + 2] * b[2 * 3 + col];
+        }
+    }
+    return result;
+}
+
+inline data::RotationMatrix transpose_rotation_matrix(const data::RotationMatrix& matrix)
+{
+    return data::RotationMatrix {matrix[0],
+                                 matrix[3],
+                                 matrix[6],
+                                 matrix[1],
+                                 matrix[4],
+                                 matrix[7],
+                                 matrix[2],
+                                 matrix[5],
+                                 matrix[8]};
+}
+
+} // namespace
 
 PGOP::PGOP(const std::vector<const float*> R_ij_data,
            const size_t n_symmetries,
@@ -17,8 +49,37 @@ PGOP::PGOP(const std::vector<const float*> R_ij_data,
            unsigned int mode,
            bool compute_per_operator)
     : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(std::move(group_sizes)),
-      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
+      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator),
+      m_use_rotated_operators_for_noopt(false)
 {
+    const auto* no_optimization = dynamic_cast<const optimize::NoOptimization*>(m_optimize.get());
+    if (no_optimization == nullptr) {
+        return;
+    }
+
+    m_use_rotated_operators_for_noopt = true;
+    const auto orientation_matrix = no_optimization->getOrientation().to_rotation_matrix();
+    const auto inverse_orientation = transpose_rotation_matrix(orientation_matrix);
+
+    m_rotated_Rij.reserve(m_Rij.size());
+    for (size_t group_idx = 0; group_idx < m_Rij.size(); ++group_idx) {
+        auto rotated_group = std::vector<float>(m_group_sizes[group_idx]);
+        const auto* group_matrices = m_Rij[group_idx];
+
+        for (size_t i = 0; i < m_group_sizes[group_idx]; i += 9) {
+            data::RotationMatrix group_operator {};
+            std::copy_n(group_matrices + i, 9, group_operator.begin());
+
+            // Rotating neighborhoods by U is equivalent to rotating operators by U^T * R * U.
+            const auto right_rotated
+                = multiply_rotation_matrices(group_operator, orientation_matrix);
+            const auto rotated_operator
+                = multiply_rotation_matrices(inverse_orientation, right_rotated);
+
+            std::copy(rotated_operator.begin(), rotated_operator.end(), rotated_group.begin() + i);
+        }
+        m_rotated_Rij.emplace_back(std::move(rotated_group));
+    }
 }
 
 std::tuple<std::vector<double>, std::vector<data::Quaternion>>
@@ -91,7 +152,8 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
     // Loop over the point groups
     // for (const auto& R_ij : m_Rij) {
     for (size_t group_idx = 0; group_idx < m_Rij.size(); ++group_idx) {
-        auto R_ij = m_Rij[group_idx];
+        const auto* R_ij = m_use_rotated_operators_for_noopt ? m_rotated_Rij[group_idx].data()
+                                                             : m_Rij[group_idx];
         // Reset neighborhood to original positions before each symmetry group
         neighborhood_original.reset();
         const auto result = compute_symmetry(neighborhood_original, R_ij, group_idx);
@@ -101,7 +163,9 @@ PGOP::compute_particle(LocalNeighborhood& neighborhood_original) const
         rotations.emplace_back(quat);
         if (m_compute_per_operator) {
             neighborhood_original.reset();
-            neighborhood_original.rotate(std::get<1>(result));
+            if (!m_use_rotated_operators_for_noopt) {
+                neighborhood_original.rotate(std::get<1>(result));
+            }
             // loop over every operator; each operator is a 3x3 matrix so size 9
             for (size_t i = 0; i < m_group_sizes[group_idx]; i += 9) {
                 // Compute the PGOP value for a single operator in our group
@@ -125,7 +189,9 @@ PGOP::compute_symmetry(LocalNeighborhood& neighborhood, const float* R_ij, size_
         data::Vec3 opt_vec3(static_cast<float>(opt_vec3d.x),
                             static_cast<float>(opt_vec3d.y),
                             static_cast<float>(opt_vec3d.z));
-        neighborhood.rotate(opt_vec3);
+        if (!m_use_rotated_operators_for_noopt) {
+            neighborhood.rotate(opt_vec3);
+        }
         const auto particle_op
             = compute_pgop(neighborhood, std::span<const float>(R_ij, m_group_sizes[group_idx]));
         opt->record_objective(-particle_op);
