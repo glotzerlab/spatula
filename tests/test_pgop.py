@@ -1762,6 +1762,65 @@ VERTICES_FOR_TESTING = np.asarray(
 )
 
 
+def _normalize_wxyz(quaternion):
+    quaternion = np.asarray(quaternion, dtype=float)
+    quaternion = quaternion / np.linalg.norm(quaternion)
+    if quaternion[0] < 0:
+        quaternion = -quaternion
+    return quaternion
+
+
+def _quat_mul_wxyz(lhs, rhs):
+    lw, lx, ly, lz = lhs
+    rw, rx, ry, rz = rhs
+    return np.array(
+        [
+            lw * rw - lx * rx - ly * ry - lz * rz,
+            lw * rx + lx * rw + ly * rz - lz * ry,
+            lw * ry - lx * rz + ly * rw + lz * rx,
+            lw * rz + lx * ry - ly * rx + lz * rw,
+        ]
+    )
+
+
+def _group_equivalent_quaternions(symmetry):
+    matrices = np.asarray(spatula.representations.CartesianRepMatrix(symmetry).matrices)
+    proper_matrices = matrices[np.linalg.det(matrices) > 0]
+    scipy_quats = scipy.spatial.transform.Rotation.from_matrix(
+        proper_matrices
+    ).as_quat()
+    quats = np.column_stack((scipy_quats[:, 3], scipy_quats[:, :3]))
+    return np.asarray([_normalize_wxyz(q) for q in quats])
+
+
+def _operator_generated_quaternions(operator):
+    operator = np.asarray(operator, dtype=float)
+    current = np.eye(3)
+    powers = [current.copy()]
+    for _ in range(1, 257):
+        current = current @ operator
+        if np.linalg.det(current) > 0 and not any(
+            np.allclose(current, prev, atol=1e-6) for prev in powers
+        ):
+            powers.append(current.copy())
+        if np.allclose(current, np.eye(3), atol=1e-6):
+            break
+    scipy_quats = scipy.spatial.transform.Rotation.from_matrix(
+        np.asarray(powers)
+    ).as_quat()
+    quats = np.column_stack((scipy_quats[:, 3], scipy_quats[:, :3]))
+    return np.asarray([_normalize_wxyz(q) for q in quats])
+
+
+def _assert_rotation_is_fz_canonical(rotation, equivalent_ops):
+    rotation = _normalize_wxyz(rotation)
+    best_w = rotation[0]
+    for op in equivalent_ops:
+        candidate = _normalize_wxyz(_quat_mul_wxyz(op, rotation))
+        best_w = max(best_w, candidate[0])
+    assert rotation[0] >= best_w - 1e-6
+
+
 @pytest.mark.parametrize("mode", modedict_types)
 @pytest.mark.parametrize("symmetries", [["T"], ["T", "Th"]])
 def test_orientations(mode, symmetries):
@@ -1785,6 +1844,46 @@ def test_orientations(mode, symmetries):
             [symmetry], norot, mode, system, nlist, None, np.zeros((1, 3))
         )
         np.testing.assert_allclose(order, op_no_opt.order[0], rtol=RTOL)
+
+
+@pytest.mark.parametrize("mode", modedict_types)
+def test_rotations_mapped_to_group_fundamental_zone(mode):
+    rot = scipy.spatial.transform.Rotation.random(random_state=RNG)
+    rotated_vertices = rot.apply(VERTICES_FOR_TESTING)
+    system, nlist = get_shape_sys_nlist(rotated_vertices)
+    symmetries = ["T", "D4h"]
+    op = compute_op_result(
+        symmetries, OPTIMIZER, mode, system, nlist, None, np.zeros((1, 3))
+    )
+
+    for rotation, symmetry in zip(op.rotations[0], symmetries):
+        equivalent_ops = _group_equivalent_quaternions(symmetry)
+        _assert_rotation_is_fz_canonical(rotation, equivalent_ops)
+
+
+def test_pgop_per_operator_rotations_mapped_to_operator_fundamental_zone():
+    rot = scipy.spatial.transform.Rotation.random(random_state=RNG)
+    rotated_vertices = rot.apply(VERTICES_FOR_TESTING)
+    system, nlist = get_shape_sys_nlist(rotated_vertices)
+
+    op_pg = spatula.PGOP(
+        ["T"],
+        OPTIMIZER,
+        mode="full",
+        compute_per_operator_values_for_final_orientation=True,
+    )
+    op_pg.compute(system, None, nlist, np.zeros((1, 3)))
+
+    group_matrices = np.asarray(
+        spatula.representations.CartesianRepMatrix("T").matrices
+    )
+    _assert_rotation_is_fz_canonical(
+        op_pg.rotations[0, 0], _group_equivalent_quaternions("T")
+    )
+    for rotation, operator in zip(op_pg.rotations[0, 1:], group_matrices[1:]):
+        _assert_rotation_is_fz_canonical(
+            rotation, _operator_generated_quaternions(operator)
+        )
 
 
 OPTIMIZERS_TO_TEST = [
