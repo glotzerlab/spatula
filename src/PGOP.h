@@ -104,9 +104,10 @@ class PGOP {
     /// Whether to compute the PGOP for each operator.
     bool m_compute_per_operator;
     /// Whether operators are pre-rotated once for NoOptimization.
-    bool m_use_rotated_operators_for_noopt;
+    bool m_use_rotated_operators_for_noopt = false;
     /// Cached operator matrices rotated into the fixed NoOptimization orientation.
-    std::vector<std::vector<float>> m_rotated_Rij;
+    /// Empty unless NoOptimization is used.
+    std::vector<std::vector<float>> m_rotated_Rij {};
 };
 
 } // End namespace spatula

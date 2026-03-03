@@ -49,8 +49,7 @@ PGOP::PGOP(const std::vector<const float*> R_ij_data,
            unsigned int mode,
            bool compute_per_operator)
     : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(std::move(group_sizes)),
-      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator),
-      m_use_rotated_operators_for_noopt(false)
+      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
 {
     const auto* no_optimization = dynamic_cast<const optimize::NoOptimization*>(m_optimize.get());
     if (no_optimization == nullptr) {
