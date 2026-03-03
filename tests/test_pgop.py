@@ -1865,7 +1865,10 @@ def test_nooptimization_orientation_per_operator(mode):
 
 
 def test_nooptimization_orientation_boosop_matches_rotated_vertices():
-    rotation = scipy.spatial.transform.Rotation.random(random_state=RNG)
+    # Use a local seeded RNG so this test remains random-but-reproducible and
+    # does not depend on global RNG consumption order in other tests.
+    local_rng = np.random.default_rng(42)
+    rotation = scipy.spatial.transform.Rotation.random(random_state=local_rng)
     scipy_quaternion = rotation.as_quat()
     orientation = (
         scipy_quaternion[3],
