@@ -57,6 +57,8 @@ before-build = """
 export PATH="$(pwd)/ispc/bin:$PATH"
 echo "pwd"
 pwd
+echo "$PATH"
+$PATH
 echo "ls"
 ls
 echo "ls ispc"
