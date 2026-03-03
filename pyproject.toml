@@ -49,6 +49,12 @@ repair-wheel-command = [
   "auditwheel repair -w {dest_dir} {wheel}",
   "pipx run abi3audit --strict --verbose {wheel}",
 ]
+before-all = """
+mkdir ispc
+curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-linux.tar.gz | tar -xvz --directory ispc --strip-components 1
+
+export PATH="$(pwd)/ispc:$PATH"
+"""
 
 [tool.cibuildwheel.macos]
 repair-wheel-command = [
