@@ -117,7 +117,9 @@ class BOOSOP:
             An optimizer to optimize the rotation of the particle's local
             neighborhoods. When using ``spatula.optimize.NoOptimization``, the
             provided fixed orientation is applied by rotating the Wigner-D
-            symmetry operators once up front.
+            symmetry operators once up front. The orientation comes from
+            ``NoOptimization(orientation=...)`` in ``[w, x, y, z]`` convention
+            and is normalized internally.
         max_l : `int`, optional
             The maximum spherical harmonic l to use for computations. This number should
             be larger than the ``l`` and ``refine_l`` used in ``compute``. Defaults to

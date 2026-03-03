@@ -316,9 +316,12 @@ class Union(Optimizer):
 
 
 class NoOptimization(Optimizer):
-    """No optimization is performed.
+    """Evaluate at one fixed orientation with no optimization loop.
 
-    This optimizer evaluates PGOP/BOOSOP at exactly one fixed orientation.
+    Instead of searching over rotations, this optimizer evaluates the objective
+    exactly once at the provided orientation. For PGOP and BOOSOP this is
+    equivalent to rotating each neighborhood by the same fixed quaternion and
+    then computing the order parameter.
     """
 
     def __init__(self, orientation=(1.0, 0.0, 0.0, 0.0)):
@@ -327,8 +330,17 @@ class NoOptimization(Optimizer):
         Parameters
         ----------
         orientation : tuple[float, float, float, float], optional
-            The fixed orientation quaternion in ``[w, x, y, z]`` convention.
-            Defaults to the identity quaternion ``(1, 0, 0, 0)``.
+            The fixed orientation quaternion in ``[w, x, y, z]`` convention
+            (note SciPy uses ``[x, y, z, w]``). The quaternion is normalized
+            internally before use.
+
+            This sets the single rotation used for evaluation. Example:
+            ``NoOptimization(orientation=q)`` on an unrotated neighborhood gives
+            the same result as ``NoOptimization()`` on a neighborhood rotated by
+            ``q``.
+
+            Defaults to the identity quaternion ``(1, 0, 0, 0)``, which means
+            no additional rotation is applied.
 
         """
         orientation = np.asarray(orientation, dtype=np.float64)
@@ -345,5 +357,8 @@ class NoOptimization(Optimizer):
 
     @property
     def orientation(self):
-        """tuple[float, float, float, float]: Fixed quaternion in [w, x, y, z]."""
+        """tuple[float, float, float, float]: Normalized fixed quaternion.
+
+        Returned in ``[w, x, y, z]`` convention.
+        """
         return self._orientation
