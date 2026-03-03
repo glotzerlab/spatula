@@ -67,6 +67,16 @@ repair-wheel-command = [
   "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
   "pipx run abi3audit --strict --verbose {wheel}",
 ]
+before-all = """
+mkdir ispc
+curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-linux.tar.gz | tar -xvz --directory ispc --strip-components 1
+
+export PATH="$(pwd)/ispc/bin:$PATH"
+ispc --version
+echo "pwd: $(pwd)"
+"""
+environment = { PATH="/project/ispc/bin:$PATH" }
+
 [tool.cibuildwheel.windows]
 repair-wheel-command = [
   "copy {wheel} {dest_dir}",
