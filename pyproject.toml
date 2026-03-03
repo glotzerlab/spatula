@@ -57,8 +57,7 @@ before-all = """
 mkdir ispc
 curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-linux.tar.gz | tar -xvz --directory ispc --strip-components 1
 
-export PATH="$(pwd)/ispc/bin:$PATH"
-ispc --version
+ispc/bin/ispc --version
 """
 environment = { PATH="/project/ispc/bin:$PATH" }
 
@@ -71,11 +70,10 @@ before-all = """
 mkdir ispc
 curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-linux.tar.gz | tar -xvz --directory ispc --strip-components 1
 
-export PATH="$(pwd)/ispc/bin:$PATH"
-ispc --version
-echo "pwd: $(pwd)"
+ispc/bin/ispc --version
 """
-environment = { PATH="/project/ispc/bin:$PATH" }
+environment = { PATH="/Users/runner/work/spatula/spatula/ispc/bin:$PATH" }
+
 
 [tool.cibuildwheel.windows]
 repair-wheel-command = [
