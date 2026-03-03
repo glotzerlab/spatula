@@ -43,6 +43,7 @@ Use **uv** or **pip** to install **spatula** binaries from PyPI_ into a virtual 
 
 .. _conda-forge: https://conda-forge.org/
 .. _PyPI: https://pypi.org/
+.. _ISPC: https://ispc.github.io
 
 
 Compile from source
@@ -77,7 +78,7 @@ The code that follows builds **spatula**:
     cd spatula
     python -m pip install .
 
-When developing code that makes use of the project's `ISPC <https://ispc.github.io>__`
+When developing code that makes use of the project's ISPC_
 extensions, or when building from source to maximize performance, users must also
 install the requisite compiler. This is available from most package managers, or via
 conda-forge:
