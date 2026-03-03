@@ -59,7 +59,7 @@ curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-li
 
 ./ispc/bin/ispc --version
 """
-environment = { PATH="/project/ispc/bin:$PATH" }
+environment = { PATH="/project/ispc/bin:$PATH", CMAKE_ARGS="-DISPC_TARGET=avx2-i32x8" }
 
 [tool.cibuildwheel.macos]
 repair-wheel-command = [
@@ -72,7 +72,7 @@ curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-ma
 
 ./ispc/bin/ispc --version
 """
-environment = { PATH="/Users/runner/work/spatula/spatula/ispc/bin:$PATH" }
+environment = { PATH="/Users/runner/work/spatula/spatula/ispc/bin:$PATH", CMAKE_ARGS="-DISPC_TARGET=neon-i32x4" }
 
 
 [tool.cibuildwheel.windows]
@@ -90,7 +90,7 @@ tar -xf ispc-v1.30.0-windows.zip -C ispc --strip-components 1
 ./ispc/bin/ispc --version
 echo "pwd: $(pwd)"
 """
-environment = { PATH="/project/ispc/bin:$PATH" }
+environment = { PATH="/project/ispc/bin:$PATH", CMAKE_ARGS="-DISPC_TARGET=avx2-i32x8" }
 
 
 [tool.ruff]
