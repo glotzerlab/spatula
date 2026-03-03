@@ -52,8 +52,7 @@ repair-wheel-command = [
 before-all = """
 mkdir ispc
 curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-linux.tar.gz | tar -xvz --directory ispc --strip-components 1
-"""
-before-build = """
+
 export PATH="$(pwd)/ispc/bin:$PATH"
 ispc --version
 """
