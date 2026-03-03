@@ -4,9 +4,6 @@
 We use install's `DIRECTORY` and `FILES_MATCHING PATTERN` features to automatically install all python files in the `spatula` directory.
 Any non-Python files would need to be installed in a separate command.
 
-## Platform Support
-Currently `spatula` only supports Unix-like platforms, but nothing in the code should prevent extending to Windows.
-
 ## Python Code
 The Python is located in the `spatula` directory.
 Most of the files are for user use.
