@@ -77,6 +77,18 @@ The code that follows builds **spatula**:
     cd spatula
     python -m pip install .
 
+When developing code that makes use of the project's `ISPC <https://ispc.github.io>__`
+extensions, or when building from source to maximize performance, users must also
+install the requisite compiler. This is available from most package managers, or via
+conda-forge:
+
+
+.. code-block:: bash
+
+    mamba install -c ispc
+    brew install ispc         # on macos
+    sudo apt-get install ispc # on ubuntu
+
 
 Building Documentation
 ----------------------
