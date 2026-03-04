@@ -41,6 +41,7 @@ extensions = [
     "sphinx.ext.todo",
     "IPython.sphinxext.ipython_console_highlighting",
     "sphinxcontrib.katex",
+    "sphinx_inline_tabs",
     "sphinxcontrib.bibtex",
     "nbsphinx",
 ]

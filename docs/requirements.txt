@@ -152,10 +152,13 @@ sphinx==9.1.0
     #   furo
     #   nbsphinx
     #   sphinx-basic-ng
+    #   sphinx-inline-tabs
     #   sphinxcontrib-bibtex
     #   sphinxcontrib-katex
 sphinx-basic-ng==1.0.0b2
     # via furo
+sphinx-inline-tabs==2025.12.21.14
+    # via -r docs/requirements.in
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
 sphinxcontrib-bibtex==2.6.5
