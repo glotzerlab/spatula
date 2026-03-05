@@ -8,10 +8,12 @@ namespace spatula { namespace optimize {
 
 class NoOptimization : public Optimizer {
     public:
-    NoOptimization() : Optimizer()
+    NoOptimization(const data::Quaternion& orientation = data::Quaternion(1.0, 0.0, 0.0, 0.0))
+        : Optimizer(), m_orientation(orientation)
     {
+        m_orientation.normalize();
         // Set the initial point
-        m_point = data::Quaternion(1.0, 0.0, 0.0, 0.0).to_axis_angle_3D();
+        m_point = m_orientation.to_axis_angle_3D();
         m_terminate = false; // Start off not terminated
     }
 
@@ -34,7 +36,14 @@ class NoOptimization : public Optimizer {
         return std::make_unique<NoOptimization>(*this);
     }
 
+    const data::Quaternion& getOrientation() const
+    {
+        return m_orientation;
+    }
+
     private:
+    /// The fixed orientation used for objective evaluations.
+    data::Quaternion m_orientation;
     // Flag to terminate the optimization
     bool m_terminate;
 };
