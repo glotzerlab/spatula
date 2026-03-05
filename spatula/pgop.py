@@ -50,7 +50,11 @@ class PGOP:
             list of strings.
         optimizer : spatula.optimize.Optimizer
             An optimizer to optimize the rotation of the particle's local
-            neighborhoods.
+            neighborhoods. When using ``spatula.optimize.NoOptimization``, the
+            provided fixed orientation is applied by rotating symmetry operators
+            once up front. The orientation comes from
+            ``NoOptimization(orientation=...)`` in ``[w, x, y, z]`` convention
+            and is normalized internally.
         mode : str, optional
             The mode to use for the computation. Either "full" or "boo". Defaults to
             "full". "full" computes the full point group symmetry order parameter (PGOP)

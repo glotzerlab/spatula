@@ -316,8 +316,49 @@ class Union(Optimizer):
 
 
 class NoOptimization(Optimizer):
-    """No optimization is performed."""
+    """Evaluate at one fixed orientation with no optimization loop.
 
-    def __init__(self):
-        """Create a NoOptimization object."""
-        self._cpp = _spatula_nb.NoOptimization()
+    Instead of searching over rotations, this optimizer evaluates the objective
+    exactly once at the provided orientation. For PGOP and BOOSOP this is
+    equivalent to rotating each neighborhood by the same fixed quaternion and
+    then computing the order parameter.
+    """
+
+    def __init__(self, orientation=(1.0, 0.0, 0.0, 0.0)):
+        """Create a NoOptimization object.
+
+        Parameters
+        ----------
+        orientation : tuple[float, float, float, float], optional
+            The fixed orientation quaternion in ``[w, x, y, z]`` convention
+            (note SciPy uses ``[x, y, z, w]``). The quaternion is normalized
+            internally before use.
+
+            This sets the single rotation used for evaluation. Example:
+            ``NoOptimization(orientation=q)`` on an unrotated neighborhood gives
+            the same result as ``NoOptimization()`` on a neighborhood rotated by
+            ``q``.
+
+            Defaults to the identity quaternion ``(1, 0, 0, 0)``, which means
+            no additional rotation is applied.
+
+        """
+        orientation = np.asarray(orientation, dtype=np.float64)
+        if orientation.shape != (4,):
+            raise ValueError(
+                "orientation must contain exactly 4 values in [w, x, y, z]."
+            )
+        norm = np.linalg.norm(orientation)
+        if norm == 0:
+            raise ValueError("orientation quaternion cannot be zero.")
+        orientation /= norm
+        self._orientation = tuple(orientation)
+        self._cpp = _spatula_nb.NoOptimization(self._orientation)
+
+    @property
+    def orientation(self):
+        """tuple[float, float, float, float]: Normalized fixed quaternion.
+
+        Returned in ``[w, x, y, z]`` convention.
+        """
+        return self._orientation
