@@ -8,7 +8,12 @@ Change Log
 <https://semver.org/>`_.
 
 
-0.2.0 (xxxx-xx-xx)
+0.x
+---
+
+
+
+0.2.0 (2026-03-05)
 ^^^^^^^^^^^^^^^^^^
 
 *Changed*
