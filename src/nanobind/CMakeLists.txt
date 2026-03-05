@@ -21,9 +21,11 @@ if(ENABLE_ISPC)
         set(ISPC_ARCH "${ispc_arch}" CACHE STRING "ISPC target architecture")
     endif()
 
-    # ISPC will automatically select the correct SIMD instruction set if available
-    message(STATUS "ISPC architecture: ${ISPC_ARCH}, targets: ${ISPC_TARGETS}")
-    set_property(TARGET spatula_ispc PROPERTY ISPC_INSTRUCTION_SETS "${ISPC_TARGETS}")
+    # ISPC_TARGET can be set to specify the target instruction set (e.g., "avx2-i32x8", "neon-i32x4")
+    # If empty, ISPC automatically selects the best instruction set for the build machine
+    set(ISPC_TARGET "" CACHE STRING "ISPC target instruction set (empty for auto-detection)")
+    message(STATUS "ISPC architecture: ${ISPC_ARCH}, target: ${ISPC_TARGET}")
+    set_property(TARGET spatula_ispc PROPERTY ISPC_INSTRUCTION_SETS "${ISPC_TARGET}")
     target_compile_options(spatula_ispc PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=${ISPC_ARCH}>")
 
     # Generate header file(s) for C++ integration

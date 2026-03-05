@@ -25,3 +25,4 @@ dependencies:
   - sphinxcontrib-serializinghtml==1.1.10
   - nbsphinx==0.9.6
   - nanobind==2.9.2
+  - sphinx-inline-tabs

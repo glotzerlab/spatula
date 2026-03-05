@@ -37,6 +37,7 @@ Change Log
 * ``m_group_sizes`` class method for PGOP, which stores the size of each group (currently, (group order - 1) * 9). Previous code used vector.size, which requires copies and allocations for both individual elements and entire groups.
 * RotationMatrix std::array wrapper for fast and strongly typed vector rotations
 * ``-DENABLE_PROFILING`` flag to allow for easy profiling
+* Pre-built wheels using ISPC for increased performance
 
 *Updated*
 
