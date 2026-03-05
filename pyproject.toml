@@ -1,12 +1,12 @@
 [build-system]
-requires = ["scikit-build-core", "nanobind"]
+requires = ["numpy>=2.0.0", "scikit-build-core", "nanobind>=2.0.0"]
 build-backend = "scikit_build_core.build"
 
 
 [project]
 name = "spatula-analysis"
 version = "0.1.1"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 description = "Point group symmetry analysis of local environments for point cloud data."
 readme = "README.rst"
 license = "BSD-3-Clause"
@@ -16,8 +16,6 @@ classifiers = [
         "Development Status :: 4 - Beta",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
@@ -31,7 +29,6 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "pytest",
-    "pytest-rerunfailures",
     "coxeter",
 ]
 
@@ -40,6 +37,59 @@ Documentation = "https://spatula.readthedocs.io"
 Download = "https://pypi.org/project/spatula-analysis/"
 Source = "https://github.com/glotzerlab/spatula"
 Issues = "https://github.com/glotzerlab/spatula/issues"
+
+[tool.cibuildwheel]
+archs = ["auto64"]
+skip = ["*musllinux*","cp3??t-*"]
+test-requires = [
+  "pytest==8.4.2", "coxeter==0.10.0", "pytest-xdist==3.8.0"
+]
+test-sources = ["tests"]
+test-command = "pytest ./tests -n auto"
+
+# Use abi3audit to catch issues with Limited API wheels
+[tool.cibuildwheel.linux]
+repair-wheel-command = [
+  "auditwheel repair -w {dest_dir} {wheel}",
+  "pipx run abi3audit --strict --verbose {wheel}",
+]
+before-all = """
+mkdir ispc
+curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-linux.tar.gz | tar -xvz --directory ispc --strip-components 1
+
+./ispc/bin/ispc --version
+"""
+environment = { PATH="/project/ispc/bin:$PATH", CMAKE_ARGS="-DISPC_TARGET=avx2-i32x8" }
+
+[tool.cibuildwheel.macos]
+repair-wheel-command = [
+  "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
+  "pipx run abi3audit --strict --verbose {wheel}",
+]
+before-all = """
+mkdir ispc
+curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-macos.universal.tar.gz | tar -xvz --directory ispc --strip-components 1
+
+./ispc/bin/ispc --version
+"""
+environment = { PATH="/Users/runner/work/spatula/spatula/ispc/bin:$PATH", CMAKE_ARGS="-DISPC_TARGET=neon-i32x4" }
+
+[tool.cibuildwheel.windows]
+repair-wheel-command = [
+  "copy {wheel} {dest_dir}",
+  "pipx run abi3audit --strict --verbose {wheel}",
+]
+before-all = """
+mkdir ispc
+curl -sSL https://github.com/ispc/ispc/releases/download/v1.30.0/ispc-v1.30.0-windows.zip -o ispc-v1.30.0-windows.zip
+
+mkdir ispc
+tar -xf ispc-v1.30.0-windows.zip -C ispc --strip-components 1
+
+./ispc/bin/ispc --version
+echo "pwd: $(pwd)"
+"""
+environment = { PATH="/project/ispc/bin:$PATH", CMAKE_ARGS="-DISPC_TARGET=avx2-i32x8" }
 
 
 [tool.ruff]
@@ -58,4 +108,6 @@ ignore = ["B905","D107","D213","D211","E741","S101","UP006","SIM116","D203"]
 "docs/source/conf.py" = ["D100"]
 
 [tool.scikit-build]
+sdist.exclude = [".github", "docs"]
 wheel.packages = ["spatula"]           # copy the whole Python package folder into the wheel
+wheel.py-api = "cp312"

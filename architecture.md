@@ -4,9 +4,6 @@
 We use install's `DIRECTORY` and `FILES_MATCHING PATTERN` features to automatically install all python files in the `spatula` directory.
 Any non-Python files would need to be installed in a separate command.
 
-## Platform Support
-Currently `spatula` only supports Unix-like platforms, but nothing in the code should prevent extending to Windows.
-
 ## Python Code
 The Python is located in the `spatula` directory.
 Most of the files are for user use.
@@ -17,6 +14,14 @@ The current data files are
 ## Native Extensions
 We use C++, located in `src/` to perform the computational complex parts of spatula.
 Furthermore, we use `nanobind <https://nanobind.readthedocs.io/en/latest/>__` to link our C++ code to the CPython interpreter.
+
+### ISPC and SIMD
+We use the `Implicit Simd Program Compiler <https://ispc.github.io>__`, or ISPC, to
+generate highly optimized SIMD kernels for the `spatula` code. This provides a
+significant performance benefit on supported systems. We package PyPI wheels with
+support for the AVX2 instruction set on Linux and Windows and NEON on OSX-aarch64.
+For other instruction sets, we recommend building `spatula` from scratch with ISPC
+installed via your system's package manager.
 
 ## C++ Structure
 The code is broken into a few small sections
