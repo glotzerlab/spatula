@@ -8,7 +8,12 @@ Change Log
 <https://semver.org/>`_.
 
 
-0.2.0 (xxxx-xx-xx)
+0.x
+---
+
+
+
+0.2.0 (2026-03-05)
 ^^^^^^^^^^^^^^^^^^
 
 *Changed*
@@ -25,6 +30,8 @@ Change Log
 * ``py::array`` are now replaced with ``std::vector`` or ``type*`` pointers
 * Implied rotation matrix type (``std::vector<double>``) is now ``typedef RotationMatrix = std::array<double, 9>``
 * Use Python stable ABI (``abi3``).
+* Massive perfomance updates all around
+* Added SIMD via ISPC for extra speedup
 
 *Removed*
 
