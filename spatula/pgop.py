@@ -249,15 +249,14 @@ class PGOP:
 
     @property
     def order(self) -> np.ndarray:
-        """:math:`(N_p, N_{sym})` numpy.ndarray of float: Reported metric values.
+        """:math:`(N_p, N_{sym})` numpy.ndarray of float: Order parameter in [0,1].
 
         The symmetry order is consistent with the order passed to
         `PGOP.compute`.
 
         Value interpretation depends on ``self.metric``:
-        - ``metric="BC"``: values are in [0, 1], with 1 = ordered, 0 = disordered.
-        - ``metric="HD"``: values are in [0, 1], with 0 = ordered, larger = less
-          ordered.
+        - ``metric="BC"``: 1 = ordered, 0 = disordered.
+        - ``metric="HD"``: 0 = ordered, 1 = disordered.
 
         """
         if self._order is None:
