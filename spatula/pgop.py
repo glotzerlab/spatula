@@ -258,6 +258,7 @@ class PGOP:
         - ``metric="BC"``: values are in [0, 1], with 1 = ordered, 0 = disordered.
         - ``metric="HD"``: values are in [0, 1], with 0 = ordered, larger = less
           ordered.
+
         """
         if self._order is None:
             raise ValueError("PGOP not computed, call compute first.")
