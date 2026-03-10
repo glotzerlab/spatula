@@ -11,9 +11,10 @@ namespace spatula {
 template<typename distribution_type>
 BOOSOP<distribution_type>::BOOSOP(const std::vector<std::vector<std::complex<double>>>& D_ij,
                                   std::shared_ptr<optimize::Optimizer>& optimizer,
-                                  typename distribution_type::param_type distribution_params)
+                                  typename distribution_type::param_type distribution_params,
+                                  bool operators_rotated_for_noopt)
     : m_distribution(distribution_params), m_n_symmetries(D_ij.size()), m_Dij(D_ij),
-      m_optimize(optimizer)
+      m_optimize(optimizer), m_operators_rotated_for_noopt(operators_rotated_for_noopt)
 {
 }
 
@@ -106,7 +107,9 @@ std::vector<double> BOOSOP<distribution_type>::refine(const float* distances,
                                                   rotations[rot_idx + 2],
                                                   rotations[rot_idx + 3])
                                      .to_axis_angle_3D();
-                neighborhood.rotate(rot);
+                if (!m_operators_rotated_for_noopt) {
+                    neighborhood.rotate(rot);
+                }
                 op_store[i * m_n_symmetries + j]
                     = this->compute_BOOSOP(neighborhood, m_Dij[j], qlm_eval, qlm_buf);
             }
@@ -143,7 +146,10 @@ BOOSOP<distribution_type>::compute_symmetry(LocalNeighborhood& neighborhood,
 {
     auto opt = m_optimize->clone();
     while (!opt->terminate()) {
-        neighborhood.rotate(opt->next_point());
+        const auto next_point = opt->next_point();
+        if (!m_operators_rotated_for_noopt) {
+            neighborhood.rotate(next_point);
+        }
         const auto particle_op = compute_BOOSOP(neighborhood, D_ij, qlm_eval, qlm_buf);
         opt->record_objective(-particle_op);
     }

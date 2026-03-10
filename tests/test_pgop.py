@@ -1857,6 +1857,166 @@ def test_orientations(mode, symmetries):
         np.testing.assert_allclose(order, op_no_opt.order[0], rtol=RTOL)
 
 
+@pytest.mark.parametrize("mode", ["full", "boo"])
+@pytest.mark.parametrize("symmetries", [["T"], ["T", "Th"]])
+def test_nooptimization_orientation_matches_rotated_vertices(mode, symmetries):
+    rotation = scipy.spatial.transform.Rotation.random(random_state=RNG)
+    scipy_quaternion = rotation.as_quat()
+    orientation = (
+        scipy_quaternion[3],
+        scipy_quaternion[0],
+        scipy_quaternion[1],
+        scipy_quaternion[2],
+    )
+
+    system, nlist = get_shape_sys_nlist(VERTICES_FOR_TESTING)
+    noopt_oriented = spatula.optimize.NoOptimization(orientation=orientation)
+    op_oriented = compute_op_result(
+        symmetries,
+        noopt_oriented,
+        mode,
+        system,
+        nlist,
+        None,
+        np.zeros((1, 3)),
+        failed=True,
+    )
+
+    rotated_vertices = rotation.apply(VERTICES_FOR_TESTING)
+    rotated_system, rotated_nlist = get_shape_sys_nlist(rotated_vertices)
+    op_reference = compute_op_result(
+        symmetries,
+        spatula.optimize.NoOptimization(),
+        mode,
+        rotated_system,
+        rotated_nlist,
+        None,
+        np.zeros((1, 3)),
+        failed=True,
+    )
+    np.testing.assert_allclose(op_oriented.order, op_reference.order, rtol=RTOL)
+
+
+@pytest.mark.parametrize("mode", ["full", "boo"])
+def test_nooptimization_orientation_per_operator(mode):
+    rotation = scipy.spatial.transform.Rotation.random(random_state=RNG)
+    scipy_quaternion = rotation.as_quat()
+    orientation = (
+        scipy_quaternion[3],
+        scipy_quaternion[0],
+        scipy_quaternion[1],
+        scipy_quaternion[2],
+    )
+    query_points = np.zeros((1, 3))
+    symmetries = ["T", "Th"]
+
+    system, nlist = get_shape_sys_nlist(VERTICES_FOR_TESTING)
+    pgop_oriented = spatula.PGOP(
+        symmetries=symmetries,
+        optimizer=spatula.optimize.NoOptimization(orientation=orientation),
+        mode=mode,
+        compute_per_operator_values_for_final_orientation=True,
+    )
+    pgop_oriented.compute(system, None, nlist, query_points=query_points)
+
+    rotated_vertices = rotation.apply(VERTICES_FOR_TESTING)
+    rotated_system, rotated_nlist = get_shape_sys_nlist(rotated_vertices)
+    pgop_reference = spatula.PGOP(
+        symmetries=symmetries,
+        optimizer=spatula.optimize.NoOptimization(),
+        mode=mode,
+        compute_per_operator_values_for_final_orientation=True,
+    )
+    pgop_reference.compute(
+        rotated_system, None, rotated_nlist, query_points=query_points
+    )
+
+    np.testing.assert_allclose(pgop_oriented.order, pgop_reference.order, rtol=RTOL)
+
+
+def test_nooptimization_orientation_boosop_matches_rotated_vertices():
+    # Use a local seeded RNG so this test remains random-but-reproducible and
+    # does not depend on global RNG consumption order in other tests.
+    local_rng = np.random.default_rng(42)
+    rotation = scipy.spatial.transform.Rotation.random(random_state=local_rng)
+    scipy_quaternion = rotation.as_quat()
+    orientation = (
+        scipy_quaternion[3],
+        scipy_quaternion[0],
+        scipy_quaternion[1],
+        scipy_quaternion[2],
+    )
+    symmetries = ["T", "Th"]
+    query_points = np.zeros((1, 3))
+
+    system, nlist = get_shape_sys_nlist(VERTICES_FOR_TESTING)
+    op_oriented = compute_op_result(
+        symmetries,
+        spatula.optimize.NoOptimization(orientation=orientation),
+        "boosop",
+        system,
+        nlist,
+        None,
+        query_points,
+        failed=True,
+    )
+
+    rotated_vertices = rotation.apply(VERTICES_FOR_TESTING)
+    rotated_system, rotated_nlist = get_shape_sys_nlist(rotated_vertices)
+    op_reference = compute_op_result(
+        symmetries,
+        spatula.optimize.NoOptimization(),
+        "boosop",
+        rotated_system,
+        rotated_nlist,
+        None,
+        query_points,
+        failed=True,
+    )
+    np.testing.assert_allclose(op_oriented.order, op_reference.order, rtol=5e-4)
+
+
+def test_nooptimization_orientation_boosop_refine_matches_rotated_vertices():
+    rotation = scipy.spatial.transform.Rotation.random(random_state=RNG)
+    scipy_quaternion = rotation.as_quat()
+    orientation = (
+        scipy_quaternion[3],
+        scipy_quaternion[0],
+        scipy_quaternion[1],
+        scipy_quaternion[2],
+    )
+    symmetries = ["T", "Th"]
+    query_points = np.zeros((1, 3))
+
+    system, nlist = get_shape_sys_nlist(VERTICES_FOR_TESTING)
+    op_oriented = compute_op_result(
+        symmetries,
+        spatula.optimize.NoOptimization(orientation=orientation),
+        "boosop",
+        system,
+        nlist,
+        None,
+        query_points,
+        failed=True,
+        refine=True,
+    )
+
+    rotated_vertices = rotation.apply(VERTICES_FOR_TESTING)
+    rotated_system, rotated_nlist = get_shape_sys_nlist(rotated_vertices)
+    op_reference = compute_op_result(
+        symmetries,
+        spatula.optimize.NoOptimization(),
+        "boosop",
+        rotated_system,
+        rotated_nlist,
+        None,
+        query_points,
+        failed=True,
+        refine=True,
+    )
+    np.testing.assert_allclose(op_oriented.order, op_reference.order, rtol=5e-4)
+
+
 OPTIMIZERS_TO_TEST = [
     (
         "Union_descent_random",

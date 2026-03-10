@@ -3,5 +3,6 @@ ipython
 nanobind
 nbsphinx
 sphinx
+sphinx-inline-tabs
 sphinxcontrib-bibtex
 sphinxcontrib-katex

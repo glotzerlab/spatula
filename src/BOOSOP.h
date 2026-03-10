@@ -27,7 +27,8 @@ template<typename distribution_type> class BOOSOP {
     public:
     BOOSOP(const std::vector<std::vector<std::complex<double>>>& D_ij,
            std::shared_ptr<optimize::Optimizer>& optimizer,
-           typename distribution_type::param_type distribution_params);
+           typename distribution_type::param_type distribution_params,
+           bool operators_rotated_for_noopt = false);
 
     /**
      * @brief Root function for computing BOOSOP for a set of points.
@@ -162,6 +163,8 @@ template<typename distribution_type> class BOOSOP {
     std::vector<std::vector<std::complex<double>>> m_Dij;
     /// Optimizer to find the optimal rotation for each point and symmetry.
     std::shared_ptr<const optimize::Optimizer> m_optimize;
+    /// Whether to skip neighborhood rotation because operators were pre-rotated for NoOptimization.
+    bool m_operators_rotated_for_noopt;
 };
 
 } // End namespace spatula

@@ -8,7 +8,12 @@ Change Log
 <https://semver.org/>`_.
 
 
-0.2.0 (xxxx-xx-xx)
+0.x
+---
+
+
+
+0.2.0 (2026-03-05)
 ^^^^^^^^^^^^^^^^^^
 
 *Changed*
@@ -24,6 +29,9 @@ Change Log
 * Many ``std::vector<std::vector<...>>`` are now vectors of pointers, allowing for copy- and move- free access to python data. Matrix elements are accessed with ``std::span`` and cast to statically-allocated types for performance.
 * ``py::array`` are now replaced with ``std::vector`` or ``type*`` pointers
 * Implied rotation matrix type (``std::vector<double>``) is now ``typedef RotationMatrix = std::array<double, 9>``
+* Use Python stable ABI (``abi3``).
+* Massive perfomance updates all around
+* Added SIMD via ISPC for extra speedup
 
 *Removed*
 
@@ -36,6 +44,8 @@ Change Log
 * ``m_group_sizes`` class method for PGOP, which stores the size of each group (currently, (group order - 1) * 9). Previous code used vector.size, which requires copies and allocations for both individual elements and entire groups.
 * RotationMatrix std::array wrapper for fast and strongly typed vector rotations
 * ``-DENABLE_PROFILING`` flag to allow for easy profiling
+* ``spatula.optimize.NoOptimization`` now accepts ``orientation=(w, x, y, z)`` so PGOP/BOOSOP can evaluate at a fixed normalized quaternion without running an optimization loop.
+* Pre-built wheels using ISPC for increased performance
 
 *Updated*
 

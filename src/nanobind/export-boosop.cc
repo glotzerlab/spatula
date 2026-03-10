@@ -34,7 +34,8 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
             [](BOOSOP<distribution_type>* self,
                const nb::ndarray<std::complex<double>, nb::ndim<2>, nb::c_contig> D_ij_py,
                std::shared_ptr<optimize::Optimizer>& optimizer,
-               typename distribution_type::param_type distribution_params) {
+               typename distribution_type::param_type distribution_params,
+               bool operators_rotated_for_noopt) {
                 const size_t n_symmetries = D_ij_py.shape(0);
                 const size_t n_mlms = D_ij_py.shape(1);
                 std::vector<std::vector<std::complex<double>>> D_ij;
@@ -46,12 +47,16 @@ void export_BOOSOP_class(nb::module_& m, const std::string& name)
                                                           D_ij_py.data() + (i + 1) * n_mlms));
                 }
 
-                new (self) BOOSOP<distribution_type>(D_ij, optimizer, distribution_params);
+                new (self) BOOSOP<distribution_type>(D_ij,
+                                                     optimizer,
+                                                     distribution_params,
+                                                     operators_rotated_for_noopt);
             },
             nb::keep_alive<1, 2>(),
             "D_ij"_a,
             "optimizer"_a,
-            "distribution_params"_a)
+            "distribution_params"_a,
+            "operators_rotated_for_noopt"_a = false)
         .def(
             "compute",
             [](const BOOSOP<distribution_type>& self,
