@@ -75,6 +75,7 @@ class PGOP:
             thresholding by geometric separation.
 
             Interpretation:
+
             - ``metric="BC"``: 1 means maximally ordered (perfect overlap), 0 means
               disordered/no overlap.
             - ``metric="HD"``: 0 means maximally ordered (zero distance), larger values
