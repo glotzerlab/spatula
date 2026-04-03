@@ -1635,7 +1635,7 @@ def test_hd_metric_perfect_symmetry_is_zero(mode):
     nlist = freud.locality.AABBQuery(box, points).query(points, qargs).toNeighborList()
     sigma = SIGMA_VALUES[mode]
 
-    op_hd = spatula.PGOP(["Oh"], OPTIMIZER, mode=mode, metric="HD")
+    op_hd = spatula.PGOP(["Oh"], OPTIMIZER, mode=mode, metric="hellinger")
     op_hd.compute((box, points), sigma, nlist)
     np.testing.assert_allclose(op_hd.order, np.zeros_like(op_hd.order), atol=RTOL)
 
@@ -1648,10 +1648,10 @@ def test_hd_metric_matches_bc_transform(mode):
     sigma = SIGMA_VALUES[mode]
     no_opt = spatula.optimize.NoOptimization()
 
-    op_bc = spatula.PGOP(["Oh", "D3h"], no_opt, mode=mode, metric="BC")
+    op_bc = spatula.PGOP(["Oh", "D3h"], no_opt, mode=mode, metric="bhattacharyya")
     op_bc.compute((box, points), sigma, nlist)
 
-    op_hd = spatula.PGOP(["Oh", "D3h"], no_opt, mode=mode, metric="HD")
+    op_hd = spatula.PGOP(["Oh", "D3h"], no_opt, mode=mode, metric="hellinger")
     op_hd.compute((box, points), sigma, nlist)
 
     np.testing.assert_allclose(
@@ -1670,7 +1670,7 @@ def test_hd_metric_matches_bc_transform_per_operator_values():
         ["Oh"],
         no_opt,
         mode="full",
-        metric="BC",
+        metric="bhattacharyya",
         compute_per_operator_values_for_final_orientation=True,
     )
     op_bc.compute((box, points), SIGMA_VALUES["full"], nlist, query_points=qp)
@@ -1679,7 +1679,7 @@ def test_hd_metric_matches_bc_transform_per_operator_values():
         ["Oh"],
         no_opt,
         mode="full",
-        metric="HD",
+        metric="hellinger",
         compute_per_operator_values_for_final_orientation=True,
     )
     op_hd.compute((box, points), SIGMA_VALUES["full"], nlist, query_points=qp)
