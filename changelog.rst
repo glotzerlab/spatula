@@ -13,7 +13,7 @@ Change Log
 
 *Added*
 
-* Introduced Hillinger distance as an order option which obeys triangle inequality.
+* Introduced Hellinger distance as an order option which obeys triangle inequality.
 
 
 0.2.0 (2026-03-05)
