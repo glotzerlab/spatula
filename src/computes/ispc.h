@@ -50,6 +50,25 @@ inline float compute_pgop_fisher_fast_ispc_wrapper(LocalNeighborhood& neighborho
                                                kappa);
 }
 
+/// Compute PGOP using ISPC with LogSumExp smooth approximation.
+inline float compute_pgop_gaussian_fast_smooth_ispc_wrapper(LocalNeighborhood& neighborhood,
+                                                            const std::span<const float> R_ij,
+                                                            float beta)
+{
+    const float sigma = neighborhood.sigmas[0];
+    const std::int32_t num_positions = static_cast<std::int32_t>(neighborhood.rotated_pos_x.size());
+    const std::int32_t num_matrices = static_cast<std::int32_t>(R_ij.size() / 9);
+
+    return ispc::compute_pgop_gaussian_fast_smooth_ispc(neighborhood.rotated_pos_x.data(),
+                                                        neighborhood.rotated_pos_y.data(),
+                                                        neighborhood.rotated_pos_z.data(),
+                                                        R_ij.data(),
+                                                        num_positions,
+                                                        num_matrices,
+                                                        sigma,
+                                                        beta);
+}
+
 /// Compute PGOP Gaussian (non-fast, per-point sigmas).
 inline float compute_pgop_gaussian_ispc_wrapper(LocalNeighborhood& neighborhood,
                                                 const std::span<const float> R_ij)

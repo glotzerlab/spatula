@@ -108,6 +108,69 @@ float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::spa
 #endif
 }
 
+float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
+                                        const std::span<const float> R_ij,
+                                        float beta)
+{
+#if defined(SPATULA_HAS_ISPC)
+    return compute_pgop_gaussian_fast_smooth_ispc_wrapper(neighborhood, R_ij, beta);
+#else
+    const float* pos_x = neighborhood.rotated_pos_x.data();
+    const float* pos_y = neighborhood.rotated_pos_y.data();
+    const float* pos_z = neighborhood.rotated_pos_z.data();
+    const size_t n = neighborhood.rotated_pos_x.size();
+
+    const double denom = 1.0 / (8.0 * neighborhood.sigmas[0] * neighborhood.sigmas[0]);
+    double overlap = 0.0;
+    data::RotationMatrix R;
+    // loop over the R_ij. Each 3x3 segment is a symmetry operation
+    // matrix. Each matrix should be applied to each point in positions.
+    for (size_t i {0}; i < R_ij.size(); i += 9) {
+        std::copy_n(R_ij.data() + i, 9, R.begin());
+
+        // loop over positions
+        for (size_t j {0}; j < n; j++) {
+            // symmetrized position is obtained by multiplying the operator with the position
+            const float sym_x = R[0] * pos_x[j] + R[1] * pos_y[j] + R[2] * pos_z[j];
+            const float sym_y = R[3] * pos_x[j] + R[4] * pos_y[j] + R[5] * pos_z[j];
+            const float sym_z = R[6] * pos_x[j] + R[7] * pos_y[j] + R[8] * pos_z[j];
+
+            // First pass: find min squared distance for numerical stability.
+            // Subtracting min_d from each term ensures exp(0) = 1 for the closest
+            // point, preventing underflow in the LogSumExp sum.
+            float min_dist_sq = std::numeric_limits<float>::infinity();
+            for (size_t m {0}; m < n; ++m) {
+                const float dx = pos_x[m] - sym_x;
+                const float dy = pos_y[m] - sym_y;
+                const float dz = pos_z[m] - sym_z;
+                const float d_sq = dx * dx + dy * dy + dz * dz;
+                if (d_sq < min_dist_sq) min_dist_sq = d_sq;
+            }
+
+            // Second pass: LogSumExp smooth-max of overlap exponents.
+            // contribution = exp(-min_d*denom + (1/beta)*log(sum exp(-beta*(d_m-min_d)*denom)))
+            // This gives a smooth upper bound on the exact exp(-min_d*denom), so
+            // PGOP values are >= exact and test thresholds are met.
+            double sum_exp = 0.0;
+            for (size_t m {0}; m < n; ++m) {
+                const float dx = pos_x[m] - sym_x;
+                const float dy = pos_y[m] - sym_y;
+                const float dz = pos_z[m] - sym_z;
+                const float d_sq = dx * dx + dy * dy + dz * dz;
+                sum_exp += util::fast_exp_approx(
+                    -static_cast<double>(d_sq - min_dist_sq) * static_cast<double>(beta) * denom);
+            }
+
+            overlap += util::fast_exp_approx(-static_cast<double>(min_dist_sq) * denom
+                                             + std::log(sum_exp) / static_cast<double>(beta));
+        }
+    }
+    // cast to double to avoid integer division
+    const auto normalization = static_cast<float>(n * R_ij.size()) / 9.0;
+    return overlap / normalization;
+#endif
+}
+
 float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
 {
 #if defined(SPATULA_HAS_ISPC)
