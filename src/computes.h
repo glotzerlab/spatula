@@ -144,7 +144,8 @@ float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
                 const float dy = pos_y[m] - sym_y;
                 const float dz = pos_z[m] - sym_z;
                 const float d_sq = dx * dx + dy * dy + dz * dz;
-                if (d_sq < min_dist_sq) min_dist_sq = d_sq;
+                if (d_sq < min_dist_sq)
+                    min_dist_sq = d_sq;
             }
 
             // Second pass: LogSumExp smooth-max of overlap exponents.
@@ -157,8 +158,8 @@ float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
                 const float dy = pos_y[m] - sym_y;
                 const float dz = pos_z[m] - sym_z;
                 const float d_sq = dx * dx + dy * dy + dz * dz;
-                sum_exp += util::fast_exp_approx(
-                    -static_cast<double>(d_sq - min_dist_sq) * static_cast<double>(beta) * denom);
+                sum_exp += util::fast_exp_approx(-static_cast<double>(d_sq - min_dist_sq)
+                                                 * static_cast<double>(beta) * denom);
             }
 
             overlap += util::fast_exp_approx(-static_cast<double>(min_dist_sq) * denom
