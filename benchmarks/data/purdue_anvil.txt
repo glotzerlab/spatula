@@ -1,0 +1,42 @@
+N_PARTICLES=13824
+N_SAMPLES=4
+threads=128
+  msm: 51.9090ms +/- 0.5022ms (0.0038ms/particle)
+  pgop: 529.6289ms +/- 12.6028ms (0.0383ms/particle)
+  pgop_60: 295.6043ms +/- 6.6048ms (0.0214ms/particle)
+  pgop_none: 245.4471ms +/- 3.2900ms (0.0178ms/particle)
+threads=64
+  msm: 64.8922ms +/- 1.0058ms (0.0047ms/particle)
+  pgop: 822.3226ms +/- 0.7015ms (0.0595ms/particle)
+  pgop_60: 360.9771ms +/- 0.3573ms (0.0261ms/particle)
+  pgop_none: 229.0684ms +/- 1.8090ms (0.0166ms/particle)
+threads=32
+  msm: 92.3175ms +/- 0.9687ms (0.0067ms/particle)
+  pgop: 1321.8952ms +/- 0.7228ms (0.0956ms/particle)
+  pgop_60: 479.0818ms +/- 0.1181ms (0.0347ms/particle)
+  pgop_none: 224.2708ms +/- 1.4200ms (0.0162ms/particle)
+threads=16
+  msm: 130.0362ms +/- 4.5255ms (0.0094ms/particle)
+  pgop: 2434.1192ms +/- 17.3761ms (0.1761ms/particle)
+  pgop_60: 736.6101ms +/- 3.3744ms (0.0533ms/particle)
+  pgop_none: 226.1373ms +/- 1.4849ms (0.0164ms/particle)
+threads=8
+  msm: 198.9804ms +/- 17.5086ms (0.0144ms/particle)
+  pgop: 4607.9953ms +/- 3.2402ms (0.3333ms/particle)
+  pgop_60: 1242.5406ms +/- 1.2996ms (0.0899ms/particle)
+  pgop_none: 229.2853ms +/- 0.6645ms (0.0166ms/particle)
+threads=4
+  msm: 150.4918ms +/- 13.5604ms (0.0109ms/particle)
+  pgop: 9156.2837ms +/- 63.8262ms (0.6623ms/particle)
+  pgop_60: 2310.9283ms +/- 1.4845ms (0.1672ms/particle)
+  pgop_none: 236.5472ms +/- 1.5490ms (0.0171ms/particle)
+threads=2
+  msm: 124.6271ms +/- 0.3919ms (0.0090ms/particle)
+  pgop: 17631.9658ms +/- 4.5110ms (1.2755ms/particle)
+  pgop_60: 4265.1867ms +/- 2.0683ms (0.3085ms/particle)
+  pgop_none: 252.2952ms +/- 2.5180ms (0.0183ms/particle)
+threads=1
+  msm: 190.3596ms +/- 0.7450ms (0.0138ms/particle)
+  pgop: 35862.4779ms +/- 1112.7420ms (2.5942ms/particle)
+  pgop_60: 8371.2325ms +/- 12.2431ms (0.6056ms/particle)
+  pgop_none: 291.2379ms +/- 0.8136ms (0.0211ms/particle)
