@@ -8,7 +8,7 @@ freud-analysis==3.5.0
     # via -r .github/workflows/requirements-test.in
 iniconfig==2.3.0
     # via pytest
-more-itertools==11.0.1
+more-itertools==11.0.2
     # via parsnip-cif
 nanobind==2.12.0
     # via -r .github/workflows/requirements-test.in
@@ -22,7 +22,7 @@ numpy==2.4.4
     #   parsnip-cif
     #   rowan
     #   scipy
-packaging==26.0
+packaging==26.1
     # via
     #   pytest
     #   scikit-build-core
