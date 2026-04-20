@@ -14,6 +14,7 @@
 #include "util/Metrics.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <span>
 
 namespace spatula { namespace computes {
@@ -172,7 +173,13 @@ float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
         }
     }
     const double normalization = static_cast<double>(n * R_ij.size()) / 9.0;
-    return static_cast<float>(overlap / normalization);
+    const double result = overlap / normalization;
+    // Guard against NaN (from 0/0) or overflow when casting to float.
+    // The smooth LogSumExp upper bound is at most n^(1/beta), typically < 2.0.
+    if (!std::isfinite(result) || result < 0.0) {
+        return 0.0f;
+    }
+    return static_cast<float>(std::min(result, 2.0));
 }
 
 float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
