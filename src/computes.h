@@ -134,38 +134,29 @@ float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
 
         // loop over positions
         for (size_t j {0}; j < n; j++) {
-            // symmetrized position — promote to double for precision
-            const double sym_x = static_cast<double>(R[0]) * pos_x[j]
-                                 + static_cast<double>(R[1]) * pos_y[j]
-                                 + static_cast<double>(R[2]) * pos_z[j];
-            const double sym_y = static_cast<double>(R[3]) * pos_x[j]
-                                 + static_cast<double>(R[4]) * pos_y[j]
-                                 + static_cast<double>(R[5]) * pos_z[j];
-            const double sym_z = static_cast<double>(R[6]) * pos_x[j]
-                                 + static_cast<double>(R[7]) * pos_y[j]
-                                 + static_cast<double>(R[8]) * pos_z[j];
+            const float sym_x = R[0] * pos_x[j] + R[1] * pos_y[j] + R[2] * pos_z[j];
+            const float sym_y = R[3] * pos_x[j] + R[4] * pos_y[j] + R[5] * pos_z[j];
+            const float sym_z = R[6] * pos_x[j] + R[7] * pos_y[j] + R[8] * pos_z[j];
 
             // First pass: find min squared distance (in double precision).
             double min_dist_sq = std::numeric_limits<double>::infinity();
             for (size_t m {0}; m < n; ++m) {
-                const double dx = static_cast<double>(pos_x[m]) - sym_x;
-                const double dy = static_cast<double>(pos_y[m]) - sym_y;
-                const double dz = static_cast<double>(pos_z[m]) - sym_z;
-                const double d_sq = dx * dx + dy * dy + dz * dz;
+                const float dx = pos_x[m] - sym_x;
+                const float dy = pos_y[m] - sym_y;
+                const float dz = pos_z[m] - sym_z;
+                const double d_sq = static_cast<double>(dx * dx + dy * dy + dz * dz);
                 if (d_sq < min_dist_sq)
                     min_dist_sq = d_sq;
             }
 
             // Second pass: LogSumExp smooth-max of overlap exponents.
-            // contribution = exp(-min_d*denom + (1/beta)*log(sum exp(-beta*(d_m-min_d)*denom)))
-            // This gives a smooth upper bound on the exact exp(-min_d*denom).
             // Using std::exp for full double-precision correctness (needed for AD).
             double sum_exp = 0.0;
             for (size_t m {0}; m < n; ++m) {
-                const double dx = static_cast<double>(pos_x[m]) - sym_x;
-                const double dy = static_cast<double>(pos_y[m]) - sym_y;
-                const double dz = static_cast<double>(pos_z[m]) - sym_z;
-                const double d_sq = dx * dx + dy * dy + dz * dz;
+                const float dx = pos_x[m] - sym_x;
+                const float dy = pos_y[m] - sym_y;
+                const float dz = pos_z[m] - sym_z;
+                const double d_sq = static_cast<double>(dx * dx + dy * dy + dz * dz);
                 sum_exp += std::exp(-(d_sq - min_dist_sq) * weight_scale);
             }
 
