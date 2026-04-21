@@ -14,6 +14,7 @@
 #include "util/Metrics.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <span>
 
 namespace spatula { namespace computes {
@@ -106,6 +107,71 @@ float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::spa
     const auto normalization = static_cast<float>(n * R_ij.size()) / 9.0;
     return overlap / normalization;
 #endif
+}
+
+float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
+                                        const std::span<const float> R_ij,
+                                        float beta)
+{
+    const float* pos_x = neighborhood.rotated_pos_x.data();
+    const float* pos_y = neighborhood.rotated_pos_y.data();
+    const float* pos_z = neighborhood.rotated_pos_z.data();
+    const size_t n = neighborhood.rotated_pos_x.size();
+
+    const double sigma = static_cast<double>(neighborhood.sigmas[0]);
+    const double denom = 1.0 / (8.0 * sigma * sigma);
+    const double beta_d = static_cast<double>(beta);
+    // Precompute the LogSumExp weight scale: beta * denom.
+    // Clamp to prevent exp(-weight_scale * delta) from underflowing to 0
+    // for all terms (which would make log(sum) = -inf).
+    const double weight_scale = std::min(beta_d * denom, 700.0);
+    double overlap = 0.0;
+    data::RotationMatrix R;
+    // loop over the R_ij. Each 3x3 segment is a symmetry operation
+    // matrix. Each matrix should be applied to each point in positions.
+    for (size_t i {0}; i < R_ij.size(); i += 9) {
+        std::copy_n(R_ij.data() + i, 9, R.begin());
+
+        // loop over positions
+        for (size_t j {0}; j < n; j++) {
+            const float sym_x = R[0] * pos_x[j] + R[1] * pos_y[j] + R[2] * pos_z[j];
+            const float sym_y = R[3] * pos_x[j] + R[4] * pos_y[j] + R[5] * pos_z[j];
+            const float sym_z = R[6] * pos_x[j] + R[7] * pos_y[j] + R[8] * pos_z[j];
+
+            // First pass: find min squared distance (in double precision).
+            double min_dist_sq = std::numeric_limits<double>::infinity();
+            for (size_t m {0}; m < n; ++m) {
+                const float dx = pos_x[m] - sym_x;
+                const float dy = pos_y[m] - sym_y;
+                const float dz = pos_z[m] - sym_z;
+                const double d_sq = static_cast<double>(dx * dx + dy * dy + dz * dz);
+                if (d_sq < min_dist_sq)
+                    min_dist_sq = d_sq;
+            }
+
+            // Second pass: LogSumExp smooth-max of overlap exponents.
+            // Using std::exp for full double-precision correctness (needed for AD).
+            double sum_exp = 0.0;
+            for (size_t m {0}; m < n; ++m) {
+                const float dx = pos_x[m] - sym_x;
+                const float dy = pos_y[m] - sym_y;
+                const float dz = pos_z[m] - sym_z;
+                const double d_sq = static_cast<double>(dx * dx + dy * dy + dz * dz);
+                sum_exp += std::exp(-(d_sq - min_dist_sq) * weight_scale);
+            }
+
+            const double exp_arg = -min_dist_sq * denom + std::log(sum_exp) / beta_d;
+            overlap += std::exp(std::min(exp_arg, 700.0));
+        }
+    }
+    const double normalization = static_cast<double>(n * R_ij.size()) / 9.0;
+    const double result = overlap / normalization;
+    // Guard against NaN (from 0/0) or overflow when casting to float.
+    // The smooth LogSumExp upper bound is at most n^(1/beta), typically < 2.0.
+    if (!std::isfinite(result) || result < 0.0) {
+        return 0.0f;
+    }
+    return static_cast<float>(std::min(result, 2.0));
 }
 
 float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
