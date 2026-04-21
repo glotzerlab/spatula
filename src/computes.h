@@ -136,14 +136,14 @@ float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
         for (size_t j {0}; j < n; j++) {
             // symmetrized position — promote to double for precision
             const double sym_x = static_cast<double>(R[0]) * pos_x[j]
-                                + static_cast<double>(R[1]) * pos_y[j]
-                                + static_cast<double>(R[2]) * pos_z[j];
+                                 + static_cast<double>(R[1]) * pos_y[j]
+                                 + static_cast<double>(R[2]) * pos_z[j];
             const double sym_y = static_cast<double>(R[3]) * pos_x[j]
-                                + static_cast<double>(R[4]) * pos_y[j]
-                                + static_cast<double>(R[5]) * pos_z[j];
+                                 + static_cast<double>(R[4]) * pos_y[j]
+                                 + static_cast<double>(R[5]) * pos_z[j];
             const double sym_z = static_cast<double>(R[6]) * pos_x[j]
-                                + static_cast<double>(R[7]) * pos_y[j]
-                                + static_cast<double>(R[8]) * pos_z[j];
+                                 + static_cast<double>(R[7]) * pos_y[j]
+                                 + static_cast<double>(R[8]) * pos_z[j];
 
             // First pass: find min squared distance (in double precision).
             double min_dist_sq = std::numeric_limits<double>::infinity();
@@ -152,7 +152,8 @@ float compute_pgop_gaussian_fast_smooth(LocalNeighborhood& neighborhood,
                 const double dy = static_cast<double>(pos_y[m]) - sym_y;
                 const double dz = static_cast<double>(pos_z[m]) - sym_z;
                 const double d_sq = dx * dx + dy * dy + dz * dz;
-                if (d_sq < min_dist_sq) min_dist_sq = d_sq;
+                if (d_sq < min_dist_sq)
+                    min_dist_sq = d_sq;
             }
 
             // Second pass: LogSumExp smooth-max of overlap exponents.
