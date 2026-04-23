@@ -2,8 +2,7 @@
 How to cite spatula
 ===================
 
-Spatula paper and Point-Group Order Parameter (PGOP) algorithm can be found `on arXiv <https://arxiv.org/abs/2509.12665>`_ or from the
-`Journal of Chemical Physics <https://doi.org/10.1063/5.0312579>`_.
+The SPATULA and Point-Group Order Parameter (PGOP) algorithm paper is available online from `Journal of Chemical Physics <https://doi.org/10.1063/5.0312579>`_ and a pre-print is freely available on `arXiv <https://arxiv.org/abs/2509.12665>`_.
 
 Work detailing the optimization procedure and implementation of BOOSOP can be found `in this thesis <https://dx.doi.org/10.7302/23058>`_.
 
