@@ -29,7 +29,8 @@ class PGOP {
          std::shared_ptr<optimize::Optimizer>& optimizer,
          const std::vector<size_t> group_sizes,
          unsigned int mode,
-         bool compute_per_operator);
+         bool compute_per_operator,
+         float smooth_beta = 0.0f);
 
     /**
      * @brief Root function for computing PGOP for a set of points.
@@ -103,6 +104,8 @@ class PGOP {
     unsigned int m_mode;
     /// Whether to compute the PGOP for each operator.
     bool m_compute_per_operator;
+    /// Sharpness parameter for LogSumExp smooth approximation. 0.0 = exact max (default).
+    float m_smooth_beta;
     /// Whether operators are pre-rotated once for NoOptimization.
     bool m_use_rotated_operators_for_noopt = false;
     /// Cached operator matrices rotated into the fixed NoOptimization orientation.

@@ -31,6 +31,7 @@ class PGOP:
         optimizer: spatula.optimize.Optimizer,
         mode: str = "full",
         compute_per_operator_values_for_final_orientation: bool = False,
+        smooth_beta: float = 10.0,
         metric: str = "BC",
     ):
         r"""Create a PGOP object.
@@ -67,6 +68,16 @@ class PGOP:
             PGOP value. Defaults to False. `order` values are in order point group
             symmetry, order for symmetry operators of this point group in order given by
             the representations.matrices, order for second point group symmetry, etc.
+        smooth_beta : float, optional
+            Sharpness parameter for a LogSumExp smooth approximation of the maximum
+            overlap. When 0.0 (default), the exact ``max`` is used (non-differentiable).
+            When positive, replaces ``max_m exp(-d_m / (8σ²))`` with a smooth upper
+            bound via LogSumExp on the overlap exponents. The approximation approaches
+            the exact value as ``smooth_beta`` increases. Typical values for
+            differentiable optimization range from 10.0 to 25.0. Note that the smooth
+            approximation may produce PGOP values slightly above 1.0 (up to
+            ``n^(1/beta) - 1`` in degenerate cases). Requires constant sigmas
+            (scalar sigma).
         metric : str, optional
             The metric to report. ``"BC"`` reports the Bhattacharyya coefficient and
             ``"HD"`` reports the Hellinger distance,
@@ -118,6 +129,7 @@ class PGOP:
             optimizer._cpp,
             m_mode,
             compute_per_operator_values_for_final_orientation,
+            smooth_beta,
         )
         self._order = None
         self._rotations = None
