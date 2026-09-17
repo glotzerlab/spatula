@@ -4,11 +4,24 @@
 """Point group and symmetry operation representations."""
 
 import itertools
+import warnings
 from collections.abc import Generator
 
 import numpy as np
 import scipy.spatial
 import scipy.special
+
+
+def _as_euler_zyz(rotations: scipy.spatial.transform.Rotation) -> np.ndarray:
+    """Extract ZYZ Euler angles, ignoring scipy's gimbal lock warning.
+
+    For gimbal-locked rotations scipy sets the third angle to zero, which is
+    acceptable here since any valid Euler decomposition describes the same
+    rotation.
+    """
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Gimbal lock detected")
+        return rotations.as_euler("zyz")
 
 
 def extract_first_element_of_hermann_mauguin_notation(s: str) -> tuple[str, int]:
@@ -458,9 +471,9 @@ def rotoreflection_from_axis_angle_cart(axis: np.ndarray, angle: float) -> np.nd
     """
     # normalize the axis of rotation
     rotation_axis = axis / np.linalg.norm(axis)
-    rotoreflection_euler = scipy.spatial.transform.Rotation.from_rotvec(
-        rotation_axis * angle
-    ).as_euler("zyz")
+    rotoreflection_euler = _as_euler_zyz(
+        scipy.spatial.transform.Rotation.from_rotvec(rotation_axis * angle)
+    )
     # find the rotoreflection matrix
     return rotoreflection_from_euler_angles_cart(*rotoreflection_euler)
 
@@ -739,7 +752,7 @@ def _rotation_operations_for_polyhedral_point_groups_cart(
     """
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group(point_group):
-        rot = i.as_euler("zyz")
+        rot = _as_euler_zyz(i)
         operations.append(rotation_from_euler_angles_cart(*rot))
     # swap first and 3rd element so that identity is first
     operations[0], operations[3] = operations[3], operations[0]
@@ -1184,9 +1197,9 @@ def rotation_from_axis_angle_sph(
     """
     # normalize the axis of rotation
     rotation_axis = axis / np.linalg.norm(axis)
-    rotation_euler = scipy.spatial.transform.Rotation.from_rotvec(
-        rotation_axis * angle
-    ).as_euler("zyz")
+    rotation_euler = _as_euler_zyz(
+        scipy.spatial.transform.Rotation.from_rotvec(rotation_axis * angle)
+    )
     # compute wigner D matrix
     return rotation_from_euler_angles_sph(max_l, *rotation_euler)
 
@@ -1274,9 +1287,9 @@ def rotoreflection_from_axis_angle_sph(
     """
     # normalize the axis of rotation
     rotation_axis = axis / np.linalg.norm(axis)
-    rotoreflection_euler = scipy.spatial.transform.Rotation.from_rotvec(
-        rotation_axis * angle
-    ).as_euler("zyz")
+    rotoreflection_euler = _as_euler_zyz(
+        scipy.spatial.transform.Rotation.from_rotvec(rotation_axis * angle)
+    )
     # find the rotoreflection matrix
     return rotoreflection_from_euler_angles_sph(max_l, *rotoreflection_euler)
 
@@ -1592,7 +1605,7 @@ def _rotation_operations_for_polyhedral_point_groups_sph(
     """
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group(point_group):
-        rot = i.as_euler("zyz")
+        rot = _as_euler_zyz(i)
         operations.append(rotation_from_euler_angles_sph(max_l, *rot))
     return operations
 

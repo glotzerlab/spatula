@@ -7,8 +7,6 @@ Provides the `BOOSOP` class which computes the point group symmetry for a
 particle's neighborhood or its local bond orientation order diagram.
 """
 
-import warnings
-
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -28,14 +26,8 @@ def _get_neighbors(
     neighbors passed.
     """
     query = freud.locality.AABBQuery.from_system(system)
-    if isinstance(neighbors, freud.locality.NeighborList):
-        if query_points is not None:
-            warnings.warn(
-                "query_points are ignored when a NeighborList is passed.",
-                UserWarning,
-                stacklevel=2,
-            )
-    else:
+    if not isinstance(neighbors, freud.locality.NeighborList):
+        # Note: query_points are ignored when a NeighborList is passed.
         query_points = query_points if query_points is not None else query.points
         neighbors = query.query(query_points, neighbors).toNeighborList()
     neighbors.filter(neighbors.distances > 0)

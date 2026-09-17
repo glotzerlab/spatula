@@ -9,6 +9,7 @@ import spatula
 from spatula.representations import (
     CartesianRepMatrix,
     WignerD,
+    _as_euler_zyz,
     _ch_operations_sph,
     _ci_operations_sph,
     _cn_operations_sph,
@@ -413,7 +414,7 @@ def test_cn(n):
 def test_cn_against_scipy_rotations_euler(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
-        operations.append(rotation_from_euler_angles_sph(maxl, *i.as_euler("zyz")))
+        operations.append(rotation_from_euler_angles_sph(maxl, *_as_euler_zyz(i)))
     assert np.allclose(
         compute_condensed_wignerD_matrix_for_a_given_point_group("C" + str(n), maxl),
         condensed_wignerD_from_operations(operations),
@@ -442,7 +443,7 @@ def test_cn_against_scipy_rotations_rotvec(n):
 def test_dn_against_scipy_rotations_euler(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
-        euler_angles = np.asarray(i.as_euler("zyz"))
+        euler_angles = np.asarray(_as_euler_zyz(i))
         # Fix for scipy starting from C2' that aligns with x axis, while I start with y.
         if n % 2 == 1 and np.isclose(euler_angles[1], np.pi):
             euler_angles[0] = euler_angles[0] + np.pi
@@ -755,7 +756,7 @@ def test_general_rotoreflection_against_axis_order_cart(n):
 def test_cn_against_scipy_rotations_euler_cart(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("C" + str(n)):
-        operations.append(rotation_from_euler_angles_cart(*i.as_euler("zyz")))
+        operations.append(rotation_from_euler_angles_cart(*_as_euler_zyz(i)))
     assert np.allclose(
         compute_Cartesian_Representation_matrix_for_a_given_point_group("C" + str(n)),
         operations,
@@ -784,7 +785,7 @@ def test_cn_against_scipy_rotations_rotvec_cart(n):
 def test_dn_against_scipy_rotations_euler_cart(n):
     operations = []
     for i in scipy.spatial.transform.Rotation.create_group("D" + str(n)):
-        euler_angles = np.asarray(i.as_euler("zyz"))
+        euler_angles = np.asarray(_as_euler_zyz(i))
         # Fix for scipy starting from C2' that aligns with x axis, while I start with y.
         if n % 2 == 1 and np.isclose(euler_angles[1], np.pi):
             euler_angles[0] = euler_angles[0] + np.pi
