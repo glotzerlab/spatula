@@ -14,6 +14,8 @@ Change Log
 *Added*
 
 * Introduced Hillinger distance as an order option which obeys triangle inequality.
+* Added a ``backend`` argument to ``PGOP`` (``{"scalar", "SIMD"}``, default
+  ``"SIMD"``) selecting the kernel implementation at runtime (#171).
 
 *Fixed*
 

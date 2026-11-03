@@ -11,6 +11,8 @@
 #include <nanobind/stl/list.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/vector.h>
+#include <stdexcept>
+#include <string>
 namespace nb = nanobind;
 using namespace nb::literals;
 
@@ -25,7 +27,19 @@ void export_spatula(nb::module_& m)
                const std::vector<nb::ndarray<float, nb::ndim<1>>>& R_ij_list,
                std::shared_ptr<optimize::Optimizer>& optimizer,
                unsigned int m_mode,
-               bool compute_per_operator) {
+               bool compute_per_operator,
+               const std::string& backend) {
+                // Validate the backend selection before doing any work.
+                Backend cpp_backend;
+                if (backend == "scalar") {
+                    cpp_backend = Backend::Scalar;
+                } else if (backend == "SIMD") {
+                    cpp_backend = Backend::SIMD;
+                } else {
+                    throw std::invalid_argument(
+                        "Backend '" + backend
+                        + "' is not valid (valid params: {\"scalar\", \"SIMD\"})");
+                }
                 // Save a vector of pointers to each group's data
                 const std::vector<const float*> ptrs = [&]() {
                     std::vector<const float*> v;
@@ -49,14 +63,16 @@ void export_spatula(nb::module_& m)
                                 optimizer,
                                 group_sizes,
                                 m_mode,
-                                compute_per_operator);
+                                compute_per_operator,
+                                cpp_backend);
             },
             // Keep argument 2 (symops) alive as long as arg 1 (self) is alive
             nb::keep_alive<1, 2>(),
             nb::arg("R_ij"),
             nb::arg("optimizer"),
             nb::arg("m_mode"),
-            nb::arg("compute_per_operator"))
+            nb::arg("compute_per_operator"),
+            nb::arg("backend") = "SIMD")
         .def(
             "compute",
             [](PGOP* self,

@@ -47,9 +47,11 @@ PGOP::PGOP(const std::vector<const float*> R_ij_data,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            std::vector<size_t> group_sizes,
            unsigned int mode,
-           bool compute_per_operator)
+           bool compute_per_operator,
+           Backend backend)
     : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(std::move(group_sizes)),
-      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
+      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator),
+      m_backend(backend)
 {
     const auto* no_optimization = dynamic_cast<const optimize::NoOptimization*>(m_optimize.get());
     if (no_optimization == nullptr) {
@@ -209,14 +211,14 @@ double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::span<const
 {
     if (m_mode == 0) {
         if (neighborhood.constantSigmas()) {
-            return computes::compute_pgop_gaussian_fast(neighborhood, R_ij);
+            return computes::compute_pgop_gaussian_fast(neighborhood, R_ij, m_backend);
         }
-        return computes::compute_pgop_gaussian(neighborhood, R_ij);
+        return computes::compute_pgop_gaussian(neighborhood, R_ij, m_backend);
     } else {
         if (neighborhood.constantSigmas()) {
-            return computes::compute_pgop_fisher_fast(neighborhood, R_ij);
+            return computes::compute_pgop_fisher_fast(neighborhood, R_ij, m_backend);
         }
-        return computes::compute_pgop_fisher(neighborhood, R_ij);
+        return computes::compute_pgop_fisher(neighborhood, R_ij, m_backend);
     }
 }
 

@@ -7,6 +7,8 @@ Provides the `PGOP` and `BOOSOP` class which computes the point group symmetry f
 particle's neighborhood or its local bond orientation order diagram.
 """
 
+import typing
+
 import numpy as np
 
 import spatula._spatula_nb
@@ -32,6 +34,7 @@ class PGOP:
         mode: str = "full",
         compute_per_operator_values_for_final_orientation: bool = False,
         metric: str = "BC",
+        backend: typing.Literal["scalar", "SIMD"] = "SIMD",
     ):
         r"""Create a PGOP object.
 
@@ -84,6 +87,12 @@ class PGOP:
               disordered/no overlap.
             - ``metric="HD"``: 0 means maximally ordered (zero distance), larger values
               mean less ordered. Defaults to ``"BC"``.
+        backend : str, optional
+            The kernel backend used to evaluate the overlap sums. ``"SIMD"`` uses
+            ISPC-vectorized kernels with a fast approximate exponential for maximum
+            throughput, and should be used in most cases.. ``"scalar"`` uses scalar C++
+            loops evaluated with the standard library ``exp``, and can be used as a
+            reference implementation. Defaults to ``"SIMD"``.
 
         """
         if isinstance(symmetries, str):
@@ -94,6 +103,12 @@ class PGOP:
             msg = f"Metric '{metric}' is not valid (valid params: {{'BC', 'HD'}})"
             raise ValueError(msg)
         self._metric = metric
+        if backend not in {"scalar", "SIMD"}:
+            msg = (
+                f"Backend '{backend}' is not valid (valid params: {{'scalar', 'SIMD'}})"
+            )
+            raise ValueError(msg)
+        self._backend = backend
         # computing the PGOP
         self._optimizer = optimizer
         matrices = []
@@ -118,6 +133,7 @@ class PGOP:
             optimizer._cpp,
             m_mode,
             compute_per_operator_values_for_final_orientation,
+            backend,
         )
         self._order = None
         self._rotations = None
