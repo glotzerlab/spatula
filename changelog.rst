@@ -19,6 +19,10 @@ Change Log
 
 * ``spatula.optimize.Mesh.from_grid``. Use ``Mesh.from_lattice`` instead, which produces meshes of comparable quality and supports an arbitrary number of rotations.
 
+*Fixed*
+
+* SIMD fast exponential paths are now slightly more accurate and handle overflows more carefully (#169)
+
 
 0.2.0 (2026-03-05)
 ^^^^^^^^^^^^^^^^^^
