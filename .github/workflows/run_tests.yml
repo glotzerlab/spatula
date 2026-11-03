@@ -24,20 +24,27 @@ jobs:
       fail-fast: false
       matrix:
         ispc: [true]
-        os: [ubuntu-24.04]
-        python: ['3.12', '3.13', '3.14']
+        os: [ubuntu-26.04]
+        python: ['3.12', '3.13', '3.14', '3.15']
         include:
-          - os: 'macos-15'
+          - os: 'macos-26'
+            python: '3.15'
+            ispc: true
+          - os: 'macos-26'
+            python: '3.15'
+            ispc: false
+          - os: 'ubuntu-26.04-arm'
             python: '3.14'
             ispc: true
           - os: 'windows-2025'
             python: '3.14'
             ispc: false # Setting up ISPC on windows is nontrivial
-          - os: 'ubuntu-24.04'
+            # Newest and oldest python version with ISPC disabled
+          - os: 'ubuntu-26.04'
             python: '3.12'
             ispc: false
-          - os: 'ubuntu-24.04'
-            python: '3.14'
+          - os: 'ubuntu-26.04'
+            python: '3.15'
             ispc: false
 
     steps:

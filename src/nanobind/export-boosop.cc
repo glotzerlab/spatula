@@ -1,16 +1,17 @@
 // Copyright (c) 2021-2026 The Regents of the University of Michigan
 // Part of spatula, released under the BSD 3-Clause License.
 
-#include <memory>
-#include <string>
-#include <vector>
-
+// Include Python (via nanobind) before the C++ standard library.
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "BOOSOP.h"
 #include "BondOrder.h"
