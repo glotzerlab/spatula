@@ -8,6 +8,7 @@
 #include <tuple>
 #include <vector>
 
+#include "computes.h"
 #include "data/Quaternion.h"
 #include "locality.h"
 #include "optimize/Optimize.h"
@@ -29,7 +30,8 @@ class PGOP {
          std::shared_ptr<optimize::Optimizer>& optimizer,
          const std::vector<size_t> group_sizes,
          unsigned int mode,
-         bool compute_per_operator);
+         bool compute_per_operator,
+         Backend backend = Backend::SIMD);
 
     /**
      * @brief Root function for computing PGOP for a set of points.
@@ -103,6 +105,8 @@ class PGOP {
     unsigned int m_mode;
     /// Whether to compute the PGOP for each operator.
     bool m_compute_per_operator;
+    /// The kernel backend used for PGOP evaluation (scalar loops or ISPC SIMD).
+    Backend m_backend;
     /// Whether operators are pre-rotated once for NoOptimization.
     bool m_use_rotated_operators_for_noopt = false;
     /// Cached operator matrices rotated into the fixed NoOptimization orientation.

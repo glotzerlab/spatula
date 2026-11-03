@@ -16,12 +16,31 @@
 #include <cmath>
 #include <span>
 
-namespace spatula { namespace computes {
-float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
+namespace spatula {
+/**
+ * @brief The kernel backend used to evaluate the PGOP overlap sums.
+ *
+ * The backend is a runtime choice; SIMD silently falls back to Scalar when
+ * spatula is built without ISPC support (SPATULA_HAS_ISPC undefined).
+ */
+enum class Backend {
+    /// Scalar C++ loops evaluated with std::exp.
+    Scalar,
+    /// ISPC vectorized kernels. Uses fast approximations of the exponential for
+    /// performance. Falls back to Scalar if ISPC is unavailable.
+    SIMD,
+};
+
+namespace computes {
+inline float compute_pgop_gaussian(LocalNeighborhood& neighborhood,
+                                   const std::span<const float> R_ij,
+                                   [[maybe_unused]] Backend backend = Backend::SIMD)
 {
 #if defined(SPATULA_HAS_ISPC)
-    return compute_pgop_gaussian_ispc_wrapper(neighborhood, R_ij);
-#else
+    if (backend == Backend::SIMD) {
+        return compute_pgop_gaussian_ispc_wrapper(neighborhood, R_ij);
+    }
+#endif
     const float* pos_x = neighborhood.rotated_pos_x.data();
     const float* pos_y = neighborhood.rotated_pos_y.data();
     const float* pos_z = neighborhood.rotated_pos_z.data();
@@ -58,14 +77,17 @@ float compute_pgop_gaussian(LocalNeighborhood& neighborhood, const std::span<con
     // cast to double to avoid integer division
     const auto normalization = static_cast<float>(n * R_ij.size()) / 9.0;
     return overlap / normalization;
-#endif
 }
 
-float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
+inline float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood,
+                                        const std::span<const float> R_ij,
+                                        [[maybe_unused]] Backend backend = Backend::SIMD)
 {
 #if defined(SPATULA_HAS_ISPC)
-    return compute_pgop_gaussian_fast_ispc_wrapper(neighborhood, R_ij);
-#else
+    if (backend == Backend::SIMD) {
+        return compute_pgop_gaussian_fast_ispc_wrapper(neighborhood, R_ij);
+    }
+#endif
     const float* pos_x = neighborhood.rotated_pos_x.data();
     const float* pos_y = neighborhood.rotated_pos_y.data();
     const float* pos_z = neighborhood.rotated_pos_z.data();
@@ -98,21 +120,24 @@ float compute_pgop_gaussian_fast(LocalNeighborhood& neighborhood, const std::spa
                 min_dist_sq = std::min(min_dist_sq, dx * dx + dy * dy + dz * dz);
             }
 
-            // Final calculation using the collapsed minimum
-            overlap += util::fast_exp_approx(-min_dist_sq * denom);
+            // Final calculation using the collapsed minimum.
+            overlap += std::exp(-min_dist_sq * denom);
         }
     }
     // cast to double to avoid integer division
     const auto normalization = static_cast<float>(n * R_ij.size()) / 9.0;
     return overlap / normalization;
-#endif
 }
 
-float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
+inline float compute_pgop_fisher(LocalNeighborhood& neighborhood,
+                                 const std::span<const float> R_ij,
+                                 [[maybe_unused]] Backend backend = Backend::SIMD)
 {
 #if defined(SPATULA_HAS_ISPC)
-    return compute_pgop_fisher_ispc_wrapper(neighborhood, R_ij);
-#else
+    if (backend == Backend::SIMD) {
+        return compute_pgop_fisher_ispc_wrapper(neighborhood, R_ij);
+    }
+#endif
     const float* pos_x = neighborhood.rotated_pos_x.data();
     const float* pos_y = neighborhood.rotated_pos_y.data();
     const float* pos_z = neighborhood.rotated_pos_z.data();
@@ -149,14 +174,17 @@ float compute_pgop_fisher(LocalNeighborhood& neighborhood, const std::span<const
     // cast to double to avoid integer division
     const float normalization = static_cast<float>(n * R_ij.size()) / 9.0;
     return overlap / normalization;
-#endif
 }
 
-float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<const float> R_ij)
+inline float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood,
+                                      const std::span<const float> R_ij,
+                                      [[maybe_unused]] Backend backend = Backend::SIMD)
 {
 #if defined(SPATULA_HAS_ISPC)
-    return compute_pgop_fisher_fast_ispc_wrapper(neighborhood, R_ij);
-#else
+    if (backend == Backend::SIMD) {
+        return compute_pgop_fisher_fast_ispc_wrapper(neighborhood, R_ij);
+    }
+#endif
     const float* pos_x = neighborhood.rotated_pos_x.data();
     const float* pos_y = neighborhood.rotated_pos_y.data();
     const float* pos_z = neighborhood.rotated_pos_z.data();
@@ -198,6 +226,6 @@ float compute_pgop_fisher_fast(LocalNeighborhood& neighborhood, const std::span<
     const float normalization = static_cast<float>(n * R_ij.size()) / 9.0;
 
     return overlap / normalization;
-#endif
 }
-}} // namespace spatula::computes
+} // namespace computes
+} // namespace spatula
