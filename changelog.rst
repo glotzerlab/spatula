@@ -15,6 +15,10 @@ Change Log
 
 * Introduced Hillinger distance as an order option which obeys triangle inequality.
 
+*Deprecated*
+
+* ``spatula.optimize.Mesh.from_grid``. Use ``Mesh.from_lattice`` instead, which produces meshes of comparable quality and supports an arbitrary number of rotations.
+
 
 0.2.0 (2026-03-05)
 ^^^^^^^^^^^^^^^^^^
