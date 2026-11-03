@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Override ISPC installation commands
-        if: matrix.arch == 'aarch64'
+        if: matrix.os.arch == 'aarch64'
         run: echo CIBW_BEFORE_ALL="" >> "$GITHUB_ENV"
 
       - name: Build wheels
