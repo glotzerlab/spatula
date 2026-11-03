@@ -1387,9 +1387,11 @@ RNG = np.random.default_rng(seed=42)
 METHODS_DICT = {}
 
 # n_axes must be at least 50 for Dnh to work correctly. Further increases bring Dnd
-# close to one as well.
+# close to one as well. 751 rotations matches from_grid's default mesh size
+# (75 axes times 10 angles plus the identity); from_lattice anchors the
+# identity the same way, so perfect symmetries resolve to exactly 1.0.
 OPTIMIZER = spatula.optimize.Union.with_step_gradient_descent(
-    spatula.optimize.Mesh.from_grid(), max_iter=MAX_ITER, learning_rate=LEARN
+    spatula.optimize.Mesh.from_lattice(751), max_iter=MAX_ITER, learning_rate=LEARN
 )
 
 
@@ -2031,7 +2033,7 @@ OPTIMIZERS_TO_TEST = [
     (
         "Union_descent_Mesh",
         spatula.optimize.Union.with_step_gradient_descent(
-            spatula.optimize.Mesh.from_grid()
+            spatula.optimize.Mesh.from_lattice(751)
         ),
     ),
     ("Descent", spatula.optimize.StepGradientDescent()),
