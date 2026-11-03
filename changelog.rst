@@ -15,6 +15,14 @@ Change Log
 
 * Introduced Hillinger distance as an order option which obeys triangle inequality.
 
+*Changed*
+
+* ``Mesh.from_lattice`` now includes the identity quaternion as the first element, matching the previous behavior of ``Mesh.from_grid`` (#170)
+
+*Deprecated*
+
+* ``spatula.optimize.Mesh.from_grid``. Use ``Mesh.from_lattice`` instead, which produces meshes of comparable quality and supports an arbitrary number of rotations. (#170)
+
 *Fixed*
 
 * SIMD fast exponential paths are now slightly more accurate and handle overflows more carefully (#169)
