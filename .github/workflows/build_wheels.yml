@@ -24,8 +24,11 @@ jobs:
       matrix:
         os:
         - base: ubuntu
-          version: 24.04
+          version: 26.04
           arch: 'x86_64'
+        - base: ubuntu
+          version: 26.04-arm
+          arch: 'aarch64'
         - base: windows
           version: 2025
           arch: 'amd64'
