@@ -61,7 +61,7 @@ Example
 
     system = freud.data.UnitCell.fcc().generate_system(3)
     optimizer = spatula.optimize.Union.with_step_gradient_descent(
-        optimizer=spatula.optimize.Mesh.from_grid()
+        optimizer=spatula.optimize.Mesh.from_lattice(750)
     )
     PGOP_Oh_Ih = spatula.PGOP(["Oh","Ih"], optimizer)
     PGOP_Oh_Ih.compute(system, sigmas=None, neighbors={"r_max": 1.2, "exclude_ii": True})
