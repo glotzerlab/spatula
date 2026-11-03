@@ -15,6 +15,10 @@ Change Log
 
 * Introduced Hillinger distance as an order option which obeys triangle inequality.
 
+*Fixed*
+
+* SIMD fast exponential paths are now slightly more accurate and handle overflows more carefully (#169)
+
 
 0.2.0 (2026-03-05)
 ^^^^^^^^^^^^^^^^^^

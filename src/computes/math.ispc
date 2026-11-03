@@ -4,12 +4,16 @@
 // Common math functions for ISPC kernels.
 
 // Fast exponential approximation using degree 5 Remez polynomial
-// with Cody-Waite range reduction.
+// with Cody-Waite range reduction. Maximum relative error is ~7.5e-8
+// for any argument whose result is representable, matching the scalar
+// version in src/util/fastmath.h.
+//
 // Works with both uniform and varying double inputs.
 static inline double fast_exp_approx(double x)
 {
-    uniform double ln2 = 0.69314718055994530941723;
-    uniform double ln2_recip = 1.44269504088896340;
+    // MUST have double postfix or the data is truncated!
+    uniform double ln2 = 0.69314718055994530941723d;
+    uniform double ln2_recip = 1.44269504088896340d;
 
     // Compute k = round(x / ln(2))
     double k = round(x * ln2_recip);
@@ -18,12 +22,12 @@ static inline double fast_exp_approx(double x)
     double r = x - ln2 * k;
 
     // Degree 5 Remez approximation using Estrin's method
-    uniform double g = 1.0000000716546679769;
-    uniform double f = 0.99999969199097560324;
-    uniform double d_const = 0.4999889485139416001;
-    uniform double c = 0.16667574730852952047;
-    uniform double b = 4.191538198120380032e-2;
-    uniform double a = 8.2976549459683138915e-3;
+    uniform double g = 1.0000000716546679769d;
+    uniform double f = 0.99999969199097560324d;
+    uniform double d_const = 0.4999889485139416001d;
+    uniform double c = 0.16667574730852952047d;
+    uniform double b = 4.191538198120380032e-2d;
+    uniform double a = 8.2976549459683138915e-3d;
 
     double r_sq = r * r;
     double p0 = f * r + g;
@@ -32,8 +36,11 @@ static inline double fast_exp_approx(double x)
     double p1_2 = p2 * r_sq + p1;
     double p = p1_2 * r_sq + p0;
 
-    // Reconstruction: 2^k * p using ldexp
-    return ldexp(p, (int32)k);
+    // Reconstruction: `2^k * p` using ldexp, manually saturating for safety.
+    double res = ldexp(p, (int32)k);
+    res = (x > 709.782712893384d) ? 1.7976931348623157e308d : res;
+    res = (x < -708.3964185322641d) ? 0.0d : res;
+    return res;
 }
 
 // Fast hyperbolic sine approximation
@@ -71,13 +78,13 @@ static inline double compute_Bhattacharyya_coefficient_gaussian(float pos_x,
 
 // Compute the Bhattacharyya coefficient for two Fisher (von Mises-Fisher) distributions.
 static inline float compute_Bhattacharyya_coefficient_fisher_normalized(float pos_x,
-                                                                         float pos_y,
-                                                                         float pos_z,
-                                                                         float sym_x,
-                                                                         float sym_y,
-                                                                         float sym_z,
-                                                                         float kappa,
-                                                                         float kappa_symmetrized)
+                                                                        float pos_y,
+                                                                        float pos_z,
+                                                                        float sym_x,
+                                                                        float sym_y,
+                                                                        float sym_z,
+                                                                        float kappa,
+                                                                        float kappa_symmetrized)
 {
     float k1_sq = kappa * kappa;
     float k2_sq = kappa_symmetrized * kappa_symmetrized;
