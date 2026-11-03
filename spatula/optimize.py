@@ -45,6 +45,8 @@ def _quaternion_fibonacci_lattice(n):
 
     This is equivalent to a Fibonacci lattice on the 3-sphere. See
     `this paper <https://ieeexplore.ieee.org/document/9878746>`_ for a derivation.
+    This version shifts some of the terms to anchor the mesh at the identity without
+    losing uniformity.
     """
     psi = 1.533751168755204288118041413  # Solution to ψ**4 = ψ + 4
     s = np.arange(n, dtype=float)
