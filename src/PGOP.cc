@@ -47,9 +47,11 @@ PGOP::PGOP(const std::vector<const float*> R_ij_data,
            std::shared_ptr<optimize::Optimizer>& optimizer,
            std::vector<size_t> group_sizes,
            unsigned int mode,
-           bool compute_per_operator)
+           bool compute_per_operator,
+           float smooth_beta)
     : m_n_symmetries(n_symmetries), m_Rij(R_ij_data), m_group_sizes(std::move(group_sizes)),
-      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator)
+      m_optimize(optimizer), m_mode(mode), m_compute_per_operator(compute_per_operator),
+      m_smooth_beta(smooth_beta)
 {
     const auto* no_optimization = dynamic_cast<const optimize::NoOptimization*>(m_optimize.get());
     if (no_optimization == nullptr) {
@@ -208,6 +210,9 @@ PGOP::compute_symmetry(LocalNeighborhood& neighborhood, const float* R_ij, size_
 double PGOP::compute_pgop(LocalNeighborhood& neighborhood, const std::span<const float> R_ij) const
 {
     if (m_mode == 0) {
+        if (m_smooth_beta > 0.0f && neighborhood.constantSigmas()) {
+            return computes::compute_pgop_gaussian_fast_smooth(neighborhood, R_ij, m_smooth_beta);
+        }
         if (neighborhood.constantSigmas()) {
             return computes::compute_pgop_gaussian_fast(neighborhood, R_ij);
         }
