@@ -24,8 +24,11 @@ jobs:
       matrix:
         os:
         - base: ubuntu
-          version: 24.04
+          version: 26.04
           arch: 'x86_64'
+        - base: ubuntu
+          version: 26.04-arm
+          arch: 'aarch64'
         - base: windows
           version: 2025
           arch: 'amd64'
@@ -38,6 +41,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Override ISPC installation commands
+        if: matrix.os.arch == 'aarch64'
+        run: echo CIBW_BEFORE_ALL="" >> "$GITHUB_ENV"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
